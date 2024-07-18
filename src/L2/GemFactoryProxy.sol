@@ -8,6 +8,6 @@ import "./GemFactoryStorage.sol";
  * @title
  * @dev
  */
-contract SeigManagerProxy is ProxyGemFactory, GemFactoryStorage {
+contract GemFactoryProxy is ProxyGemFactory, GemFactoryStorage {
 
 }

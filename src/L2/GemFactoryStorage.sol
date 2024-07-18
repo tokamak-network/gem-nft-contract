@@ -17,8 +17,11 @@ contract GemFactoryStorage {
         Rarity rarity;
         bytes4 quadrants;
         string color;
+        string colorStyle;
+        string backgroundColor;
+        string backgroundColorStyle;
+        uint256 cooldownPeriod;
         uint256 value;
-        address owner;
     }
 
     Gem[] public Gems;
@@ -29,10 +32,12 @@ contract GemFactoryStorage {
     mapping(uint256 => address) public GEMIndexToApproved;
     mapping(uint256 => address) public gemAllowedToAddress;
 
+    bool public paused;
+
     /**
      * EVENTS **
      */
 
     event Created(uint256 tokenId, Rarity rarity, bytes4 quadrants, string color, uint256 value, address owner);
-    event TransferTKGEM(address from, address to, uint256 tokenId);
+    event TransferGEM(address from, address to, uint256 tokenId);
 }

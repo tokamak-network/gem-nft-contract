@@ -1,15 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {ERC165Storage} from "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./AuthRoleGemFactory.sol";
 
-contract AuthControlGemFactory is
-    AuthRoleGemFactory,
-    ERC165Storage,
-    AccessControl
-{
+contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
     modifier onlyOwner() {
         require(isAdmin(msg.sender), "AuthControl: Caller is not an admin");
         _;
@@ -101,13 +97,7 @@ contract AuthControlGemFactory is
 
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override(ERC165Storage, AccessControl)
-        returns (bool)
-    {
+    ) public view virtual override(ERC165, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
