@@ -18,6 +18,12 @@ git clone https://github.com/tokamak-network/gem-nft-contracts
 cd gem-nft-contracts
 ```
 
+3. Compile 
+
+```
+forge compile
+```
+
 ### Contact
 
 For any inquiries, you can reach me through [my GitHub profile](https://github.com/mehdi-defiesta)
