@@ -1,66 +1,25 @@
-## Foundry
+### Description
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+The project is an NFT collection and marketplace featuring Gems, which rewards users with monetary value through staking TON. Users interact with a game-like interface to mint new Gems, as well as to buy, sell, and burn them. Additionally, users can forge two Gems to obtain a rarer Gem. Users can deposit TON on Layer 1 (L1) and receive a wrapped version called sTON. After bridging these tokens to Layer 2 (L2), users utilize L2 WSTON at a discount price.
 
-Foundry consists of:
+When a user wishes to acquire a new Gem from the pre-minted pool, the token is assigned randomly using the VDF verifier implementation.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+### Installation
 
-## Documentation
+1.  Clone this repository.
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```
+git clone https://github.com/tokamak-network/gem-nft-contracts
 ```
 
-### Test
+2. Navigate to the project directory.
 
-```shell
-$ forge test
+```
+cd gem-nft-contracts
 ```
 
-### Format
+### Contact
 
-```shell
-$ forge fmt
-```
+For any inquiries, you can reach me through [my GitHub profile](https://github.com/mehdi-defiesta)
 
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+Or you can leave a message on the GitHub forum. 
