@@ -11,9 +11,9 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
         _;
     }
 
-    modifier onlyMinter() {
+    modifier onlyTreasury() {
         require(
-            hasRole(MINTER_ROLE, msg.sender),
+            hasRole(TREASURY_ROLE, msg.sender),
             "AuthControl: Caller is not a minter"
         );
         _;
@@ -27,9 +27,9 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
         _;
     }
 
-    modifier onlyMinterOrAdmin() {
+    modifier onlyTreasuryOrAdmin() {
         require(
-            isAdmin(msg.sender) || hasRole(MINTER_ROLE, msg.sender),
+            isAdmin(msg.sender) || hasRole(TREASURY_ROLE, msg.sender),
             "not onlyMinterOrAdmin"
         );
         _;
@@ -42,7 +42,7 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
     }
 
     function addMinter(address account) public virtual onlyOwner {
-        grantRole(MINTER_ROLE, account);
+        grantRole(TREASURY_ROLE, account);
     }
 
     /// @dev remove admin
@@ -52,7 +52,7 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
     }
 
     function removeMinter(address account) public virtual onlyOwner {
-        renounceRole(MINTER_ROLE, account);
+        renounceRole(TREASURY_ROLE, account);
     }
 
     /// @dev transfer admin
@@ -74,11 +74,11 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
     }
 
     function renounceMinter() public {
-        renounceRole(MINTER_ROLE, msg.sender);
+        renounceRole(TREASURY_ROLE, msg.sender);
     }
 
     function revokeMinter(address account) public onlyOwner {
-        revokeRole(MINTER_ROLE, account);
+        revokeRole(TREASURY_ROLE, account);
     }
 
     /// @dev whether admin
@@ -92,7 +92,7 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
     }
 
     function isMinter(address account) public view virtual returns (bool) {
-        return hasRole(MINTER_ROLE, account);
+        return hasRole(TREASURY_ROLE, account);
     }
 
     function supportsInterface(

@@ -18,7 +18,7 @@ contract ProxyGemFactory is
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(TREASURY_ROLE, DEFAULT_ADMIN_ROLE);
     }
 
     /* ========== onlyOwner ========== */
