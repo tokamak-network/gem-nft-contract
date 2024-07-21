@@ -6,14 +6,15 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { MarketPlaceStorage } from "./MarketPlaceStorage.sol";
 import { GemFactory } from "./GemFactory.sol";
 
+
 contract MarketPlace is MarketPlaceStorage, GemFactory {
     using SafeERC20 for IERC20;
 
     function initialize(address _treasury, address _titanwston, address _ton, uint256 _discountRate) external {
-        require(titanwston == address(0), "titanwston already initialized");
+        require(wston == address(0), "titanwston already initialized");
         require(ton == address(0), "ton already initialized");
         require(_discountRate < 100, "discount rate must be less than 100%");
-        titanwston = _titanwston;
+        wston = _titanwston;
         ton = _ton;
         discountRate = _discountRate;
         treasury = _treasury;
@@ -24,11 +25,10 @@ contract MarketPlace is MarketPlaceStorage, GemFactory {
      * @notice to buy a GEM listed onto the marketplace
      * @param _tokenId the ID of the token to be transferred
      * @param _paymentMethod The paymentMethod used. if true, user purchases using L2 WSTON if false, user purchases using TON
-     * @return true if the GEM is transferred
      */
-    function buyGem(uint256 _tokenId, bool _paymentMethod) external whenNotPaused returns(bool) {
+    function buyGem(uint256 _tokenId, bool _paymentMethod) external whenNotPaused {
         require(_buyGem(_tokenId, msg.sender, _paymentMethod));
-        return true;
+
     }
 
     function _buyGem(uint256 _tokenId, address _payer, bool _paymentMethod) internal returns(bool) {
@@ -41,7 +41,7 @@ contract MarketPlace is MarketPlaceStorage, GemFactory {
         //  transfer TON or WSTON to the treasury contract
         if (_paymentMethod) {
             uint256 discountedGemValue = GemValue - ((GemValue * discountRate) / DISCOUNT_RATE_DIVIDER);     
-            IERC20(titanwston).safeTransferFrom(_payer, treasury, discountedGemValue);
+            IERC20(wston).safeTransferFrom(_payer, treasury, discountedGemValue);
         } else {
             IERC20(ton).safeTransferFrom(_payer, treasury, GemValue);
         }

@@ -5,15 +5,23 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {GemFactoryStorage} from "./GemFactoryStorage.sol";
 import {AuthControlGemFactory} from "../common/AuthControlGemFactory.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "../proxy/ProxyStorage.sol";
+
+import {RNGConsumerBase} from "./RNGConsumerBase.sol";
+import {ICRRRNGCoordinator} from "../interfaces/ICRRRNGCoordinator.sol";
+
+interface ITreasury {
+    function transferWSTON(address _to, uint256 _amount) external returns(bool);
+}
 
 /**
  * @title GemFactory
  * @dev GemFactory handles the creation of GEMs. It allows for admin to premine GEMs for the treasury contract.
  * it also allows for users to mine forge and melt GEMs.
  */
-contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFactory {
+contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthControlGemFactory, RNGConsumerBase {
 
     using SafeERC20 for IERC20;
 
@@ -28,10 +36,10 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
         _;
     }
 
-    constructor() ERC721("TokamakGEM", "GEM") {}
+    constructor(address coordinator) ERC721("TokamakGEM", "GEM") RNGConsumerBase(coordinator) {}
 
     // Override supportsInterface to delegate to AuthControlGemFactory's implementation
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, AuthControlGemFactory) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721URIStorage, AuthControlGemFactory) returns (bool) {
         // Delegates to AuthControlGemFactory's supportsInterface which aggregates checks across ERC165 and AccessControl
         return super.supportsInterface(interfaceId);
     }
@@ -46,10 +54,10 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
         uint256 _UncommonMiningFees,
         uint256 _RareMiningFees)
     external {
-        require(titanwston == address(0), "titanwston already initialized");
+        require(wston == address(0), "titanwston already initialized");
         require(ton == address(0), "ton already initialized");
         require(_miningCooldown != 0, "mining cooldown must be greater than 0");
-        titanwston = _titanwston;
+        wston = _titanwston;
         ton = _ton;
         treasury = _treasury;
         miningCooldown = _miningCooldown;
@@ -69,18 +77,18 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
      * @param _tokenId Id of the token to be mined.
      * @return true if the gem user started mining the gem
      */
-    function startMiningGem(uint256 _tokenId) external whenNotPaused returns(bool) {
+    function startMiningGEM(uint256 _tokenId) external whenNotPaused returns(bool) {
         require(_tokenId != 0, "tokenId must be different from 0");
         // safety check on the function caller
         require(msg.sender != address(0), "zero address");
         // gem must be mineable
-        require(Gems[_tokenId].isMinable && Gems[_tokenId].cooldownPeriod != 0, "Gem can not be mined");
+        require(Gems[_tokenId].cooldownPeriod != 0, "Gem can not be mined");
         // token must not be listed for sale within the marketplace
         require(!Gems[_tokenId].isForSale, "Gem is listed for sale");
         // user must not be mining another gem
         require(!isUserMining[msg.sender], "user is already mining");
         // treasury must own the token
-        require(GEMIndexToOwner[_tokenId] == address(this));
+        require(GEMIndexToOwner[_tokenId] == msg.sender);
 
         // Mining fees calculation
         uint256 miningFees;
@@ -97,18 +105,20 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
         // User pays mining fees
         IERC20(ton).safeTransferFrom(msg.sender, treasury, miningFees);
 
-        Gems[_tokenId].isMinable = false;
         // We set isUserMining to true to prevent the same user to recall the function
         isUserMining[msg.sender] = true;
         userMiningToken[msg.sender][_tokenId] = true;
         // Store the current timestamp
         userMiningStartTime[msg.sender][_tokenId] = block.timestamp;
+        tokenMiningByUser[msg.sender] = _tokenId;
 
-        emit GemMining(_tokenId, msg.sender);
+        emit GemMiningStarted(_tokenId, msg.sender);
         return true;
     }
 
-    function claimMinedGem(uint256 _tokenId) external whenNotPaused returns(bool) {
+    function claimMinedGEM(uint256 _tokenId) external whenNotPaused payable returns(bool) {
+        // user must be owner of token
+        require(GEMIndexToOwner[_tokenId] == msg.sender, "not GEM owner");
         // user must be the miner
         require(userMiningToken[msg.sender][_tokenId] == true, "user is not mining this Gem");
         // user must wait until the end of the cooldown period
@@ -118,12 +128,52 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
         isUserMining[msg.sender] = false;
         delete userMiningToken[msg.sender][_tokenId];
         delete userMiningStartTime[msg.sender][_tokenId];
+        delete tokenMiningByUser[msg.sender];
 
-        // transfer ownership of the gem to user
-        transferGEM(msg.sender, _tokenId);
+        // defining the random value
+        require(tx.origin == msg.sender, "caller must be EOA");
+        (uint256 requestId, uint256 requestPrice) = requestRandomness(CALLBACK_GAS_LIMIT);
+        require(msg.value >= requestPrice, "Not enough funds");
+
+        s_requests[requestId].requested = true;
+        s_requests[requestId].requester = msg.sender;
+        unchecked {
+            requestCount++;
+        }
+        lastRequestId = requestId;
+        if (msg.value > requestPrice) {
+            (bool sent, ) = payable(msg.sender).call{value: msg.value - requestPrice}("");
+            require(sent, "not enough funds");
+        }
+        
 
         emit GemMiningClaimed(_tokenId, msg.sender);
         return true;
+
+    }
+
+    function meltGEM(uint256 _tokenId) external whenNotPaused {
+        require(_tokenId != 0, "tokenId must be valid");
+        // safety check on the function caller
+        require(msg.sender != address(0), "zero address"); 
+        require(GEMIndexToOwner[_tokenId] == msg.sender);
+
+        burnToken(msg.sender, _tokenId);
+
+        uint256 amount = Gems[_tokenId].value;
+        require(ITreasury(treasury).transferWSTON(msg.sender, amount), "transfer failed");
+
+        emit GemMelted(_tokenId, msg.sender);
+    } 
+
+    function burnToken(address _from, uint256 _tokenId) internal {
+        
+        ownershipTokenCount[_from]--;
+        delete GEMIndexToOwner[_tokenId];
+        delete gemAllowedToAddress[_tokenId];
+        delete GEMIndexToApproved[_tokenId];
+
+        _burn(_tokenId);
 
     }
 
@@ -131,12 +181,13 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
     function createGEM( 
         Rarity _rarity, 
         string memory _color, 
-        uint256 _value, 
-        bytes4 _quadrants, 
+        uint128 _value, 
+        bytes2 _quadrants, 
         string memory _colorStyle,
         string memory _backgroundColor,
         string memory _backgroundColorStyle,
-        uint256 _cooldownPeriod) 
+        uint256 _cooldownPeriod,
+        string memory _tokenURI) 
     external onlyTreasuryOrAdmin whenNotPaused returns (uint256) {
         Gem memory _Gem = Gem({
             tokenId: 0,
@@ -148,8 +199,8 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
             backgroundColor: _backgroundColor,
             backgroundColorStyle: _backgroundColorStyle,
             cooldownPeriod: _cooldownPeriod,
-            isMinable: false,
-            isForSale: false
+            isForSale: false,
+            tokenURI: _tokenURI
         });
         // storage update
         Gems.push(_Gem);
@@ -163,6 +214,9 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
         
         // Use the ERC721 _safeMint function to handle the token creation
         _safeMint(msg.sender, newGemId);
+
+        // Set the token URI
+        _setTokenURI(newGemId, _tokenURI);
 
         emit Created(newGemId, _rarity, _quadrants, _color, _value, msg.sender);
         return newGemId;
@@ -220,12 +274,13 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
     function createPreminedGEMPool(
         Rarity[] memory _rarities,
         string[] memory _colors,
-        uint256[] memory _values,
-        bytes4[] memory _quadrants,
+        uint128[] memory _values,
+        bytes2[] memory _quadrants,
         string[] memory _colorStyle,
         string[]memory _backgroundColor,
         string[] memory _backgroundColorStyle,
-        uint256[] memory _cooldownPeriod
+        uint256[] memory _cooldownPeriod,
+        string[] memory _tokenURIs
     ) external onlyTreasuryOrAdmin whenNotPaused returns (uint256[] memory) {
         require(
             _rarities.length == _colors.length &&
@@ -248,7 +303,7 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
                 backgroundColorStyle: _backgroundColorStyle[i],
                 cooldownPeriod: _cooldownPeriod[i],
                 isForSale: false,
-                isMinable: false
+                tokenURI: _tokenURIs[i]
             });
             Gems.push(_Gem);
             uint256 newGemId = Gems.length - 1;
@@ -261,6 +316,7 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
 
             // Use the ERC721 _safeMint function to handle the token creation
             _safeMint(msg.sender, newGemId);
+            _setTokenURI(newGemId, _tokenURIs[i]);
 
             emit Created(newGemId, _rarities[i], _quadrants[i], _colors[i], _values[i], msg.sender);
             newGemIds[i] = newGemId;
@@ -292,6 +348,25 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
         GEMIndexToApproved[_tokenId] = _approved;
     }
 
+
+    // Implement the abstract function from RNGConsumerBase
+    function fulfillRandomWords(uint256 requestId, uint256 hashedOmegaVal) internal override {
+        require(s_requests[requestId].requested, "Request not made");
+        address requester = s_requests[requestId].requester;
+        s_requests[requestId].fulfilled = true;
+        s_requests[requestId].randomWord = hashedOmegaVal;
+
+        bytes2 quadrant = Gems[tokenMiningByUser[requester]].quadrants;
+        
+        (uint256 gemCount, uint256[] memory tokenIds) = countGemsByQuadrant(quadrant);
+
+        uint256 modNbGemsAvailable = (hashedOmegaVal % gemCount) + 1;
+        uint256 finalTokenId = tokenIds[modNbGemsAvailable];
+        transferGEMFrom(treasury, requester, finalTokenId);
+    }
+
+
+
     //---------------------------------------------------------------------------------------
     //-----------------------------VIEW FUNCTIONS--------------------------------------------
     //---------------------------------------------------------------------------------------
@@ -308,8 +383,7 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
         return GEMIndexToApproved[_tokenId] == _claimant;
     }
 
-
-    function balanceOf(address _owner) public view override returns (uint256 count) {
+    function balanceOf(address _owner) public view override(ERC721, IERC721) returns (uint256 count) {
         return ownershipTokenCount[_owner];
     }
 
@@ -317,6 +391,40 @@ contract GemFactory is ERC721, GemFactoryStorage, ProxyStorage, AuthControlGemFa
         owner = GEMIndexToOwner[_tokenId];
 
         require(owner != address(0));
+    }
+
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+        return super.tokenURI(tokenId);
+    }
+
+    function _exists(uint256 tokenId) internal view returns (bool) {
+        return GEMIndexToOwner[tokenId] != address(0);
+    }
+
+    // Function to count the number of Gems from treasury where quadrants < given quadrant and return their tokenIds
+    function countGemsByQuadrant(bytes2 quadrant) internal view returns (uint256, uint256[] memory) {
+        uint256 count = 0;
+        uint256[] memory tokenIds = new uint256[](Gems.length);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < Gems.length; i++) {
+            if (Gems[i].quadrants < quadrant && GEMIndexToOwner[i] == treasury) {
+                tokenIds[index] = Gems[i].tokenId;
+                unchecked{
+                    index++;
+                    count++;
+                } 
+            }
+        }
+
+        // Resize the array to the actual count
+        uint256[] memory result = new uint256[](count);
+        for (uint256 j = 0; j < count; j++) {
+            result[j] = tokenIds[j];
+        }
+
+        return (count, result);
     }
 
     /// @notice Returns a list of all tkGEM IDs assigned to an address.
