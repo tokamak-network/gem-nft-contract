@@ -134,4 +134,116 @@ contract GemFactoryTest is Test {
 
         vm.stopPrank();
     }
+
+    function testCreatePreminedGEMPool() public {
+        vm.startPrank(owner);
+
+        // Define GEM properties
+        GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
+        rarities[0] = GemFactoryStorage.Rarity.RARE;
+        rarities[1] = GemFactoryStorage.Rarity.COMMON;
+
+        string[] memory colors = new string[](2);
+        colors[0] = "Red";
+        colors[1] = "Blue";
+
+        uint128[] memory values = new uint128[](2);
+        values[0] = 1000;
+        values[1] = 500;
+
+        bytes2[] memory quadrants = new bytes2[](2);
+        quadrants[0] = 0x4433;
+        quadrants[1] = 0x3232;
+
+        string[] memory colorStyles = new string[](2);
+        colorStyles[0] = "Solid";
+        colorStyles[1] = "Gradient";
+
+        string[] memory backgroundColors = new string[](2);
+        backgroundColors[0] = "Black";
+        backgroundColors[1] = "White";
+
+        string[] memory backgroundColorStyles = new string[](2);
+        backgroundColorStyles[0] = "Gradient";
+        backgroundColorStyles[1] = "Solid";
+
+        uint256[] memory cooldownPeriods = new uint256[](2);
+        cooldownPeriods[0] = 3600 * 2; // 2 hour
+        cooldownPeriods[1] = 3600 * 4; // 4 hours
+
+        string[] memory tokenURIs = new string[](2);
+        tokenURIs[0] = "https://example.com/token/1";
+        tokenURIs[1] = "https://example.com/token/2";
+
+        // Call createPreminedGEMPool function from the Treasury contract
+        uint256[] memory newGemIds = treasury.createPreminedGEMPool(
+            rarities,
+            colors,
+            values,
+            quadrants,
+            colorStyles,
+            backgroundColors,
+            backgroundColorStyles,
+            cooldownPeriods,
+            tokenURIs
+        );
+
+        // Verify GEM creation
+        assert(newGemIds.length == 2);
+        assert(gemfactory.ownerOf(newGemIds[0]) == address(treasury));
+        assert(gemfactory.ownerOf(newGemIds[1]) == address(treasury));
+        assert(keccak256(abi.encodePacked(gemfactory.tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
+        assert(keccak256(abi.encodePacked(gemfactory.tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
+
+        vm.stopPrank();
+    }
+
+    function testMeltGEM() public {
+        vm.startPrank(owner);
+
+        // Define GEM properties
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE; // Correctly reference Rarity
+        string memory color = "Red";
+        uint128 value = 1000 * 10 ** 27;
+        bytes2 quadrants = 0x4444;
+        string memory colorStyle = "Solid";
+        string memory backgroundColor = "Black";
+        string memory backgroundColorStyle = "Gradient";
+        uint256 cooldownPeriod = 3600; // 1 hour
+        string memory tokenURI = "https://example.com/token/1";
+
+        // Call createGEM function from the Treasury contract
+        uint256 newGemId = treasury.createPreminedGEM(
+            rarity,
+            color,
+            value,
+            quadrants,
+            colorStyle,
+            backgroundColor,
+            backgroundColorStyle,
+            cooldownPeriod,
+            tokenURI
+        );
+
+
+        // Transfer the GEM to user1
+        treasury.transferTreasuryGEMto(user1, newGemId);
+
+        // Verify GEM transfer
+        assert(gemfactory.ownerOf(newGemId) == user1);
+
+        vm.stopPrank();
+
+        // Start prank as user1 to melt the GEM
+        vm.startPrank(user1);
+
+        // Call meltGEM function
+        gemfactory.meltGEM(newGemId);
+
+        // Verify GEM melting
+        assert(wston.balanceOf(user1) == 2000 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 1000 WSWTON)
+
+        vm.stopPrank();
+    }
+
 }

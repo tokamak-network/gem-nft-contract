@@ -91,13 +91,21 @@ contract Treasury is GemFactory, IERC721Receiver {
         );
     }
 
-    // Implement the onERC721Received function to accept ERC721 tokens
+    function approveGEMTransfer(address _to, uint256 _tokenId) external onlyOwner {
+        GemFactory(_gemFactory).approveGEM(_to, _tokenId);
+    }
+
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyOwner {
+        GemFactory(_gemFactory).transferGEM(_to, _tokenId);
+    }
+
+    // onERC721Received function to accept ERC721 tokens
     function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) external override returns (bytes4) {
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*tokenId*/,
+        bytes calldata /*data*/
+    ) external pure override returns (bytes4) {
         return this.onERC721Received.selector;
     }
 

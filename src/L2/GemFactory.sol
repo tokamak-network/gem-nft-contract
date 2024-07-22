@@ -170,11 +170,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function meltGEM(uint256 _tokenId) external whenNotPaused {
-        require(_tokenId != 0, "tokenId must be valid");
-        // safety check on the function caller
         require(msg.sender != address(0), "zero address"); 
         require(GEMIndexToOwner[_tokenId] == msg.sender);
-
+    
         burnToken(msg.sender, _tokenId);
 
         uint256 amount = Gems[_tokenId].value;
@@ -260,7 +258,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Safety check to prevent against an unexpected 0x0 default.
         require(_to != address(0));
         require(_to != _from);
-        require(_approvedFor(_to, _tokenId));
+        require(_approvedFor(address(this), _tokenId));
         require(_ownsGEM(_from, _tokenId));
 
         _transferGEM(_from, _to, _tokenId);
@@ -271,10 +269,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function approveGEM(address _to, uint256 _tokenId) public whenNotPaused {
         // Only an owner can grant transfer approval.
-        require(_ownsGEM(msg.sender, _tokenId));
+        require(_ownsGEM(msg.sender, _tokenId) || msg.sender == treasury, "Not authorized to approve");
 
-        // Register the approval (replacing any previous approval).
-        _approve(_tokenId, _to);
+        // Register the approval 
+        _approveGEM(_tokenId, _to);
 
         // Emit approval event.
         emit Approval(msg.sender, _to, _tokenId);
@@ -356,8 +354,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         delete GEMIndexToApproved[_tokenId];
     }
 
-    function _approve(uint256 _tokenId, address _approved) internal {
+    function _approveGEM(uint256 _tokenId, address _approved) internal {
         GEMIndexToApproved[_tokenId] = _approved;
+        // ERC721 approval
+        approve(_approved, _tokenId);
     }
 
 
