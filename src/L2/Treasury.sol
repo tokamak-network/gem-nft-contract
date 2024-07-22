@@ -91,12 +91,9 @@ contract Treasury is GemFactory, IERC721Receiver {
         );
     }
 
-    function approveGEMTransfer(address _to, uint256 _tokenId) external onlyOwner {
-        GemFactory(_gemFactory).approveGEM(_to, _tokenId);
-    }
-
-    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyOwner {
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactory returns(bool) {
         GemFactory(_gemFactory).transferGEM(_to, _tokenId);
+        return true;
     }
 
     // onERC721Received function to accept ERC721 tokens

@@ -14,6 +14,7 @@ import {ICRRRNGCoordinator} from "../interfaces/ICRRRNGCoordinator.sol";
 
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
 }
 
 /**
@@ -237,9 +238,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return newGemId;
     }
 
-    function transferGEM(address _to, uint256 _tokenId) public whenNotPaused {
+    function transferGEM(address _to, uint256 _tokenId) external onlyTreasury whenNotPaused {
         // Safety check to prevent against an unexpected 0x0 default.
-        require(_to != address(0) && msg.sender != address(0));
+        require(_to != address(0));
         require(_to != msg.sender);
 
         // You can only send your own gem.
@@ -254,28 +255,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         emit TransferGEM(msg.sender, _to, _tokenId);
     }
 
-    function transferGEMFrom(address _from, address _to, uint256 _tokenId) public whenNotPaused {
-        // Safety check to prevent against an unexpected 0x0 default.
-        require(_to != address(0));
-        require(_to != _from);
-        require(_approvedFor(address(this), _tokenId));
-        require(_ownsGEM(_from, _tokenId));
-
-        _transferGEM(_from, _to, _tokenId);
-        safeTransferFrom(_from, _to, _tokenId);
-        //emit transfer event
-        emit TransferGEM(_from, _to, _tokenId);
-    }
-
-    function approveGEM(address _to, uint256 _tokenId) public whenNotPaused {
-        // Only an owner can grant transfer approval.
-        require(_ownsGEM(msg.sender, _tokenId) || msg.sender == treasury, "Not authorized to approve");
-
-        // Register the approval 
-        _approveGEM(_tokenId, _to);
-
-        // Emit approval event.
-        emit Approval(msg.sender, _to, _tokenId);
+    function adminTransferGEM(address _to, uint256 _tokenId) external onlyOwner returns (bool) {
+        require(ITreasury(treasury).transferTreasuryGEMto(_to, _tokenId), "failed to transfer token");
+        return true;
     }
 
     /**
@@ -354,13 +336,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         delete GEMIndexToApproved[_tokenId];
     }
 
-    function _approveGEM(uint256 _tokenId, address _approved) internal {
-        GEMIndexToApproved[_tokenId] = _approved;
-        // ERC721 approval
-        approve(_approved, _tokenId);
-    }
-
-
     // Implement the abstract function from RNGConsumerBase
     function fulfillRandomWords(uint256 requestId, uint256 hashedOmegaVal) internal override {
         require(s_requests[requestId].requested, "Request not made");
@@ -374,7 +349,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         uint256 modNbGemsAvailable = (hashedOmegaVal % gemCount) + 1;
         uint256 finalTokenId = tokenIds[modNbGemsAvailable];
-        transferGEMFrom(treasury, requester, finalTokenId);
+        require(ITreasury(treasury).transferTreasuryGEMto(requester, finalTokenId), "failed to transfer token");
     }
 
 
@@ -384,7 +359,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     //---------------------------------------------------------------------------------------
 
     function preMintedGemsAvailable() external view returns (uint256[] memory GemsAvailable) {
-        return tokensOfOwner(address(this));
+        return tokensOfOwner(treasury);
     }
 
     function _ownsGEM(address _claimant, uint256 _tokenId) internal view returns (bool) {

@@ -48,7 +48,7 @@ contract MarketPlace is MarketPlaceStorage, GemFactory {
             IERC20(ton).safeTransferFrom(_payer, treasury, GemValue);
         }
         // transfer NFT ownership
-        transferGEM(_payer, _tokenId);
+        //transferGEM(_payer, _tokenId);
         emit GemBought(_tokenId, _payer);
         return true;
     }

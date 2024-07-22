@@ -227,7 +227,7 @@ contract GemFactoryTest is Test {
 
 
         // Transfer the GEM to user1
-        treasury.transferTreasuryGEMto(user1, newGemId);
+        gemfactory.adminTransferGEM(user1, newGemId);
 
         // Verify GEM transfer
         assert(gemfactory.ownerOf(newGemId) == user1);
