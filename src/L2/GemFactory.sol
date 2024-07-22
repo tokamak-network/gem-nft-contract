@@ -36,7 +36,28 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _;
     }
 
-    constructor(address coordinator) ERC721("TokamakGEM", "GEM") RNGConsumerBase(coordinator) {}
+        modifier onlyTreasury() {
+        require(
+            msg.sender == treasury, 
+            "function callable from treasury contract only"
+        );
+        _;
+    }
+
+    constructor(address coordinator) ERC721("TokamakGEM", "GEM") RNGConsumerBase(coordinator) {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+
+    function pause() public onlyPauser whenNotPaused {
+        paused = true;
+        emit Paused(msg.sender);
+    }
+
+    function unpause() public onlyPauser whenNotPaused {
+        paused = false;
+        emit Unpaused(msg.sender);
+    }
 
     // Override supportsInterface to delegate to AuthControlGemFactory's implementation
     function supportsInterface(bytes4 interfaceId) public view override(ERC721URIStorage, AuthControlGemFactory) returns (bool) {
@@ -48,7 +69,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         address _titanwston, 
         address _ton,
         address _treasury, 
-        uint256 _miningCooldown, 
         uint256 _BaseMiningFees, 
         uint256 _CommonMiningFees, 
         uint256 _UncommonMiningFees,
@@ -56,11 +76,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     external {
         require(wston == address(0), "titanwston already initialized");
         require(ton == address(0), "ton already initialized");
-        require(_miningCooldown != 0, "mining cooldown must be greater than 0");
         wston = _titanwston;
         ton = _ton;
         treasury = _treasury;
-        miningCooldown = _miningCooldown;
         BaseMiningFees = _BaseMiningFees;
         CommonMiningFees = _CommonMiningFees;
         UncommonMiningFees = _UncommonMiningFees;
@@ -145,7 +163,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             (bool sent, ) = payable(msg.sender).call{value: msg.value - requestPrice}("");
             require(sent, "not enough funds");
         }
-        
 
         emit GemMiningClaimed(_tokenId, msg.sender);
         return true;
@@ -188,7 +205,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         string memory _backgroundColorStyle,
         uint256 _cooldownPeriod,
         string memory _tokenURI) 
-    external onlyTreasuryOrAdmin whenNotPaused returns (uint256) {
+    external onlyTreasury whenNotPaused returns (uint256) {
         Gem memory _Gem = Gem({
             tokenId: 0,
             rarity: _rarity,
@@ -243,7 +260,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Safety check to prevent against an unexpected 0x0 default.
         require(_to != address(0));
         require(_to != _from);
-        require(_approvedFor(msg.sender, _tokenId));
+        require(_approvedFor(_to, _tokenId));
         require(_ownsGEM(_from, _tokenId));
 
         _transferGEM(_from, _to, _tokenId);
@@ -271,7 +288,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @param _quadrants The quadrants of the GEMs to be created.
      * @return The IDs of the newly created GEMs.
      */
-    function createPreminedGEMPool(
+    function createGEMPool(
         Rarity[] memory _rarities,
         string[] memory _colors,
         uint128[] memory _values,
@@ -281,7 +298,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         string[] memory _backgroundColorStyle,
         uint256[] memory _cooldownPeriod,
         string[] memory _tokenURIs
-    ) external onlyTreasuryOrAdmin whenNotPaused returns (uint256[] memory) {
+    ) external onlyTreasury whenNotPaused returns (uint256[] memory) {
         require(
             _rarities.length == _colors.length &&
             _colors.length == _values.length &&
@@ -325,11 +342,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return newGemIds;
     }
 
-
-    function setMiningCooldown(uint256 _miningCooldown) external onlyOwner {
-        require(_miningCooldown != 0, "mining cooldown must be greater than 0");
-        miningCooldown = _miningCooldown;
-    }
 
     //---------------------------------------------------------------------------------------
     //--------------------------INERNAL FUNCTIONS--------------------------------------------
@@ -400,6 +412,34 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function _exists(uint256 tokenId) internal view returns (bool) {
         return GEMIndexToOwner[tokenId] != address(0);
+    }
+
+    function getWston() public view returns (address) {
+        return wston;
+    }
+
+    function getBaseMiningFees() public view returns (uint256) {
+        return BaseMiningFees;
+    }
+
+    function getCommonMiningFees() public view returns (uint256) {
+        return CommonMiningFees;
+    }
+
+    function getUncommonMiningFees() public view returns (uint256) {
+        return UncommonMiningFees;
+    }
+
+    function getRareMiningFees() public view returns (uint256) {
+        return RareMiningFees;
+    }
+
+    function getTon() public view returns (address) {
+        return ton;
+    }
+
+    function getTreasury() public view returns (address) {
+        return treasury;
     }
 
     // Function to count the number of Gems from treasury where quadrants < given quadrant and return their tokenIds

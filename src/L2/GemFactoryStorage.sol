@@ -57,7 +57,6 @@ contract GemFactoryStorage {
     uint256 public estimatedStakingIndexIncreaseRate;
 
     // Mining storage
-    uint256 public miningCooldown;
     uint256 public BaseMiningFees;
     uint256 public CommonMiningFees;
     uint256 public UncommonMiningFees;
@@ -69,9 +68,9 @@ contract GemFactoryStorage {
     uint256 public lastRequestId;
 
 
-    address internal wston;
-    address internal ton;
-    address internal treasury;
+    address public wston;
+    address public ton;
+    address public treasury;
 
     // constants
     uint32 public constant CALLBACK_GAS_LIMIT = 210000;
@@ -88,4 +87,8 @@ contract GemFactoryStorage {
     event GemMiningStarted(uint256 tokenId, address miner);
     event GemMiningClaimed(uint256 tokenId, address miner);
     event GemMelted(uint256 _tokenId, address _from);
+
+    // Pause Events
+    event Paused(address account);
+    event Unpaused(address account);
 }

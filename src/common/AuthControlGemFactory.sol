@@ -11,14 +11,6 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
         _;
     }
 
-    modifier onlyTreasury() {
-        require(
-            hasRole(TREASURY_ROLE, msg.sender),
-            "AuthControl: Caller is not a minter"
-        );
-        _;
-    }
-
     modifier onlyPauser() {
         require(
             hasRole(PAUSE_ROLE, msg.sender),
@@ -30,7 +22,7 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
     modifier onlyTreasuryOrAdmin() {
         require(
             isAdmin(msg.sender) || hasRole(TREASURY_ROLE, msg.sender),
-            "not onlyMinterOrAdmin"
+            "not onlyTreasuryOrAdmin"
         );
         _;
     }

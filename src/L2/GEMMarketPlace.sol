@@ -10,6 +10,8 @@ import { GemFactory } from "./GemFactory.sol";
 contract MarketPlace is MarketPlaceStorage, GemFactory {
     using SafeERC20 for IERC20;
 
+    constructor(address coordinator) GemFactory(coordinator) {}
+
     function initialize(address _treasury, address _titanwston, address _ton, uint256 _discountRate) external {
         require(wston == address(0), "titanwston already initialized");
         require(ton == address(0), "ton already initialized");
