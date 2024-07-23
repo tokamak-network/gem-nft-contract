@@ -12,7 +12,6 @@ contract GemFactoryTest is Test {
     uint256 public baseMiningFees = 10 * 10 ** 18;
     uint256 public commonMiningFees = 20 * 10 ** 18;
     uint256 public uncommonMiningFees = 40 * 10 ** 18;
-    uint256 public rareMiningFees = 80 * 10 ** 18;
 
     address payable owner;
     address payable user1;
@@ -57,8 +56,7 @@ contract GemFactoryTest is Test {
             address(treasury),
             baseMiningFees,
             commonMiningFees,
-            uncommonMiningFees,
-            rareMiningFees
+            uncommonMiningFees
         );
         treasury.setGemFactory(address(gemfactory));
         
@@ -87,9 +85,6 @@ contract GemFactoryTest is Test {
 
         uint256 uncommonMiningFeesCheck = gemfactory.getUncommonMiningFees();
         assert(uncommonMiningFeesCheck == uncommonMiningFees);
-
-        uint256 rareMiningFeesCheck = gemfactory.getRareMiningFees();
-        assert(rareMiningFeesCheck == rareMiningFees);
 
         // Check that the Treasury has the correct GemFactory address set
         address gemFactoryAddress = treasury.getGemFactoryAddress();
