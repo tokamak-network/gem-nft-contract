@@ -21,6 +21,7 @@ contract WrappedStakedTONStorage {
     bool paused;
 
     mapping (address => IRefactor.Balance) public balances;
+    address[] public balanceAddresses;
     IRefactor.Balance[] public Balances;
 
     // Main events

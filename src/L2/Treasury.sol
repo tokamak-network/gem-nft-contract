@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { GemFactory } from "./GemFactory.sol";
 import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract Treasury is GemFactory, IERC721Receiver {
+contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     address internal _gemFactory;
+    address internal _marketplace;
 
-    modifier onlyGemFactory() {
-        require(msg.sender == _gemFactory, "not GemFactory");
+    modifier onlyGemFactoryOrMarketPlace() {
+        require(msg.sender == _gemFactory || msg.sender == _marketplace, "caller is neither GemFactory nor MarketPlace");
         _;
     }
 
@@ -33,8 +35,7 @@ contract Treasury is GemFactory, IERC721Receiver {
         IERC20(wston).approve(_gemFactory, _amount);
     }
 
-    
-    function transferWSTON(address _to, uint256 _amount) external whenNotPaused onlyGemFactory returns(bool) {
+    function transferWSTON(address _to, uint256 _amount) external whenNotPaused onlyGemFactoryOrMarketPlace nonReentrant returns(bool) {
         require(_to != address(0), "address zero");
         uint256 contractWSTONBalance = getWSTONBalance();
         require(contractWSTONBalance >= _amount, "Unsuffiscient WSTON balance");
@@ -53,7 +54,6 @@ contract Treasury is GemFactory, IERC721Receiver {
         string memory _tokenURI
     ) external onlyOwner returns (uint256) {
         return GemFactory(_gemFactory).createGEM(
-
             _color,
             _value,
             _quadrants,
@@ -84,7 +84,7 @@ contract Treasury is GemFactory, IERC721Receiver {
         );
     }
 
-    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactory returns(bool) {
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlace returns(bool) {
         GemFactory(_gemFactory).transferGEM(_to, _tokenId);
         return true;
     }

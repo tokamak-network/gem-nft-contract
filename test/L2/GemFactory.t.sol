@@ -2,10 +2,11 @@
 pragma solidity ^0.8.23;
 
 import "forge-std/Test.sol";
-import { GemFactory } from "../src/L2/GemFactory.sol";
-import { Treasury } from "../src/L2/Treasury.sol";
-import { MockERC20 } from "../src/L2/MockERC20.sol";
-import { GemFactoryStorage } from "../src/L2/GemFactoryStorage.sol";
+import { GemFactory } from "../../src/L2/GemFactory.sol";
+import { Treasury } from "../../src/L2/Treasury.sol";
+import { MarketPlace } from "../../src/L2/GEMMarketPlace.sol";
+import { MockERC20 } from "../../src/L2/MockERC20.sol";
+import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
 
 contract GemFactoryTest is Test {
 
@@ -19,6 +20,7 @@ contract GemFactoryTest is Test {
 
     GemFactory gemfactory;
     Treasury treasury;
+    MarketPlace marketplace;
     MockERC20 wston;
     MockERC20 ton;
 
@@ -54,6 +56,7 @@ contract GemFactoryTest is Test {
             address(wston),
             address(ton),
             address(treasury),
+            address(marketplace),
             commonMiningFees,
             rareMiningFees,
             uniqueMiningFees

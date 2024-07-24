@@ -45,6 +45,14 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _;
     }
 
+    modifier onlyMarketPlace() {
+        require(
+            msg.sender == marketplace, 
+            "function callable from treasury contract only"
+        );
+        _;
+    }
+
     constructor(address coordinator) ERC721("TokamakGEM", "GEM") RNGConsumerBase(coordinator) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
@@ -69,7 +77,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     function initialize(
         address _titanwston, 
         address _ton,
-        address _treasury,  
+        address _treasury,
+        address _marketplace,  
         uint256 _CommonMiningFees, 
         uint256 _RareMiningFees,
         uint256 _UniqueMiningFees
@@ -80,6 +89,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         wston = _titanwston;
         ton = _ton;
         treasury = _treasury;
+        marketplace = _marketplace;
         CommonMiningFees = _CommonMiningFees;
         RareMiningFees = _RareMiningFees;
         UniqueMiningFees = _UniqueMiningFees;
@@ -101,7 +111,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // gem must be mineable
         require(Gems[_tokenId].gemCooldownPeriod < block.timestamp, "Gem cooldown period has not elapsed");
         // token must not be listed for sale within the marketplace
-        require(!Gems[_tokenId].isLocked, "Gem is listed for sale");
+        require(!Gems[_tokenId].isLocked, "Gem is listed for sale or already mining");
         // user must not be mining another gem
         require(!isUserMining[msg.sender], "user is already mining");
         // treasury must own the token
@@ -128,6 +138,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Store the current timestamp
         userMiningStartTime[msg.sender][_tokenId] = block.timestamp;
         tokenMiningByUser[msg.sender] = _tokenId;
+        Gems[_tokenId].isLocked = true;
 
          // defining the random value
         require(tx.origin == msg.sender, "caller must be EOA");
@@ -161,12 +172,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         require(userMiningToken[msg.sender][_tokenId] == true, "user is not mining this Gem");
         // user must wait until the end of the cooldown period
         require(block.timestamp > userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
+        //Verify that gem was locked 
+        require(Gems[_tokenId].isLocked == true, "Gems is not mining");
 
         // reset mining variables
         isUserMining[msg.sender] = false;
         delete userMiningToken[msg.sender][_tokenId];
         delete userMiningStartTime[msg.sender][_tokenId];
         delete tokenMiningByUser[msg.sender];
+        Gems[_tokenId].isLocked = false;
 
         // fetch the random request Id
         uint256 requestId = Gems[_tokenId].randomRequestId;
@@ -258,6 +272,20 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         safeTransferFrom(msg.sender, _to, _tokenId);
 
         emit TransferGEM(msg.sender, _to, _tokenId);
+    }
+
+    function transferGEMFrom(address _from, address _to, uint256 _tokenId) external onlyMarketPlace whenNotPaused {
+        // Safety check to prevent against an unexpected 0x0 default.
+        require(_to != address(0));
+        require(_to != msg.sender);
+
+                // storage variables update
+        _transferGEM(_from, _to, _tokenId);
+
+        // Reassign ownership,
+        safeTransferFrom(_from, _to, _tokenId);
+
+        emit TransferGEM(_from, _to, _tokenId);
     }
 
     /**

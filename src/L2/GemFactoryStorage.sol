@@ -62,6 +62,7 @@ contract GemFactoryStorage {
     address public wston;
     address public ton;
     address public treasury;
+    address public marketplace;
 
     // constants
     uint32 public constant CALLBACK_GAS_LIMIT = 210000;

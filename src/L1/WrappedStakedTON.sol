@@ -63,6 +63,10 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         require(IERC20(wton).transferFrom(msg.sender, address(this), _amount), "failed ton transfer wton to this contract");
         require(IDepositManager(depositManager).deposit(layer2, _amount), "failed to deposit");
 
+        // user deposits storage update
+        balances[msg.sender].balance += _amount;
+        
+        
         // staking index update
 
         // we mint WSTON
@@ -72,7 +76,7 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
     }
 
     function requestTONWithdrawal(uint256 _amount) external whenNotPaused nonReentrant returns (bool) {
-        
+        require(balances[msg.sender].balance >= _amount, "not enough funds");
         require(IDepositManager(depositManager).requestWithdrawal(layer2, _amount), "failed to request withdrawal");
 
         emit WithdrawalRequested(msg.sender, _amount);
@@ -81,8 +85,11 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
 
     function updateSeigniorage() external whenNotPaused {
         ISeigManager(seigManager).updateSeigniorage();
-        for(uint256 i = 0; i < Balances.length; i++) {
-            
+        
+        // not sure if correct
+        for (uint256 i = 0; i < balanceAddresses.length; i++) {
+            address addr = balanceAddresses[i];
+            balances[addr].refactoredCount += 1;
         }
     }
 
