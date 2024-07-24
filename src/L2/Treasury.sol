@@ -43,49 +43,42 @@ contract Treasury is GemFactory, IERC721Receiver {
         return true;
     }
 
-    function createPreminedGEM(
-        GemFactoryStorage.Rarity _rarity, 
+    function createPreminedGEM( 
         string memory _color, 
-        uint128 _value, 
-        bytes2 _quadrants, 
-        string memory _colorStyle,
+        uint256 _value, 
+        bytes1 _quadrants, 
         string memory _backgroundColor,
-        string memory _backgroundColorStyle,
+        uint256 _miningPeriod,
         uint256 _cooldownPeriod,
         string memory _tokenURI
     ) external onlyOwner returns (uint256) {
         return GemFactory(_gemFactory).createGEM(
-            _rarity,
+
             _color,
             _value,
             _quadrants,
-            _colorStyle,
             _backgroundColor,
-            _backgroundColorStyle,
+            _miningPeriod,
             _cooldownPeriod,
             _tokenURI
         );
     }
 
     function createPreminedGEMPool(
-        GemFactoryStorage.Rarity[] memory _rarities,
         string[] memory _colors,
-        uint128[] memory _values,
-        bytes2[] memory _quadrants,
-        string[] memory _colorStyle,
+        uint256[] memory _values,
+        bytes1[] memory _quadrants,
         string[]memory _backgroundColor,
-        string[] memory _backgroundColorStyle,
+        uint256[] memory _miningPeriods,
         uint256[] memory _cooldownPeriod,
         string[] memory _tokenURIs
     ) external onlyOwner returns (uint256[] memory) {
         return GemFactory(_gemFactory).createGEMPool(
-            _rarities,
             _colors,
             _values,
             _quadrants,
-            _colorStyle,
             _backgroundColor,
-            _backgroundColorStyle,
+            _miningPeriods,
             _cooldownPeriod,
             _tokenURIs
         );

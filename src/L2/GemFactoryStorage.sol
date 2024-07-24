@@ -7,13 +7,11 @@ contract GemFactoryStorage {
         uint256 tokenId;
         bytes1 quadrants;
         string color;
-        string colorStyle; //deterministic =>we dont need it
         string backgroundColor; //deterministic =>we dont need it
-        string backgroundColorStyle; //deterministic =>we dont need it
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
         uint256 miningPeriod; // Mining delay before claiming
         bool isLocked; // Locked if gem is listed on the marketplace
-        uint128 value; // 27 decimals
+        uint256 value; // 27 decimals
         string tokenURI; // IPFS address of the metadata file
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
     }

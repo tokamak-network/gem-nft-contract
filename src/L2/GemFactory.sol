@@ -37,7 +37,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _;
     }
 
-        modifier onlyTreasury() {
+    modifier onlyTreasury() {
         require(
             msg.sender == treasury, 
             "function callable from treasury contract only"
@@ -181,10 +181,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     function meltGEM(uint256 _tokenId) external whenNotPaused {
         require(msg.sender != address(0), "zero address"); 
         require(GEMIndexToOwner[_tokenId] == msg.sender);
-    
-        burnToken(msg.sender, _tokenId);
-
         uint256 amount = Gems[_tokenId].value;
+        burnToken(msg.sender, _tokenId);
         require(ITreasury(treasury).transferWSTON(msg.sender, amount), "transfer failed");
 
         emit GemMelted(_tokenId, msg.sender);
@@ -206,11 +204,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function createGEM( 
         string memory _color, 
-        uint128 _value, 
+        uint256 _value, 
         bytes1 _quadrants, 
-        string memory _colorStyle,
         string memory _backgroundColor,
-        string memory _backgroundColorStyle,
         uint256 _miningPeriod,
         uint256 _gemCooldownPeriod,
         string memory _tokenURI) 
@@ -220,9 +216,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             quadrants: _quadrants,
             color: _color,
             value: _value,
-            colorStyle: _colorStyle,
             backgroundColor: _backgroundColor,
-            backgroundColorStyle: _backgroundColorStyle,
             miningPeriod: _miningPeriod,
             gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
             isLocked: false,
@@ -289,11 +283,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     // consider gem are not forgeable => implement cooldown
     function createGEMPool(
         string[] memory _colors,
-        uint128[] memory _values,
+        uint256[] memory _values,
         bytes1[] memory _quadrants,
-        string[] memory _colorStyle,
         string[]memory _backgroundColor,
-        string[] memory _backgroundColorStyle,
         uint256[] memory _miningPeriod,
         uint256[] memory _gemCooldownPeriod,
         string[] memory _tokenURIs
@@ -315,9 +307,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 quadrants: _quadrants[i],
                 color: _colors[i],
                 value: _values[i],
-                colorStyle: _colorStyle[i],
                 backgroundColor: _backgroundColor[i],
-                backgroundColorStyle: _backgroundColorStyle[i],
                 miningPeriod: _miningPeriod[i],
                 gemCooldownPeriod: block.timestamp + _gemCooldownPeriod[i],
                 isLocked: false,

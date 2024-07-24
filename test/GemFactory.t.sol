@@ -9,9 +9,9 @@ import { GemFactoryStorage } from "../src/L2/GemFactoryStorage.sol";
 
 contract GemFactoryTest is Test {
 
-    uint256 public baseMiningFees = 10 * 10 ** 18;
-    uint256 public commonMiningFees = 20 * 10 ** 18;
-    uint256 public uncommonMiningFees = 40 * 10 ** 18;
+    uint256 public commonMiningFees = 10 * 10 ** 18;
+    uint256 public rareMiningFees = 20 * 10 ** 18;
+    uint256 public uniqueMiningFees = 40 * 10 ** 18;
 
     address payable owner;
     address payable user1;
@@ -54,9 +54,9 @@ contract GemFactoryTest is Test {
             address(wston),
             address(ton),
             address(treasury),
-            baseMiningFees,
             commonMiningFees,
-            uncommonMiningFees
+            rareMiningFees,
+            uniqueMiningFees
         );
         treasury.setGemFactory(address(gemfactory));
         
@@ -77,14 +77,14 @@ contract GemFactoryTest is Test {
         address treasuryAddress = gemfactory.getTreasury();
         assert(treasuryAddress == address(treasury));
 
-        uint256 baseMiningFeesCheck = gemfactory.getBaseMiningFees();
-        assert(baseMiningFeesCheck == baseMiningFees);
+        uint256 CommonMiningFeesCheck = gemfactory.getCommonMiningFees();
+        assert(CommonMiningFeesCheck == commonMiningFees);
 
-        uint256 commonMiningFeesCheck = gemfactory.getCommonMiningFees();
-        assert(commonMiningFeesCheck == commonMiningFees);
+        uint256 RareMiningFeesCheck = gemfactory.getRareMiningFees();
+        assert(RareMiningFeesCheck == rareMiningFees);
 
-        uint256 uncommonMiningFeesCheck = gemfactory.getUncommonMiningFees();
-        assert(uncommonMiningFeesCheck == uncommonMiningFees);
+        uint256 UniqueMiningFeesCheck = gemfactory.getUniqueMiningFees();
+        assert(UniqueMiningFeesCheck == uniqueMiningFees);
 
         // Check that the Treasury has the correct GemFactory address set
         address gemFactoryAddress = treasury.getGemFactoryAddress();
@@ -99,25 +99,21 @@ contract GemFactoryTest is Test {
         vm.startPrank(owner);
 
         // Define GEM properties
-        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.BASE;
         string memory color = "Red";
-        uint128 value = 100 * 10 ** 27;
-        bytes2 quadrants = 0x1111;
-        string memory colorStyle = "Solid";
+        uint256 value = 10 * 10 ** 27; // 10 WSTON
+        bytes1 quadrants = 0x0C;
         string memory backgroundColor = "Black";
-        string memory backgroundColorStyle = "Gradient";
         uint256 cooldownPeriod = 3600 * 24; // 24 hours
+        uint256 miningPeriod = 1200; // 20 min
         string memory tokenURI = "https://example.com/token/1";
 
         // Call createGEM function
         uint256 newGemId = treasury.createPreminedGEM(
-            rarity,
             color,
             value,
             quadrants,
-            colorStyle,
             backgroundColor,
-            backgroundColorStyle,
+            miningPeriod,
             cooldownPeriod,
             tokenURI
         );
@@ -134,37 +130,29 @@ contract GemFactoryTest is Test {
         vm.startPrank(owner);
 
         // Define GEM properties
-        GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
-        rarities[0] = GemFactoryStorage.Rarity.RARE;
-        rarities[1] = GemFactoryStorage.Rarity.COMMON;
-
         string[] memory colors = new string[](2);
         colors[0] = "Red";
         colors[1] = "Blue";
 
-        uint128[] memory values = new uint128[](2);
-        values[0] = 1000;
-        values[1] = 500;
+        uint256[] memory values = new uint256[](2);
+        values[0] = 10 * 10 ** 27; // 10 WSTON
+        values[1] = 150 * 10 ** 27; // 150 WSTON
 
-        bytes2[] memory quadrants = new bytes2[](2);
-        quadrants[0] = 0x4433;
-        quadrants[1] = 0x3232;
-
-        string[] memory colorStyles = new string[](2);
-        colorStyles[0] = "Solid";
-        colorStyles[1] = "Gradient";
+        bytes1[] memory quadrants = new bytes1[](2);
+        quadrants[0] = 0x0B;
+        quadrants[1] = 0x22;
 
         string[] memory backgroundColors = new string[](2);
         backgroundColors[0] = "Black";
         backgroundColors[1] = "White";
 
-        string[] memory backgroundColorStyles = new string[](2);
-        backgroundColorStyles[0] = "Gradient";
-        backgroundColorStyles[1] = "Solid";
-
         uint256[] memory cooldownPeriods = new uint256[](2);
-        cooldownPeriods[0] = 3600 * 2; // 2 hour
-        cooldownPeriods[1] = 3600 * 4; // 4 hours
+        cooldownPeriods[0] = 3600 * 24; // 24 hour
+        cooldownPeriods[1] = 3600 * 48; // 48 hours
+
+        uint256[] memory miningPeriods = new uint256[](2);
+        miningPeriods[0] = 1200; // 20 min
+        miningPeriods[1] = 2400; // 40 min
 
         string[] memory tokenURIs = new string[](2);
         tokenURIs[0] = "https://example.com/token/1";
@@ -172,13 +160,11 @@ contract GemFactoryTest is Test {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds = treasury.createPreminedGEMPool(
-            rarities,
             colors,
             values,
             quadrants,
-            colorStyles,
             backgroundColors,
-            backgroundColorStyles,
+            miningPeriods,
             cooldownPeriods,
             tokenURIs
         );
@@ -197,25 +183,21 @@ contract GemFactoryTest is Test {
         vm.startPrank(owner);
 
         // Define GEM properties
-        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE; // Correctly reference Rarity
         string memory color = "Red";
-        uint128 value = 1000 * 10 ** 27;
-        bytes2 quadrants = 0x4444;
-        string memory colorStyle = "Solid";
+        uint256 value = 1000 * 10 ** 27;
+        bytes1 quadrants = 0x34;
         string memory backgroundColor = "Black";
-        string memory backgroundColorStyle = "Gradient";
-        uint256 cooldownPeriod = 3600; // 1 hour
+        uint256 miningPeriod = 3600; // 1 hour
+        uint256 cooldownPeriod = 3600 * 72; // 72 hours
         string memory tokenURI = "https://example.com/token/1";
 
         // Call createGEM function from the Treasury contract
         uint256 newGemId = treasury.createPreminedGEM(
-            rarity,
             color,
             value,
             quadrants,
-            colorStyle,
             backgroundColor,
-            backgroundColorStyle,
+            miningPeriod,
             cooldownPeriod,
             tokenURI
         );

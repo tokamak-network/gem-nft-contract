@@ -34,7 +34,7 @@ contract MarketPlace is MarketPlaceStorage, GemFactory {
     }
 
     function _buyGem(uint256 _tokenId, address _payer, bool _paymentMethod) internal returns(bool) {
-        require(Gems[_tokenId].isForSale, "Gem not for sale");
+        require(Gems[_tokenId].isLocked, "Gem not for sale");
         require(_payer != address(0), "zero address");
         
         uint256 GemValue = Gems[_tokenId].value;
