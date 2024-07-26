@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 import "./BaseTest.sol";
 
-contract GemFactoryTest is BaseTest {
+contract MarketPlaceTest is BaseTest {
 
     function setUp() public override {
         super.setUp();

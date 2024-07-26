@@ -92,4 +92,33 @@ contract BaseTest is Test {
 
         vm.stopPrank();
     }
+
+
+    function testSetup() public view {
+        address wstonAddress = GemFactory(gemfactory).getWston();
+        assert(wstonAddress == address(wston));
+
+        address tonAddress = GemFactory(gemfactory).getTon();
+        assert(tonAddress == address(ton));
+
+        address treasuryAddress = GemFactory(gemfactory).getTreasury();
+        assert(treasuryAddress == address(treasury));
+
+        uint256 CommonMiningFeesCheck = GemFactory(gemfactory).getCommonMiningFees();
+        assert(CommonMiningFeesCheck == commonMiningFees);
+
+        uint256 RareMiningFeesCheck = GemFactory(gemfactory).getRareMiningFees();
+        assert(RareMiningFeesCheck == rareMiningFees);
+
+        uint256 UniqueMiningFeesCheck = GemFactory(gemfactory).getUniqueMiningFees();
+        assert(UniqueMiningFeesCheck == uniqueMiningFees);
+
+        // Check that the Treasury has the correct GemFactory address set
+        address gemFactoryAddress = Treasury(treasury).getGemFactoryAddress();
+        assert(gemFactoryAddress == address(gemfactory));
+
+        // Check that the Treasury has approved the GemFactory to spend WSTON
+        uint256 allowance = IERC20(wston).allowance(address(treasury), address(gemfactory));
+        assert(allowance == type(uint256).max);
+    }
 }
