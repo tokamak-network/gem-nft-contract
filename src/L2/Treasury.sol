@@ -30,6 +30,11 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
         _gemFactory = gemFactory;
     }
 
+    function setMarketPlace(address marketplace) external onlyOwner {
+        require(marketplace != address(0), "Invalid address");
+        _marketplace = marketplace;
+    }
+
     function approveGemFactory() external onlyOwner {
         require(wston != address(0), "wston address not set");
         IERC20(wston).approve(_gemFactory, type(uint256).max);
@@ -37,7 +42,7 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
 
     function approveMarketPlace() external onlyOwner {
         require(wston != address(0), "wston address not set");
-        IERC20(wston).approve(_gemFactory, type(uint256).max);
+        IERC20(wston).approve(_marketplace, type(uint256).max);
     }
 
     function transferWSTON(address _to, uint256 _amount) external whenNotPaused onlyGemFactoryOrMarketPlace nonReentrant returns(bool) {

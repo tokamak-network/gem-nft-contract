@@ -24,9 +24,9 @@ contract BaseTest is Test {
     address payable user2;
     address payable coordinator;
 
-    GemFactory gemfactory;
-    Treasury treasury;
-    MarketPlace marketplace;
+    address gemfactory;
+    address treasury;
+    address marketplace;
     address wston;
     address ton;
 
@@ -52,42 +52,43 @@ contract BaseTest is Test {
         vm.deal(user2, 100 ether);
 
         // deploy treasury and marketplace
-        treasury = new Treasury(coordinator, address(wston), address(ton));
-        marketplace = new MarketPlace(coordinator);
+        treasury = address(new Treasury(coordinator, wston, ton));
+        marketplace = address(new MarketPlace(coordinator));
 
         // transfer some TON & TITAN WSTON to treasury
-        IERC20(wston).transfer(address(treasury), 100000 * 10 ** 27);
-        IERC20(ton).transfer(address(treasury), 100000 * 10 ** 18);
+        IERC20(wston).transfer(treasury, 100000 * 10 ** 27);
+        IERC20(ton).transfer(treasury, 100000 * 10 ** 18);
 
         // deploy and initialize GemFactory
-        gemfactory = new GemFactory(coordinator);
+        gemfactory = address(new GemFactory(coordinator));
 
         // Grant admin role to owner
-        gemfactory.grantRole(gemfactory.DEFAULT_ADMIN_ROLE(), owner);
+        GemFactory(gemfactory).grantRole(GemFactory(gemfactory).DEFAULT_ADMIN_ROLE(), owner);
 
-        gemfactory.initialize(
+        GemFactory(gemfactory).initialize(
             wston,
             ton,
-            address(treasury),
+            treasury,
             commonMiningFees,
             rareMiningFees,
             uniqueMiningFees
         );
 
-        marketplace.initialize(
-            address(treasury),
+        MarketPlace(marketplace).initialize(
+            treasury,
             address(gemfactory),
             tonFeesRate,
             wston,
             ton
         );
 
-        gemfactory.setMarketPlaceAddress(address(marketplace));
-        treasury.setGemFactory(address(gemfactory));
+        GemFactory(gemfactory).setMarketPlaceAddress(marketplace);
+        Treasury(treasury).setGemFactory(gemfactory);
+        Treasury(treasury).setMarketPlace(marketplace);
         
         // approve GemFactory to spend treasury wston
-        treasury.approveGemFactory();
-        treasury.approveMarketPlace();
+        Treasury(treasury).approveGemFactory();
+        Treasury(treasury).approveMarketPlace();
 
         vm.stopPrank();
     }

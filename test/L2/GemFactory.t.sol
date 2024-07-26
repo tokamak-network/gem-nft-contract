@@ -10,26 +10,26 @@ contract GemFactoryTest is BaseTest {
     }
 
     function testSetup() public view {
-        address wstonAddress = gemfactory.getWston();
+        address wstonAddress = GemFactory(gemfactory).getWston();
         assert(wstonAddress == address(wston));
 
-        address tonAddress = gemfactory.getTon();
+        address tonAddress = GemFactory(gemfactory).getTon();
         assert(tonAddress == address(ton));
 
-        address treasuryAddress = gemfactory.getTreasury();
+        address treasuryAddress = GemFactory(gemfactory).getTreasury();
         assert(treasuryAddress == address(treasury));
 
-        uint256 CommonMiningFeesCheck = gemfactory.getCommonMiningFees();
+        uint256 CommonMiningFeesCheck = GemFactory(gemfactory).getCommonMiningFees();
         assert(CommonMiningFeesCheck == commonMiningFees);
 
-        uint256 RareMiningFeesCheck = gemfactory.getRareMiningFees();
+        uint256 RareMiningFeesCheck = GemFactory(gemfactory).getRareMiningFees();
         assert(RareMiningFeesCheck == rareMiningFees);
 
-        uint256 UniqueMiningFeesCheck = gemfactory.getUniqueMiningFees();
+        uint256 UniqueMiningFeesCheck = GemFactory(gemfactory).getUniqueMiningFees();
         assert(UniqueMiningFeesCheck == uniqueMiningFees);
 
         // Check that the Treasury has the correct GemFactory address set
-        address gemFactoryAddress = treasury.getGemFactoryAddress();
+        address gemFactoryAddress = Treasury(treasury).getGemFactoryAddress();
         assert(gemFactoryAddress == address(gemfactory));
 
         // Check that the Treasury has approved the GemFactory to spend WSTON
@@ -50,7 +50,7 @@ contract GemFactoryTest is BaseTest {
         string memory tokenURI = "https://example.com/token/1";
 
         // Call createGEM function
-        uint256 newGemId = treasury.createPreminedGEM(
+        uint256 newGemId = Treasury(treasury).createPreminedGEM(
             color,
             value,
             quadrants,
@@ -62,8 +62,8 @@ contract GemFactoryTest is BaseTest {
 
         // Verify GEM creation
         assert(newGemId == 0);
-        assert(gemfactory.ownerOf(newGemId) == address(treasury));
-        assert(keccak256(abi.encodePacked(gemfactory.tokenURI(newGemId))) == keccak256(abi.encodePacked(tokenURI)));
+        assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
+        assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemId))) == keccak256(abi.encodePacked(tokenURI)));
 
         vm.stopPrank();
     }
@@ -101,7 +101,7 @@ contract GemFactoryTest is BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = treasury.createPreminedGEMPool(
+        uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             colors,
             values,
             quadrants,
@@ -113,10 +113,10 @@ contract GemFactoryTest is BaseTest {
 
         // Verify GEM creation
         assert(newGemIds.length == 2);
-        assert(gemfactory.ownerOf(newGemIds[0]) == address(treasury));
-        assert(gemfactory.ownerOf(newGemIds[1]) == address(treasury));
-        assert(keccak256(abi.encodePacked(gemfactory.tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
-        assert(keccak256(abi.encodePacked(gemfactory.tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
+        assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
+        assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
 
         vm.stopPrank();
     }
@@ -134,7 +134,7 @@ contract GemFactoryTest is BaseTest {
         string memory tokenURI = "https://example.com/token/1";
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = treasury.createPreminedGEM(
+        uint256 newGemId = Treasury(treasury).createPreminedGEM(
             color,
             value,
             quadrants,
@@ -145,10 +145,10 @@ contract GemFactoryTest is BaseTest {
         );
 
         // Transfer the GEM to user1
-        gemfactory.adminTransferGEM(user1, newGemId);
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
 
         // Verify GEM transfer
-        assert(gemfactory.ownerOf(newGemId) == user1);
+        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
 
         vm.stopPrank();
 
@@ -156,7 +156,7 @@ contract GemFactoryTest is BaseTest {
         vm.startPrank(user1);
 
         // Call meltGEM function
-        gemfactory.meltGEM(newGemId);
+        GemFactory(gemfactory).meltGEM(newGemId);
 
         // Verify GEM melting
         assert(IERC20(wston).balanceOf(user1) == 2000 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 1000 WSWTON)

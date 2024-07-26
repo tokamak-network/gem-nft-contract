@@ -56,24 +56,11 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
 
     /**
      * @notice put a GEM for sale
-     * @param tokenId the ID of the token to be transferred
-     * @param price price asked for the transaction
+     * @param _tokenId the ID of the token to be transferred
+     * @param _price price asked for the transaction
      */
-    function putGemForSale(uint256 tokenId, uint256 price) external whenNotPaused returns (bool){
-        require(GemFactory(_gemFactory).ownerOf(tokenId) == msg.sender, "Not the owner of the GEM");
-        require(price > 0, "Price must be greater than zero");
-        require(GemFactory(_gemFactory).isTokenLocked(tokenId) == false, "Gem is already for sale or mining");
-
-        GemFactory(_gemFactory).setIsLocked(tokenId, true);
-
-        gemsForSale[tokenId] = Sale({
-            seller: msg.sender,
-            price: price,
-            isActive: true
-        });
-
-        emit GemForSale(tokenId, msg.sender, price);
-        return true;
+    function putGemForSale(uint256 _tokenId, uint256 _price) external whenNotPaused {
+        require(_putGemForSale(_tokenId, _price, msg.sender), "failed to put gem for sale");
     }
 
     /**
@@ -81,28 +68,13 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
      * @param tokenIds the ID of the token to be transferred
      * @param prices price asked for the transaction
      */
-    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused returns (bool) {
+    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused {
         require(tokenIds.length != 0, "no tokens");
         require(tokenIds.length == prices.length, "wrong length");
 
         for (uint256 i = 0; i < tokenIds.length; i++){
-            
-            require(GemFactory(_gemFactory).ownerOf(tokenIds[i]) == msg.sender, "Not the owner of the GEM");
-            require(prices[i] > 0, "Price must be greater than zero");
-            require(GemFactory(_gemFactory).isTokenLocked(tokenIds[i]) == false, "Gem is already for sale or mining");
-            require(!userMiningToken[msg.sender][tokenIds[i]], "user is using this GEM for mining");
-
-            GemFactory(_gemFactory).setIsLocked(tokenIds[i], true);
-
-            gemsForSale[tokenIds[i]] = Sale({
-                seller: msg.sender,
-                price: prices[i],
-                isActive: true
-            });
-            emit GemForSale(tokenIds[i], msg.sender, prices[i]);
+            require(_putGemForSale(tokenIds[i], prices[i], msg.sender), "failed to put gem for sale");
         }
-
-        return true;
     }
 
     function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {
@@ -115,6 +87,24 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
     //--------------------------INTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
 
+    
+    function _putGemForSale(uint256 _tokenId, uint256 _price, address _seller) internal returns (bool) {
+        require(GemFactory(_gemFactory).ownerOf(_tokenId) == _seller, "Not the owner of the GEM");
+        require(_price > 0, "Price must be greater than zero");
+        require(GemFactory(_gemFactory).isTokenLocked(_tokenId) == false, "Gem is already for sale or mining");
+
+        GemFactory(_gemFactory).setIsLocked(_tokenId, true);
+
+        gemsForSale[_tokenId] = Sale({
+            seller: _seller,
+            price: _price,
+            isActive: true
+        });
+
+        emit GemForSale(_tokenId, _seller, _price);
+        return true;
+    }
+    
     function _buyGem(uint256 _tokenId, address _payer, bool _paymentMethod) internal nonReentrant returns(bool) {
         require(_payer != address(0), "zero address");
         require(gemsForSale[_tokenId].isActive, "not for sale");
@@ -130,8 +120,8 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
             IERC20(wston_).safeTransferFrom(_payer, seller, price);
         } else {
             uint256 totalprice = _toWAD(price + ((price * tonFeesRate) / TON_FEES_RATE_DIVIDER));
-            IERC20(ton_).safeTransferFrom(_payer, treasury, totalprice); // 18 decimals
-            IERC20(wston_).safeTransferFrom(treasury, seller, price); // 27 decimals
+            IERC20(ton_).safeTransferFrom(_payer, _treasury, totalprice); // 18 decimals
+            IERC20(wston_).safeTransferFrom(_treasury, seller, price); // 27 decimals
         }
 
         gemsForSale[_tokenId].isActive = false;
