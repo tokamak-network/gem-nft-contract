@@ -15,10 +15,7 @@ contract GemFactoryStorage {
     struct Gem {
         uint256 tokenId;
         Rarity rarity;
-        uint8 quadrant1;
-        uint8 quadrant2;
-        uint8 quadrant3;
-        uint8 quadrant4;
+        uint8[4] quadrants; // 4 quadrants
         string color;
         string backgroundColor; //deterministic =>we dont need it
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining

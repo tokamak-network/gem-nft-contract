@@ -16,10 +16,7 @@ contract GemFactoryTest is BaseTest {
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         string memory color = "Red";
         uint256 value = 10 * 10 ** 27; // 10 WSTON
-        uint8 quadrant1 = 1;
-        uint8 quadrant2 = 2;
-        uint8 quadrant3 = 1;
-        uint8 quadrant4 = 1;
+        uint8[4] memory quadrants = [uint8(1), uint8(2), uint8(1), uint8(2)];
         string memory backgroundColor = "Black";
         uint256 cooldownPeriod = 3600 * 24; // 24 hours
         uint256 miningPeriod = 1200; // 20 min
@@ -30,10 +27,7 @@ contract GemFactoryTest is BaseTest {
             rarity,
             color,
             value,
-            quadrant1,
-            quadrant2,
-            quadrant3,
-            quadrant4,
+            quadrants,
             backgroundColor,
             miningPeriod,
             cooldownPeriod,
@@ -63,23 +57,10 @@ contract GemFactoryTest is BaseTest {
         uint256[] memory values = new uint256[](2);
         values[0] = 10 * 10 ** 27; // 10 WSTON
         values[1] = 150 * 10 ** 27; // 150 WSTON
-
-        uint8[] memory quadrants1 = new uint8[](2);
-        quadrants1[0] = 2;
-        quadrants1[1] = 3;
         
-        uint8[] memory quadrants2 = new uint8[](2);
-        quadrants2[0] = 3;
-        quadrants2[1] = 3;
-
-        uint8[] memory quadrants3 = new uint8[](2);
-        quadrants3[0] = 2;
-        quadrants3[1] = 4;
-
-        uint8[] memory quadrants4 = new uint8[](2);
-        quadrants4[0] = 3;
-        quadrants4[1] = 4;
-
+        uint8[4][] memory quadrants = new uint8[4][](2);
+        quadrants[0] = [2, 3, 3, 2];
+        quadrants[1] = [4, 3, 4, 4];
 
         string[] memory backgroundColors = new string[](2);
         backgroundColors[0] = "Black";
@@ -102,10 +83,7 @@ contract GemFactoryTest is BaseTest {
             rarities,
             colors,
             values,
-            quadrants1,
-            quadrants2,
-            quadrants3,
-            quadrants4,
+            quadrants,
             backgroundColors,
             miningPeriods,
             cooldownPeriods,
@@ -125,14 +103,11 @@ contract GemFactoryTest is BaseTest {
     function testMeltGEM() public {
         vm.startPrank(owner);
 
-        // Define GEM properties
+         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         string memory color = "Red";
         uint256 value = 10 * 10 ** 27; // 10 WSTON
-        uint8 quadrant1 = 1;
-        uint8 quadrant2 = 2;
-        uint8 quadrant3 = 1;
-        uint8 quadrant4 = 1;
+        uint8[4] memory quadrants = [uint8(1), uint8(2), uint8(1), uint8(2)];
         string memory backgroundColor = "Black";
         uint256 cooldownPeriod = 3600 * 24; // 24 hours
         uint256 miningPeriod = 1200; // 20 min
@@ -143,15 +118,13 @@ contract GemFactoryTest is BaseTest {
             rarity,
             color,
             value,
-            quadrant1,
-            quadrant2,
-            quadrant3,
-            quadrant4,
+            quadrants,
             backgroundColor,
             miningPeriod,
             cooldownPeriod,
             tokenURI
         );
+
 
         // Transfer the GEM to user1
         GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
