@@ -1,116 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import "forge-std/Test.sol";
-import { GemFactory } from "../../src/L2/GemFactory.sol";
-import { Treasury } from "../../src/L2/Treasury.sol";
-import { MarketPlace } from "../../src/L2/GEMMarketPlace.sol";
-import { MockERC20 } from "../../src/L2/MockERC20.sol";
-import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
+import "./BaseTest.sol";
 
-contract GemFactoryTest is Test {
+contract GemFactoryTest is BaseTest {
 
-    uint256 public commonMiningFees = 10 * 10 ** 18;
-    uint256 public rareMiningFees = 20 * 10 ** 18;
-    uint256 public uniqueMiningFees = 40 * 10 ** 18;
-
-    address payable owner;
-    address payable user1;
-    address payable coordinator;
-
-    GemFactory gemfactory;
-    Treasury treasury;
-    MarketPlace marketplace;
-    MockERC20 wston;
-    MockERC20 ton;
-
-    function setUp() public {
-        owner = payable(makeAddr("Owner"));
-        user1 = payable(makeAddr("User1"));
-
-        vm.startPrank(owner);
-        vm.warp(1632934800);
-
-        wston = new MockERC20("TITAN WSWTON", "WSTON", 200000 * 10 ** 27);
-        ton = new MockERC20("TITAN TON", "TON", 200000 * 10 ** 18);
-
-        // Transfer some tokens to User1
-        wston.transfer(user1, 1000 * 10 ** 27);
-        ton.transfer(user1, 1000 * 10 ** 18);
-
-        // give ETH to User1 to cover gasFees associated with using VRF functions
-        vm.deal(user1, 100 ether);
-
-        // deploy treasury and transfer some TON & TITAN WSTON
-        treasury = new Treasury(coordinator, address(wston), address(ton));
-        wston.transfer(address(treasury), 100000 * 10 ** 27);
-        ton.transfer(address(treasury), 100000 * 10 ** 18);
-
-        // deploy and initialize GemFactory
-        gemfactory = new GemFactory(coordinator);
-
-        // Grant admin role to owner
-        gemfactory.grantRole(gemfactory.DEFAULT_ADMIN_ROLE(), owner);
-
-        gemfactory.initialize(
-            address(wston),
-            address(ton),
-            address(treasury),
-            address(marketplace),
-            commonMiningFees,
-            rareMiningFees,
-            uniqueMiningFees
-        );
-        treasury.setGemFactory(address(gemfactory));
-        
-        // approve GemFactory to spend treasury wston
-        treasury.approveGemFactory(100000 * 10 ** 27);
-
-        vm.stopPrank();
+    function setUp() public override {
+        super.setUp();
     }
 
-    function testSetup() public view {
-
-        address wstonAddress = gemfactory.getWston();
-        assert(wstonAddress == address(wston));
-
-        address tonAddress = gemfactory.getTon();
-        assert(tonAddress == address(ton));
-
-        address treasuryAddress = gemfactory.getTreasury();
-        assert(treasuryAddress == address(treasury));
-
-        uint256 CommonMiningFeesCheck = gemfactory.getCommonMiningFees();
-        assert(CommonMiningFeesCheck == commonMiningFees);
-
-        uint256 RareMiningFeesCheck = gemfactory.getRareMiningFees();
-        assert(RareMiningFeesCheck == rareMiningFees);
-
-        uint256 UniqueMiningFeesCheck = gemfactory.getUniqueMiningFees();
-        assert(UniqueMiningFeesCheck == uniqueMiningFees);
-
-        // Check that the Treasury has the correct GemFactory address set
-        address gemFactoryAddress = treasury.getGemFactoryAddress();
-        assert(gemFactoryAddress == address(gemfactory));
-
-        // Check that the Treasury has approved the GemFactory to spend WSTON
-        uint256 allowance = wston.allowance(address(treasury), address(gemfactory));
-        assert(allowance == 100000 * 10 ** 27);
-    }
-
-    function testCreateGEM() public {
+    function testPutGemForSale() public {
         vm.startPrank(owner);
 
         // Define GEM properties
         string memory color = "Red";
-        uint256 value = 10 * 10 ** 27; // 10 WSTON
-        bytes1 quadrants = 0x0C;
+        uint256 value = 1000 * 10 ** 27;
+        bytes1 quadrants = 0x34;
         string memory backgroundColor = "Black";
-        uint256 cooldownPeriod = 3600 * 24; // 24 hours
-        uint256 miningPeriod = 1200; // 20 min
+        uint256 miningPeriod = 3600; // 1 hour
+        uint256 cooldownPeriod = 3600 * 72; // 72 hours
         string memory tokenURI = "https://example.com/token/1";
 
-        // Call createGEM function
+        // Call createGEM function from the Treasury contract
         uint256 newGemId = treasury.createPreminedGEM(
             color,
             value,
@@ -121,15 +32,28 @@ contract GemFactoryTest is Test {
             tokenURI
         );
 
-        // Verify GEM creation
-        assert(newGemId == 0);
+        // Verify GEM minting
         assert(gemfactory.ownerOf(newGemId) == address(treasury));
-        assert(keccak256(abi.encodePacked(gemfactory.tokenURI(newGemId))) == keccak256(abi.encodePacked(tokenURI)));
+
+        // Transfer the GEM to user1
+        gemfactory.adminTransferGEM(user1, newGemId);
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        uint256 gemPrice = 1500 * 10 ** 27;
+
+        // Verify token existence before putting it for sale
+        assert(gemfactory.ownerOf(newGemId) == user1);
+
+        gemfactory.approve(address(marketplace), newGemId);
+        marketplace.putGemForSale(newGemId, gemPrice);
 
         vm.stopPrank();
     }
 
-    function testCreatePreminedGEMPool() public {
+    function testPutGemlistForSale() public {
         vm.startPrank(owner);
 
         // Define GEM properties
@@ -172,22 +96,38 @@ contract GemFactoryTest is Test {
             tokenURIs
         );
 
-        // Verify GEM creation
-        assert(newGemIds.length == 2);
+        // Verify GEM minting
         assert(gemfactory.ownerOf(newGemIds[0]) == address(treasury));
         assert(gemfactory.ownerOf(newGemIds[1]) == address(treasury));
-        assert(keccak256(abi.encodePacked(gemfactory.tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
-        assert(keccak256(abi.encodePacked(gemfactory.tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
+
+        // Transfer the GEM to user1
+        gemfactory.adminTransferGEM(user1, newGemIds[0]);
+        gemfactory.adminTransferGEM(user1, newGemIds[1]);
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        uint256[] memory prices = new uint256[](2);
+        prices[0] = 20 * 10 ** 27; // 10 WSTON
+        prices[1] = 300 * 10 ** 27; 
+
+        // Verify token existence before putting it for sale
+        assert(gemfactory.ownerOf(newGemIds[0]) == user1);
+        assert(gemfactory.ownerOf(newGemIds[1]) == user1);
+
+        gemfactory.approve(address(marketplace), newGemIds[0]);
+        marketplace.putGemListForSale(newGemIds, prices);
 
         vm.stopPrank();
     }
 
-    function testMeltGEM() public {
+    function testBuyGem() public {
         vm.startPrank(owner);
 
         // Define GEM properties
         string memory color = "Red";
-        uint256 value = 1000 * 10 ** 27;
+        uint256 value = 100 * 10 ** 27;
         bytes1 quadrants = 0x34;
         string memory backgroundColor = "Black";
         uint256 miningPeriod = 3600; // 1 hour
@@ -205,25 +145,32 @@ contract GemFactoryTest is Test {
             tokenURI
         );
 
+        // Verify GEM minting
+        assert(gemfactory.ownerOf(newGemId) == address(treasury));
 
         // Transfer the GEM to user1
         gemfactory.adminTransferGEM(user1, newGemId);
 
-        // Verify GEM transfer
-        assert(gemfactory.ownerOf(newGemId) == user1);
-
         vm.stopPrank();
 
-        // Start prank as user1 to melt the GEM
         vm.startPrank(user1);
 
-        // Call meltGEM function
-        gemfactory.meltGEM(newGemId);
+        uint256 gemPrice = 200 * 10 ** 27;
 
-        // Verify GEM melting
-        assert(wston.balanceOf(user1) == 2000 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 1000 WSWTON)
+        // Verify token existence before putting it for sale
+        assert(gemfactory.ownerOf(newGemId) == user1);
+
+        gemfactory.approve(address(marketplace), newGemId);
+        marketplace.putGemForSale(newGemId, gemPrice);
 
         vm.stopPrank();
-    }
 
+        vm.startPrank(user2);
+        IERC20(wston).approve(address(marketplace), type(uint256).max);
+        IERC20(ton).approve(address(marketplace), type(uint256).max);
+        marketplace.buyGem(newGemId, true);
+        assert(IERC20(wston).balanceOf(user1) == 1200 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
+        assert(gemfactory.ownerOf(newGemId) == user2); // GEM was correctly trransferred
+        vm.stopPrank();
+    }
 }

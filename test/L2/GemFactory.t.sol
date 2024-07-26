@@ -1,76 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import "forge-std/Test.sol";
-import { GemFactory } from "../../src/L2/GemFactory.sol";
-import { Treasury } from "../../src/L2/Treasury.sol";
-import { MarketPlace } from "../../src/L2/GEMMarketPlace.sol";
-import { MockERC20 } from "../../src/L2/MockERC20.sol";
-import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
+import "./BaseTest.sol";
 
-contract GemFactoryTest is Test {
+contract GemFactoryTest is BaseTest {
 
-    uint256 public commonMiningFees = 10 * 10 ** 18;
-    uint256 public rareMiningFees = 20 * 10 ** 18;
-    uint256 public uniqueMiningFees = 40 * 10 ** 18;
-
-    address payable owner;
-    address payable user1;
-    address payable coordinator;
-
-    GemFactory gemfactory;
-    Treasury treasury;
-    MarketPlace marketplace;
-    MockERC20 wston;
-    MockERC20 ton;
-
-    function setUp() public {
-        owner = payable(makeAddr("Owner"));
-        user1 = payable(makeAddr("User1"));
-
-        vm.startPrank(owner);
-        vm.warp(1632934800);
-
-        wston = new MockERC20("TITAN WSWTON", "WSTON", 200000 * 10 ** 27);
-        ton = new MockERC20("TITAN TON", "TON", 200000 * 10 ** 18);
-
-        // Transfer some tokens to User1
-        wston.transfer(user1, 1000 * 10 ** 27);
-        ton.transfer(user1, 1000 * 10 ** 18);
-
-        // give ETH to User1 to cover gasFees associated with using VRF functions
-        vm.deal(user1, 100 ether);
-
-        // deploy treasury and transfer some TON & TITAN WSTON
-        treasury = new Treasury(coordinator, address(wston), address(ton));
-        wston.transfer(address(treasury), 100000 * 10 ** 27);
-        ton.transfer(address(treasury), 100000 * 10 ** 18);
-
-        // deploy and initialize GemFactory
-        gemfactory = new GemFactory(coordinator);
-
-        // Grant admin role to owner
-        gemfactory.grantRole(gemfactory.DEFAULT_ADMIN_ROLE(), owner);
-
-        gemfactory.initialize(
-            address(wston),
-            address(ton),
-            address(treasury),
-            address(marketplace),
-            commonMiningFees,
-            rareMiningFees,
-            uniqueMiningFees
-        );
-        treasury.setGemFactory(address(gemfactory));
-        
-        // approve GemFactory to spend treasury wston
-        treasury.approveGemFactory(100000 * 10 ** 27);
-
-        vm.stopPrank();
+    function setUp() public override {
+        super.setUp();
     }
 
     function testSetup() public view {
-
         address wstonAddress = gemfactory.getWston();
         assert(wstonAddress == address(wston));
 
@@ -94,8 +33,8 @@ contract GemFactoryTest is Test {
         assert(gemFactoryAddress == address(gemfactory));
 
         // Check that the Treasury has approved the GemFactory to spend WSTON
-        uint256 allowance = wston.allowance(address(treasury), address(gemfactory));
-        assert(allowance == 100000 * 10 ** 27);
+        uint256 allowance = IERC20(wston).allowance(address(treasury), address(gemfactory));
+        assert(allowance == type(uint256).max);
     }
 
     function testCreateGEM() public {
@@ -205,7 +144,6 @@ contract GemFactoryTest is Test {
             tokenURI
         );
 
-
         // Transfer the GEM to user1
         gemfactory.adminTransferGEM(user1, newGemId);
 
@@ -221,9 +159,8 @@ contract GemFactoryTest is Test {
         gemfactory.meltGEM(newGemId);
 
         // Verify GEM melting
-        assert(wston.balanceOf(user1) == 2000 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 1000 WSWTON)
+        assert(IERC20(wston).balanceOf(user1) == 2000 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 1000 WSWTON)
 
         vm.stopPrank();
     }
-
 }

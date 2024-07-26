@@ -75,10 +75,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function initialize(
-        address _titanwston, 
+        address _wston, 
         address _ton,
-        address _treasury,
-        address _marketplace,  
+        address _treasury,  
         uint256 _CommonMiningFees, 
         uint256 _RareMiningFees,
         uint256 _UniqueMiningFees
@@ -86,10 +85,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     external {
         require(wston == address(0), "titanwston already initialized");
         require(ton == address(0), "ton already initialized");
-        wston = _titanwston;
+        wston = _wston;
         ton = _ton;
         treasury = _treasury;
-        marketplace = _marketplace;
         CommonMiningFees = _CommonMiningFees;
         RareMiningFees = _RareMiningFees;
         UniqueMiningFees = _UniqueMiningFees;
@@ -240,10 +238,11 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // storage update
         Gems.push(_Gem);
         uint256 newGemId = Gems.length - 1;
+        // Update the tokenId of the Gem in the array
+        Gems[newGemId].tokenId = newGemId;
 
         // safe check on the token Id created
         require(newGemId == uint256(uint32(newGemId)));
-        _Gem.tokenId = uint32(newGemId);
         GEMIndexToOwner[newGemId] = msg.sender;
         ownershipTokenCount[msg.sender]++;
         
@@ -261,6 +260,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Safety check to prevent against an unexpected 0x0 default.
         require(_to != address(0));
         require(_to != msg.sender);
+        require(!Gems[_tokenId].isLocked, "Gem is locked");
 
         // You can only send your own gem.
         require(_ownsGEM(msg.sender, _tokenId));
@@ -275,11 +275,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function transferGEMFrom(address _from, address _to, uint256 _tokenId) external onlyMarketPlace whenNotPaused {
-        // Safety check to prevent against an unexpected 0x0 default.
-        require(_to != address(0));
-        require(_to != msg.sender);
+        require(_exists(_tokenId), "ERC721NonexistentToken");
+        require(!Gems[_tokenId].isLocked, "Gem is locked");
+        require(GEMIndexToOwner[_tokenId] == _from, "Not token owner");
+        require(_to != address(0), "Invalid address");
 
-                // storage variables update
+        // storage variables update
         _transferGEM(_from, _to, _tokenId);
 
         // Reassign ownership,
@@ -362,6 +363,17 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return newGemIds;
     }
 
+    function setMarketPlaceAddress(address _marketplace) external onlyOwner {
+        marketplace = _marketplace;
+    }
+
+    function setApprovalForMarketplace() external whenNotPaused {
+        setApprovalForAll(marketplace, true);
+    }
+
+    function setIsLocked(uint256 _tokenId, bool _isLocked) external onlyMarketPlace {
+        Gems[_tokenId].isLocked = _isLocked;
+    }
 
     //---------------------------------------------------------------------------------------
     //--------------------------INERNAL FUNCTIONS--------------------------------------------
@@ -451,6 +463,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function getTreasury() public view returns (address) {
         return treasury;
+    }
+
+    function isTokenLocked(uint256 _tokenId) public view returns(bool) {
+        return Gems[_tokenId].isLocked;
     }
 
     // Function to count the number of Gems from treasury where quadrants < given quadrant and return their tokenIds
