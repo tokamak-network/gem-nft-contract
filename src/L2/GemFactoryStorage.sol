@@ -3,9 +3,22 @@ pragma solidity ^0.8.23;
 
 contract GemFactoryStorage {
 
+    enum Rarity {
+        COMMON,
+        RARE,
+        UNIQUE,
+        EPIC,
+        LEGENDARY,
+        MYTHIC
+    }
+
     struct Gem {
         uint256 tokenId;
-        bytes1 quadrants;
+        Rarity rarity;
+        uint8 quadrant1;
+        uint8 quadrant2;
+        uint8 quadrant3;
+        uint8 quadrant4;
         string color;
         string backgroundColor; //deterministic =>we dont need it
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
@@ -52,6 +65,7 @@ contract GemFactoryStorage {
     uint256 public CommonMiningFees;
     uint256 public RareMiningFees;
     uint256 public UniqueMiningFees;
+    uint256 public EpicMiningFees;
 
     // past random requests Id.
     uint256[] public requestIds;
@@ -72,7 +86,7 @@ contract GemFactoryStorage {
      */
 
     // Premining events
-    event Created(uint256 tokenId, bytes1 quadrants, string color, uint256 value, address owner);
+    event Created(uint256 tokenId, address owner);
     event TransferGEM(address from, address to, uint256 tokenId);
 
     // Mining Events

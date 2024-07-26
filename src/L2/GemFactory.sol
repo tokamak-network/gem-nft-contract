@@ -80,7 +80,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         address _treasury,  
         uint256 _CommonMiningFees, 
         uint256 _RareMiningFees,
-        uint256 _UniqueMiningFees
+        uint256 _UniqueMiningFees,
+        uint256 _EpicMiningFees
     )
     external {
         require(wston == address(0), "titanwston already initialized");
@@ -91,6 +92,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         CommonMiningFees = _CommonMiningFees;
         RareMiningFees = _RareMiningFees;
         UniqueMiningFees = _UniqueMiningFees;
+        EpicMiningFees = _EpicMiningFees;
     }
 
     //---------------------------------------------------------------------------------------
@@ -117,12 +119,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         // Mining fees calculation
         uint256 miningFees;
-        if(Gems[_tokenId].quadrants < 0x0F) {
+        uint8 sumOfQuadrants = Gems[_tokenId].quadrant1 + Gems[_tokenId].quadrant2 + Gems[_tokenId].quadrant3 + Gems[_tokenId].quadrant4;
+        if(sumOfQuadrants <= 8) {
             miningFees = CommonMiningFees; 
-        } else if(Gems[_tokenId].quadrants >= 0x0F && Gems[_tokenId].quadrants < 0x1E) {
+        } else if(sumOfQuadrants > 8 && sumOfQuadrants <= 12) {
             miningFees = RareMiningFees; 
-        } else if (Gems[_tokenId].quadrants >= 0x1E && Gems[_tokenId].quadrants < 0x2D) {
+        } else if (sumOfQuadrants > 12 && sumOfQuadrants <= 16) {
             miningFees = UniqueMiningFees;
+        } else if (sumOfQuadrants > 16 && sumOfQuadrants <= 20) {
+            miningFees = EpicMiningFees;
         } else {
             revert("Gem not allowed to Mine");
         }
@@ -213,19 +218,110 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     }
 
-
+    /**
+     * @notice Creates a premined pool of GEMs based oon their attribute passed in the parameters and assigns their ownership to the contract.
+     * @param _rarity The rarity of the GEMs to be created.
+     * @param _color The colors of the GEMs to be created.
+     * @param _value The values of the GEMs to be created.
+     * @param _quadrant1 quadrant1 of the GEMs to be created.
+     * @param _quadrant2 quadrant2 of the GEMs to be created.
+     * @param _quadrant3 quadrant3 of the GEMs to be created.
+     * @param _quadrant4 quadrant4 of the GEMs to be created.
+     * @param _miningPeriod period in seconds that a user have to wait for claiming a mined gem  
+     * @param _gemCooldownPeriod period in second that a user must wait before using it for mining
+     * @param _tokenURI TokenURIs of each GEM
+     * @return The IDs of the newly created GEMs.
+     */
     function createGEM( 
+        Rarity _rarity,
         string memory _color, 
         uint256 _value, 
-        bytes1 _quadrants, 
+        uint8 _quadrant1,
+        uint8 _quadrant2,
+        uint8 _quadrant3,
+        uint8 _quadrant4,
         string memory _backgroundColor,
         uint256 _miningPeriod,
         uint256 _gemCooldownPeriod,
         string memory _tokenURI) 
     external onlyTreasury whenNotPaused returns (uint256) {
+        
+        uint8 sumOfQuadrants = _quadrant1 + _quadrant2 + _quadrant3 + _quadrant4;
+
+        // Ensure that if rarity is COMMON, all quadrants must be either 1 or 2
+        if (_rarity == Rarity.COMMON) {
+            require(
+                (_quadrant1 == 1 || _quadrant1 == 2) &&
+                (_quadrant2 == 1 || _quadrant2 == 2) &&
+                (_quadrant3 == 1 || _quadrant3 == 2) &&
+                (_quadrant4 == 1 || _quadrant4 == 2),
+                "All quadrants must be 1 or 2 for COMMON rarity"
+            );
+        }
+
+        // Ensure that if rarity is RARE, all quadrants must be either 2 or 3
+        if (_rarity == Rarity.RARE) {
+            require(
+                (_quadrant1 == 2 || _quadrant1 == 3) &&
+                (_quadrant2 == 2 || _quadrant2 == 3) &&
+                (_quadrant3 == 2 || _quadrant3 == 3) &&
+                (_quadrant4 == 2 || _quadrant4 == 3),
+                "All quadrants must be 2 or 3 for RARE rarity"
+            );
+        }
+
+        // Ensure that if rarity is UNIQUE, all quadrants must be either 3 or 4
+        if (_rarity == Rarity.UNIQUE) {
+            require(
+                (_quadrant1 == 3 || _quadrant1 == 4) &&
+                (_quadrant2 == 3 || _quadrant2 == 4) &&
+                (_quadrant3 == 3 || _quadrant3 == 4) &&
+                (_quadrant4 == 3 || _quadrant4 == 4),
+                "All quadrants must be 3 or 4 for UNIQUE rarity"
+            );
+        }
+
+        // Ensure that if rarity is EPIC, all quadrants must be either 4 or 5
+        if (_rarity == Rarity.EPIC) {
+            require(
+                (_quadrant1 == 4 || _quadrant1 == 5) &&
+                (_quadrant2 == 4 || _quadrant2 == 5) &&
+                (_quadrant3 == 4 || _quadrant3 == 5) &&
+                (_quadrant4 == 4 || _quadrant4 == 5),
+                "All quadrants must be 4 or 5 for EPIC rarity"
+            );
+        }
+
+        // Ensure that if rarity is LEGENDARY, all quadrants must be either 5 or 6
+        if (_rarity == Rarity.LEGENDARY) {
+            require(
+                (_quadrant1 == 5 || _quadrant1 == 6) &&
+                (_quadrant2 == 5 || _quadrant2 == 6) &&
+                (_quadrant3 == 5 || _quadrant3 == 6) &&
+                (_quadrant4 == 5 || _quadrant4 == 6),
+                "All quadrants must be 5 or 6 for LEGENDARY rarity"
+            );
+            require(sumOfQuadrants < 24, "this sum corresponds to a Mythic GEM");
+        }
+
+        // Ensure that if rarity is MYTHIC, all quadrants must be equal to 6
+        if (_rarity == Rarity.MYTHIC) {
+            require(
+                (_quadrant1 == 6) &&
+                (_quadrant2 == 6) &&
+                (_quadrant3 == 6) &&
+                (_quadrant4 == 6),
+                "All quadrants must be 6 for MYTHIC rarity"
+            );
+        }
+
         Gem memory _Gem = Gem({
             tokenId: 0,
-            quadrants: _quadrants,
+            rarity: _rarity,
+            quadrant1: _quadrant1,
+            quadrant2: _quadrant2,
+            quadrant3: _quadrant3,
+            quadrant4: _quadrant4,
             color: _color,
             value: _value,
             backgroundColor: _backgroundColor,
@@ -252,8 +348,157 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Set the token URI
         _setTokenURI(newGemId, _tokenURI);
 
-        emit Created(newGemId, _quadrants, _color, _value, msg.sender);
+        emit Created(newGemId, msg.sender);
         return newGemId;
+    }
+
+    /**
+     * @notice Creates a premined pool of GEMs based oon their attribute passed in the parameters and assigns their ownership to the contract.
+     * @param _colors The colors of the GEMs to be created.
+     * @param _values The values of the GEMs to be created.
+     * @param _quadrant1 quadrant1 of the GEMs to be created.
+     * @param _quadrant2 quadrant2 of the GEMs to be created.
+     * @param _quadrant3 quadrant3 of the GEMs to be created.
+     * @param _quadrant4 quadrant4 of the GEMs to be created.
+     * @param _miningPeriod period in seconds that a user have to wait for claiming a mined gem  
+     * @param _gemCooldownPeriod period in second that a user must wait before using it for mining
+     * @param _tokenURIs TokenURIs of each GEM
+     * @return The IDs of the newly created GEMs.
+     */
+    function createGEMPool(
+        Rarity[] memory _rarities,
+        string[] memory _colors,
+        uint256[] memory _values,
+        uint8[] memory _quadrant1,
+        uint8[] memory _quadrant2,
+        uint8[] memory _quadrant3,
+        uint8[] memory _quadrant4,
+        string[]memory _backgroundColor,
+        uint256[] memory _miningPeriod,
+        uint256[] memory _gemCooldownPeriod,
+        string[] memory _tokenURIs
+    ) external onlyTreasury whenNotPaused returns (uint256[] memory) {
+        require(
+            _rarities.length == _colors.length &&
+            _colors.length == _values.length &&
+            _values.length == _quadrant1.length &&
+            _quadrant1.length == _quadrant2.length &&
+            _quadrant2.length == _quadrant3.length &&
+            _quadrant2.length == _quadrant4.length &&
+            _quadrant4.length == _backgroundColor.length &&
+            _quadrant1.length == _miningPeriod.length &&
+            _miningPeriod.length == _gemCooldownPeriod.length &&
+            _gemCooldownPeriod.length == _tokenURIs.length,
+            "Input arrays must have the same length"
+        );
+
+        uint256[] memory newGemIds = new uint256[](_values.length);
+
+        for (uint256 i = 0; i < _values.length; i++) {
+
+            uint8 sumOfQuadrants = _quadrant1[i] + _quadrant2[i] + _quadrant3[i] + _quadrant4[i];
+
+            // Ensure that if rarity is COMMON, all quadrants must be either 1 or 2
+            if (_rarities[i] == Rarity.COMMON) {
+                require(
+                    (_quadrant1[i] == 1 || _quadrant1[i] == 2) &&
+                    (_quadrant2[i] == 1 || _quadrant2[i] == 2) &&
+                    (_quadrant3[i] == 1 || _quadrant3[i] == 2) &&
+                    (_quadrant4[i] == 1 || _quadrant4[i] == 2),
+                    "All quadrants must be 1 or 2 for COMMON rarity"
+                );
+            }
+
+            // Ensure that if rarity is RARE, all quadrants must be either 2 or 3
+            if (_rarities[i] == Rarity.RARE) {
+                require(
+                    (_quadrant1[i] == 2 || _quadrant1[i] == 3) &&
+                    (_quadrant2[i] == 2 || _quadrant2[i] == 3) &&
+                    (_quadrant3[i] == 2 || _quadrant3[i] == 3) &&
+                    (_quadrant4[i] == 2 || _quadrant4[i] == 3),
+                    "All quadrants must be 2 or 3 for RARE rarity"
+                );
+            }
+
+            // Ensure that if rarity is UNIQUE, all quadrants must be either 3 or 4
+            if (_rarities[i] == Rarity.UNIQUE) {
+                require(
+                    (_quadrant1[i] == 3 || _quadrant1[i] == 4) &&
+                    (_quadrant2[i] == 3 || _quadrant2[i] == 4) &&
+                    (_quadrant3[i] == 3 || _quadrant3[i] == 4) &&
+                    (_quadrant4[i] == 3 || _quadrant4[i] == 4),
+                    "All quadrants must be 3 or 4 for UNIQUE rarity"
+                );
+            }
+
+            // Ensure that if rarity is EPIC, all quadrants must be either 4 or 5
+            if (_rarities[i] == Rarity.EPIC) {
+                require(
+                    (_quadrant1[i] == 4 || _quadrant1[i] == 5) &&
+                    (_quadrant2[i] == 4 || _quadrant2[i] == 5) &&
+                    (_quadrant3[i] == 4 || _quadrant3[i] == 5) &&
+                    (_quadrant4[i] == 4 || _quadrant4[i] == 5),
+                    "All quadrants must be 4 or 5 for EPIC rarity"
+                );
+            }
+
+            // Ensure that if rarity is LEGENDARY, all quadrants must be either 5 or 6
+            if (_rarities[i] == Rarity.LEGENDARY) {
+                require(
+                    (_quadrant1[i] == 5 || _quadrant1[i] == 6) &&
+                    (_quadrant2[i] == 5 || _quadrant2[i] == 6) &&
+                    (_quadrant3[i] == 5 || _quadrant3[i] == 6) &&
+                    (_quadrant4[i] == 5 || _quadrant4[i] == 6),
+                    "All quadrants must be 5 or 6 for LEGENDARY rarity"
+                );
+                require(sumOfQuadrants < 24, "this sum corresponds to a Mythic GEM");
+            }
+
+            // Ensure that if rarity is MYTHIC, all quadrants must be equal to 6
+            if (_rarities[i] == Rarity.MYTHIC) {
+                require(
+                    (_quadrant1[i] == 6) &&
+                    (_quadrant2[i] == 6) &&
+                    (_quadrant3[i] == 6) &&
+                    (_quadrant4[i] == 6),
+                    "All quadrants must be 6 for MYTHIC rarity"
+                );
+            }
+
+            Gem memory _Gem = Gem({
+                tokenId: 0,
+                rarity: _rarities[i],
+                quadrant1: _quadrant1[i],
+                quadrant2: _quadrant2[i],
+                quadrant3: _quadrant3[i],
+                quadrant4: _quadrant4[i],
+                color: _colors[i],
+                value: _values[i],
+                backgroundColor: _backgroundColor[i],
+                miningPeriod: _miningPeriod[i],
+                gemCooldownPeriod: block.timestamp + _gemCooldownPeriod[i],
+                isLocked: false,
+                tokenURI: _tokenURIs[i],
+                randomRequestId: 0
+            });
+            Gems.push(_Gem);
+            uint256 newGemId = Gems.length - 1;
+
+            // safe check on the token Id created
+            require(newGemId == uint256(uint32(newGemId)));
+            _Gem.tokenId = uint32(newGemId);
+            GEMIndexToOwner[newGemId] = msg.sender;
+            ownershipTokenCount[msg.sender]++;
+
+            // Use the ERC721 _safeMint function to handle the token creation
+            _safeMint(msg.sender, newGemId);
+            _setTokenURI(newGemId, _tokenURIs[i]);
+
+            emit Created(newGemId, msg.sender);
+            newGemIds[i] = newGemId;
+        }
+
+        return newGemIds;
     }
 
     function transferGEM(address _to, uint256 _tokenId) external onlyTreasury whenNotPaused {
@@ -299,70 +544,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return true;
     }
 
-    /**
-     * @notice Creates a premined pool of GEMs based oon their attribute passed in the parameters and assigns their ownership to the contract.
-     * @param _colors The colors of the GEMs to be created.
-     * @param _values The values of the GEMs to be created.
-     * @param _quadrants The quadrants of the GEMs to be created.
-     * @param _miningPeriod period in seconds that a user have to wait for claiming a mined gem  
-     * @param _gemCooldownPeriod period in second that a user must wait before using it for mining
-     * @return The IDs of the newly created GEMs.
-     */
-    // generic data to use for events
-    // consider gem are not forgeable => implement cooldown
-    function createGEMPool(
-        string[] memory _colors,
-        uint256[] memory _values,
-        bytes1[] memory _quadrants,
-        string[]memory _backgroundColor,
-        uint256[] memory _miningPeriod,
-        uint256[] memory _gemCooldownPeriod,
-        string[] memory _tokenURIs
-    ) external onlyTreasury whenNotPaused returns (uint256[] memory) {
-        require(
-            _colors.length == _values.length &&
-            _values.length == _quadrants.length &&
-            _quadrants.length == _miningPeriod.length &&
-            _miningPeriod.length == _gemCooldownPeriod.length &&
-            _gemCooldownPeriod.length == _tokenURIs.length,
-            "Input arrays must have the same length"
-        );
-
-        uint256[] memory newGemIds = new uint256[](_values.length);
-
-        for (uint256 i = 0; i < _values.length; i++) {
-            Gem memory _Gem = Gem({
-                tokenId: 0,
-                quadrants: _quadrants[i],
-                color: _colors[i],
-                value: _values[i],
-                backgroundColor: _backgroundColor[i],
-                miningPeriod: _miningPeriod[i],
-                gemCooldownPeriod: block.timestamp + _gemCooldownPeriod[i],
-                isLocked: false,
-                tokenURI: _tokenURIs[i],
-                randomRequestId: 0
-            });
-            Gems.push(_Gem);
-            uint256 newGemId = Gems.length - 1;
-
-            // safe check on the token Id created
-            require(newGemId == uint256(uint32(newGemId)));
-            _Gem.tokenId = uint32(newGemId);
-            GEMIndexToOwner[newGemId] = msg.sender;
-            ownershipTokenCount[msg.sender]++;
-
-            // Use the ERC721 _safeMint function to handle the token creation
-            _safeMint(msg.sender, newGemId);
-            _setTokenURI(newGemId, _tokenURIs[i]);
-
-            emit Created(newGemId, _quadrants[i], _colors[i], _values[i], msg.sender);
-            newGemIds[i] = newGemId;
-        }
-
-        return newGemIds;
-    }
-
     function setMarketPlaceAddress(address _marketplace) external onlyOwner {
         marketplace = _marketplace;
     }
@@ -395,9 +576,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         s_requests[requestId].fulfilled = true;
         s_requests[requestId].randomWord = hashedOmegaVal;
 
-        bytes1 quadrant = Gems[tokenMiningByUser[requester]].quadrants;
+        uint8 quadrant1 = Gems[tokenMiningByUser[requester]].quadrant1;
+        uint8 quadrant2 = Gems[tokenMiningByUser[requester]].quadrant1;
+        uint8 quadrant3 = Gems[tokenMiningByUser[requester]].quadrant1;
+        uint8 quadrant4 = Gems[tokenMiningByUser[requester]].quadrant1;
         
-        (uint256 gemCount, uint256[] memory tokenIds) = countGemsByQuadrant(quadrant);
+        (uint256 gemCount, uint256[] memory tokenIds) = countGemsByQuadrant(quadrant1, quadrant2, quadrant3, quadrant4);
 
         uint256 modNbGemsAvailable = (hashedOmegaVal % gemCount) + 1;
         s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
@@ -470,13 +654,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     // Function to count the number of Gems from treasury where quadrants < given quadrant and return their tokenIds
-    function countGemsByQuadrant(bytes2 quadrant) internal view returns (uint256, uint256[] memory) {
+    function countGemsByQuadrant(uint8 quadrant1, uint8 quadrant2, uint8 quadrant3, uint8 quadrant4) internal view returns (uint256, uint256[] memory) {
         uint256 count = 0;
         uint256[] memory tokenIds = new uint256[](Gems.length);
         uint256 index = 0;
+        uint8 sumOfQuadrants = quadrant1 + quadrant2 + quadrant3+ quadrant4;
 
         for (uint256 i = 0; i < Gems.length; i++) {
-            if (Gems[i].quadrants < quadrant && GEMIndexToOwner[i] == treasury) {
+            uint8 GemSumOfQuadrants = Gems[i].quadrant1 + Gems[i].quadrant2 + Gems[i].quadrant3+ Gems[i].quadrant4;
+            if (GemSumOfQuadrants < sumOfQuadrants && GEMIndexToOwner[i] == treasury) {
                 tokenIds[index] = Gems[i].tokenId;
                 unchecked{
                     index++;
@@ -484,7 +670,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 } 
             }
         }
-
         // Resize the array to the actual count
         uint256[] memory result = new uint256[](count);
         for (uint256 j = 0; j < count; j++) {

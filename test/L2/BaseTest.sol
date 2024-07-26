@@ -17,6 +17,7 @@ contract BaseTest is Test {
     uint256 public commonMiningFees = 10 * 10 ** 18;
     uint256 public rareMiningFees = 20 * 10 ** 18;
     uint256 public uniqueMiningFees = 40 * 10 ** 18;
+    uint256 public epicMiningFees = 60 * 10 ** 18;
     uint256 public tonFeesRate = 10; // 10%
 
     address payable owner;
@@ -71,7 +72,8 @@ contract BaseTest is Test {
             treasury,
             commonMiningFees,
             rareMiningFees,
-            uniqueMiningFees
+            uniqueMiningFees,
+            epicMiningFees
         );
 
         MarketPlace(marketplace).initialize(

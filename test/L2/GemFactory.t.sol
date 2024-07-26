@@ -13,19 +13,27 @@ contract GemFactoryTest is BaseTest {
         vm.startPrank(owner);
 
         // Define GEM properties
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         string memory color = "Red";
         uint256 value = 10 * 10 ** 27; // 10 WSTON
-        bytes1 quadrants = 0x0C;
+        uint8 quadrant1 = 1;
+        uint8 quadrant2 = 2;
+        uint8 quadrant3 = 1;
+        uint8 quadrant4 = 1;
         string memory backgroundColor = "Black";
         uint256 cooldownPeriod = 3600 * 24; // 24 hours
         uint256 miningPeriod = 1200; // 20 min
         string memory tokenURI = "https://example.com/token/1";
 
-        // Call createGEM function
+        // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
+            rarity,
             color,
             value,
-            quadrants,
+            quadrant1,
+            quadrant2,
+            quadrant3,
+            quadrant4,
             backgroundColor,
             miningPeriod,
             cooldownPeriod,
@@ -48,13 +56,30 @@ contract GemFactoryTest is BaseTest {
         colors[0] = "Red";
         colors[1] = "Blue";
 
+        GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
+        rarities[0] = GemFactoryStorage.Rarity.RARE;
+        rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
+
         uint256[] memory values = new uint256[](2);
         values[0] = 10 * 10 ** 27; // 10 WSTON
         values[1] = 150 * 10 ** 27; // 150 WSTON
 
-        bytes1[] memory quadrants = new bytes1[](2);
-        quadrants[0] = 0x0B;
-        quadrants[1] = 0x22;
+        uint8[] memory quadrants1 = new uint8[](2);
+        quadrants1[0] = 2;
+        quadrants1[1] = 3;
+        
+        uint8[] memory quadrants2 = new uint8[](2);
+        quadrants2[0] = 3;
+        quadrants2[1] = 3;
+
+        uint8[] memory quadrants3 = new uint8[](2);
+        quadrants3[0] = 2;
+        quadrants3[1] = 4;
+
+        uint8[] memory quadrants4 = new uint8[](2);
+        quadrants4[0] = 3;
+        quadrants4[1] = 4;
+
 
         string[] memory backgroundColors = new string[](2);
         backgroundColors[0] = "Black";
@@ -74,9 +99,13 @@ contract GemFactoryTest is BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
+            rarities,
             colors,
             values,
-            quadrants,
+            quadrants1,
+            quadrants2,
+            quadrants3,
+            quadrants4,
             backgroundColors,
             miningPeriods,
             cooldownPeriods,
@@ -97,19 +126,27 @@ contract GemFactoryTest is BaseTest {
         vm.startPrank(owner);
 
         // Define GEM properties
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         string memory color = "Red";
-        uint256 value = 1000 * 10 ** 27;
-        bytes1 quadrants = 0x34;
+        uint256 value = 10 * 10 ** 27; // 10 WSTON
+        uint8 quadrant1 = 1;
+        uint8 quadrant2 = 2;
+        uint8 quadrant3 = 1;
+        uint8 quadrant4 = 1;
         string memory backgroundColor = "Black";
-        uint256 miningPeriod = 3600; // 1 hour
-        uint256 cooldownPeriod = 3600 * 72; // 72 hours
+        uint256 cooldownPeriod = 3600 * 24; // 24 hours
+        uint256 miningPeriod = 1200; // 20 min
         string memory tokenURI = "https://example.com/token/1";
 
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
+            rarity,
             color,
             value,
-            quadrants,
+            quadrant1,
+            quadrant2,
+            quadrant3,
+            quadrant4,
             backgroundColor,
             miningPeriod,
             cooldownPeriod,
@@ -131,7 +168,7 @@ contract GemFactoryTest is BaseTest {
         GemFactory(gemfactory).meltGEM(newGemId);
 
         // Verify GEM melting
-        assert(IERC20(wston).balanceOf(user1) == 2000 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 1000 WSWTON)
+        assert(IERC20(wston).balanceOf(user1) == 1010 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 10 WSWTON)
 
         vm.stopPrank();
     }
