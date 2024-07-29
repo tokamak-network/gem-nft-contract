@@ -2,24 +2,16 @@
 pragma solidity ^0.8.23;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-
 import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
-import { IRefactorCoinageSnapshot } from "../interfaces/IRefactorCoinageSnapshot.sol";
-import { IRefactor } from "../interfaces/IRefactor.sol";
 import { WrappedStakedTONStorage } from "./WrappedStakedTONStorage.sol";
-import { DSMath } from "../libraries/DSMath.sol";
 
 interface IL1StandardBridge {
-     function depositERC20To(
+    function depositERC20To(
         address _l1Token,
         address _l2Token,
         address _to,
@@ -29,17 +21,30 @@ interface IL1StandardBridge {
     ) external;
 }
 
+interface IL1CrossDomainMessenger {
+    function sendMessage(
+        address _target,
+        bytes memory _message,
+        uint32 _gasLimit
+    ) external;
+}
 
-contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONStorage, DSMath {
+interface ITreasury {
+    function onWSTONDeposit(
+        address _recipient,
+        uint256 _amount,
+        uint256 _stakingIndex,
+        uint256 _depositTime
+    ) external;
+}
 
+contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONStorage {
     using SafeERC20 for IERC20;
-    
 
     modifier whenNotPaused() {
-      require(!paused, "Pausable: paused");
-      _;
+        require(!paused, "Pausable: paused");
+        _;
     }
-
 
     modifier whenPaused() {
         require(paused, "Pausable: not paused");
@@ -47,19 +52,17 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
     }
 
     constructor(
-        address _layer2, 
-        address _depositManager, 
-        address _seigManager, 
-        address _wton,
-        address _titanwston,
-        address _l1StandardBridge
+        Layer2[] memory _layer2s,
+        address _depositManager,
+        address _seigManager,
+        address _l1wton
     ) ERC20("Wrapped Staked TON", "WSTON") Ownable(msg.sender) {
-        layer2 = _layer2;
+        for (uint256 i = 0; i < _layer2s.length; i++) {
+            layer2s.push(_layer2s[i]);
+        }
         depositManager = _depositManager;
         seigManager = _seigManager;
-        wton = _wton;
-        titanwston = _titanwston;
-        l1StandardBridge = _l1StandardBridge;
+        l1wton = _l1wton;
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -76,42 +79,77 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         emit Unpaused(msg.sender);
     }
 
-    function depositAndGetWSTON(uint256 _amount, address _recipient) external whenNotPaused nonReentrant returns (bool) {
+    function depositAndGetWSTONOnL2(
+        uint256 _amount,
+        address _recipient,
+        uint8 _layer2Index
+    ) external whenNotPaused nonReentrant returns (bool) {
         // user transfers wton to this contract
-        require(IERC20(wton).transferFrom(_recipient, address(this), _amount), "failed to transfer wton to this contract");
+        require(
+            IERC20(l1wton).transferFrom(_recipient, address(this), _amount),
+            "failed to transfer wton to this contract"
+        );
         // deposit _amount to DepositManager
-        require(IDepositManager(depositManager).deposit(layer2, _amount), "failed to stake");
+        require(
+            IDepositManager(depositManager).deposit(
+                layer2s[_layer2Index].layer2Address,
+                _amount
+            ),
+            "failed to stake"
+        );
 
-        // we mint WSTON 
+        // we mint WSTON
         _mint(address(this), _amount);
 
-        uint256 wstonAllowance = allowance(address(this), l1StandardBridge);
-        if(wstonAllowance < _amount) approve(l1StandardBridge, _amount-wstonAllowance);
+        uint256 balanceBefore = balanceOf(
+            layer2s[_layer2Index].l1StandardBridge
+        );
 
-        uint256 balanceBefore = balanceOf(l1StandardBridge); 
-
-        DepositTracker memory _depositTracker = DepositTracker({
-            stakingIndex: depositTrackers.length,
+        StakingTracker memory _stakingTracker = StakingTracker({
+            initialHolder: _recipient,
+            currentHolder: _recipient,
+            amount: _amount,
+            stakingIndex: stakingTrackers.length,
             depositTime: block.timestamp
         });
 
-        depositTrackers.push(_depositTracker);
+        stakingTrackers.push(_stakingTracker);
 
-        bytes memory data = abi.encode(_depositTracker);
+        bytes memory data = abi.encode(_stakingTracker);
 
         // Bridge WSTON to L2
-        IL1StandardBridge(l1StandardBridge).depositERC20To(
-            address(this), 
-            titanwston, 
-            _recipient, 
-            _amount, 
-            MIN_DEPOSIT_GAS_LIMIT, 
-            data
+        IL1StandardBridge(layer2s[_layer2Index].l1StandardBridge)
+            .depositERC20To(
+                address(this),
+                layer2s[_layer2Index].l2wston,
+                layer2s[_layer2Index].treasury,
+                _amount,
+                MIN_DEPOSIT_GAS_LIMIT,
+                data
+            );
+
+        IL1CrossDomainMessenger(layer2s[_layer2Index].l1CrossDomainMessenger)
+            .sendMessage(
+                layer2s[_layer2Index].treasury,
+                abi.encodeCall(
+                    ITreasury(layer2s[_layer2Index].treasury).onWSTONDeposit,
+                    (
+                        _stakingTracker.initialHolder,
+                        _stakingTracker.amount,
+                        _stakingTracker.stakingIndex,
+                        _stakingTracker.depositTime
+                    )
+                ),
+                1000000 // gas limit
+            );
+
+        require(
+            balanceOf(layer2s[_layer2Index].l1StandardBridge) ==
+                balanceBefore + _amount,
+            "fail depositERC20To"
         );
 
-        require(balanceOf(l1StandardBridge) == balanceBefore + _amount, "fail depositERC20To");
-
-        emit Deposited(_recipient, _amount);
+        emit DepositedAndBridged(_recipient, _amount);
         return true;
     }
 
@@ -119,4 +157,23 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         ISeigManager(seigManager).updateSeigniorage();
     }
 
+    function addLayer2(
+        address _layer2Address,
+        address _l1StandardBridge,
+        address _l1CrossDomainMessenger,
+        address _treasury,
+        address _l2wston
+    ) external onlyOwner returns (bool) {
+        Layer2 memory layer2 = Layer2({
+            layer2Address: _layer2Address,
+            l1StandardBridge: _l1StandardBridge,
+            l1CrossDomainMessenger: _l1CrossDomainMessenger,
+            treasury: _treasury,
+            l2wston: _l2wston
+        });
+        layer2s.push(layer2);
+        return true;
+    }
+
+    // Todo requestWithdrawal, process withdrawal
 }

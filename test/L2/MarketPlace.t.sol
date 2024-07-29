@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import "./BaseTest.sol";
+import "./L2BaseTest.sol";
 
-contract MarketPlaceTest is BaseTest {
+contract MarketPlaceTest is L2BaseTest {
 
     function setUp() public override {
         super.setUp();

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import "./BaseTest.sol";
+import "./L2BaseTest.sol";
 
-contract GemFactoryTest is BaseTest {
+contract GemFactoryTest is L2BaseTest {
 
     function setUp() public override {
         super.setUp();

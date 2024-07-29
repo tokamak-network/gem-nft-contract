@@ -5,12 +5,12 @@ import "forge-std/Test.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
-import { ERC20Mock } from "../../src/L2/ERC20Mock.sol";
+import { MockL2WSTON } from "../../src/L2/MockL2WSTON.sol";
 import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract BaseTest is Test {
+contract L2BaseTest is Test {
 
     using SafeERC20 for IERC20;
 
@@ -30,6 +30,7 @@ contract BaseTest is Test {
     address marketplace;
     address wston;
     address ton;
+    address l2CrossDomainMessenger;
 
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
@@ -39,8 +40,8 @@ contract BaseTest is Test {
         vm.startPrank(owner);
         vm.warp(1632934800);
 
-        wston = address(new ERC20Mock("Wrapped Ston", "WSTON", 27)); // 27 decimals
-        ton = address(new ERC20Mock("Ton", "TON", 18)); // 18 decimals
+        wston = address(new MockL2WSTON("Wrapped Ston", "WSTON", 27)); // 27 decimals
+        ton = address(new MockL2WSTON("Ton", "TON", 18)); // 18 decimals
 
         // Transfer some tokens to User1
         IERC20(wston).transfer(user1, 1000 * 10 ** 27);
@@ -53,7 +54,7 @@ contract BaseTest is Test {
         vm.deal(user2, 100 ether);
 
         // deploy treasury and marketplace
-        treasury = address(new Treasury(coordinator, wston, ton));
+        treasury = address(new Treasury(coordinator, wston, ton, l2CrossDomainMessenger));
         marketplace = address(new MarketPlace(coordinator));
 
         // transfer some TON & TITAN WSTON to treasury

@@ -1,30 +1,38 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import { IRefactor } from "../interfaces/IRefactor.sol";
-
 contract WrappedStakedTONStorage {
 
-    struct DepositTracker {
+    struct StakingTracker {
+        address initialHolder;
+        address currentHolder;
+        uint256 amount;
         uint256 stakingIndex;
         uint256 depositTime;
     }
 
-    DepositTracker[] public depositTrackers;
+    struct Layer2 {
+        address layer2Address;
+        address l1StandardBridge;
+        address l1CrossDomainMessenger;
+        address treasury;
+        address l2wston;
+    }
+
+    Layer2[] public layer2s; // 0: TITAN, 1: THANOOS, 2: ARBITRUM etc...
+    StakingTracker[] public stakingTrackers;
 
     uint32 public constant MIN_DEPOSIT_GAS_LIMIT = 210000;
-    
-    address public layer2;
+
+
     address public depositManager;
     address public seigManager;
-    address public wton;
-    address public titanwston;
-    address public l1StandardBridge;
+    address public l1wton;
 
     bool paused;
 
     // Main events
-    event Deposited(address account, uint256 amount);
+    event DepositedAndBridged(address account, uint256 amount);
 
     // Pause Events
     event Paused(address account);

@@ -1,8 +1,8 @@
 ### Description
 
-The project is an NFT collection and marketplace featuring Gems, which rewards users with monetary value through staking TON. Users interact with a game-like interface to mint new Gems, as well as to buy, sell, and burn them. Additionally, users can forge two Gems to obtain a rarer Gem. Users can deposit TON on Layer 1 (L1) and receive a wrapped version called sTON. After bridging these tokens to Layer 2 (L2), users utilize L2 WSTON at a discount price.
+The project is an NFT collection and marketplace featuring Gems, which rewards users with monetary value through staking TON. Users interact with a game-like interface to mine new Gems, as well as to buy, sell, and burn them. Additionally, users can forge two Gems to obtain a rarer Gem. Users can deposit WTON on Layer 1 (L1) and receive a wrapped version called WSTON on L2. Users utilize L2 WSTON to buy GEMs at a discount price.
 
-When a user wishes to acquire a new Gem from the pre-minted pool, the token is assigned randomly using the VDF verifier implementation.
+When a user wishes to acquire a new Gem from the pre-mined pool, the token is assigned randomly using the VDF verifier implementation.
 
 ### Installation
 
@@ -22,6 +22,12 @@ cd gem-nft-contracts
 
 ```
 forge compile
+```
+
+4. Test
+
+```
+forge test
 ```
 
 ### Contact
