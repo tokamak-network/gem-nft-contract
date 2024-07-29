@@ -4,30 +4,27 @@ pragma solidity ^0.8.23;
 import { IRefactor } from "../interfaces/IRefactor.sol";
 
 contract WrappedStakedTONStorage {
-    
 
+    struct DepositTracker {
+        uint256 stakingIndex;
+        uint256 depositTime;
+    }
 
-    uint256 public constant REFACTOR_DIVIDER = 2;
+    DepositTracker[] public depositTrackers;
+
+    uint32 public constant MIN_DEPOSIT_GAS_LIMIT = 210000;
     
     address public layer2;
     address public depositManager;
     address public seigManager;
     address public wton;
-
-    uint256 public stakingIndex;
-
-    uint256 public factor;
+    address public titanwston;
+    address public l1StandardBridge;
 
     bool paused;
 
-    mapping (address => IRefactor.Balance) public balances;
-    address[] public balanceAddresses;
-    IRefactor.Balance[] public Balances;
-
     // Main events
     event Deposited(address account, uint256 amount);
-    event WithdrawalRequested(address account, uint256 amount);
-
 
     // Pause Events
     event Paused(address account);

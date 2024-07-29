@@ -17,7 +17,6 @@ contract MarketPlaceTest is BaseTest {
         string memory color = "Red";
         uint256 value = 10 * 10 ** 27; // 10 WSTON
         uint8[4] memory quadrants = [uint8(1), uint8(2), uint8(1), uint8(2)];
-        string memory backgroundColor = "Black";
         uint256 cooldownPeriod = 3600 * 24; // 24 hours
         uint256 miningPeriod = 1200; // 20 min
         string memory tokenURI = "https://example.com/token/1";
@@ -28,7 +27,6 @@ contract MarketPlaceTest is BaseTest {
             color,
             value,
             quadrants,
-            backgroundColor,
             miningPeriod,
             cooldownPeriod,
             tokenURI
@@ -75,10 +73,6 @@ contract MarketPlaceTest is BaseTest {
         quadrants[0] = [2, 3, 3, 2];
         quadrants[1] = [4, 3, 4, 4];
 
-        string[] memory backgroundColors = new string[](2);
-        backgroundColors[0] = "Black";
-        backgroundColors[1] = "White";
-
         uint256[] memory cooldownPeriods = new uint256[](2);
         cooldownPeriods[0] = 3600 * 24; // 24 hour
         cooldownPeriods[1] = 3600 * 48; // 48 hours
@@ -97,12 +91,11 @@ contract MarketPlaceTest is BaseTest {
             colors,
             values,
             quadrants,
-            backgroundColors,
             miningPeriods,
             cooldownPeriods,
             tokenURIs
         );
-        
+
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
@@ -137,7 +130,6 @@ contract MarketPlaceTest is BaseTest {
         string memory color = "Red";
         uint256 value = 10 * 10 ** 27; // 10 WSTON
         uint8[4] memory quadrants = [uint8(1), uint8(2), uint8(1), uint8(2)];
-        string memory backgroundColor = "Black";
         uint256 cooldownPeriod = 3600 * 24; // 24 hours
         uint256 miningPeriod = 1200; // 20 min
         string memory tokenURI = "https://example.com/token/1";
@@ -148,7 +140,6 @@ contract MarketPlaceTest is BaseTest {
             color,
             value,
             quadrants,
-            backgroundColor,
             miningPeriod,
             cooldownPeriod,
             tokenURI

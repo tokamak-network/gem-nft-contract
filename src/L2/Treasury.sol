@@ -59,7 +59,6 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
         string memory _color, 
         uint256 _value, 
         uint8[4] memory _quadrants,  
-        string memory _backgroundColor,
         uint256 _miningPeriod,
         uint256 _cooldownPeriod,
         string memory _tokenURI
@@ -69,7 +68,6 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
             _color,
             _value,
             _quadrants,
-            _backgroundColor,
             _miningPeriod,
             _cooldownPeriod,
             _tokenURI
@@ -81,7 +79,6 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
         string[] memory _colors,
         uint256[] memory _values,
         uint8[4][] memory _quadrants, 
-        string[]memory _backgroundColor,
         uint256[] memory _miningPeriods,
         uint256[] memory _cooldownPeriod,
         string[] memory _tokenURIs
@@ -91,7 +88,6 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
             _colors,
             _values,
             _quadrants,
-            _backgroundColor,
             _miningPeriods,
             _cooldownPeriod,
             _tokenURIs

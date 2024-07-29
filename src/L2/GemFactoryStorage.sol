@@ -17,7 +17,6 @@ contract GemFactoryStorage {
         Rarity rarity;
         uint8[4] quadrants; // 4 quadrants
         string color;
-        string backgroundColor; //deterministic =>we dont need it
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
         uint256 miningPeriod; // Mining delay before claiming
         bool isLocked; // Locked if gem is listed on the marketplace

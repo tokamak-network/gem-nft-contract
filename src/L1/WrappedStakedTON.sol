@@ -18,6 +18,16 @@ import { IRefactor } from "../interfaces/IRefactor.sol";
 import { WrappedStakedTONStorage } from "./WrappedStakedTONStorage.sol";
 import { DSMath } from "../libraries/DSMath.sol";
 
+interface IL1StandardBridge {
+     function depositERC20To(
+        address _l1Token,
+        address _l2Token,
+        address _to,
+        uint256 _amount,
+        uint32 _l2Gas,
+        bytes calldata _data
+    ) external;
+}
 
 
 contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONStorage, DSMath {
@@ -36,12 +46,20 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         _;
     }
 
-    constructor(address _layer2, address _depositManager, address _seigManager, address _wton) ERC20("Wrapped Staked TON", "WSTON") Ownable(msg.sender) {
+    constructor(
+        address _layer2, 
+        address _depositManager, 
+        address _seigManager, 
+        address _wton,
+        address _titanwston,
+        address _l1StandardBridge
+    ) ERC20("Wrapped Staked TON", "WSTON") Ownable(msg.sender) {
         layer2 = _layer2;
         depositManager = _depositManager;
         seigManager = _seigManager;
         wton = _wton;
-        factor = IRefactorCoinageSnapshot(_layer2).factor();
+        titanwston = _titanwston;
+        l1StandardBridge = _l1StandardBridge;
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -53,68 +71,52 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         emit Paused(msg.sender);
     }
 
-    function unpause() public onlyOwner whenNotPaused {
+    function unpause() public onlyOwner whenPaused {
         paused = false;
         emit Unpaused(msg.sender);
     }
 
-    function depositAndGetWSTON(uint256 _amount) external whenNotPaused nonReentrant returns (bool) {
-        // we transfer wton to this contract
-        require(IERC20(wton).transferFrom(msg.sender, address(this), _amount), "failed ton transfer wton to this contract");
-        require(IDepositManager(depositManager).deposit(layer2, _amount), "failed to deposit");
+    function depositAndGetWSTON(uint256 _amount, address _recipient) external whenNotPaused nonReentrant returns (bool) {
+        // user transfers wton to this contract
+        require(IERC20(wton).transferFrom(_recipient, address(this), _amount), "failed to transfer wton to this contract");
+        // deposit _amount to DepositManager
+        require(IDepositManager(depositManager).deposit(layer2, _amount), "failed to stake");
 
-        // user deposits storage update
-        balances[msg.sender].balance += _amount;
-        
-        
-        // staking index update
+        // we mint WSTON 
+        _mint(address(this), _amount);
 
-        // we mint WSTON
-        _mint(msg.sender, _amount);
-        emit Deposited(msg.sender, _amount);
-        return true;
-    }
+        uint256 wstonAllowance = allowance(address(this), l1StandardBridge);
+        if(wstonAllowance < _amount) approve(l1StandardBridge, _amount-wstonAllowance);
 
-    function requestTONWithdrawal(uint256 _amount) external whenNotPaused nonReentrant returns (bool) {
-        require(balances[msg.sender].balance >= _amount, "not enough funds");
-        require(IDepositManager(depositManager).requestWithdrawal(layer2, _amount), "failed to request withdrawal");
+        uint256 balanceBefore = balanceOf(l1StandardBridge); 
 
-        emit WithdrawalRequested(msg.sender, _amount);
+        DepositTracker memory _depositTracker = DepositTracker({
+            stakingIndex: depositTrackers.length,
+            depositTime: block.timestamp
+        });
+
+        depositTrackers.push(_depositTracker);
+
+        bytes memory data = abi.encode(_depositTracker);
+
+        // Bridge WSTON to L2
+        IL1StandardBridge(l1StandardBridge).depositERC20To(
+            address(this), 
+            titanwston, 
+            _recipient, 
+            _amount, 
+            MIN_DEPOSIT_GAS_LIMIT, 
+            data
+        );
+
+        require(balanceOf(l1StandardBridge) == balanceBefore + _amount, "fail depositERC20To");
+
+        emit Deposited(_recipient, _amount);
         return true;
     }
 
     function updateSeigniorage() external whenNotPaused {
         ISeigManager(seigManager).updateSeigniorage();
-        
-        // not sure if correct
-        for (uint256 i = 0; i < balanceAddresses.length; i++) {
-            address addr = balanceAddresses[i];
-            balances[addr].refactoredCount += 1;
-        }
     }
-
-    function usersTONBalance(address _account) external view returns (uint256) {
-        IRefactor.Balance storage b = balances[_account];
-
-        return _applyFactor(b.balance, b.refactoredCount);
-    }
-
-    function _applyFactor(uint256 v, uint256 refactoredCount) internal view returns (uint256) {
-        if (v == 0) {
-            return 0;
-        }
-        v = rmul2(v, factor);
-        uint256 WSTONrefactorCount = getWSWTONRefactorCount();
-        if (WSTONrefactorCount > refactoredCount) {
-            v = v * REFACTOR_DIVIDER ** (WSTONrefactorCount - refactoredCount);
-        }
-        return v;
-    }
-
-    function getWSWTONRefactorCount() internal view returns (uint256) {
-        (IRefactor.Balance memory WSTONBalance, ) = IRefactorCoinageSnapshot(layer2).getBalanceAndFactor(address(this));
-        return WSTONBalance.refactoredCount;
-    }
-
 
 }

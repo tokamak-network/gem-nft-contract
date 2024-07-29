@@ -234,7 +234,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         string memory _color, 
         uint256 _value, 
         uint8[4] memory _quadrants,
-        string memory _backgroundColor,
         uint256 _miningPeriod,
         uint256 _gemCooldownPeriod,
         string memory _tokenURI) 
@@ -251,10 +250,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 1 || _quadrants[3] == 2),
                 "All quadrants must be 1 or 2 for COMMON rarity"
             );
-        }
-
-        // Ensure that if rarity is RARE, all quadrants must be either 2 or 3
-        if (_rarity == Rarity.RARE) {
+        } else if (_rarity == Rarity.RARE) {
             require(
                 (_quadrants[0] == 2 || _quadrants[0] == 3) &&
                 (_quadrants[1] == 2 || _quadrants[1] == 3) &&
@@ -262,10 +258,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 2 || _quadrants[3] == 3),
                 "All quadrants must be 2 or 3 for RARE rarity"
             );
-        }
-
-        // Ensure that if rarity is UNIQUE, all quadrants must be either 3 or 4
-        if (_rarity == Rarity.UNIQUE) {
+        } else if (_rarity == Rarity.UNIQUE) {
             require(
                 (_quadrants[0] == 3 || _quadrants[0] == 4) &&
                 (_quadrants[1] == 3 || _quadrants[1] == 4) &&
@@ -273,10 +266,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 3 || _quadrants[3] == 4),
                 "All quadrants must be 3 or 4 for UNIQUE rarity"
             );
-        }
-
-        // Ensure that if rarity is EPIC, all quadrants must be either 4 or 5
-        if (_rarity == Rarity.EPIC) {
+        } else if (_rarity == Rarity.EPIC) {
             require(
                 (_quadrants[0] == 4 || _quadrants[0] == 5) &&
                 (_quadrants[1] == 4 || _quadrants[1] == 5) &&
@@ -284,10 +274,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 4 || _quadrants[3] == 5),
                 "All quadrants must be 4 or 5 for EPIC rarity"
             );
-        }
-
-        // Ensure that if rarity is LEGENDARY, all quadrants must be either 5 or 6
-        if (_rarity == Rarity.LEGENDARY) {
+        } else if (_rarity == Rarity.LEGENDARY) {
             require(
                 (_quadrants[0] == 5 || _quadrants[0] == 6) &&
                 (_quadrants[1] == 5 || _quadrants[1] == 6) &&
@@ -296,10 +283,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 "All quadrants must be 5 or 6 for LEGENDARY rarity"
             );
             require(sumOfQuadrants < 24, "this sum corresponds to a Mythic GEM");
-        }
-
-        // Ensure that if rarity is MYTHIC, all quadrants must be equal to 6
-        if (_rarity == Rarity.MYTHIC) {
+        } else if (_rarity == Rarity.MYTHIC) {
             require(
                 (_quadrants[0] == 6) &&
                 (_quadrants[1] == 6) &&
@@ -307,6 +291,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 6),
                 "All quadrants must be 6 for MYTHIC rarity"
             );
+        } else {
+            revert("wrong Rarity");
         }
 
         Gem memory _Gem = Gem({
@@ -315,7 +301,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             quadrants: _quadrants,
             color: _color,
             value: _value,
-            backgroundColor: _backgroundColor,
             miningPeriod: _miningPeriod,
             gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
             isLocked: false,
@@ -359,7 +344,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         string[] memory _colors,
         uint256[] memory _values,
         uint8[4][] memory _quadrants,
-        string[] memory _backgroundColors,
         uint256[] memory _miningPeriods,
         uint256[] memory _gemCooldownPeriods,
         string[] memory _tokenURIs
@@ -373,8 +357,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _rarities.length == _colors.length &&
             _colors.length == _values.length &&
             _values.length == _quadrants.length &&
-            _quadrants.length == _backgroundColors.length &&
-            _backgroundColors.length == _miningPeriods.length &&
+            _quadrants.length == _miningPeriods.length &&
             _miningPeriods.length == _gemCooldownPeriods.length &&
             _gemCooldownPeriods.length == _tokenURIs.length,
             "Input arrays must have the same length"
@@ -458,7 +441,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 quadrants: _quadrants[i],
                 color: _colors[i],
                 value: _values[i],
-                backgroundColor: _backgroundColors[i],
                 miningPeriod: _miningPeriods[i],
                 gemCooldownPeriod: block.timestamp + _gemCooldownPeriods[i],
                 isLocked: false,
@@ -566,7 +548,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         uint256 modNbGemsAvailable = (hashedOmegaVal % gemCount) + 1;
         s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
-        require(ITreasury(treasury).transferTreasuryGEMto(requester, s_requests[requestId].chosenTokenId), "failed to transfer token");
     }
 
 
