@@ -29,7 +29,7 @@ interface IL1CrossDomainMessenger {
     ) external;
 }
 
-interface ITreasury {
+interface IWSTONManager {
     function onWSTONDeposit(
         address _recipient,
         uint256 _amount,
@@ -106,8 +106,7 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         );
 
         StakingTracker memory _stakingTracker = StakingTracker({
-            initialHolder: _recipient,
-            currentHolder: _recipient,
+            holderId: 0,
             amount: _amount,
             stakingIndex: stakingTrackers.length,
             depositTime: block.timestamp
@@ -122,7 +121,7 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
             .depositERC20To(
                 address(this),
                 layer2s[_layer2Index].l2wston,
-                layer2s[_layer2Index].treasury,
+                layer2s[_layer2Index].WSTONManager,
                 _amount,
                 MIN_DEPOSIT_GAS_LIMIT,
                 data
@@ -130,11 +129,11 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
 
         IL1CrossDomainMessenger(layer2s[_layer2Index].l1CrossDomainMessenger)
             .sendMessage(
-                layer2s[_layer2Index].treasury,
+                layer2s[_layer2Index].WSTONManager,
                 abi.encodeCall(
-                    ITreasury(layer2s[_layer2Index].treasury).onWSTONDeposit,
+                    IWSTONManager(layer2s[_layer2Index].WSTONManager).onWSTONDeposit,
                     (
-                        _stakingTracker.initialHolder,
+                        _recipient,
                         _stakingTracker.amount,
                         _stakingTracker.stakingIndex,
                         _stakingTracker.depositTime
@@ -161,14 +160,14 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         address _layer2Address,
         address _l1StandardBridge,
         address _l1CrossDomainMessenger,
-        address _treasury,
+        address _WSTONManager,
         address _l2wston
     ) external onlyOwner returns (bool) {
         Layer2 memory layer2 = Layer2({
             layer2Address: _layer2Address,
             l1StandardBridge: _l1StandardBridge,
             l1CrossDomainMessenger: _l1CrossDomainMessenger,
-            treasury: _treasury,
+            WSTONManager: _WSTONManager,
             l2wston: _l2wston
         });
         layer2s.push(layer2);

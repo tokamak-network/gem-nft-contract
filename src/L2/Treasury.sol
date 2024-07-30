@@ -6,27 +6,23 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { GemFactory } from "./GemFactory.sol";
 import { GemFactoryStorage } from "./GemFactoryStorage.sol";
-import { TreasuryStorage } from "./TreasuryStorage.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard, TreasuryStorage {
+contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
     using SafeERC20 for IERC20;
+
+    address internal _gemFactory;
+    address internal _marketplace;
 
     modifier onlyGemFactoryOrMarketPlace() {
         require(msg.sender == _gemFactory || msg.sender == _marketplace, "caller is neither GemFactory nor MarketPlace");
         _;
     }
 
-    modifier onlyL2CrossDomainMessenger() {
-        require(msg.sender == l2CrossDomainMessenger, "caller is not L2CrossDomainMessenger contract");
-        _;
-    }
-
-    constructor(address coordinator, address _wston, address _ton, address _l2CrossDomainMessenger) GemFactory(coordinator) {
+    constructor(address coordinator, address _wston, address _ton) GemFactory(coordinator) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         wston = _wston;
         ton = _ton;
-        l2CrossDomainMessenger = _l2CrossDomainMessenger;
     }
 
     function setGemFactory(address gemFactory) external onlyOwner {
@@ -101,22 +97,6 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard, TreasuryStora
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlace returns(bool) {
         GemFactory(_gemFactory).transferGEM(_to, _tokenId);
         return true;
-    }
-
-    function onWSTONDeposit(
-        address _recipient,
-        uint256 _amount,
-        uint256 _stakingIndex,
-        uint256 _depositTime
-    ) external onlyL2CrossDomainMessenger {
-        StakingTracker memory _stakingTracker = StakingTracker({
-            initialHolder: _recipient,
-            currentHolder: _recipient,
-            amount: _amount,
-            stakingIndex: _stakingIndex,
-            depositTime: _depositTime
-        });
-        stakingTrackers.push(_stakingTracker);
     }
 
     // onERC721Received function to accept ERC721 tokens

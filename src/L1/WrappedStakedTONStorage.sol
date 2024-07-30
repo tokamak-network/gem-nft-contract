@@ -4,8 +4,7 @@ pragma solidity ^0.8.23;
 contract WrappedStakedTONStorage {
 
     struct StakingTracker {
-        address initialHolder;
-        address currentHolder;
+        uint256 holderId; // initialized to 0 when held by an EOA.
         uint256 amount;
         uint256 stakingIndex;
         uint256 depositTime;
@@ -15,11 +14,11 @@ contract WrappedStakedTONStorage {
         address layer2Address;
         address l1StandardBridge;
         address l1CrossDomainMessenger;
-        address treasury;
+        address WSTONManager;
         address l2wston;
     }
 
-    Layer2[] public layer2s; // 0: TITAN, 1: THANOOS, 2: ARBITRUM etc...
+    Layer2[] public layer2s; // 0: TITAN, 1: THANOS, 2: ARBITRUM etc...
     StakingTracker[] public stakingTrackers;
 
     uint32 public constant MIN_DEPOSIT_GAS_LIMIT = 210000;

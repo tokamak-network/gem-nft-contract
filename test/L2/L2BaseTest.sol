@@ -30,7 +30,6 @@ contract L2BaseTest is Test {
     address marketplace;
     address wston;
     address ton;
-    address l2CrossDomainMessenger;
 
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
@@ -54,7 +53,7 @@ contract L2BaseTest is Test {
         vm.deal(user2, 100 ether);
 
         // deploy treasury and marketplace
-        treasury = address(new Treasury(coordinator, wston, ton, l2CrossDomainMessenger));
+        treasury = address(new Treasury(coordinator, wston, ton));
         marketplace = address(new MarketPlace(coordinator));
 
         // transfer some TON & TITAN WSTON to treasury
