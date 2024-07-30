@@ -16,7 +16,7 @@ contract GemFactoryStorage {
         uint256 tokenId;
         Rarity rarity;
         uint8[4] quadrants; // 4 quadrants
-        string color;
+        uint8 color; // id of the color
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
         uint256 miningPeriod; // Mining delay before claiming
         bool isLocked; // Locked if gem is listed on the marketplace
@@ -34,6 +34,14 @@ contract GemFactoryStorage {
     }
 
     Gem[] public Gems;
+    mapping(uint8 => string) public customColors;
+    uint8 public customColorsCount;
+    string[] public colors;
+
+    mapping(uint8 => string) public customBackgroundColors;
+    uint8 public customBackgroundColorsCount;
+    string[] public backgroundColors;
+
     mapping(uint256 => string) private _tokenURIs;
 
     mapping(uint256 => address) public GEMIndexToOwner;
@@ -93,4 +101,8 @@ contract GemFactoryStorage {
     // Pause Events
     event Paused(address account);
     event Unpaused(address account);
+
+    //storage setter events
+    event ColorAdded(uint8 indexed id, string color);
+    event BackgroundColorAdded(uint8 indexed id, string backgroundColor);
 }

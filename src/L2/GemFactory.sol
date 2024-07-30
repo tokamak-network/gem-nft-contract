@@ -231,7 +231,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      */
     function createGEM( 
         Rarity _rarity,
-        string memory _color, 
+        uint8 _color, 
         uint256 _value, 
         uint8[4] memory _quadrants,
         uint256 _miningPeriod,
@@ -341,7 +341,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      */
     function createGEMPool(
         Rarity[] memory _rarities,
-        string[] memory _colors,
+        uint8[] memory _colors,
         uint256[] memory _values,
         uint8[4][] memory _quadrants,
         uint256[] memory _miningPeriods,
@@ -522,6 +522,24 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         Gems[_tokenId].isLocked = _isLocked;
     }
 
+    function addColor(string memory _color) external onlyOwner {
+        customColors[customColorsCount] = _color;
+        colors.push(_color);
+        customColorsCount++;
+
+        emit ColorAdded(customColorsCount, _color);
+
+    }
+
+    function addBackgroundColor(string memory _backgroundColor) external onlyOwner {
+        customBackgroundColors[customBackgroundColorsCount] = _backgroundColor;
+        backgroundColors.push(_backgroundColor);
+        customBackgroundColorsCount++;
+
+        emit BackgroundColorAdded(customBackgroundColorsCount, _backgroundColor);
+
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------INERNAL FUNCTIONS--------------------------------------------
     //---------------------------------------------------------------------------------------
@@ -613,6 +631,11 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function isTokenLocked(uint256 _tokenId) public view returns(bool) {
         return Gems[_tokenId].isLocked;
+    }
+
+    function getCustomColor(uint8 _index) public view returns (string memory) {
+        require(_index < customColorsCount, "Index out of bounds");
+        return customColors[_index];
     }
 
     // Function to count the number of Gems from treasury where quadrants < given quadrant and return their tokenIds

@@ -14,7 +14,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        string memory color = "Red";
+        uint8 color = 0;
         uint256 value = 10 * 10 ** 27; // 10 WSTON
         uint8[4] memory quadrants = [uint8(1), uint8(2), uint8(1), uint8(2)];
         uint256 cooldownPeriod = 3600 * 24; // 24 hours
@@ -44,9 +44,9 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
 
         // Define GEM properties
-        string[] memory colors = new string[](2);
-        colors[0] = "Red";
-        colors[1] = "Blue";
+        uint8[] memory colors = new uint8[](2);
+        colors[0] = 0;
+        colors[1] = 1;
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
@@ -98,7 +98,7 @@ contract GemFactoryTest is L2BaseTest {
 
          // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        string memory color = "Red";
+        uint8 color = 0;
         uint256 value = 10 * 10 ** 27; // 10 WSTON
         uint8[4] memory quadrants = [uint8(1), uint8(2), uint8(1), uint8(2)];
         uint256 cooldownPeriod = 3600 * 24; // 24 hours
