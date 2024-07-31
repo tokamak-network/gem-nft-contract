@@ -91,17 +91,14 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         uint256 _layer2Index
     ) internal returns (bool) {
 
-        // Check allowance
-        require(
-            IERC20(l1wton).allowance(_to, address(this)) >= _amount,
-            "allowance too low"
-        );
-
         // user transfers wton to this contract
         require(
             IERC20(l1wton).transferFrom(_to, address(this), _amount),
             "failed to transfer wton to this contract"
         );
+
+        // approve depositManager to spend on behalf of the WrappedStakedTON coontract 
+        IERC20(l1wton).approve(depositManager, _amount);
 
         // deposit _amount to DepositManager
         require(
@@ -159,7 +156,7 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         IERC20(address(this)).safeTransfer(_to, _amount);
 
         stakingTrackers[_stakingIndex].account = _to;
-        
+
         emit Transferred(_stakingIndex, msg.sender, _to, _amount);
         return true;
     }
