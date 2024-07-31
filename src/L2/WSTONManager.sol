@@ -2,32 +2,25 @@
 pragma solidity ^0.8.23;
 
 import { WSTONManagerStorage } from "./WSTONManagerStorage.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract WSTONManager is WSTONManagerStorage {
+contract WSTONManager is WSTONManagerStorage, Ownable {
 
-    
-    modifier onlyL2CrossDomainMessenger() {
-        require(msg.sender == l2CrossDomainMessenger, "caller is not L2CrossDomainMessenger contract");
-        _;
-    }
-
-    constructor(address _l2CrossDomainManager) {
-        l2CrossDomainMessenger = _l2CrossDomainManager;
-    }
+    constructor() Ownable(msg.sender) {}
     
     function onWSTONDeposit(
-        address _recipient,
+        address _account,
         uint256 _amount,
         uint256 _stakingIndex,
         uint256 _depositTime
-    ) external onlyL2CrossDomainMessenger {
+    ) external onlyOwner {
         StakingTracker memory _stakingTracker = StakingTracker({
-            holderId: 0,
+            currentHolder: _account,
             amount: _amount,
             stakingIndex: _stakingIndex,
             depositTime: _depositTime
         });
         stakingTrackers.push(_stakingTracker);
-        wstonOwner[_recipient] = _stakingTracker;
+        wstonOwner[_account] = _stakingTracker;
     }
 }

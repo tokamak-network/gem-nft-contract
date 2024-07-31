@@ -29,15 +29,6 @@ interface IL1CrossDomainMessenger {
     ) external;
 }
 
-interface IWSTONManager {
-    function onWSTONDeposit(
-        address _recipient,
-        uint256 _amount,
-        uint256 _stakingIndex,
-        uint256 _depositTime
-    ) external;
-}
-
 contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONStorage {
     using SafeERC20 for IERC20;
 
@@ -79,16 +70,39 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         emit Unpaused(msg.sender);
     }
 
-    function depositAndGetWSTONOnL2(
+    function depositAndGetWSWTON(
         uint256 _amount,
-        address _recipient,
-        uint8 _layer2Index
-    ) external whenNotPaused nonReentrant returns (bool) {
+        uint256 _layer2Index
+    ) external whenNotPaused nonReentrant {
+        require(_depositAndGetWSWTONTo(msg.sender, _amount, _layer2Index), "failed to deposit and get WSTON");
+    }
+
+    function depositAndGetWSWTONTo(
+        address _to,
+        uint256 _amount,
+        uint256 _layer2Index
+    ) external whenNotPaused nonReentrant {
+        require(_depositAndGetWSWTONTo(_to, _amount, _layer2Index), "failed to deposit and get WSTON");
+    }
+
+    function _depositAndGetWSWTONTo(
+        address _to,
+        uint256 _amount,
+        uint256 _layer2Index
+    ) internal returns (bool) {
+
+        // Check allowance
+        require(
+            IERC20(l1wton).allowance(_to, address(this)) >= _amount,
+            "allowance too low"
+        );
+
         // user transfers wton to this contract
         require(
-            IERC20(l1wton).transferFrom(_recipient, address(this), _amount),
+            IERC20(l1wton).transferFrom(_to, address(this), _amount),
             "failed to transfer wton to this contract"
         );
+
         // deposit _amount to DepositManager
         require(
             IDepositManager(depositManager).deposit(
@@ -98,57 +112,55 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
             "failed to stake"
         );
 
-        // we mint WSTON
-        _mint(address(this), _amount);
-
-        uint256 balanceBefore = balanceOf(
-            layer2s[_layer2Index].l1StandardBridge
-        );
-
         StakingTracker memory _stakingTracker = StakingTracker({
-            holderId: 0,
+            layer2: layer2s[_layer2Index],
+            account: _to,
             amount: _amount,
-            stakingIndex: stakingTrackers.length,
+            stakingIndex: stakingTrackerCount,
             depositTime: block.timestamp
         });
-
         stakingTrackers.push(_stakingTracker);
+        stakingTrackerCount++;
 
-        bytes memory data = abi.encode(_stakingTracker);
+        // we mint WSTON
+        _mint(_to, _amount);
 
-        // Bridge WSTON to L2
-        IL1StandardBridge(layer2s[_layer2Index].l1StandardBridge)
-            .depositERC20To(
-                address(this),
-                layer2s[_layer2Index].l2wston,
-                layer2s[_layer2Index].WSTONManager,
-                _amount,
-                MIN_DEPOSIT_GAS_LIMIT,
-                data
-            );
+        emit Deposited(stakingTrackerCount, _to, _amount, block.timestamp);
 
-        IL1CrossDomainMessenger(layer2s[_layer2Index].l1CrossDomainMessenger)
-            .sendMessage(
-                layer2s[_layer2Index].WSTONManager,
-                abi.encodeCall(
-                    IWSTONManager(layer2s[_layer2Index].WSTONManager).onWSTONDeposit,
-                    (
-                        _recipient,
-                        _stakingTracker.amount,
-                        _stakingTracker.stakingIndex,
-                        _stakingTracker.depositTime
-                    )
-                ),
-                1000000 // gas limit
-            );
+        return true;
+    }
 
-        require(
-            balanceOf(layer2s[_layer2Index].l1StandardBridge) ==
-                balanceBefore + _amount,
-            "fail depositERC20To"
-        );
+    function transferWSTONFrom(
+        uint256 _stakingIndex, 
+        address _from, 
+        address _to, 
+        uint256 _amount
+    ) external nonReentrant returns(bool) {
+        require(_to != address(0), "address zero");
+        require(_amount >= 0, "zero amount");
+        require(_amount >= stakingTrackers[_stakingIndex].amount, "not enough funds to transfer on this stakingIndex");
 
-        emit DepositedAndBridged(_recipient, _amount);
+        // Check allowance
+        require(allowance(_from, address(this)) >= _amount, "allowance too low");
+
+        IERC20(address(this)).safeTransferFrom(_from, _to, _amount);
+
+        stakingTrackers[_stakingIndex].account = _to;
+
+        emit Transferred(_stakingIndex, _from, _to, _amount);
+        return true;
+    }
+
+    function transferWSTON(uint256 _stakingIndex, address _to, uint256 _amount) external nonReentrant returns (bool) {
+        require(_to != address(0), "address zero");
+        require(_amount >= 0, "zero amount");
+        require(_amount >= stakingTrackers[_stakingIndex].amount, "not enough funds to transfer on this stakingIndex");
+
+        IERC20(address(this)).safeTransfer(_to, _amount);
+
+        stakingTrackers[_stakingIndex].account = _to;
+        
+        emit Transferred(_stakingIndex, msg.sender, _to, _amount);
         return true;
     }
 

@@ -324,7 +324,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Set the token URI
         _setTokenURI(newGemId, _tokenURI);
 
-        emit Created(newGemId, msg.sender);
+        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI,  msg.sender);
         return newGemId;
     }
 
@@ -460,7 +460,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _safeMint(msg.sender, newGemId);
             _setTokenURI(newGemId, _tokenURIs[i]);
 
-            emit Created(newGemId, msg.sender);
+            emit Created(newGemId, _rarities[i], _colors[i], _values[i], _quadrants[i], _miningPeriods[i], _gemCooldownPeriods[i], _tokenURIs[i],  msg.sender);
             newGemIds[i] = newGemId;
         }
 

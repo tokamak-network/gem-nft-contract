@@ -90,7 +90,17 @@ contract GemFactoryStorage {
      */
 
     // Premining events
-    event Created(uint256 tokenId, address owner);
+    event Created(
+        uint256 indexed tokenId, 
+        Rarity rarity, 
+        uint8 color, 
+        uint256 value, 
+        uint8[4] quadrants, 
+        uint256 miningPeriod,
+        uint256 cooldownPeriod,
+        string tokenURI, 
+        address owner
+    );
     event TransferGEM(address from, address to, uint256 tokenId);
 
     // Mining Events

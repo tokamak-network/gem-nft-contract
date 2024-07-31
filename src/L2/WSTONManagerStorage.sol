@@ -4,7 +4,7 @@ pragma solidity ^0.8.23;
 contract WSTONManagerStorage {
 
     struct StakingTracker{
-        uint256 holderId;
+        address currentHolder;
         uint256 amount;
         uint256 stakingIndex;
         uint256 depositTime;

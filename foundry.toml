@@ -3,9 +3,14 @@ src = "src"
 out = "out"
 #viaIR = true
 libs = ["lib"]
+fs_permissions = [
+    { access = "read", path = "lib/foundry-chainlink-toolkit/out" },
+]
+
 remappings = [
     '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts',
     '@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
+    '@chainlink/contracts=lib/foundry-chainlink-toolkit/lib/chainlink-brownie-contracts/',
 ]
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/crates/config
