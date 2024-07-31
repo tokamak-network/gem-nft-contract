@@ -23,7 +23,7 @@ const L1_ABI = [
 
 // ABI of the L2 contract
 const L2_ABI = [
-    "function onWSTONDeposit(address _account, uint256 _amount, uint256 _stakingIndex, uint256 _depositTime) external"
+    "function onWSTONDeposit(uint256 _amount, uint256 _stakingIndex, uint256 _depositTime) external"
 ];
 
 // Providers
@@ -41,7 +41,7 @@ const l2Contract = new Contract(L2_CONTRACT_ADDRESS, L2_ABI, l2Signer);
 l1Contract.on("Deposited", async (stakingIndex, account, amount, depositTime) => {
     console.log(`Deposited event detected: stakingIndex=${stakingIndex}, account=${account}, amount=${amount}, depositTime=${depositTime}`);
     try {
-        const tx = await l2Contract.onWSTONDeposit(account, amount, stakingIndex, depositTime);
+        const tx = await l2Contract.onWSTONDeposit(amount, stakingIndex, depositTime);
         await tx.wait();
         console.log(`L2 data updated: stakingIndex=${stakingIndex}, account=${account}, amount=${amount}, depositTime=${depositTime}`);
     } catch (error) {

@@ -8,7 +8,7 @@ import "../interfaces/IProxyAction.sol";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-contract ProxyWrappedStakedTON is
+contract ProxyL1WrappedStakedTON is
     ProxyStorage,
     AuthControlGemFactory,
     IProxyEvent,

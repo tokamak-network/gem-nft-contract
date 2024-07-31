@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import "../src/L1/WrappedStakedTON.sol";
+import "../src/L1/L1WrappedStakedTON.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DeployWrappedStakedTON is Script {
@@ -19,8 +19,8 @@ contract DeployWrappedStakedTON is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // Create a memory array to hold the Layer2 struct
-        WrappedStakedTONStorage.Layer2[] memory layer2s = new WrappedStakedTONStorage.Layer2[](1);
-        layer2s[0] = WrappedStakedTONStorage.Layer2(
+        L1WrappedStakedTONStorage.Layer2[] memory layer2s = new L1WrappedStakedTONStorage.Layer2[](1);
+        layer2s[0] = L1WrappedStakedTONStorage.Layer2(
             0xCBeF7Cc221c04AD2E68e623613cc5d33b0fE1599,
             address(0),
             address(0),
@@ -29,16 +29,16 @@ contract DeployWrappedStakedTON is Script {
         );
 
         // Deploy the WrappedStakedTON contract
-        WrappedStakedTON token = new WrappedStakedTON(layer2s, depositManager, seigManager, l1wton);
+        L1WrappedStakedTON wston = new L1WrappedStakedTON(layer2s, depositManager, seigManager, l1wton);
 
         // Log the contract address
-        console.log("WrappedStakedTON deployed at:", address(token));
+        console.log("WrappedStakedTON deployed at:", address(wston));
 
         // Approve the WrappedStakedTON contract to spend your tokens
-        IERC20(l1wton).approve(address(token), amount);
+        IERC20(l1wton).approve(address(wston), amount);
 
         // Call the depositAndGetWSWTON function
-        token.depositAndGetWSWTON(amount, layer2Index);
+        wston.depositAndGetWSTON(amount, layer2Index);
 
         vm.stopBroadcast();
     }

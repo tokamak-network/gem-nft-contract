@@ -15,3 +15,6 @@ docs/
 
 # Node modules
 node_modules/
+
+# Broadcast
+broadcast/

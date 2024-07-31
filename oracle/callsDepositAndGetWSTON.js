@@ -17,7 +17,7 @@ if (!SEPOLIA_RPC_URL || !PRIVATE_KEY || !L1_CONTRACT_ADDRESS || !L1_WSTON_ADDRES
 
 // ABI of the L1 contract
 const L1_ABI = [
-    "function depositAndGetWSWTON(uint256 _amount, uint256 _layer2Index) external",
+    "function depositAndGetWSTON(uint256 _amount, uint256 _layer2Index) external",
 ];
 
 // ABI of the ERC20 contract (for approve function)
@@ -45,12 +45,12 @@ async function callApproveAndDeposit(amount, layer2Index) {
         console.log(`Approve transaction confirmed: ${approveTx.hash}`);
 
         // Call depositAndGetWSWTON
-        const depositTx = await l1Contract.depositAndGetWSWTON(amount, layer2Index);
+        const depositTx = await l1Contract.depositAndGetWSTON(amount, layer2Index);
         console.log(`Deposit transaction hash: ${depositTx.hash}`);
         await depositTx.wait();
         console.log(`Deposit transaction confirmed: ${depositTx.hash}`);
     } catch (error) {
-        console.error(`Failed to call approve and depositAndGetWSWTON: ${error}`);
+        console.error(`Failed to call approve and depositAndGetWSTON: ${error}`);
     }
 }
 

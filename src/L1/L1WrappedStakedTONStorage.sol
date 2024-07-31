@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-contract WrappedStakedTONStorage {
+contract L1WrappedStakedTONStorage {
 
     struct StakingTracker {
         Layer2 layer2;
-        address account;
         uint256 amount;
         uint256 stakingIndex;
         uint256 depositTime;

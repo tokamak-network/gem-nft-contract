@@ -8,7 +8,7 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
-import { WrappedStakedTONStorage } from "./WrappedStakedTONStorage.sol";
+import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
 
 interface IL1StandardBridge {
     function depositERC20To(
@@ -29,7 +29,7 @@ interface IL1CrossDomainMessenger {
     ) external;
 }
 
-contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONStorage {
+contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedTONStorage {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {
@@ -70,22 +70,22 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         emit Unpaused(msg.sender);
     }
 
-    function depositAndGetWSWTON(
+    function depositAndGetWSTON(
         uint256 _amount,
         uint256 _layer2Index
     ) external whenNotPaused nonReentrant {
-        require(_depositAndGetWSWTONTo(msg.sender, _amount, _layer2Index), "failed to deposit and get WSTON");
+        require(_depositAndGetWSTONTo(msg.sender, _amount, _layer2Index), "failed to deposit and get WSTON");
     }
 
-    function depositAndGetWSWTONTo(
+    function depositAndGetWSTONTo(
         address _to,
         uint256 _amount,
         uint256 _layer2Index
     ) external whenNotPaused nonReentrant {
-        require(_depositAndGetWSWTONTo(_to, _amount, _layer2Index), "failed to deposit and get WSTON");
+        require(_depositAndGetWSTONTo(_to, _amount, _layer2Index), "failed to deposit and get WSTON");
     }
 
-    function _depositAndGetWSWTONTo(
+    function _depositAndGetWSTONTo(
         address _to,
         uint256 _amount,
         uint256 _layer2Index
@@ -111,7 +111,6 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
 
         StakingTracker memory _stakingTracker = StakingTracker({
             layer2: layer2s[_layer2Index],
-            account: _to,
             amount: _amount,
             stakingIndex: stakingTrackerCount,
             depositTime: block.timestamp
@@ -142,8 +141,6 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
 
         IERC20(address(this)).safeTransferFrom(_from, _to, _amount);
 
-        stakingTrackers[_stakingIndex].account = _to;
-
         emit Transferred(_stakingIndex, _from, _to, _amount);
         return true;
     }
@@ -154,8 +151,6 @@ contract WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, WrappedStakedTONSt
         require(_amount >= stakingTrackers[_stakingIndex].amount, "not enough funds to transfer on this stakingIndex");
 
         IERC20(address(this)).safeTransfer(_to, _amount);
-
-        stakingTrackers[_stakingIndex].account = _to;
 
         emit Transferred(_stakingIndex, msg.sender, _to, _amount);
         return true;
