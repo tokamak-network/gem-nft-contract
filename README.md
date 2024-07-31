@@ -30,6 +30,23 @@ forge compile
 forge test
 ```
 
+### Oracle Testing on Sepolia
+
+We have created a minimalistic script that listens for Deposited event from WrappedStakedTON contract (deployed on Sepolia Ethereum). The script calls onWSTONDeposit function from WSTON manager (which is deployed on Titan Sepolia). Therefore, the script allows us to update the staking index on L2 whenever a user deposit WTON and gets WSTON on L1. 
+
+1. update the .env.example (by removing the .example). Fill in the PRIVATE_KEY (you must have enough ETH on both Ethereum Sepolia and Titan Sepolia), the SEPOLIA_RPC_URL, ETHERSCAN_API_KEY and TIITAN_SEPOLIA_RPC_URL.
+2. run the node : 
+```
+node oracle/TitanOracle.js
+```
+3. Open another terminal and run callsDepoositAndGetWSTON.js. It deposits WTON on behalf of the user on WrappedStakedTON contract. User must have at least 10 Sepolia WTON available.
+```
+node oracle/callsDepositAndGetWSTON.js
+```
+
+You should get the following output on the first terminal ```Deposited event detected:...```
+
+
 ### Contact
 
 For any inquiries, you can reach me through [my GitHub profile](https://github.com/mehdi-defiesta)
