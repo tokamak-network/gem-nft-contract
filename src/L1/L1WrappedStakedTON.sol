@@ -44,6 +44,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
 
     constructor(
         Layer2[] memory _layer2s,
+        uint256 _minDepositAmount,
         address _depositManager,
         address _seigManager,
         address _l1wton
@@ -54,6 +55,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         depositManager = _depositManager;
         seigManager = _seigManager;
         l1wton = _l1wton;
+        minDepositAmount = _minDepositAmount;
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -90,6 +92,8 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         uint256 _amount,
         uint256 _layer2Index
     ) internal returns (bool) {
+
+        require(_amount >= minDepositAmount, "min required amount");
 
         // user transfers wton to this contract
         require(
@@ -176,6 +180,23 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         });
         layer2s.push(layer2);
         return true;
+    }
+
+    function setMinDepositAmount(uint256 _minDepositAmount) external onlyOwner {
+        minDepositAmount = _minDepositAmount;
+    }
+
+    function getMinDepositAmount() external view returns(uint256) {
+        return minDepositAmount;
+    }
+
+    // Override ERC20 transfer and transferFrom functions to disable them
+    function transfer(address, uint256) public pure override returns (bool) {
+        revert("Use transferWSTON instead");
+    }
+
+    function transferFrom(address, address, uint256) public pure override returns (bool) {
+        revert("Use transferWSTONFrom instead");
     }
 
     // Todo requestWithdrawal, process withdrawal

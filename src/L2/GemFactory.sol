@@ -81,9 +81,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint256 _CommonMiningFees, 
         uint256 _RareMiningFees,
         uint256 _UniqueMiningFees,
-        uint256 _EpicMiningFees
+        uint256 _EpicMiningFees,
+        uint256 _CommonGemsValue,
+        uint256 _RareGemsValue,
+        uint256 _UniqueGemsValue,
+        uint256 _EpicGemsValue,
+        uint256 _LegendaryGemsValue,
+        uint256 _MythicGemsValue
     )
-    external {
+    external onlyOwner {
         require(wston == address(0), "titanwston already initialized");
         require(ton == address(0), "ton already initialized");
         wston = _wston;
@@ -93,6 +99,44 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         RareMiningFees = _RareMiningFees;
         UniqueMiningFees = _UniqueMiningFees;
         EpicMiningFees = _EpicMiningFees;
+        CommonGemsValue = _CommonGemsValue;
+        RareGemsValue = _RareGemsValue;
+        UniqueGemsValue = _UniqueGemsValue;
+        EpicGemsValue = _EpicGemsValue;
+        LegendaryGemsValue = _LegendaryGemsValue;
+        MythicGemsValue = _MythicGemsValue;
+    }
+
+    function setGemsMiningPeriods(
+        uint256 _CommonGemsMiningPeriod,
+        uint256 _RareGemsMiningPeriod,
+        uint256 _UniqueGemsMiningPeriod,
+        uint256 _EpicGemsMiningPeriod,
+        uint256 _LegendaryGemsMiningPeriod,
+        uint256 _MythicGemsMiningPeriod
+    ) external onlyOwner {
+        CommonGemsMiningPeriod = _CommonGemsMiningPeriod;
+        RareGemsMiningPeriod = _RareGemsMiningPeriod;
+        UniqueGemsMiningPeriod = _UniqueGemsMiningPeriod;
+        EpicGemsMiningPeriod = _EpicGemsMiningPeriod;
+        LegendaryGemsMiningPeriod = _LegendaryGemsMiningPeriod;
+        MythicGemsMiningPeriod = _MythicGemsMiningPeriod;
+    }
+
+    function setGemsCooldownPeriods(
+        uint256 _CommonGemsCooldownPeriod,
+        uint256 _RareGemsCooldownPeriod,
+        uint256 _UniqueGemsCooldownPeriod,
+        uint256 _EpicGemsCooldownPeriod,
+        uint256 _LegendaryGemsCooldownPeriod,
+        uint256 _MythicGemsCooldownPeriod
+    ) external onlyOwner {
+        CommonGemsCooldownPeriod = _CommonGemsCooldownPeriod;
+        RareGemsCooldownPeriod = _RareGemsCooldownPeriod;
+        UniqueGemsCooldownPeriod = _UniqueGemsCooldownPeriod;
+        EpicGemsCooldownPeriod = _EpicGemsCooldownPeriod;
+        LegendaryGemsCooldownPeriod = _LegendaryGemsCooldownPeriod;
+        MythicGemsCooldownPeriod = _MythicGemsCooldownPeriod;
     }
 
     //---------------------------------------------------------------------------------------
@@ -162,7 +206,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             require(sent, "not enough funds");
         }
 
-        emit GemMiningStarted(_tokenId, msg.sender);
+        emit GemMiningStarted(_tokenId, msg.sender, block.timestamp);
         return true;
     }
 
@@ -219,6 +263,155 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     /**
+     * @notice function that allow users to forge their gems. Gems must have the same rarity and
+     * same stakingIndex. Users can choose the color the forged gem will have if it respects certain conditions. 
+     * old gems are burnt while the new forged gem is minted.
+     * @param _tokenIds array of tokens to be forged. Must respect some length depending on the rarity chosen
+     * @param _stakingIndex to check if the staking index of each token selected is the same
+     * @param _rarity to check if the rarity of each token selected is the same
+     * @param _color color desired of the forged gem
+     */
+    function forgeTokens(
+        uint256[] memory _tokenIds, 
+        uint256 _stakingIndex, 
+        Rarity _rarity, 
+        uint8[2] memory _color
+    ) external whenNotPaused returns(uint256 newGemId) {
+        
+        uint256 forgedGemsValue;
+        uint256 forgedGemsMiningPeriod;
+        uint256 forgedGemsCooldownPeriod;
+
+        if(_rarity == Rarity.COMMON) {
+            require(_tokenIds.length == 2, "wrong number of Gems to be forged");
+            forgedGemsValue = RareGemsValue;
+            forgedGemsMiningPeriod = RareGemsMiningPeriod;
+            forgedGemsCooldownPeriod = RareGemsCooldownPeriod;
+        } else if(_rarity == Rarity.RARE) {
+            require(_tokenIds.length == 3, "wrong number of Gems to be forged");
+            forgedGemsValue = UniqueGemsValue;
+            forgedGemsMiningPeriod = UniqueGemsMiningPeriod;
+            forgedGemsCooldownPeriod = UniqueGemsCooldownPeriod;
+        } else if(_rarity == Rarity.UNIQUE) {
+            require(_tokenIds.length == 4, "wrong number of Gems to be forged");
+            forgedGemsValue = EpicGemsValue;
+            forgedGemsMiningPeriod = EpicGemsMiningPeriod;
+            forgedGemsCooldownPeriod = EpicGemsCooldownPeriod;
+        } else if(_rarity == Rarity.EPIC) {
+            require(_tokenIds.length == 5, "wrong number of Gems to be forged");
+            forgedGemsValue = LegendaryGemsValue;
+            forgedGemsMiningPeriod = LegendaryGemsMiningPeriod;
+            forgedGemsCooldownPeriod = LegendaryGemsCooldownPeriod;
+        } else if(_rarity == Rarity.LEGENDARY) {
+            require(_tokenIds.length == 6, "wrong number of Gems to be forged");
+            forgedGemsValue = MythicGemsValue;
+            forgedGemsMiningPeriod = MythicGemsMiningPeriod;
+            forgedGemsCooldownPeriod = MythicGemsCooldownPeriod;
+        } else {
+            revert("wrong rarity");
+        }
+
+        uint8[4] memory sumOfQuadrants;
+        uint8[2][2][] memory availableColorsList = generateGemColorList(_color);
+
+        for (uint8 i = 0; i < _tokenIds.length; i++) {
+            require(Gems[_tokenIds[i]].rarity == _rarity, "wrong rarity Gems");
+            require(Gems[_tokenIds[i]].stakingIndex == _stakingIndex, "wrong staking index");
+            sumOfQuadrants[0] += Gems[_tokenIds[i]].quadrants[0];
+            sumOfQuadrants[1] += Gems[_tokenIds[i]].quadrants[1];
+            sumOfQuadrants[2] += Gems[_tokenIds[i]].quadrants[2];
+            sumOfQuadrants[3] += Gems[_tokenIds[i]].quadrants[3];
+            
+            for(uint8 j = 0; j < _tokenIds.length; i++) {
+                if(i != j) {
+                    uint8[2] memory _color1 = Gems[_tokenIds[i]].color;
+                    uint8[2] memory _color2 = Gems[_tokenIds[j]].color;
+                    bool colorValidated = false;
+                    for (uint8 u = 0; u < availableColorsList.length; u++) {
+                        uint8[2][2] memory availableColors = availableColorsList[u];
+                        if (
+                            (availableColors[0][0] == _color1[0] || availableColors[0][0] == _color1[1] ||
+                            availableColors[0][1] == _color1[0] || availableColors[0][1] == _color1[1] ||
+                            availableColors[1][0] == _color1[0] || availableColors[1][0] == _color1[1] ||
+                            availableColors[1][1] == _color1[0] || availableColors[1][1] == _color1[1]) &&
+                            (availableColors[0][0] == _color2[0] || availableColors[0][0] == _color2[1] ||
+                            availableColors[0][1] == _color2[0] || availableColors[0][1] == _color2[1] ||
+                            availableColors[1][0] == _color2[0] || availableColors[1][0] == _color2[1] ||
+                            availableColors[1][1] == _color2[0] || availableColors[1][1] == _color2[1])
+                        ) {
+                            colorValidated = true;
+                            break; // Exit the loop early if a match is found
+                        }
+                    }
+                    require(colorValidated, "this color can't be obtained");
+                }
+            }
+
+            burnToken(msg.sender, _tokenIds[i]);
+        }
+
+        sumOfQuadrants[0] %= 2;
+        sumOfQuadrants[1] %= 2;
+        sumOfQuadrants[2] %= 2;
+        sumOfQuadrants[3] %= 2;
+
+        uint8[4] memory forgedQuadrants;
+
+        uint8 baseValue;
+        if (_rarity == Rarity.COMMON) baseValue = 2;
+        else if (_rarity == Rarity.RARE) baseValue = 3;
+        else if (_rarity == Rarity.UNIQUE) baseValue = 4;
+        else if (_rarity == Rarity.EPIC) baseValue = 5;
+        else if (_rarity == Rarity.LEGENDARY) baseValue = 6;
+
+        for (uint8 i = 0; i < 4; i++) {
+            forgedQuadrants[i] = baseValue + sumOfQuadrants[i];
+        }
+
+        // handling the case of sumOfQuadrants = 1111
+        if (
+            forgedQuadrants[0] == baseValue + 1 && 
+            forgedQuadrants[1] == baseValue + 1 && 
+            forgedQuadrants[2] == baseValue + 1 && 
+            forgedQuadrants[3] == baseValue + 1
+        ) {
+            forgedQuadrants[3] = baseValue;
+        }
+
+        Gem memory _Gem = Gem({
+            tokenId: 0,
+            rarity: _rarity,
+            quadrants: forgedQuadrants,
+            color: _color,
+            value: forgedGemsValue,
+            stakingIndex: _stakingIndex,
+            miningPeriod: forgedGemsMiningPeriod,
+            gemCooldownPeriod: block.timestamp + forgedGemsCooldownPeriod,
+            isLocked: false,
+            tokenURI: "",
+            randomRequestId: 0
+        });
+        Gems.push(_Gem);
+        newGemId = Gems.length - 1;
+        // Update the tokenId of the Gem in the array
+        Gems[newGemId].tokenId = newGemId;
+
+        // safe check on the token Id created
+        require(newGemId == uint256(uint32(newGemId)));
+        GEMIndexToOwner[newGemId] = msg.sender;
+        ownershipTokenCount[msg.sender]++;
+        
+        // Use the ERC721 _safeMint function to handle the token creation
+        _safeMint(msg.sender, newGemId);
+
+        // Set the token URI
+        _setTokenURI(newGemId, "");
+
+
+        return newGemId;
+    }
+
+    /**
      * @notice Creates a premined pool of GEM based oon their attribute passed in the parameters and assigns their ownership to the contract.
      * @param _rarity The rarity of the GEM to be created.
      * @param _color The colors of the GEM to be created.
@@ -231,8 +424,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      */
     function createGEM( 
         Rarity _rarity,
-        uint8 _color, 
+        uint8[2] memory _color, 
         uint256 _value, 
+        uint256 _stakingIndex,
         uint8[4] memory _quadrants,
         uint256 _miningPeriod,
         uint256 _gemCooldownPeriod,
@@ -301,6 +495,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             quadrants: _quadrants,
             color: _color,
             value: _value,
+            stakingIndex: _stakingIndex,
             miningPeriod: _miningPeriod,
             gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
             isLocked: false,
@@ -324,7 +519,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Set the token URI
         _setTokenURI(newGemId, _tokenURI);
 
-        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI,  msg.sender);
+        emit Created(newGemId, _rarity, _color, _value, _stakingIndex, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI,  msg.sender);
         return newGemId;
     }
 
@@ -341,8 +536,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      */
     function createGEMPool(
         Rarity[] memory _rarities,
-        uint8[] memory _colors,
+        uint8[2][] memory _colors,
         uint256[] memory _values,
+        uint256[] memory _stakingIndexes,
         uint8[4][] memory _quadrants,
         uint256[] memory _miningPeriods,
         uint256[] memory _gemCooldownPeriods,
@@ -356,7 +552,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         require(
             _rarities.length == _colors.length &&
             _colors.length == _values.length &&
-            _values.length == _quadrants.length &&
+            _values.length == _stakingIndexes.length &&
+            _stakingIndexes.length == _quadrants.length &&
             _quadrants.length == _miningPeriods.length &&
             _miningPeriods.length == _gemCooldownPeriods.length &&
             _gemCooldownPeriods.length == _tokenURIs.length,
@@ -441,6 +638,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 quadrants: _quadrants[i],
                 color: _colors[i],
                 value: _values[i],
+                stakingIndex: _stakingIndexes[i],
                 miningPeriod: _miningPeriods[i],
                 gemCooldownPeriod: block.timestamp + _gemCooldownPeriods[i],
                 isLocked: false,
@@ -460,7 +658,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _safeMint(msg.sender, newGemId);
             _setTokenURI(newGemId, _tokenURIs[i]);
 
-            emit Created(newGemId, _rarities[i], _colors[i], _values[i], _quadrants[i], _miningPeriods[i], _gemCooldownPeriods[i], _tokenURIs[i],  msg.sender);
+            emit Created(newGemId, _rarities[i], _colors[i], _values[i], _stakingIndexes[i], _quadrants[i], _miningPeriods[i], _gemCooldownPeriods[i], _tokenURIs[i],  msg.sender);
             newGemIds[i] = newGemId;
         }
 
@@ -566,6 +764,26 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         uint256 modNbGemsAvailable = (hashedOmegaVal % gemCount) + 1;
         s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
+    }
+
+    /**
+     * @notice computes the list of color combinaison that after being forged, give the color passed into the parameter 
+     * @param _color color that is wished to be obtained after forging
+     */
+    function generateGemColorList(uint8[2] memory _color) internal pure returns (uint8[2][2][] memory _colorList) {
+        uint8 maxColorValue = 10;
+        uint256 combinationsCount = (maxColorValue + 1) * (maxColorValue + 1);
+        _colorList = new uint8[2][2][](combinationsCount);
+
+        uint256 index = 0;
+        for (uint8 i = 0; i <= maxColorValue; i++) {
+            for (uint8 j = 0; j <= maxColorValue; j++) {
+                _colorList[index] = [[_color[0], i], [_color[1], j]];
+                index++;
+            }
+        }
+
+        return _colorList;
     }
 
 

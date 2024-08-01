@@ -23,7 +23,8 @@ contract L1WrappedStakedTONStorage {
     uint256 stakingTrackerCount;
 
     uint32 public constant MIN_DEPOSIT_GAS_LIMIT = 210000;
-
+    
+    uint256 public minDepositAmount;
 
     address public depositManager;
     address public seigManager;

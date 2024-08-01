@@ -16,11 +16,12 @@ contract GemFactoryStorage {
         uint256 tokenId;
         Rarity rarity;
         uint8[4] quadrants; // 4 quadrants
-        uint8 color; // id of the color
+        uint8[2] color; // id of the color
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
         uint256 miningPeriod; // Mining delay before claiming
         bool isLocked; // Locked if gem is listed on the marketplace
         uint256 value; // 27 decimals
+        uint256 stakingIndex;
         string tokenURI; // IPFS address of the metadata file
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
     }
@@ -71,6 +72,27 @@ contract GemFactoryStorage {
     uint256 public UniqueMiningFees;
     uint256 public EpicMiningFees;
 
+    uint256 public CommonGemsValue;
+    uint256 public RareGemsValue;
+    uint256 public UniqueGemsValue;
+    uint256 public EpicGemsValue;
+    uint256 public LegendaryGemsValue;
+    uint256 public MythicGemsValue;
+
+    uint256 public CommonGemsMiningPeriod;
+    uint256 public RareGemsMiningPeriod;
+    uint256 public UniqueGemsMiningPeriod;
+    uint256 public EpicGemsMiningPeriod;
+    uint256 public LegendaryGemsMiningPeriod;
+    uint256 public MythicGemsMiningPeriod;
+
+    uint256 public CommonGemsCooldownPeriod;
+    uint256 public RareGemsCooldownPeriod;
+    uint256 public UniqueGemsCooldownPeriod;
+    uint256 public EpicGemsCooldownPeriod;
+    uint256 public LegendaryGemsCooldownPeriod;
+    uint256 public MythicGemsCooldownPeriod;
+
     // past random requests Id.
     uint256[] public requestIds;
     uint256 public requestCount;
@@ -93,8 +115,9 @@ contract GemFactoryStorage {
     event Created(
         uint256 indexed tokenId, 
         Rarity rarity, 
-        uint8 color, 
-        uint256 value, 
+        uint8[2] color, 
+        uint256 value,
+        uint256 stakingIndex, 
         uint8[4] quadrants, 
         uint256 miningPeriod,
         uint256 cooldownPeriod,
@@ -104,9 +127,12 @@ contract GemFactoryStorage {
     event TransferGEM(address from, address to, uint256 tokenId);
 
     // Mining Events
-    event GemMiningStarted(uint256 tokenId, address miner);
+    event GemMiningStarted(uint256 tokenId, address miner, uint256 startMiningTime);
     event GemMiningClaimed(uint256 tokenId, address miner);
     event GemMelted(uint256 _tokenId, address _from);
+
+    // Forging Event
+    event GemForged(uint256[] GemsTokenIds, uint256 newGemCreatedId);
 
     // Pause Events
     event Paused(address account);

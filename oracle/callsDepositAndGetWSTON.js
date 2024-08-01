@@ -5,12 +5,12 @@ const { ethers } = require('ethers');
 const {
     SEPOLIA_RPC_URL,
     PRIVATE_KEY,
-    L1_CONTRACT_ADDRESS,
+    L1WRAPPEDSTAKEDTON_CONTRACT_ADDRESS,
     L1_WSTON_ADDRESS
 } = process.env;
 
 // Check if environment variables are loaded correctly
-if (!SEPOLIA_RPC_URL || !PRIVATE_KEY || !L1_CONTRACT_ADDRESS || !L1_WSTON_ADDRESS) {
+if (!SEPOLIA_RPC_URL || !PRIVATE_KEY || !L1WRAPPEDSTAKEDTON_CONTRACT_ADDRESS || !L1_WSTON_ADDRESS) {
     console.error("Please ensure all environment variables are set correctly.");
     process.exit(1);
 }
@@ -32,14 +32,14 @@ const provider = new ethers.JsonRpcProvider(SEPOLIA_RPC_URL);
 const signer = new ethers.Wallet(PRIVATE_KEY, provider);
 
 // Contract instances
-const l1Contract = new ethers.Contract(L1_CONTRACT_ADDRESS, L1_ABI, signer);
+const l1Contract = new ethers.Contract(L1WRAPPEDSTAKEDTON_CONTRACT_ADDRESS, L1_ABI, signer);
 const l1WstonContract = new ethers.Contract(L1_WSTON_ADDRESS, ERC20_ABI, signer);
 
 // Function to call approve and then depositAndGetWSWTON
 async function callApproveAndDeposit(amount, layer2Index) {
     try {
         // Approve the L1 contract to spend the specified amount of WSTON
-        const approveTx = await l1WstonContract.approve(L1_CONTRACT_ADDRESS, amount);
+        const approveTx = await l1WstonContract.approve(L1WRAPPEDSTAKEDTON_CONTRACT_ADDRESS, amount);
         console.log(`Approve transaction hash: ${approveTx.hash}`);
         await approveTx.wait();
         console.log(`Approve transaction confirmed: ${approveTx.hash}`);

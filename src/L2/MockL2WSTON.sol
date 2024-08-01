@@ -2,7 +2,7 @@
 pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./IMockL2WSTON.sol";
+import "../interfaces/IMockL2WSTON.sol";
 
 contract MockL2WSTON is ERC20, IMockL2WSTON {
 
