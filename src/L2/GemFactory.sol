@@ -147,6 +147,167 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
 
+    /**
+     * @notice function that allow users to forge their gems. Gems must have the same rarity and
+     * same stakingIndex. Users can choose the color the forged gem will have if it respects certain conditions. 
+     * old gems are burnt while the new forged gem is minted.
+     * @param _tokenIds array of tokens to be forged. Must respect some length depending on the rarity chosen
+     * @param _stakingIndex to check if the staking index of each token selected is the same
+     * @param _rarity to check if the rarity of each token selected is the same
+     * @param _color color desired of the forged gem
+     */
+    function forgeTokens(
+        uint256[] memory _tokenIds, 
+        uint256 _stakingIndex, 
+        Rarity _rarity, 
+        uint8[2] memory _color
+    ) external whenNotPaused returns(uint256 newGemId) {
+        
+        require(msg.sender != address(0), "zero address"); 
+        
+        uint256 forgedGemsValue;
+        uint256 forgedGemsMiningPeriod;
+        uint256 forgedGemsCooldownPeriod;
+
+        uint8 _color_0 = _color[0];
+        uint8 _color_1 = _color[1];
+
+        if(_rarity == Rarity.COMMON) {
+            require(_tokenIds.length == 2, "wrong number of Gems to be forged");
+            forgedGemsValue = RareGemsValue;
+            forgedGemsMiningPeriod = RareGemsMiningPeriod;
+            forgedGemsCooldownPeriod = RareGemsCooldownPeriod;
+        } else if(_rarity == Rarity.RARE) {
+            require(_tokenIds.length == 3, "wrong number of Gems to be forged");
+            forgedGemsValue = UniqueGemsValue;
+            forgedGemsMiningPeriod = UniqueGemsMiningPeriod;
+            forgedGemsCooldownPeriod = UniqueGemsCooldownPeriod;
+        } else if(_rarity == Rarity.UNIQUE) {
+            require(_tokenIds.length == 4, "wrong number of Gems to be forged");
+            forgedGemsValue = EpicGemsValue;
+            forgedGemsMiningPeriod = EpicGemsMiningPeriod;
+            forgedGemsCooldownPeriod = EpicGemsCooldownPeriod;
+        } else if(_rarity == Rarity.EPIC) {
+            require(_tokenIds.length == 5, "wrong number of Gems to be forged");
+            forgedGemsValue = LegendaryGemsValue;
+            forgedGemsMiningPeriod = LegendaryGemsMiningPeriod;
+            forgedGemsCooldownPeriod = LegendaryGemsCooldownPeriod;
+        } else if(_rarity == Rarity.LEGENDARY) {
+            require(_tokenIds.length == 6, "wrong number of Gems to be forged");
+            forgedGemsValue = MythicGemsValue;
+            forgedGemsMiningPeriod = MythicGemsMiningPeriod;
+            forgedGemsCooldownPeriod = MythicGemsCooldownPeriod;
+        } else {
+            revert("wrong rarity");
+        }
+
+        uint8[4] memory sumOfQuadrants;
+
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            require(GEMIndexToOwner[_tokenIds[i]] == msg.sender);
+            require(isTokenLocked(_tokenIds[i]) == false, "Gem is for sale or is mining");
+            require(Gems[_tokenIds[i]].rarity == _rarity, "wrong rarity Gems");
+            require(Gems[_tokenIds[i]].stakingIndex == _stakingIndex, "wrong staking index");
+            sumOfQuadrants[0] += Gems[_tokenIds[i]].quadrants[0];
+            sumOfQuadrants[1] += Gems[_tokenIds[i]].quadrants[1];
+            sumOfQuadrants[2] += Gems[_tokenIds[i]].quadrants[2];
+            sumOfQuadrants[3] += Gems[_tokenIds[i]].quadrants[3];
+            
+            for(uint256 j = 0; j < _tokenIds.length; j++) {
+                if(i != j) {
+                    uint8[2] memory _color1 = Gems[_tokenIds[i]].color;
+                    uint8 _color1_0 = _color1[0];
+                    uint8 _color1_1 = _color1[1];
+                    uint8[2] memory _color2 = Gems[_tokenIds[j]].color;
+                    uint8 _color2_0 = _color2[0];
+                    uint8 _color2_1 = _color2[1];
+                    bool colorValidated = false;
+
+                    if (
+                        (_color1_0 == _color_0 ||
+                        _color1_1 == _color_0 ||
+                        _color2_0 == _color_0 ||
+                        _color2_1 == _color_0) &&
+                        (_color1_0 == _color_1 ||
+                        _color1_1 == _color_1 ||
+                        _color2_0 == _color_1 ||
+                        _color2_1 == _color_1)
+                    ) {
+                        colorValidated = true;
+                    }
+                
+                    require(colorValidated, "this color can't be obtained");
+                }
+            }
+
+            burnToken(msg.sender, _tokenIds[i]);
+        }
+
+        sumOfQuadrants[0] %= 2;
+        sumOfQuadrants[1] %= 2;
+        sumOfQuadrants[2] %= 2;
+        sumOfQuadrants[3] %= 2;
+
+        uint8[4] memory forgedQuadrants;
+
+        uint8 baseValue;
+        if (_rarity == Rarity.COMMON) baseValue = 2;
+        else if (_rarity == Rarity.RARE) baseValue = 3;
+        else if (_rarity == Rarity.UNIQUE) baseValue = 4;
+        else if (_rarity == Rarity.EPIC) baseValue = 5;
+        else if (_rarity == Rarity.LEGENDARY) baseValue = 6;
+
+        for (uint8 i = 0; i < 4; i++) {
+            forgedQuadrants[i] = baseValue + sumOfQuadrants[i];
+        }
+
+        // handling the case of sumOfQuadrants = 1111
+        if (
+            forgedQuadrants[0] == baseValue + 1 && 
+            forgedQuadrants[1] == baseValue + 1 && 
+            forgedQuadrants[2] == baseValue + 1 && 
+            forgedQuadrants[3] == baseValue + 1
+        ) {
+            forgedQuadrants[0] = baseValue;
+            forgedQuadrants[1] = baseValue;
+            forgedQuadrants[2] = baseValue;
+            forgedQuadrants[3] = baseValue;
+        }
+
+        // Increment the rarity to the next level
+        Rarity newRarity = Rarity(uint8(_rarity) + 1);
+
+        Gem memory _Gem = Gem({
+            tokenId: 0,
+            rarity: newRarity,
+            quadrants: forgedQuadrants,
+            color: _color,
+            value: forgedGemsValue,
+            stakingIndex: _stakingIndex,
+            miningPeriod: forgedGemsMiningPeriod,
+            gemCooldownPeriod: block.timestamp + forgedGemsCooldownPeriod,
+            isLocked: false,
+            tokenURI: "",
+            randomRequestId: 0
+        });
+        Gems.push(_Gem);
+        newGemId = Gems.length - 1;
+        // Update the tokenId of the Gem in the array
+        Gems[newGemId].tokenId = newGemId;
+
+        // safe check on the token Id created
+        require(newGemId == uint256(uint32(newGemId)));
+        GEMIndexToOwner[newGemId] = msg.sender;
+        ownershipTokenCount[msg.sender]++;
+        
+        // Use the ERC721 _safeMint function to handle the token creation
+        _safeMint(msg.sender, newGemId);
+
+        // Set the token URI
+        _setTokenURI(newGemId, "");
+
+        return newGemId;
+    }
 
     /**
      * @notice triggers the mining process of a gem by the function caller
@@ -267,163 +428,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // ERC721 burn function
         _burn(_tokenId);
 
-    }
-
-    /**
-     * @notice function that allow users to forge their gems. Gems must have the same rarity and
-     * same stakingIndex. Users can choose the color the forged gem will have if it respects certain conditions. 
-     * old gems are burnt while the new forged gem is minted.
-     * @param _tokenIds array of tokens to be forged. Must respect some length depending on the rarity chosen
-     * @param _stakingIndex to check if the staking index of each token selected is the same
-     * @param _rarity to check if the rarity of each token selected is the same
-     * @param _color color desired of the forged gem
-     */
-    function forgeTokens(
-        uint256[] memory _tokenIds, 
-        uint256 _stakingIndex, 
-        Rarity _rarity, 
-        uint8[2] memory _color
-    ) external whenNotPaused returns(uint256 newGemId) {
-        
-        uint256 forgedGemsValue;
-        uint256 forgedGemsMiningPeriod;
-        uint256 forgedGemsCooldownPeriod;
-
-        uint8 _color_0 = _color[0];
-        uint8 _color_1 = _color[1];
-
-        if(_rarity == Rarity.COMMON) {
-            require(_tokenIds.length == 2, "wrong number of Gems to be forged");
-            forgedGemsValue = RareGemsValue;
-            forgedGemsMiningPeriod = RareGemsMiningPeriod;
-            forgedGemsCooldownPeriod = RareGemsCooldownPeriod;
-        } else if(_rarity == Rarity.RARE) {
-            require(_tokenIds.length == 3, "wrong number of Gems to be forged");
-            forgedGemsValue = UniqueGemsValue;
-            forgedGemsMiningPeriod = UniqueGemsMiningPeriod;
-            forgedGemsCooldownPeriod = UniqueGemsCooldownPeriod;
-        } else if(_rarity == Rarity.UNIQUE) {
-            require(_tokenIds.length == 4, "wrong number of Gems to be forged");
-            forgedGemsValue = EpicGemsValue;
-            forgedGemsMiningPeriod = EpicGemsMiningPeriod;
-            forgedGemsCooldownPeriod = EpicGemsCooldownPeriod;
-        } else if(_rarity == Rarity.EPIC) {
-            require(_tokenIds.length == 5, "wrong number of Gems to be forged");
-            forgedGemsValue = LegendaryGemsValue;
-            forgedGemsMiningPeriod = LegendaryGemsMiningPeriod;
-            forgedGemsCooldownPeriod = LegendaryGemsCooldownPeriod;
-        } else if(_rarity == Rarity.LEGENDARY) {
-            require(_tokenIds.length == 6, "wrong number of Gems to be forged");
-            forgedGemsValue = MythicGemsValue;
-            forgedGemsMiningPeriod = MythicGemsMiningPeriod;
-            forgedGemsCooldownPeriod = MythicGemsCooldownPeriod;
-        } else {
-            revert("wrong rarity");
-        }
-
-        uint8[4] memory sumOfQuadrants;
-
-        for (uint8 i = 0; i < _tokenIds.length; i++) {
-            require(Gems[_tokenIds[i]].rarity == _rarity, "wrong rarity Gems");
-            require(Gems[_tokenIds[i]].stakingIndex == _stakingIndex, "wrong staking index");
-            sumOfQuadrants[0] += Gems[_tokenIds[i]].quadrants[0];
-            sumOfQuadrants[1] += Gems[_tokenIds[i]].quadrants[1];
-            sumOfQuadrants[2] += Gems[_tokenIds[i]].quadrants[2];
-            sumOfQuadrants[3] += Gems[_tokenIds[i]].quadrants[3];
-            
-            for(uint8 j = 0; j < _tokenIds.length; i++) {
-                if(i != j) {
-                    uint8[2] memory _color1 = Gems[_tokenIds[i]].color;
-                    uint8 _color1_0 = _color1[0];
-                    uint8 _color1_1 = _color1[1];
-                    uint8[2] memory _color2 = Gems[_tokenIds[j]].color;
-                    uint8 _color2_0 = _color2[0];
-                    uint8 _color2_1 = _color2[1];
-                    bool colorValidated = false;
-
-                    if (
-                        (_color1_0 == _color_0 ||
-                        _color1_1 == _color_0 ||
-                        _color2_0 == _color_0 ||
-                        _color2_1 == _color_0) &&
-                        (_color1_0 == _color_1 ||
-                        _color1_1 == _color_1 ||
-                        _color2_0 == _color_1 ||
-                        _color2_1 == _color_1)
-                    ) {
-                        colorValidated = true;
-                        break; // Exit the loop early if a match is found
-                    }
-                
-                    require(colorValidated, "this color can't be obtained");
-                }
-            }
-
-            burnToken(msg.sender, _tokenIds[i]);
-        }
-
-        sumOfQuadrants[0] %= 2;
-        sumOfQuadrants[1] %= 2;
-        sumOfQuadrants[2] %= 2;
-        sumOfQuadrants[3] %= 2;
-
-        uint8[4] memory forgedQuadrants;
-
-        uint8 baseValue;
-        if (_rarity == Rarity.COMMON) baseValue = 2;
-        else if (_rarity == Rarity.RARE) baseValue = 3;
-        else if (_rarity == Rarity.UNIQUE) baseValue = 4;
-        else if (_rarity == Rarity.EPIC) baseValue = 5;
-        else if (_rarity == Rarity.LEGENDARY) baseValue = 6;
-
-        for (uint8 i = 0; i < 4; i++) {
-            forgedQuadrants[i] = baseValue + sumOfQuadrants[i];
-        }
-
-        // handling the case of sumOfQuadrants = 1111
-        if (
-            forgedQuadrants[0] == baseValue + 1 && 
-            forgedQuadrants[1] == baseValue + 1 && 
-            forgedQuadrants[2] == baseValue + 1 && 
-            forgedQuadrants[3] == baseValue + 1
-        ) {
-            forgedQuadrants[0] = baseValue;
-            forgedQuadrants[1] = baseValue;
-            forgedQuadrants[2] = baseValue;
-            forgedQuadrants[3] = baseValue;
-        }
-
-        Gem memory _Gem = Gem({
-            tokenId: 0,
-            rarity: _rarity,
-            quadrants: forgedQuadrants,
-            color: _color,
-            value: forgedGemsValue,
-            stakingIndex: _stakingIndex,
-            miningPeriod: forgedGemsMiningPeriod,
-            gemCooldownPeriod: block.timestamp + forgedGemsCooldownPeriod,
-            isLocked: false,
-            tokenURI: "",
-            randomRequestId: 0
-        });
-        Gems.push(_Gem);
-        newGemId = Gems.length - 1;
-        // Update the tokenId of the Gem in the array
-        Gems[newGemId].tokenId = newGemId;
-
-        // safe check on the token Id created
-        require(newGemId == uint256(uint32(newGemId)));
-        GEMIndexToOwner[newGemId] = msg.sender;
-        ownershipTokenCount[msg.sender]++;
-        
-        // Use the ERC721 _safeMint function to handle the token creation
-        _safeMint(msg.sender, newGemId);
-
-        // Set the token URI
-        _setTokenURI(newGemId, "");
-
-
-        return newGemId;
     }
 
     /**
@@ -928,6 +932,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         }
 
         return (count, result);
+    }
+
+    // Function to get the details of a gem by its tokenId
+    function getGem(uint256 _tokenId) external view returns (Gem memory) {
+        require(_tokenId < Gems.length, "Gem does not exist");
+        return Gems[_tokenId];
     }
 
     /// @notice Returns a list of all tkGEM IDs assigned to an address.

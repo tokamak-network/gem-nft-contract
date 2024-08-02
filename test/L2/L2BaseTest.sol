@@ -36,6 +36,13 @@ contract L2BaseTest is Test {
     uint256 public LegendaryGemsMiningPeriod = 5 weeks;
     uint256 public MythicGemsMiningPeriod = 6 weeks;
 
+    uint256 public CommonGemsCooldownPeriod = 1 weeks;
+    uint256 public RareGemsCooldownPeriod = 2 weeks;
+    uint256 public UniqueGemsCooldownPeriod = 3 weeks;
+    uint256 public EpicGemsCooldownPeriod = 4 weeks;
+    uint256 public LegendaryGemsCooldownPeriod = 5 weeks;
+    uint256 public MythicGemsCooldownPeriod = 6 weeks;
+
     address payable owner;
     address payable user1;
     address payable user2;
@@ -110,12 +117,12 @@ contract L2BaseTest is Test {
         );
 
         GemFactory(gemfactory).setGemsCooldownPeriods(
-            CommonGemsMiningPeriod,
-            RareGemsMiningPeriod,
-            UniqueGemsMiningPeriod,
-            EpicGemsMiningPeriod,
-            LegendaryGemsMiningPeriod,
-            MythicGemsMiningPeriod
+            CommonGemsCooldownPeriod,
+            RareGemsCooldownPeriod,
+            UniqueGemsCooldownPeriod,
+            EpicGemsCooldownPeriod,
+            LegendaryGemsCooldownPeriod,
+            MythicGemsCooldownPeriod
         );
 
         MarketPlace(marketplace).initialize(

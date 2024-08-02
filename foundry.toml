@@ -1,7 +1,10 @@
 [profile.default]
+solc-version = "0.8.23"
 src = "src"
 out = "out"
 viaIR = true
+optimizer = true # Enable the optimizer
+optimizer-runs = 200 # Set the number of optimizer runs
 libs = ["lib"]
 fs_permissions = [
     { access = "read", path = "lib/foundry-chainlink-toolkit/out" },
@@ -12,5 +15,14 @@ remappings = [
     '@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
     '@chainlink/contracts=lib/foundry-chainlink-toolkit/lib/chainlink-brownie-contracts/',
 ]
+
+# Optional: Additional optimizer details
+[profile.default.optimizer_details]
+constantOptimizer = true
+yul = true
+
+[profile.default.optimizer_details.yulDetails]
+stackAllocation = true
+optimizerSteps = 'dhfoDgvulfnTUtnIf'
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/crates/config
