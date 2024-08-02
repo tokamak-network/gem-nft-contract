@@ -98,7 +98,10 @@ contract GemFactoryStorage {
     uint256 public requestCount;
     uint256 public lastRequestId;
 
+    // color storage
+    uint8 public numberOfSolidColors;
 
+    // contract addresses
     address public wston;
     address public ton;
     address public treasury;

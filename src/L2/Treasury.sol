@@ -56,8 +56,9 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
 
     function createPreminedGEM( 
         Rarity _rarity,
-        uint8 _color, 
-        uint256 _value, 
+        uint8[2] memory _color, 
+        uint256 _value,
+        uint256 _stakingIndex, 
         uint8[4] memory _quadrants,  
         uint256 _miningPeriod,
         uint256 _cooldownPeriod,
@@ -67,6 +68,7 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
             _rarity,
             _color,
             _value,
+            _stakingIndex,
             _quadrants,
             _miningPeriod,
             _cooldownPeriod,
@@ -76,8 +78,9 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
 
     function createPreminedGEMPool(
         Rarity[] memory _rarities,
-        uint8[] memory _colors,
+        uint8[2][] memory _colors,
         uint256[] memory _values,
+        uint256[] memory _stakingIndexes,
         uint8[4][] memory _quadrants, 
         uint256[] memory _miningPeriods,
         uint256[] memory _cooldownPeriod,
@@ -87,6 +90,7 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
             _rarities,
             _colors,
             _values,
+            _stakingIndexes,
             _quadrants,
             _miningPeriods,
             _cooldownPeriod,

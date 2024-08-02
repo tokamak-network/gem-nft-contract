@@ -234,6 +234,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         require(ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId), "failed to transfer token");
 
+        Gems[_tokenId].randomRequestId = 0;
+        Gems[_tokenId].gemCooldownPeriod = block.timestamp + getCooldownPeriod(Gems[_tokenId].rarity);
+        
         emit GemMiningClaimed(_tokenId, msg.sender);
         return true;
 
@@ -282,6 +285,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint256 forgedGemsMiningPeriod;
         uint256 forgedGemsCooldownPeriod;
 
+        uint8 _color_0 = _color[0];
+        uint8 _color_1 = _color[1];
+
         if(_rarity == Rarity.COMMON) {
             require(_tokenIds.length == 2, "wrong number of Gems to be forged");
             forgedGemsValue = RareGemsValue;
@@ -312,7 +318,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         }
 
         uint8[4] memory sumOfQuadrants;
-        uint8[2][2][] memory availableColorsList = generateGemColorList(_color);
 
         for (uint8 i = 0; i < _tokenIds.length; i++) {
             require(Gems[_tokenIds[i]].rarity == _rarity, "wrong rarity Gems");
@@ -325,24 +330,27 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             for(uint8 j = 0; j < _tokenIds.length; i++) {
                 if(i != j) {
                     uint8[2] memory _color1 = Gems[_tokenIds[i]].color;
+                    uint8 _color1_0 = _color1[0];
+                    uint8 _color1_1 = _color1[1];
                     uint8[2] memory _color2 = Gems[_tokenIds[j]].color;
+                    uint8 _color2_0 = _color2[0];
+                    uint8 _color2_1 = _color2[1];
                     bool colorValidated = false;
-                    for (uint8 u = 0; u < availableColorsList.length; u++) {
-                        uint8[2][2] memory availableColors = availableColorsList[u];
-                        if (
-                            (availableColors[0][0] == _color1[0] || availableColors[0][0] == _color1[1] ||
-                            availableColors[0][1] == _color1[0] || availableColors[0][1] == _color1[1] ||
-                            availableColors[1][0] == _color1[0] || availableColors[1][0] == _color1[1] ||
-                            availableColors[1][1] == _color1[0] || availableColors[1][1] == _color1[1]) &&
-                            (availableColors[0][0] == _color2[0] || availableColors[0][0] == _color2[1] ||
-                            availableColors[0][1] == _color2[0] || availableColors[0][1] == _color2[1] ||
-                            availableColors[1][0] == _color2[0] || availableColors[1][0] == _color2[1] ||
-                            availableColors[1][1] == _color2[0] || availableColors[1][1] == _color2[1])
-                        ) {
-                            colorValidated = true;
-                            break; // Exit the loop early if a match is found
-                        }
+
+                    if (
+                        (_color1_0 == _color_0 ||
+                        _color1_1 == _color_0 ||
+                        _color2_0 == _color_0 ||
+                        _color2_1 == _color_0) &&
+                        (_color1_0 == _color_1 ||
+                        _color1_1 == _color_1 ||
+                        _color2_0 == _color_1 ||
+                        _color2_1 == _color_1)
+                    ) {
+                        colorValidated = true;
+                        break; // Exit the loop early if a match is found
                     }
+                
                     require(colorValidated, "this color can't be obtained");
                 }
             }
@@ -375,6 +383,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             forgedQuadrants[2] == baseValue + 1 && 
             forgedQuadrants[3] == baseValue + 1
         ) {
+            forgedQuadrants[0] = baseValue;
+            forgedQuadrants[1] = baseValue;
+            forgedQuadrants[2] = baseValue;
             forgedQuadrants[3] = baseValue;
         }
 
@@ -738,12 +749,17 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     }
 
+    function setNumberOfSolidColors(uint8 _numberOfSolidColors) external onlyOwner {
+        numberOfSolidColors = _numberOfSolidColors;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------INERNAL FUNCTIONS--------------------------------------------
     //---------------------------------------------------------------------------------------
 
 
     function _transferGEM(address _from, address _to, uint256 _tokenId) internal {
+        Gems[_tokenId].gemCooldownPeriod = block.timestamp + getCooldownPeriod(Gems[_tokenId].rarity);
         ownershipTokenCount[_to]++;
         GEMIndexToOwner[_tokenId] = _to;
         ownershipTokenCount[_from]--;
@@ -766,26 +782,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
     }
 
-    /**
-     * @notice computes the list of color combinaison that after being forged, give the color passed into the parameter 
-     * @param _color color that is wished to be obtained after forging
-     */
-    function generateGemColorList(uint8[2] memory _color) internal pure returns (uint8[2][2][] memory _colorList) {
-        uint8 maxColorValue = 10;
-        uint256 combinationsCount = (maxColorValue + 1) * (maxColorValue + 1);
-        _colorList = new uint8[2][2][](combinationsCount);
-
-        uint256 index = 0;
-        for (uint8 i = 0; i <= maxColorValue; i++) {
-            for (uint8 j = 0; j <= maxColorValue; j++) {
-                _colorList[index] = [[_color[0], i], [_color[1], j]];
-                index++;
-            }
-        }
-
-        return _colorList;
+    function getCooldownPeriod(Rarity rarity) internal view returns (uint256) {
+        if (rarity == Rarity.COMMON) return CommonGemsCooldownPeriod;
+        if (rarity == Rarity.RARE) return RareGemsCooldownPeriod;
+        if (rarity == Rarity.UNIQUE) return UniqueGemsCooldownPeriod;
+        if (rarity == Rarity.EPIC) return EpicGemsCooldownPeriod;
+        if (rarity == Rarity.LEGENDARY) return LegendaryGemsCooldownPeriod;
+        if (rarity == Rarity.MYTHIC) return MythicGemsCooldownPeriod;
+        revert("Invalid rarity");
     }
-
 
 
     //---------------------------------------------------------------------------------------
