@@ -82,6 +82,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint256 _RareMiningFees,
         uint256 _UniqueMiningFees,
         uint256 _EpicMiningFees,
+        uint256 _LegendaryMiningFees,
+        uint256 _MythicMiningFees,
         uint256 _CommonGemsValue,
         uint256 _RareGemsValue,
         uint256 _UniqueGemsValue,
@@ -99,6 +101,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         RareMiningFees = _RareMiningFees;
         UniqueMiningFees = _UniqueMiningFees;
         EpicMiningFees = _EpicMiningFees;
+        LegendaryMiningFees = _LegendaryMiningFees;
+        MythicMiningFees = _MythicMiningFees;
         CommonGemsValue = _CommonGemsValue;
         RareGemsValue = _RareGemsValue;
         UniqueGemsValue = _UniqueGemsValue;
@@ -426,24 +430,23 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @notice Creates a premined pool of GEM based oon their attribute passed in the parameters and assigns their ownership to the contract.
      * @param _rarity The rarity of the GEM to be created.
      * @param _color The colors of the GEM to be created.
-     * @param _value The values of the GEM to be created.
+     * @param _stakingIndex staking index of the WSTON associated with the GEM
      * @param _quadrants quadrants of the GEM to be created.
-     * @param _miningPeriod period in seconds that a user have to wait for claiming a mined gem  
-     * @param _gemCooldownPeriod period in second that a user must wait before using it for mining
      * @param _tokenURI TokenURIs of each GEM
      * @return The IDs of the newly created GEM.
      */
     function createGEM( 
         Rarity _rarity,
-        uint8[2] memory _color, 
-        uint256 _value, 
+        uint8[2] memory _color,  
         uint256 _stakingIndex,
         uint8[4] memory _quadrants,
-        uint256 _miningPeriod,
-        uint256 _gemCooldownPeriod,
         string memory _tokenURI) 
     external onlyTreasury whenNotPaused returns (uint256) {
         
+        uint256 _gemCooldownPeriod;
+        uint256 _miningPeriod;
+        uint256 _value;
+
         uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
 
         // Ensure that if rarity is COMMON, all quadrants must be either 1 or 2
@@ -455,6 +458,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 1 || _quadrants[3] == 2),
                 "All quadrants must be 1 or 2 for COMMON rarity"
             );
+            require(sumOfQuadrants < 8, "2222 is RARE not COMMON");
+            _gemCooldownPeriod = CommonGemsCooldownPeriod;
+            _miningPeriod = CommonGemsMiningPeriod;
+            _value = CommonGemsValue;
         } else if (_rarity == Rarity.RARE) {
             require(
                 (_quadrants[0] == 2 || _quadrants[0] == 3) &&
@@ -463,6 +470,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 2 || _quadrants[3] == 3),
                 "All quadrants must be 2 or 3 for RARE rarity"
             );
+            require(sumOfQuadrants < 12, "3333 is UNIQUE not RARE");
+            _gemCooldownPeriod = RareGemsCooldownPeriod;
+            _miningPeriod = RareGemsMiningPeriod;
+            _value = RareGemsValue;
         } else if (_rarity == Rarity.UNIQUE) {
             require(
                 (_quadrants[0] == 3 || _quadrants[0] == 4) &&
@@ -471,6 +482,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 3 || _quadrants[3] == 4),
                 "All quadrants must be 3 or 4 for UNIQUE rarity"
             );
+            require(sumOfQuadrants < 16, "4444 is EPIC not UNIQUE");
+            _gemCooldownPeriod = UniqueGemsCooldownPeriod;
+            _miningPeriod = UniqueGemsMiningPeriod;
+            _value = UniqueGemsValue;
         } else if (_rarity == Rarity.EPIC) {
             require(
                 (_quadrants[0] == 4 || _quadrants[0] == 5) &&
@@ -479,6 +494,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 4 || _quadrants[3] == 5),
                 "All quadrants must be 4 or 5 for EPIC rarity"
             );
+            require(sumOfQuadrants < 20, "5555 is LEGENDARY not EPIC");
+            _gemCooldownPeriod = EpicGemsCooldownPeriod;
+            _miningPeriod = EpicGemsMiningPeriod;
+            _value = EpicGemsValue;
         } else if (_rarity == Rarity.LEGENDARY) {
             require(
                 (_quadrants[0] == 5 || _quadrants[0] == 6) &&
@@ -487,7 +506,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 5 || _quadrants[3] == 6),
                 "All quadrants must be 5 or 6 for LEGENDARY rarity"
             );
-            require(sumOfQuadrants < 24, "this sum corresponds to a Mythic GEM");
+            require(sumOfQuadrants < 24, "6666 is MYTHIC not LEGENDARY");
+            _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
+            _miningPeriod = LegendaryGemsMiningPeriod;
+            _value = LegendaryGemsValue;
         } else if (_rarity == Rarity.MYTHIC) {
             require(
                 (_quadrants[0] == 6) &&
@@ -496,6 +518,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 (_quadrants[3] == 6),
                 "All quadrants must be 6 for MYTHIC rarity"
             );
+            _gemCooldownPeriod = MythicGemsCooldownPeriod;
+            _miningPeriod = MythicGemsMiningPeriod;
+            _value = MythicGemsValue;
         } else {
             revert("wrong Rarity");
         }
@@ -538,21 +563,16 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @notice Creates a premined pool of GEMs based oon their attribute passed in the parameters and assigns their ownership to the contract.
      * @param _rarities rarity of each Gem
      * @param _colors The colors of the GEMs to be created.
-     * @param _values The values of the GEMs to be created.
+     * @param _stakingIndexes staking index of the WSTON associated with the GEMs
      * @param _quadrants quadrants of the GEMs to be created.
-     * @param _miningPeriods period in seconds that a user have to wait for claiming a mined gem  
-     * @param _gemCooldownPeriods period in second that a user must wait before using it for mining
      * @param _tokenURIs TokenURIs of each GEM
      * @return The IDs of the newly created GEMs.
      */
     function createGEMPool(
         Rarity[] memory _rarities,
         uint8[2][] memory _colors,
-        uint256[] memory _values,
         uint256[] memory _stakingIndexes,
         uint8[4][] memory _quadrants,
-        uint256[] memory _miningPeriods,
-        uint256[] memory _gemCooldownPeriods,
         string[] memory _tokenURIs
     )
         external
@@ -562,18 +582,19 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     {
         require(
             _rarities.length == _colors.length &&
-            _colors.length == _values.length &&
-            _values.length == _stakingIndexes.length &&
+            _colors.length == _stakingIndexes.length &&
             _stakingIndexes.length == _quadrants.length &&
-            _quadrants.length == _miningPeriods.length &&
-            _miningPeriods.length == _gemCooldownPeriods.length &&
-            _gemCooldownPeriods.length == _tokenURIs.length,
+            _quadrants.length == _tokenURIs.length,
             "Input arrays must have the same length"
         );
 
-        uint256[] memory newGemIds = new uint256[](_values.length);
+        uint256[] memory newGemIds = new uint256[](_rarities.length);
+        uint256 _gemCooldownPeriod;
+        uint256 _miningPeriod;
+        uint256 _value;
 
-        for (uint256 i = 0; i < _values.length; i++) {
+        for (uint256 i = 0; i < _rarities.length; i++) {
+
             uint8 sumOfQuadrants = _quadrants[i][0] + _quadrants[i][1] + _quadrants[i][2] + _quadrants[i][3];
 
             // Ensure that if rarity is COMMON, all quadrants must be either 1 or 2
@@ -585,6 +606,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                     (_quadrants[i][3] == 1 || _quadrants[i][3] == 2),
                     "All quadrants must be 1 or 2 for COMMON rarity"
                 );
+                require(sumOfQuadrants < 8, "2222 is RARE not COMMON");
+                _gemCooldownPeriod = CommonGemsCooldownPeriod;
+                _miningPeriod = CommonGemsMiningPeriod;
+                _value = CommonGemsValue;
             }
 
             // Ensure that if rarity is RARE, all quadrants must be either 2 or 3
@@ -596,6 +621,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                     (_quadrants[i][3] == 2 || _quadrants[i][3] == 3),
                     "All quadrants must be 2 or 3 for RARE rarity"
                 );
+                require(sumOfQuadrants < 12, "3333 is UNIQUE not RARE");
+                _gemCooldownPeriod = RareGemsCooldownPeriod;
+                _miningPeriod = RareGemsMiningPeriod;
+                _value = RareGemsValue;
             }
 
             // Ensure that if rarity is UNIQUE, all quadrants must be either 3 or 4
@@ -607,6 +636,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                     (_quadrants[i][3] == 3 || _quadrants[i][3] == 4),
                     "All quadrants must be 3 or 4 for UNIQUE rarity"
                 );
+                require(sumOfQuadrants < 16, "4444 is EPIC not UNIQUE");
+                _gemCooldownPeriod = UniqueGemsCooldownPeriod;
+                _miningPeriod = UniqueGemsMiningPeriod;
+                _value = UniqueGemsValue;
             }
 
             // Ensure that if rarity is EPIC, all quadrants must be either 4 or 5
@@ -618,6 +651,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                     (_quadrants[i][3] == 4 || _quadrants[i][3] == 5),
                     "All quadrants must be 4 or 5 for EPIC rarity"
                 );
+                require(sumOfQuadrants < 20, "5555 is LEGENDARY not EPIC");
+                _gemCooldownPeriod = EpicGemsCooldownPeriod;
+                _miningPeriod = EpicGemsMiningPeriod;
+                _value = EpicGemsValue;
             }
 
             // Ensure that if rarity is LEGENDARY, all quadrants must be either 5 or 6
@@ -629,7 +666,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                     (_quadrants[i][3] == 5 || _quadrants[i][3] == 6),
                     "All quadrants must be 5 or 6 for LEGENDARY rarity"
                 );
-                require(sumOfQuadrants < 24, "this sum corresponds to a Mythic GEM");
+                require(sumOfQuadrants < 24, "6666 is MYTHIC not LEGENDARY");
+                _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
+                _miningPeriod = LegendaryGemsMiningPeriod;
+                _value = LegendaryGemsValue;
             }
 
             // Ensure that if rarity is MYTHIC, all quadrants must be equal to 6
@@ -641,6 +681,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                     (_quadrants[i][3] == 6),
                     "All quadrants must be 6 for MYTHIC rarity"
                 );
+                _gemCooldownPeriod = MythicGemsCooldownPeriod;
+                _miningPeriod = MythicGemsMiningPeriod;
+                _value = MythicGemsValue;
             }
 
             Gem memory _Gem = Gem({
@@ -648,10 +691,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 rarity: _rarities[i],
                 quadrants: _quadrants[i],
                 color: _colors[i],
-                value: _values[i],
+                value: _value,
                 stakingIndex: _stakingIndexes[i],
-                miningPeriod: _miningPeriods[i],
-                gemCooldownPeriod: block.timestamp + _gemCooldownPeriods[i],
+                miningPeriod: _miningPeriod,
+                gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
                 isLocked: false,
                 tokenURI: _tokenURIs[i],
                 randomRequestId: 0
@@ -669,7 +712,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _safeMint(msg.sender, newGemId);
             _setTokenURI(newGemId, _tokenURIs[i]);
 
-            emit Created(newGemId, _rarities[i], _colors[i], _values[i], _stakingIndexes[i], _quadrants[i], _miningPeriods[i], _gemCooldownPeriods[i], _tokenURIs[i],  msg.sender);
+            emit Created(newGemId, _rarities[i], _colors[i], _value, _stakingIndexes[i], _quadrants[i], _miningPeriod, _gemCooldownPeriod, _tokenURIs[i],  msg.sender);
             newGemIds[i] = newGemId;
         }
 

@@ -11,24 +11,20 @@ contract GemFactoryTest is L2BaseTest {
 
     function testCreateGEM() public {
         vm.startPrank(owner);
-
+        
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint8 color = 0;
-        uint256 value = 10 * 10 ** 27; // 10 WSTON
-        uint8[4] memory quadrants = [uint8(1), uint8(2), uint8(1), uint8(2)];
-        uint256 cooldownPeriod = 3600 * 24; // 24 hours
-        uint256 miningPeriod = 1200; // 20 min
+        uint8[2] memory color = [0,0];
+        uint256 stakingIndex = 1;
+        uint8[4] memory quadrants = [1, 2, 1, 1];
         string memory tokenURI = "https://example.com/token/1";
 
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            value,
+            stakingIndex,
             quadrants,
-            miningPeriod,
-            cooldownPeriod,
             tokenURI
         );
 
@@ -44,29 +40,21 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
 
         // Define GEM properties
-        uint8[] memory colors = new uint8[](2);
-        colors[0] = 0;
-        colors[1] = 1;
+        uint8[2][] memory colors = new uint8[2][](2);
+        colors[0] = [0,0];
+        colors[1] = [1,1];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
 
-        uint256[] memory values = new uint256[](2);
-        values[0] = 10 * 10 ** 27; // 10 WSTON
-        values[1] = 150 * 10 ** 27; // 150 WSTON
+        uint256[] memory stakingIndexes = new uint256[](2);
+        stakingIndexes[0] = 1; 
+        stakingIndexes[1] = 1; 
         
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [2, 3, 3, 2];
-        quadrants[1] = [4, 3, 4, 4];
-
-        uint256[] memory cooldownPeriods = new uint256[](2);
-        cooldownPeriods[0] = 3600 * 24; // 24 hour
-        cooldownPeriods[1] = 3600 * 48; // 48 hours
-
-        uint256[] memory miningPeriods = new uint256[](2);
-        miningPeriods[0] = 1200; // 20 min
-        miningPeriods[1] = 2400; // 40 min
+        quadrants[1] = [4, 3, 4, 3];
 
         string[] memory tokenURIs = new string[](2);
         tokenURIs[0] = "https://example.com/token/1";
@@ -76,10 +64,8 @@ contract GemFactoryTest is L2BaseTest {
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             rarities,
             colors,
-            values,
+            stakingIndexes,
             quadrants,
-            miningPeriods,
-            cooldownPeriods,
             tokenURIs
         );
 
@@ -93,26 +79,22 @@ contract GemFactoryTest is L2BaseTest {
         vm.stopPrank();
     }
 
-    function testMeltGEM() public {
+function testMeltGEM() public {
         vm.startPrank(owner);
 
          // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint8 color = 0;
-        uint256 value = 10 * 10 ** 27; // 10 WSTON
-        uint8[4] memory quadrants = [uint8(1), uint8(2), uint8(1), uint8(2)];
-        uint256 cooldownPeriod = 3600 * 24; // 24 hours
-        uint256 miningPeriod = 1200; // 20 min
+        uint8[2] memory color = [0,0];
+        uint256 stakingIndex = 1;
+        uint8[4] memory quadrants = [1,2,1,1];
         string memory tokenURI = "https://example.com/token/1";
 
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            value,
+            stakingIndex,
             quadrants,
-            miningPeriod,
-            cooldownPeriod,
             tokenURI
         );
 

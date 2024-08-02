@@ -18,7 +18,23 @@ contract L2BaseTest is Test {
     uint256 public rareMiningFees = 20 * 10 ** 18;
     uint256 public uniqueMiningFees = 40 * 10 ** 18;
     uint256 public epicMiningFees = 60 * 10 ** 18;
+    uint256 public LegendaryMiningFees = 80 * 10 ** 18;
+    uint256 public MythicMiningFees = 100 * 10 ** 18;
     uint256 public tonFeesRate = 10; // 10%
+
+    uint256 public CommonGemsValue = 10 * 10 ** 27;
+    uint256 public RareGemsValue = 19 * 10 ** 27;
+    uint256 public UniqueGemsValue = 53 * 10 ** 27;
+    uint256 public EpicGemsValue = 204 * 10 ** 27;
+    uint256 public LegendaryGemsValue = 605 * 10 ** 27;
+    uint256 public MythicGemsValue = 4000 * 10 ** 27;
+
+    uint256 public CommonGemsMiningPeriod = 1 weeks;
+    uint256 public RareGemsMiningPeriod = 2 weeks;
+    uint256 public UniqueGemsMiningPeriod = 3 weeks;
+    uint256 public EpicGemsMiningPeriod = 4 weeks;
+    uint256 public LegendaryGemsMiningPeriod = 5 weeks;
+    uint256 public MythicGemsMiningPeriod = 6 weeks;
 
     address payable owner;
     address payable user1;
@@ -73,7 +89,33 @@ contract L2BaseTest is Test {
             commonMiningFees,
             rareMiningFees,
             uniqueMiningFees,
-            epicMiningFees
+            epicMiningFees,
+            LegendaryMiningFees,
+            MythicMiningFees, 
+            CommonGemsValue,
+            RareGemsValue,
+            UniqueGemsValue,
+            EpicGemsValue,
+            LegendaryGemsValue,
+            MythicGemsValue
+        );
+
+        GemFactory(gemfactory).setGemsMiningPeriods(
+            CommonGemsMiningPeriod,
+            RareGemsMiningPeriod,
+            UniqueGemsMiningPeriod,
+            EpicGemsMiningPeriod,
+            LegendaryGemsMiningPeriod,
+            MythicGemsMiningPeriod
+        );
+
+        GemFactory(gemfactory).setGemsCooldownPeriods(
+            CommonGemsMiningPeriod,
+            RareGemsMiningPeriod,
+            UniqueGemsMiningPeriod,
+            EpicGemsMiningPeriod,
+            LegendaryGemsMiningPeriod,
+            MythicGemsMiningPeriod
         );
 
         MarketPlace(marketplace).initialize(

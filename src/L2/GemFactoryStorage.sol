@@ -71,6 +71,8 @@ contract GemFactoryStorage {
     uint256 public RareMiningFees;
     uint256 public UniqueMiningFees;
     uint256 public EpicMiningFees;
+    uint256 public LegendaryMiningFees;
+    uint256 public MythicMiningFees;
 
     uint256 public CommonGemsValue;
     uint256 public RareGemsValue;

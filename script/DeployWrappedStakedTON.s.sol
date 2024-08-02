@@ -15,6 +15,7 @@ contract DeployWrappedStakedTON is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         uint256 amount = 100 * 10**27; // Example amount to approve and deposit
         uint256 layer2Index = 0; // Example Layer2 index
+        uint256 minDepositAmount = 100 * 10**27;
 
         vm.startBroadcast(deployerPrivateKey);
 
@@ -29,7 +30,7 @@ contract DeployWrappedStakedTON is Script {
         );
 
         // Deploy the WrappedStakedTON contract
-        L1WrappedStakedTON wston = new L1WrappedStakedTON(layer2s, depositManager, seigManager, l1wton);
+        L1WrappedStakedTON wston = new L1WrappedStakedTON(layer2s, minDepositAmount, depositManager, seigManager, l1wton);
 
         // Log the contract address
         console.log("WrappedStakedTON deployed at:", address(wston));
