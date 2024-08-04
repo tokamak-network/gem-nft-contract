@@ -122,11 +122,41 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         stakingTrackers.push(_stakingTracker);
         stakingTrackerCount++;
 
+        userBalanceByStakingIndex[_to][_stakingTracker.stakingIndex] = _amount;
+
         // we mint WSTON
         _mint(_to, _amount);
 
         emit Deposited(stakingTrackerCount, _to, _amount, block.timestamp);
 
+        return true;
+    }
+
+    function bridgeWSTON(uint256 _layer2Index, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
+        require(_bridgeWSTONTo(_layer2Index, msg.sender, _stakingIndex, _amount));
+    }
+
+    function bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
+        require(_bridgeWSTONTo(_layer2Index, _to, _stakingIndex, _amount));
+    }
+
+    function _bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _stakingIndex, uint256 _amount) internal returns(bool) {
+        address layer2Address = layer2s[_layer2Index].layer2Address;
+        require(layer2Address != address(0));
+
+        require(this.transferWSTONFrom(_stakingIndex, _to, address(this), _amount));
+        userBridgedAmountByLayer2AndIndex[_to][_layer2Index][_stakingIndex] += _amount;
+
+        IL1StandardBridge(layer2Address).depositERC20To(
+            address(this),
+            layer2s[_layer2Index].l2wston,
+            _to,
+            _amount,
+            MIN_DEPOSIT_GAS_LIMIT,
+            ""
+        );
+
+        emit WSTONBridged(_layer2Index, _to, _stakingIndex, _amount);
         return true;
     }
 
@@ -138,12 +168,16 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
     ) external nonReentrant returns(bool) {
         require(_to != address(0), "address zero");
         require(_amount >= 0, "zero amount");
-        require(_amount >= stakingTrackers[_stakingIndex].amount, "not enough funds to transfer on this stakingIndex");
+        require(userBalanceByStakingIndex[_from][_stakingIndex] >= _amount, "not enough funds to transfer on this stakingIndex");
 
         // Check allowance
         require(allowance(_from, address(this)) >= _amount, "allowance too low");
 
-        IERC20(address(this)).safeTransferFrom(_from, _to, _amount);
+        userBalanceByStakingIndex[_from][_stakingIndex] -= _amount;
+        userBalanceByStakingIndex[_to][_stakingIndex] -= _amount;
+
+        // Call transferFrom on behalf of the contract
+        this.transferFrom(_from, _to, _amount);
 
         emit Transferred(_stakingIndex, _from, _to, _amount);
         return true;
@@ -152,9 +186,13 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
     function transferWSTON(uint256 _stakingIndex, address _to, uint256 _amount) external nonReentrant returns (bool) {
         require(_to != address(0), "address zero");
         require(_amount >= 0, "zero amount");
-        require(_amount >= stakingTrackers[_stakingIndex].amount, "not enough funds to transfer on this stakingIndex");
+        require(userBalanceByStakingIndex[msg.sender][_stakingIndex] >= _amount, "not enough funds to transfer on this stakingIndex");
 
-        IERC20(address(this)).safeTransfer(_to, _amount);
+        userBalanceByStakingIndex[msg.sender][_stakingIndex] -= _amount;
+        userBalanceByStakingIndex[_to][_stakingIndex] -= _amount;
+
+        // Call transfer on behalf of the contract
+        this.transfer(_to, _amount);
 
         emit Transferred(_stakingIndex, msg.sender, _to, _amount);
         return true;
@@ -190,14 +228,32 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         return minDepositAmount;
     }
 
-    // Override ERC20 transfer and transferFrom functions to disable them
-    function transfer(address, uint256) public pure override returns (bool) {
-        revert("Use transferWSTON instead");
+    // Override ERC20 transfer and transferFrom functions to disable user transferring anywher else from beside this contract
+    function transfer(address to, uint256 value) public override returns (bool) {
+        for(uint256 i = 0; i < layer2s.length; i++) {
+            if(msg.sender != address(this) && msg.sender != layer2s[i].l1StandardBridge) {
+                revert("Use transferWSTONFrom instead");
+            }
+        }
+
+        address owner = _msgSender();
+        _transfer(owner, to, value);
+        return true;
     }
 
-    function transferFrom(address, address, uint256) public pure override returns (bool) {
-        revert("Use transferWSTONFrom instead");
+    function transferFrom(address from, address to, uint256 value) public override returns (bool) {
+        for(uint256 i = 0; i < layer2s.length; i++) {
+            if(msg.sender != address(this) && msg.sender != layer2s[i].l1StandardBridge) {
+                revert("Use transferWSTONFrom instead");
+            }
+        }
+
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        _transfer(from, to, value);
+        return true;
     }
+    
 
     // Todo requestWithdrawal, process withdrawal
 }

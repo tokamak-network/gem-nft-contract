@@ -14,12 +14,12 @@ contract L2BaseTest is Test {
 
     using SafeERC20 for IERC20;
 
-    uint256 public commonMiningFees = 10 * 10 ** 18;
-    uint256 public rareMiningFees = 20 * 10 ** 18;
-    uint256 public uniqueMiningFees = 40 * 10 ** 18;
-    uint256 public epicMiningFees = 60 * 10 ** 18;
-    uint256 public LegendaryMiningFees = 80 * 10 ** 18;
-    uint256 public MythicMiningFees = 100 * 10 ** 18;
+    uint256 public commonMiningFees = 1 * 10 ** 16; // 0,01 eth
+    uint256 public rareMiningFees = 1 * 10 ** 16;
+    uint256 public uniqueMiningFees = 1 * 10 ** 16;
+    uint256 public epicMiningFees = 1 * 10 ** 16;
+    uint256 public LegendaryMiningFees = 1 * 10 ** 16;
+    uint256 public MythicMiningFees = 1 * 10 ** 16;
     uint256 public tonFeesRate = 10; // 10%
 
     uint256 public CommonGemsValue = 10 * 10 ** 27;
@@ -73,7 +73,6 @@ contract L2BaseTest is Test {
 
         // give ETH to User1 to cover gasFees associated with using VRF functions
         vm.deal(user1, 100 ether);
-        vm.deal(user2, 100 ether);
 
         // deploy treasury and marketplace
         treasury = address(new Treasury(coordinator, wston, ton));

@@ -324,7 +324,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // user must not be mining another gem
         require(!isUserMining[msg.sender], "user is already mining");
         // treasury must own the token
-        require(GEMIndexToOwner[_tokenId] == msg.sender);
+        require(GEMIndexToOwner[_tokenId] == msg.sender, "not gem owner");
 
         // Mining fees calculation
         uint256 miningFees;
@@ -341,9 +341,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             revert("Gem not allowed to Mine");
         }
 
-        // User pays mining fees
-        IERC20(ton).safeTransferFrom(msg.sender, treasury, miningFees);
-
         // We set isUserMining to true to prevent the same user to recall the function
         isUserMining[msg.sender] = true;
         userMiningToken[msg.sender][_tokenId] = true;
@@ -353,7 +350,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         Gems[_tokenId].isLocked = true;
 
          // defining the random value
-        require(tx.origin == msg.sender, "caller must be EOA");
+        //require(tx.origin == msg.sender, "caller must be EOA");
         (uint256 requestId, uint256 requestPrice) = requestRandomness(CALLBACK_GAS_LIMIT);
         require(msg.value >= requestPrice, "Not enough funds");
         

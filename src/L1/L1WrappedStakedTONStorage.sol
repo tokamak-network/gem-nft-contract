@@ -20,6 +20,10 @@ contract L1WrappedStakedTONStorage {
 
     Layer2[] public layer2s; // 0: TITAN, 1: THANOS, 2: ARBITRUM etc...
     StakingTracker[] public stakingTrackers;
+
+    mapping(address => mapping(uint256 => uint256)) userBalanceByStakingIndex;
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) userBridgedAmountByLayer2AndIndex;
+
     uint256 stakingTrackerCount;
 
     uint32 public constant MIN_DEPOSIT_GAS_LIMIT = 210000;
@@ -33,9 +37,9 @@ contract L1WrappedStakedTONStorage {
     bool paused;
 
     // Main events
-    event DepositedAndBridged(address indexed account, address indexed layer2, uint256 amount, uint256 stakingIndex, uint256 depositTime);
     event Deposited(uint256 indexed stakingIndex, address indexed account, uint256 amount, uint256 depositTime);
     event Transferred(uint256 indexed stakingIndex, address from, address to, uint256 amount);
+    event WSTONBridged(uint256 layer2Index, address to, uint256 stakingIndex, uint256 amount);
 
 
     // Pause Events
