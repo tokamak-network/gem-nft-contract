@@ -903,7 +903,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         for (uint256 i = 0; i < Gems.length; i++) {
             uint8 GemSumOfQuadrants = Gems[i].quadrants[0] + Gems[i].quadrants[1] + Gems[i].quadrants[2] + Gems[i].quadrants[3];
-            if (GemSumOfQuadrants < sumOfQuadrants && GEMIndexToOwner[i] == treasury) {
+            if (GemSumOfQuadrants < sumOfQuadrants && 
+                GEMIndexToOwner[i] == treasury &&
+                !Gems[i].isLocked
+            ) {
                 tokenIds[index] = Gems[i].tokenId;
                 unchecked{
                     index++;

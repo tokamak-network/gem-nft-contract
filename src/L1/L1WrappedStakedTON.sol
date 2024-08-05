@@ -24,6 +24,9 @@ interface IL1StandardBridge {
 contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedTONStorage {
     using SafeERC20 for IERC20;
 
+    // Flag to indicate if the bridgeWSTON function is being executed
+    bool private isBridging;
+
     modifier whenNotPaused() {
         require(!paused, "Pausable: paused");
         _;
@@ -48,6 +51,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         seigManager = _seigManager;
         l1wton = _l1wton;
         minDepositAmount = _minDepositAmount;
+        isBridging = false;
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -84,8 +88,9 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         uint256 _amount,
         uint256 _layer2Index
     ) internal returns (bool) {
-
+        // minimum deposits enabled in order to avoid user griefing the function
         require(_amount >= minDepositAmount, "min required amount");
+        // we distribute rewards each time a user deposits in order to calculate each user's share correctly
         require(distributeRewards(), "failed to distrribute rewards");
 
         // user transfers wton to this contract
@@ -116,13 +121,16 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         stakingTrackers.push(_stakingTracker);
         stakingTrackerCount++;
 
+
+        // mapping updates
         layer2s[_layer2Index].totalAmountStaked += _amount;
         userBalanceByLayer2Index[_to][_layer2Index] += _amount;
         
+        // add user to the list if it is the first time he calls the function
         addUserAddress(_to);
 
+        // recompute each staker's share rate
         uint256 totalStakedAmount = layer2s[_layer2Index].totalAmountStaked;
-
         for(uint256 i = 0; i < userAddresses.length; i++) {
             uint256 userBalance = userBalanceByLayer2Index[userAddresses[i]][_layer2Index];
             uint256 userShares = (userBalance * 1e27) / totalStakedAmount; // Multiply by 1e27 for precision
@@ -136,25 +144,27 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         return true;
     }
 
-
-
+    /**
+     * @notice function used to distribute the seigniorage received by the contract to each WSTON holder.
+     */
     function distributeRewards() public whenNotPaused nonReentrant returns(bool) {   
         uint256 swtonContractBalance;
+        require(ISeigManager(seigManager).updateSeigniorage(), "failed to update seigniorage");
+
         for(uint256 i = 0; i < layer2s.length; i++) {
-            require(ISeigManager(seigManager).updateSeigniorage(), "failed to update seigniorage");
             swtonContractBalance = ISeigManager(seigManager).stakeOf(layer2s[i].layer2Address, address(this));
             uint256 rewardsToDistribute = layer2s[i].totalAmountStaked - swtonContractBalance;
-            require(rewardsToDistribute > 0, "No tokens to distribute");
-
-            for(uint256 j = 0; j < userAddresses.length; j++) {
-                uint256 userRewards = rewardsToDistribute * userSharesByLayer2Index[userAddresses[j]][i];
-                if(userRewards > 0) {
-                    _mint(userAddresses[j], userRewards);   
+            if (rewardsToDistribute > 0) {
+                for(uint256 j = 0; j < userAddresses.length; j++) {
+                    uint256 userRewards = rewardsToDistribute * userSharesByLayer2Index[userAddresses[j]][i];
+                    if(userRewards > 0) {
+                        _mint(userAddresses[j], userRewards);   
+                    }                    
                 }
-            }
 
-            layer2s[i].totalAmountStaked = swtonContractBalance;
-            layer2s[i].lastRewardsDistributionDate = block.timestamp;
+                layer2s[i].totalAmountStaked = swtonContractBalance;
+                layer2s[i].lastRewardsDistributionDate = block.timestamp;
+            }
         }
         return true;
     }
@@ -173,6 +183,9 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
 
         require(this.transferWSTONFrom(_layer2Index, _to, address(this), _amount));
 
+        // flag to ensure user can't bridge withoout going through this function
+        isBridging = true;
+
         IL1StandardBridge(layer2Address).depositERC20To(
             address(this),
             layer2s[_layer2Index].l2wston,
@@ -181,6 +194,8 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
             MIN_DEPOSIT_GAS_LIMIT,
             ""
         );
+
+        isBridging = false;
 
         emit WSTONBridged(_layer2Index, _to, _stakingIndex, _amount);
         return true;
@@ -202,9 +217,10 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         userBalanceByLayer2Index[_from][_layer2Index] -= _amount;
         userBalanceByLayer2Index[_to][_layer2Index] += _amount;
 
-        if(userBalanceByLayer2Index[msg.sender][_layer2Index] == 0) {
-            delete userBalanceByLayer2Index[msg.sender][_layer2Index];
-            delete userSharesByLayer2Index[msg.sender][_layer2Index];
+
+        if(userBalanceByLayer2Index[_from][_layer2Index] == 0) {
+            delete userBalanceByLayer2Index[_from][_layer2Index];
+            delete userSharesByLayer2Index[_from][_layer2Index];
         }
 
         // Call transferFrom on behalf of the contract
@@ -227,7 +243,6 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
             delete userBalanceByLayer2Index[msg.sender][_layer2Index];
             delete userSharesByLayer2Index[msg.sender][_layer2Index];
         }
-
 
         // Call transfer on behalf of the contract
         this.transfer(_to, _amount);
@@ -268,8 +283,8 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
     // Override ERC20 transfer and transferFrom functions to disable user transferring anywher else from beside this contract
     function transfer(address to, uint256 value) public override returns (bool) {
         for(uint256 i = 0; i < layer2s.length; i++) {
-            if(msg.sender != address(this) && msg.sender != layer2s[i].l1StandardBridge) {
-                revert("Use transferWSTONFrom instead");
+            if(msg.sender != address(this)) {
+                revert("Not allowed to use transfer. Use transferWSTON instead");
             }
         }
 
@@ -280,8 +295,8 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
 
     function transferFrom(address from, address to, uint256 value) public override returns (bool) {
         for(uint256 i = 0; i < layer2s.length; i++) {
-            if(msg.sender != address(this) && msg.sender != layer2s[i].l1StandardBridge) {
-                revert("Use transferWSTONFrom instead");
+            if(msg.sender != address(this) || (msg.sender != layer2s[i].l1StandardBridge && isBridging == true)) {
+                revert("Not allowed to use transferFrom. Use transferWSTONFrom instead");
             }
         }
 
