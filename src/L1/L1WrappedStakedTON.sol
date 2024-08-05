@@ -86,6 +86,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
     ) internal returns (bool) {
 
         require(_amount >= minDepositAmount, "min required amount");
+        require(distributeRewards(), "failed to distrribute rewards");
 
         // user transfers wton to this contract
         require(
@@ -117,14 +118,16 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
 
         layer2s[_layer2Index].totalAmountStaked += _amount;
         userBalanceByLayer2Index[_to][_layer2Index] += _amount;
+        
+        addUserAddress(_to);
 
-        uint256 userBalance = userBalanceByLayer2Index[_to][_layer2Index];
         uint256 totalStakedAmount = layer2s[_layer2Index].totalAmountStaked;
 
-        uint256 userShares = (userBalance * 1e27) / totalStakedAmount; // Multiply by 1e27 for precision
-        userSharesByLayer2Index[_to][_layer2Index] = userShares;
-
-        addUserAddress(_to);
+        for(uint256 i = 0; i < userAddresses.length; i++) {
+            uint256 userBalance = userBalanceByLayer2Index[userAddresses[i]][_layer2Index];
+            uint256 userShares = (userBalance * 1e27) / totalStakedAmount; // Multiply by 1e27 for precision
+            userSharesByLayer2Index[_to][_layer2Index] = userShares;
+        }
 
         // we mint WSTON
         _mint(_to, _amount);
@@ -135,8 +138,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
 
 
 
-    function distributeRewards() external whenNotPaused nonReentrant {
-        
+    function distributeRewards() public whenNotPaused nonReentrant returns(bool) {   
         uint256 swtonContractBalance;
         for(uint256 i = 0; i < layer2s.length; i++) {
             require(ISeigManager(seigManager).updateSeigniorage(), "failed to update seigniorage");
@@ -154,6 +156,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
             layer2s[i].totalAmountStaked = swtonContractBalance;
             layer2s[i].lastRewardsDistributionDate = block.timestamp;
         }
+        return true;
     }
 
     function bridgeWSTON(uint256 _layer2Index, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
@@ -192,12 +195,17 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         require(_to != address(0), "address zero");
         require(_amount >= 0, "zero amount");
         require(userBalanceByLayer2Index[_from][_layer2Index] >= _amount, "not enough funds to transfer on this stakingIndex");
-
+        require(distributeRewards(), "failed to distrribute rewards");
         // Check allowance
         require(allowance(_from, address(this)) >= _amount, "allowance too low");
 
         userBalanceByLayer2Index[_from][_layer2Index] -= _amount;
-        userBalanceByLayer2Index[_to][_layer2Index] -= _amount;
+        userBalanceByLayer2Index[_to][_layer2Index] += _amount;
+
+        if(userBalanceByLayer2Index[msg.sender][_layer2Index] == 0) {
+            delete userBalanceByLayer2Index[msg.sender][_layer2Index];
+            delete userSharesByLayer2Index[msg.sender][_layer2Index];
+        }
 
         // Call transferFrom on behalf of the contract
         this.transferFrom(_from, _to, _amount);
@@ -210,9 +218,16 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         require(_to != address(0), "address zero");
         require(_amount >= 0, "zero amount");
         require(userBalanceByLayer2Index[msg.sender][_layer2Index] >= _amount, "not enough funds to transfer on this stakingIndex");
+        require(distributeRewards(), "failed to distrribute rewards");
 
         userBalanceByLayer2Index[msg.sender][_layer2Index] -= _amount;
-        userBalanceByLayer2Index[_to][_layer2Index] -= _amount;
+        userBalanceByLayer2Index[_to][_layer2Index] += _amount;
+
+        if(userBalanceByLayer2Index[msg.sender][_layer2Index] == 0) {
+            delete userBalanceByLayer2Index[msg.sender][_layer2Index];
+            delete userSharesByLayer2Index[msg.sender][_layer2Index];
+        }
+
 
         // Call transfer on behalf of the contract
         this.transfer(_to, _amount);
