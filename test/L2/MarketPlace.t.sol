@@ -15,7 +15,6 @@ contract MarketPlaceTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -23,7 +22,6 @@ contract MarketPlaceTest is L2BaseTest {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );
@@ -60,10 +58,6 @@ contract MarketPlaceTest is L2BaseTest {
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
-
-        uint256[] memory stakingIndexes = new uint256[](2);
-        stakingIndexes[0] = 1; 
-        stakingIndexes[1] = 1; 
         
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [2, 3, 3, 2];
@@ -77,7 +71,6 @@ contract MarketPlaceTest is L2BaseTest {
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             rarities,
             colors,
-            stakingIndexes,
             quadrants,
             tokenURIs
         );
@@ -114,7 +107,6 @@ contract MarketPlaceTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -122,7 +114,6 @@ contract MarketPlaceTest is L2BaseTest {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );

@@ -152,13 +152,11 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * same stakingIndex. Users can choose the color the forged gem will have if it respects certain conditions. 
      * old gems are burnt while the new forged gem is minted.
      * @param _tokenIds array of tokens to be forged. Must respect some length depending on the rarity chosen
-     * @param _stakingIndex to check if the staking index of each token selected is the same
      * @param _rarity to check if the rarity of each token selected is the same
      * @param _color color desired of the forged gem
      */
     function forgeTokens(
         uint256[] memory _tokenIds, 
-        uint256 _stakingIndex, 
         Rarity _rarity, 
         uint8[2] memory _color
     ) external whenNotPaused returns(uint256 newGemId) {
@@ -207,7 +205,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             require(GEMIndexToOwner[_tokenIds[i]] == msg.sender);
             require(isTokenLocked(_tokenIds[i]) == false, "Gem is for sale or is mining");
             require(Gems[_tokenIds[i]].rarity == _rarity, "wrong rarity Gems");
-            require(Gems[_tokenIds[i]].stakingIndex == _stakingIndex, "wrong staking index");
             sumOfQuadrants[0] += Gems[_tokenIds[i]].quadrants[0];
             sumOfQuadrants[1] += Gems[_tokenIds[i]].quadrants[1];
             sumOfQuadrants[2] += Gems[_tokenIds[i]].quadrants[2];
@@ -283,7 +280,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             quadrants: forgedQuadrants,
             color: _color,
             value: forgedGemsValue,
-            stakingIndex: _stakingIndex,
             miningPeriod: forgedGemsMiningPeriod,
             gemCooldownPeriod: block.timestamp + forgedGemsCooldownPeriod,
             isLocked: false,
@@ -431,7 +427,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @notice Creates a premined pool of GEM based oon their attribute passed in the parameters and assigns their ownership to the contract.
      * @param _rarity The rarity of the GEM to be created.
      * @param _color The colors of the GEM to be created.
-     * @param _stakingIndex staking index of the WSTON associated with the GEM
      * @param _quadrants quadrants of the GEM to be created.
      * @param _tokenURI TokenURIs of each GEM
      * @return The IDs of the newly created GEM.
@@ -439,7 +434,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     function createGEM( 
         Rarity _rarity,
         uint8[2] memory _color,  
-        uint256 _stakingIndex,
         uint8[4] memory _quadrants,
         string memory _tokenURI) 
     external onlyTreasury whenNotPaused returns (uint256) {
@@ -532,7 +526,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             quadrants: _quadrants,
             color: _color,
             value: _value,
-            stakingIndex: _stakingIndex,
             miningPeriod: _miningPeriod,
             gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
             isLocked: false,
@@ -556,7 +549,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Set the token URI
         _setTokenURI(newGemId, _tokenURI);
 
-        emit Created(newGemId, _rarity, _color, _value, _stakingIndex, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI,  msg.sender);
+        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI,  msg.sender);
         return newGemId;
     }
 
@@ -564,7 +557,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @notice Creates a premined pool of GEMs based oon their attribute passed in the parameters and assigns their ownership to the contract.
      * @param _rarities rarity of each Gem
      * @param _colors The colors of the GEMs to be created.
-     * @param _stakingIndexes staking index of the WSTON associated with the GEMs
      * @param _quadrants quadrants of the GEMs to be created.
      * @param _tokenURIs TokenURIs of each GEM
      * @return The IDs of the newly created GEMs.
@@ -572,7 +564,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     function createGEMPool(
         Rarity[] memory _rarities,
         uint8[2][] memory _colors,
-        uint256[] memory _stakingIndexes,
         uint8[4][] memory _quadrants,
         string[] memory _tokenURIs
     )
@@ -583,8 +574,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     {
         require(
             _rarities.length == _colors.length &&
-            _colors.length == _stakingIndexes.length &&
-            _stakingIndexes.length == _quadrants.length &&
+            _colors.length == _quadrants.length &&
             _quadrants.length == _tokenURIs.length,
             "Input arrays must have the same length"
         );
@@ -693,7 +683,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 quadrants: _quadrants[i],
                 color: _colors[i],
                 value: _value,
-                stakingIndex: _stakingIndexes[i],
                 miningPeriod: _miningPeriod,
                 gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
                 isLocked: false,
@@ -713,7 +702,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _safeMint(msg.sender, newGemId);
             _setTokenURI(newGemId, _tokenURIs[i]);
 
-            emit Created(newGemId, _rarities[i], _colors[i], _value, _stakingIndexes[i], _quadrants[i], _miningPeriod, _gemCooldownPeriod, _tokenURIs[i],  msg.sender);
+            emit Created(newGemId, _rarities[i], _colors[i], _value, _quadrants[i], _miningPeriod, _gemCooldownPeriod, _tokenURIs[i],  msg.sender);
             newGemIds[i] = newGemId;
         }
 

@@ -6,7 +6,8 @@ contract L1WrappedStakedTONStorage {
     struct StakingTracker {
         Layer2 layer2;
         uint256 amount;
-        uint256 stakingIndex;
+        address depositor;
+        uint256 depositBlock;
         uint256 depositTime;
     }
 
@@ -16,13 +17,19 @@ contract L1WrappedStakedTONStorage {
         address l1CrossDomainMessenger;
         address WSTONManager;
         address l2wston;
+        uint256 totalAmountStaked;
+        uint256 lastRewardsDistributionDate;
     }
 
     Layer2[] public layer2s; // 0: TITAN, 1: THANOS, 2: ARBITRUM etc...
     StakingTracker[] public stakingTrackers;
 
-    mapping(address => mapping(uint256 => uint256)) userBalanceByStakingIndex;
-    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) userBridgedAmountByLayer2AndIndex;
+    mapping(address => mapping(uint256 => uint256)) public userBalanceByLayer2Index;
+    mapping(address => mapping(uint256 => uint256)) public userSharesByLayer2Index;
+
+    address[] public userAddresses; // Array to store user addresses
+    mapping(address => bool) public userAddressExists; // Mapping to track if an address is already added
+
 
     uint256 stakingTrackerCount;
 

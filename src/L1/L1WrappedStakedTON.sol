@@ -10,25 +10,6 @@ import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
 import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
 
-interface IL1StandardBridge {
-    function depositERC20To(
-        address _l1Token,
-        address _l2Token,
-        address _to,
-        uint256 _amount,
-        uint32 _l2Gas,
-        bytes calldata _data
-    ) external;
-}
-
-interface IL1CrossDomainMessenger {
-    function sendMessage(
-        address _target,
-        bytes memory _message,
-        uint32 _gasLimit
-    ) external;
-}
-
 contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedTONStorage {
     using SafeERC20 for IERC20;
 
@@ -101,7 +82,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
             "failed to transfer wton to this contract"
         );
 
-        // approve depositManager to spend on behalf of the WrappedStakedTON coontract 
+        // approve depositManager to spend on behalf of the WrappedStakedTON contract 
         IERC20(l1wton).approve(depositManager, _amount);
 
         // deposit _amount to DepositManager
@@ -116,91 +97,92 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         StakingTracker memory _stakingTracker = StakingTracker({
             layer2: layer2s[_layer2Index],
             amount: _amount,
-            stakingIndex: stakingTrackerCount,
+            depositor: _to,
+            depositBlock: block.timestamp,
             depositTime: block.timestamp
         });
         stakingTrackers.push(_stakingTracker);
         stakingTrackerCount++;
 
-        userBalanceByStakingIndex[_to][_stakingTracker.stakingIndex] = _amount;
+        layer2s[_layer2Index].totalAmountStaked += _amount;
+        userBalanceByLayer2Index[_to][_layer2Index] += _amount;
+
+        uint256 userBalance = userBalanceByLayer2Index[_to][_layer2Index];
+        uint256 totalStakedAmount = layer2s[_layer2Index].totalAmountStaked;
+
+        uint256 userShares = (userBalance * 1e27) / totalStakedAmount; // Multiply by 1e27 for precision
+        userSharesByLayer2Index[_to][_layer2Index] = userShares;
+
+        addUserAddress(_to);
 
         // we mint WSTON
         _mint(_to, _amount);
 
         emit Deposited(stakingTrackerCount, _to, _amount, block.timestamp);
-
         return true;
     }
 
-    function bridgeWSTON(uint256 _layer2Index, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
-        require(_bridgeWSTONTo(_layer2Index, msg.sender, _stakingIndex, _amount));
-    }
 
-    function bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
-        require(_bridgeWSTONTo(_layer2Index, _to, _stakingIndex, _amount));
-    }
 
-    function _bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _stakingIndex, uint256 _amount) internal returns(bool) {
-        address layer2Address = layer2s[_layer2Index].layer2Address;
-        require(layer2Address != address(0));
+    function distributeRewards() external whenNotPaused nonReentrant {
+        
+        uint256 swtonContractBalance;
+        for(uint256 i = 0; i < layer2s.length; i++) {
+            require(ISeigManager(seigManager).updateSeigniorage(), "failed to update seigniorage");
+            swtonContractBalance = ISeigManager(seigManager).stakeOf(layer2s[i].layer2Address, address(this));
+            uint256 rewardsToDistribute = layer2s[i].totalAmountStaked - swtonContractBalance;
+            require(rewardsToDistribute > 0, "No tokens to distribute");
 
-        require(this.transferWSTONFrom(_stakingIndex, _to, address(this), _amount));
-        userBridgedAmountByLayer2AndIndex[_to][_layer2Index][_stakingIndex] += _amount;
+            for(uint256 j = 0; j < userAddresses.length; j++) {
+                uint256 userRewards = rewardsToDistribute * userSharesByLayer2Index[userAddresses[j]][i];
+                if(userRewards > 0) {
+                    _mint(userAddresses[j], userRewards);   
+                }
+            }
 
-        IL1StandardBridge(layer2Address).depositERC20To(
-            address(this),
-            layer2s[_layer2Index].l2wston,
-            _to,
-            _amount,
-            MIN_DEPOSIT_GAS_LIMIT,
-            ""
-        );
-
-        emit WSTONBridged(_layer2Index, _to, _stakingIndex, _amount);
-        return true;
+            layer2s[i].totalAmountStaked = swtonContractBalance;
+            layer2s[i].lastRewardsDistributionDate = block.timestamp;
+        }
     }
 
     function transferWSTONFrom(
-        uint256 _stakingIndex, 
+        uint256 _layer2Index, 
         address _from, 
         address _to, 
         uint256 _amount
     ) external nonReentrant returns(bool) {
         require(_to != address(0), "address zero");
         require(_amount >= 0, "zero amount");
-        require(userBalanceByStakingIndex[_from][_stakingIndex] >= _amount, "not enough funds to transfer on this stakingIndex");
+        require(userBalanceByLayer2Index[_from][_layer2Index] >= _amount, "not enough funds to transfer on this stakingIndex");
 
         // Check allowance
         require(allowance(_from, address(this)) >= _amount, "allowance too low");
 
-        userBalanceByStakingIndex[_from][_stakingIndex] -= _amount;
-        userBalanceByStakingIndex[_to][_stakingIndex] -= _amount;
+        userBalanceByLayer2Index[_from][_layer2Index] -= _amount;
+        userBalanceByLayer2Index[_to][_layer2Index] -= _amount;
 
         // Call transferFrom on behalf of the contract
         this.transferFrom(_from, _to, _amount);
 
-        emit Transferred(_stakingIndex, _from, _to, _amount);
+        emit Transferred(_layer2Index, _from, _to, _amount);
         return true;
     }
 
-    function transferWSTON(uint256 _stakingIndex, address _to, uint256 _amount) external nonReentrant returns (bool) {
+    function transferWSTON(uint256 _layer2Index, address _to, uint256 _amount) external nonReentrant returns (bool) {
         require(_to != address(0), "address zero");
         require(_amount >= 0, "zero amount");
-        require(userBalanceByStakingIndex[msg.sender][_stakingIndex] >= _amount, "not enough funds to transfer on this stakingIndex");
+        require(userBalanceByLayer2Index[msg.sender][_layer2Index] >= _amount, "not enough funds to transfer on this stakingIndex");
 
-        userBalanceByStakingIndex[msg.sender][_stakingIndex] -= _amount;
-        userBalanceByStakingIndex[_to][_stakingIndex] -= _amount;
+        userBalanceByLayer2Index[msg.sender][_layer2Index] -= _amount;
+        userBalanceByLayer2Index[_to][_layer2Index] -= _amount;
 
         // Call transfer on behalf of the contract
         this.transfer(_to, _amount);
 
-        emit Transferred(_stakingIndex, msg.sender, _to, _amount);
+        emit Transferred(_layer2Index, msg.sender, _to, _amount);
         return true;
     }
 
-    function updateSeigniorage() external whenNotPaused {
-        ISeigManager(seigManager).updateSeigniorage();
-    }
 
     function addLayer2(
         address _layer2Address,
@@ -214,7 +196,9 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
             l1StandardBridge: _l1StandardBridge,
             l1CrossDomainMessenger: _l1CrossDomainMessenger,
             WSTONManager: _WSTONManager,
-            l2wston: _l2wston
+            l2wston: _l2wston,
+            totalAmountStaked: 0,
+            lastRewardsDistributionDate: block.timestamp
         });
         layer2s.push(layer2);
         return true;
@@ -252,6 +236,13 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         _spendAllowance(from, spender, value);
         _transfer(from, to, value);
         return true;
+    }
+
+    function addUserAddress(address user) internal {
+        if (!userAddressExists[user]) {
+            userAddresses.push(user);
+            userAddressExists[user] = true;
+        }
     }
     
 

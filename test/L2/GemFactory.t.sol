@@ -15,7 +15,6 @@ contract GemFactoryTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1, 2, 1, 1];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -23,7 +22,6 @@ contract GemFactoryTest is L2BaseTest {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );
@@ -47,10 +45,6 @@ contract GemFactoryTest is L2BaseTest {
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
-
-        uint256[] memory stakingIndexes = new uint256[](2);
-        stakingIndexes[0] = 1; 
-        stakingIndexes[1] = 1; 
         
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [2, 3, 3, 2];
@@ -64,7 +58,6 @@ contract GemFactoryTest is L2BaseTest {
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             rarities,
             colors,
-            stakingIndexes,
             quadrants,
             tokenURIs
         );
@@ -85,7 +78,6 @@ function testMeltGEM() public {
          // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1,2,1,1];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -93,7 +85,6 @@ function testMeltGEM() public {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );
@@ -131,10 +122,6 @@ function testMeltGEM() public {
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
 
-        uint256[] memory stakingIndexes = new uint256[](2);
-        stakingIndexes[0] = 1;
-        stakingIndexes[1] = 1;
-
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [1, 2, 1, 1];
         quadrants[1] = [1, 1, 2, 1];
@@ -147,7 +134,6 @@ function testMeltGEM() public {
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             rarities,
             colors,
-            stakingIndexes,
             quadrants,
             tokenURIs
         );
@@ -174,7 +160,7 @@ function testMeltGEM() public {
 
         uint8[2] memory color = [0, 1];
 
-        uint256 newGemId = GemFactory(gemfactory).forgeTokens(tokenIds, 1, GemFactoryStorage.Rarity.COMMON, color);
+        uint256 newGemId = GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         // Verify the new gem is created and owned by user1
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
@@ -183,7 +169,6 @@ function testMeltGEM() public {
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactory).getGem(newGemId);
         assert(newGem.rarity == GemFactoryStorage.Rarity.RARE);
         assert(newGem.color[0] == color[0] && newGem.color[1] == color[1]);
-        assert(newGem.stakingIndex == 1);
         assert(newGem.miningPeriod == RareGemsMiningPeriod);
         assert(newGem.gemCooldownPeriod == block.timestamp + RareGemsCooldownPeriod);
 
@@ -208,10 +193,6 @@ function testMeltGEM() public {
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.RARE;
 
-        uint256[] memory stakingIndexes = new uint256[](2);
-        stakingIndexes[0] = 1;
-        stakingIndexes[1] = 1;
-
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [1, 2, 1, 1];
         quadrants[1] = [2, 2, 2, 3];
@@ -224,7 +205,6 @@ function testMeltGEM() public {
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             rarities,
             colors,
-            stakingIndexes,
             quadrants,
             tokenURIs
         );
@@ -253,7 +233,7 @@ function testMeltGEM() public {
 
         // Expect the transaction to revert with the error message "wrong rarity Gems"
         vm.expectRevert("wrong rarity Gems");
-        GemFactory(gemfactory).forgeTokens(tokenIds, 1, GemFactoryStorage.Rarity.COMMON, color);
+        GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
     }
@@ -270,10 +250,6 @@ function testMeltGEM() public {
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
 
-        uint256[] memory stakingIndexes = new uint256[](2);
-        stakingIndexes[0] = 1;
-        stakingIndexes[1] = 1;
-
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [1, 2, 1, 1];
         quadrants[1] = [1, 1, 2, 1];
@@ -286,7 +262,6 @@ function testMeltGEM() public {
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             rarities,
             colors,
-            stakingIndexes,
             quadrants,
             tokenURIs
         );
@@ -316,7 +291,7 @@ function testMeltGEM() public {
 
         // Expect the transaction to revert with the error message "this color can't be obtained"
         vm.expectRevert("this color can't be obtained");
-        GemFactory(gemfactory).forgeTokens(tokenIds, 1, GemFactoryStorage.Rarity.COMMON, invalidColor);
+        GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, invalidColor);
 
         vm.stopPrank();
     }
@@ -337,12 +312,6 @@ function testMeltGEM() public {
         rarities[2] = GemFactoryStorage.Rarity.EPIC;
         rarities[3] = GemFactoryStorage.Rarity.EPIC;
 
-        uint256[] memory stakingIndexes = new uint256[](4);
-        stakingIndexes[0] = 1;
-        stakingIndexes[1] = 1;
-        stakingIndexes[2] = 1;
-        stakingIndexes[3] = 1;
-
         uint8[4][] memory quadrants = new uint8[4][](4);
         quadrants[0] = [4, 5, 5, 5]; // epic quadrants
         quadrants[1] = [5, 4, 4, 5]; // epic quadrants
@@ -359,7 +328,6 @@ function testMeltGEM() public {
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             rarities,
             colors,
-            stakingIndexes,
             quadrants,
             tokenURIs
         );
@@ -396,7 +364,7 @@ function testMeltGEM() public {
 
         // Expect the transaction to revert with the error message "wrong number of Gems to be forged"
         vm.expectRevert("wrong number of Gems to be forged");
-        GemFactory(gemfactory).forgeTokens(tokenIds, 1, GemFactoryStorage.Rarity.COMMON, color);
+        GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
     }
@@ -407,7 +375,6 @@ function testMeltGEM() public {
         // Define GEM properties
         uint8[2] memory color = [0, 0];
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1, 2, 1, 1];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -415,7 +382,6 @@ function testMeltGEM() public {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );
@@ -452,7 +418,6 @@ function testMeltGEM() public {
         // Define GEM properties
         uint8[2] memory color = [0, 0];
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1, 2, 1, 1];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -460,7 +425,6 @@ function testMeltGEM() public {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );
@@ -495,7 +459,6 @@ function testMeltGEM() public {
         // Define GEM properties
         uint8[2] memory color = [0, 0];
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1, 2, 1, 1];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -503,7 +466,6 @@ function testMeltGEM() public {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );
@@ -553,10 +515,6 @@ function testMeltGEM() public {
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
 
-        uint256[] memory stakingIndexes = new uint256[](2);
-        stakingIndexes[0] = 1;
-        stakingIndexes[1] = 1;
-
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [1, 2, 1, 1];
         quadrants[1] = [1, 1, 2, 1];
@@ -569,7 +527,6 @@ function testMeltGEM() public {
         uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
             rarities,
             colors,
-            stakingIndexes,
             quadrants,
             tokenURIs
         );
@@ -614,7 +571,6 @@ function testMeltGEM() public {
         // Define GEM properties
         uint8[2] memory color = [0, 0];
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1, 2, 1, 1];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -622,7 +578,6 @@ function testMeltGEM() public {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );
@@ -661,7 +616,6 @@ function testMeltGEM() public {
         // Define GEM properties
         uint8[2] memory color = [0, 0];
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint256 stakingIndex = 1;
         uint8[4] memory quadrants = [1, 2, 1, 1];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -669,7 +623,6 @@ function testMeltGEM() public {
         uint256 newGemId = Treasury(treasury).createPreminedGEM(
             rarity,
             color,
-            stakingIndex,
             quadrants,
             tokenURI
         );

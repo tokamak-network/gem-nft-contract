@@ -21,7 +21,6 @@ contract GemFactoryStorage {
         uint256 miningPeriod; // Mining delay before claiming
         bool isLocked; // Locked if gem is listed on the marketplace
         uint256 value; // 27 decimals
-        uint256 stakingIndex;
         string tokenURI; // IPFS address of the metadata file
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
     }
@@ -61,10 +60,6 @@ contract GemFactoryStorage {
     mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */
 
     bool public paused;
-
-    // Staking index trackers
-    uint256 public L1StakingIndex;
-    uint256 public estimatedStakingIndexIncreaseRate;
 
     // Mining storage
     uint256 public CommonMiningFees;
@@ -122,7 +117,6 @@ contract GemFactoryStorage {
         Rarity rarity, 
         uint8[2] color, 
         uint256 value,
-        uint256 stakingIndex, 
         uint8[4] quadrants, 
         uint256 miningPeriod,
         uint256 cooldownPeriod,
