@@ -10,6 +10,17 @@ import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
 import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
 
+interface IL1StandardBridge {
+    function depositERC20To(
+        address _l1Token,
+        address _l2Token,
+        address _to,
+        uint256 _amount,
+        uint32 _l2Gas,
+        bytes calldata _data
+    ) external;
+}
+
 contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedTONStorage {
     using SafeERC20 for IERC20;
 
@@ -143,6 +154,33 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
             layer2s[i].totalAmountStaked = swtonContractBalance;
             layer2s[i].lastRewardsDistributionDate = block.timestamp;
         }
+    }
+
+    function bridgeWSTON(uint256 _layer2Index, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
+        require(_bridgeWSTONTo(_layer2Index, msg.sender, _stakingIndex, _amount));
+    }
+
+    function bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
+        require(_bridgeWSTONTo(_layer2Index, _to, _stakingIndex, _amount));
+    }
+
+    function _bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _stakingIndex, uint256 _amount) internal returns(bool) {
+        address layer2Address = layer2s[_layer2Index].layer2Address;
+        require(layer2Address != address(0));
+
+        require(this.transferWSTONFrom(_layer2Index, _to, address(this), _amount));
+
+        IL1StandardBridge(layer2Address).depositERC20To(
+            address(this),
+            layer2s[_layer2Index].l2wston,
+            _to,
+            _amount,
+            MIN_DEPOSIT_GAS_LIMIT,
+            ""
+        );
+
+        emit WSTONBridged(_layer2Index, _to, _stakingIndex, _amount);
+        return true;
     }
 
     function transferWSTONFrom(
