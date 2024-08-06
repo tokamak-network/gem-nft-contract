@@ -7,11 +7,11 @@ const {
     TIITAN_SEPOLIA_RPC_URL,
     PRIVATE_KEY,
     L1WRAPPEDSTAKEDTON_CONTRACT_ADDRESS,
-    L2WSTONWSTON_CONTRACT_ADDRESS
+    L2WSTON_CONTRACT_ADDRESS
 } = process.env;
 
 // Check if environment variables are loaded correctly
-if (!SEPOLIA_RPC_URL || !TIITAN_SEPOLIA_RPC_URL || !PRIVATE_KEY || !L1WRAPPEDSTAKEDTON_CONTRACT_ADDRESS || !L2WSTONWSTON_CONTRACT_ADDRESS) {
+if (!SEPOLIA_RPC_URL || !TIITAN_SEPOLIA_RPC_URL || !PRIVATE_KEY || !L1WRAPPEDSTAKEDTON_CONTRACT_ADDRESS || !L2WSTON_CONTRACT_ADDRESS) {
     console.error("Please ensure all environment variables are set correctly.");
     process.exit(1);
 }
@@ -36,7 +36,7 @@ const l2Signer = new Wallet(PRIVATE_KEY, l2Provider);
 
 // Contract instances
 const l1Contract = new Contract(L1WRAPPEDSTAKEDTON_CONTRACT_ADDRESS, L1_ABI, l1Provider);
-const l2Contract = new Contract(L2WSTONWSTON_CONTRACT_ADDRESS, L2_ABI, l2Signer);
+const l2Contract = new Contract(L2WSTON_CONTRACT_ADDRESS, L2_ABI, l2Signer);
 
 // Listen to events from L1 and update L2
 l1Contract.on("WSTONBridged", async (layer2Index, to, amount) => {

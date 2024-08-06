@@ -71,7 +71,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
     function depositAndGetWSTON(
         uint256 _amount,
         uint256 _layer2Index
-    ) external whenNotPaused nonReentrant {
+    ) external whenNotPaused {
         require(_depositAndGetWSTONTo(msg.sender, _amount, _layer2Index), "failed to deposit and get WSTON");
     }
 
@@ -79,7 +79,7 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         address _to,
         uint256 _amount,
         uint256 _layer2Index
-    ) external whenNotPaused nonReentrant {
+    ) external whenNotPaused {
         require(_depositAndGetWSTONTo(_to, _amount, _layer2Index), "failed to deposit and get WSTON");
     }
 
@@ -149,11 +149,11 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
      */
     function distributeRewards() public whenNotPaused nonReentrant returns(bool) {   
         uint256 swtonContractBalance;
-        require(ISeigManager(seigManager).updateSeigniorage(), "failed to update seigniorage");
+        //require(ISeigManager(seigManager).updateSeigniorage(), "failed to update seigniorage");
 
         for(uint256 i = 0; i < layer2s.length; i++) {
             swtonContractBalance = ISeigManager(seigManager).stakeOf(layer2s[i].layer2Address, address(this));
-            uint256 rewardsToDistribute = layer2s[i].totalAmountStaked - swtonContractBalance;
+            uint256 rewardsToDistribute = swtonContractBalance - layer2s[i].totalAmountStaked;
             if (rewardsToDistribute > 0) {
                 for(uint256 j = 0; j < userAddresses.length; j++) {
                     uint256 userRewards = rewardsToDistribute * userSharesByLayer2Index[userAddresses[j]][i];
@@ -169,16 +169,17 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         return true;
     }
 
-    function bridgeWSTON(uint256 _layer2Index, uint256 _amount) external nonReentrant whenNotPaused {
+    function bridgeWSTON(uint256 _layer2Index, uint256 _amount) external whenNotPaused {
         require(_bridgeWSTONTo(_layer2Index, msg.sender, _amount));
     }
 
-    function bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _amount) external nonReentrant whenNotPaused {
+    function bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _amount) external whenNotPaused {
         require(_bridgeWSTONTo(_layer2Index, _to, _amount));
     }
 
     function _bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _amount) internal returns(bool) {
         address layer2Address = layer2s[_layer2Index].layer2Address;
+        address l1StandardBridge = layer2s[_layer2Index].l1StandardBridge;
         require(layer2Address != address(0));
 
         require(this.transferWSTONFrom(_layer2Index, _to, address(this), _amount));
@@ -186,13 +187,13 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         // flag to ensure user can't bridge without going through this function
         isBridging = true;
 
-        IL1StandardBridge(layer2Address).depositERC20To(
+        IL1StandardBridge(l1StandardBridge).depositERC20To(
             address(this),
             layer2s[_layer2Index].l2wston,
             layer2s[_layer2Index].WSTONVault,
             _amount,
             MIN_DEPOSIT_GAS_LIMIT,
-            ""
+            "0x"
         );
 
         isBridging = false;
@@ -208,9 +209,8 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         address _from, 
         address _to, 
         uint256 _amount
-    ) external nonReentrant returns(bool) {
+    ) external returns(bool) {
         require(_to != address(0), "address zero");
-        require(_amount >= 0, "zero amount");
         require(userBalanceByLayer2Index[_from][_layer2Index] >= _amount, "not enough funds to transfer on this stakingIndex");
         require(distributeRewards(), "failed to distrribute rewards");
         // Check allowance
@@ -284,6 +284,41 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         return true;
     }
 
+    function updateLayer2(       
+        uint256 _layer2Index, 
+        address _layer2Address,
+        address _l1StandardBridge,
+        address _WSTONVault,
+        address _l2wston
+    ) external onlyOwner returns(bool) {
+        layer2s[_layer2Index].layer2Address = _layer2Address;
+        layer2s[_layer2Index].l1StandardBridge = _l1StandardBridge;
+        layer2s[_layer2Index].WSTONVault = _WSTONVault;
+        layer2s[_layer2Index].l2wston = _l2wston;
+
+        return true;
+    }
+
+    function setL2wston(uint256 _layer2Index, address _l2wston) external onlyOwner returns(bool){
+        layer2s[_layer2Index].l2wston = _l2wston;
+        return true;
+    }
+
+    function setWSTONVault(uint256 _layer2Index, address _WSTONVault) external onlyOwner returns(bool){
+        layer2s[_layer2Index].WSTONVault = _WSTONVault;
+        return true;
+    }
+
+    function setlayer2Address(uint256 _layer2Index, address _layer2Address) external onlyOwner returns(bool){
+        layer2s[_layer2Index].layer2Address = _layer2Address;
+        return true;
+    }
+
+    function setL1StandardBridge(uint256 _layer2Index, address _l1StandardBridge) external onlyOwner returns(bool){
+        layer2s[_layer2Index].l1StandardBridge = _l1StandardBridge;
+        return true;
+    }
+
     function setMinDepositAmount(uint256 _minDepositAmount) external onlyOwner {
         minDepositAmount = _minDepositAmount;
     }
@@ -306,17 +341,21 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
     }
 
     function transferFrom(address from, address to, uint256 value) public override returns (bool) {
+        bool isAuthorized = false;
         for(uint256 i = 0; i < layer2s.length; i++) {
-            if(msg.sender != address(this) || (msg.sender != layer2s[i].l1StandardBridge && isBridging == true)) {
-                revert("Not allowed to use transferFrom. Use transferWSTONFrom instead");
+            if(msg.sender == address(this) || (msg.sender == layer2s[i].l1StandardBridge && isBridging == true)) {
+                isAuthorized = true;
+                break;
             }
         }
+        require(isAuthorized, "Not allowed to use transferFrom. Use transferWSTONFrom instead");
 
         address spender = _msgSender();
         _spendAllowance(from, spender, value);
         _transfer(from, to, value);
         return true;
     }
+
 
     function addUserAddress(address user) internal {
         if (!userAddressExists[user]) {
