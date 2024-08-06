@@ -130,7 +130,7 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
         GemFactory(_gemFactory).transferGEMFrom(seller, _payer, _tokenId);
         
 
-        emit GemBought(_tokenId, _payer);
+        emit GemBought(_tokenId, _payer, seller, price);
         return true;
     }
 

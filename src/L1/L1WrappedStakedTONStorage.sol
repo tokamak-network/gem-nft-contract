@@ -14,8 +14,7 @@ contract L1WrappedStakedTONStorage {
     struct Layer2 {
         address layer2Address;
         address l1StandardBridge;
-        address l1CrossDomainMessenger;
-        address WSTONManager;
+        address WSTONVault;
         address l2wston;
         uint256 totalAmountStaked;
         uint256 lastRewardsDistributionDate;
@@ -25,7 +24,8 @@ contract L1WrappedStakedTONStorage {
     StakingTracker[] public stakingTrackers;
 
     mapping(address => mapping(uint256 => uint256)) public userBalanceByLayer2Index;
-    mapping(address => mapping(uint256 => uint256)) public userSharesByLayer2Index;
+    mapping(address => mapping(uint256 => uint256)) public userSharesByLayer2Index; // rate (27 decimals)
+    mapping(address => mapping(uint256 => uint256)) public bridgedAmountByLayer2Index;
 
     address[] public userAddresses; // Array to store user addresses
     mapping(address => bool) public userAddressExists; // Mapping to track if an address is already added
@@ -46,7 +46,7 @@ contract L1WrappedStakedTONStorage {
     // Main events
     event Deposited(uint256 indexed stakingIndex, address indexed account, uint256 amount, uint256 depositTime);
     event Transferred(uint256 indexed stakingIndex, address from, address to, uint256 amount);
-    event WSTONBridged(uint256 layer2Index, address to, uint256 stakingIndex, uint256 amount);
+    event WSTONBridged(uint256 layer2Index, address to, uint256 amount);
 
 
     // Pause Events

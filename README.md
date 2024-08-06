@@ -46,6 +46,18 @@ node oracle/callsDepositAndGetWSTON.js
 
 You should get the following output on the first terminal ```Deposited event detected:...```
 
+### Contract addresses
+
+On Titan
+```
+WSTON : 
+```
+
+On Ethereum
+```
+WrappedStakedTON: 
+```
+
 
 ### Contact
 

@@ -169,27 +169,27 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         return true;
     }
 
-    function bridgeWSTON(uint256 _layer2Index, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
-        require(_bridgeWSTONTo(_layer2Index, msg.sender, _stakingIndex, _amount));
+    function bridgeWSTON(uint256 _layer2Index, uint256 _amount) external nonReentrant whenNotPaused {
+        require(_bridgeWSTONTo(_layer2Index, msg.sender, _amount));
     }
 
-    function bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _stakingIndex, uint256 _amount) external nonReentrant whenNotPaused {
-        require(_bridgeWSTONTo(_layer2Index, _to, _stakingIndex, _amount));
+    function bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _amount) external nonReentrant whenNotPaused {
+        require(_bridgeWSTONTo(_layer2Index, _to, _amount));
     }
 
-    function _bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _stakingIndex, uint256 _amount) internal returns(bool) {
+    function _bridgeWSTONTo(uint256 _layer2Index, address _to, uint256 _amount) internal returns(bool) {
         address layer2Address = layer2s[_layer2Index].layer2Address;
         require(layer2Address != address(0));
 
         require(this.transferWSTONFrom(_layer2Index, _to, address(this), _amount));
 
-        // flag to ensure user can't bridge withoout going through this function
+        // flag to ensure user can't bridge without going through this function
         isBridging = true;
 
         IL1StandardBridge(layer2Address).depositERC20To(
             address(this),
             layer2s[_layer2Index].l2wston,
-            _to,
+            layer2s[_layer2Index].WSTONVault,
             _amount,
             MIN_DEPOSIT_GAS_LIMIT,
             ""
@@ -197,7 +197,9 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
 
         isBridging = false;
 
-        emit WSTONBridged(_layer2Index, _to, _stakingIndex, _amount);
+        bridgedAmountByLayer2Index[layer2s[_layer2Index].WSTONVault][_layer2Index] += _amount;
+
+        emit WSTONBridged(_layer2Index, _to, _amount);
         return true;
     }
 
@@ -214,9 +216,14 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         // Check allowance
         require(allowance(_from, address(this)) >= _amount, "allowance too low");
 
+        uint256 fromOldBalance = userBalanceByLayer2Index[_from][_layer2Index];
+        uint256 sharesTransferred = (userSharesByLayer2Index[_from][_layer2Index] * _amount) / fromOldBalance;
+       
         userBalanceByLayer2Index[_from][_layer2Index] -= _amount;
         userBalanceByLayer2Index[_to][_layer2Index] += _amount;
 
+        userSharesByLayer2Index[_from][_layer2Index] -= sharesTransferred;
+        userSharesByLayer2Index[_to][_layer2Index] += sharesTransferred;
 
         if(userBalanceByLayer2Index[_from][_layer2Index] == 0) {
             delete userBalanceByLayer2Index[_from][_layer2Index];
@@ -236,8 +243,15 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
         require(userBalanceByLayer2Index[msg.sender][_layer2Index] >= _amount, "not enough funds to transfer on this stakingIndex");
         require(distributeRewards(), "failed to distrribute rewards");
 
+        uint256 fromOldBalance = userBalanceByLayer2Index[msg.sender][_layer2Index];
+        uint256 sharesTransferred = (userSharesByLayer2Index[msg.sender][_layer2Index] * _amount) / fromOldBalance;
+    
+        
         userBalanceByLayer2Index[msg.sender][_layer2Index] -= _amount;
         userBalanceByLayer2Index[_to][_layer2Index] += _amount;
+
+        userSharesByLayer2Index[msg.sender][_layer2Index] -= sharesTransferred;
+        userSharesByLayer2Index[_to][_layer2Index] += sharesTransferred;
 
         if(userBalanceByLayer2Index[msg.sender][_layer2Index] == 0) {
             delete userBalanceByLayer2Index[msg.sender][_layer2Index];
@@ -255,15 +269,13 @@ contract L1WrappedStakedTON is ReentrancyGuard, Ownable, ERC20, L1WrappedStakedT
     function addLayer2(
         address _layer2Address,
         address _l1StandardBridge,
-        address _l1CrossDomainMessenger,
-        address _WSTONManager,
+        address _WSTONVault,
         address _l2wston
     ) external onlyOwner returns (bool) {
         Layer2 memory layer2 = Layer2({
             layer2Address: _layer2Address,
             l1StandardBridge: _l1StandardBridge,
-            l1CrossDomainMessenger: _l1CrossDomainMessenger,
-            WSTONManager: _WSTONManager,
+            WSTONVault: _WSTONVault,
             l2wston: _l2wston,
             totalAmountStaked: 0,
             lastRewardsDistributionDate: block.timestamp

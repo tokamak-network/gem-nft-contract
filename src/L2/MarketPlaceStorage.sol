@@ -21,7 +21,7 @@ contract MarketPlaceStorage {
 
     uint256 constant public TON_FEES_RATE_DIVIDER = 100;
 
-    event GemBought(uint256 tokenId, address payer);
+    event GemBought(uint256 tokenId, address payer, address seller, uint256 amount);
     event GemForSale(uint256 tokenId, address seller, uint256 price);
     event WSTONClaimed(uint256 tokenId, address claimer);
     event SetDiscountRate(uint256 discountRate);
