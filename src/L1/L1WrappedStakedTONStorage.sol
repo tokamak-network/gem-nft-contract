@@ -33,7 +33,7 @@ contract L1WrappedStakedTONStorage {
 
     uint256 stakingTrackerCount;
 
-    uint32 public constant MIN_DEPOSIT_GAS_LIMIT = 900000000;
+    uint32 public constant MIN_DEPOSIT_GAS_LIMIT = 210000;
     
     uint256 public minDepositAmount;
 
@@ -44,8 +44,8 @@ contract L1WrappedStakedTONStorage {
     bool paused;
 
     // Main events
-    event Deposited(uint256 indexed stakingIndex, address indexed account, uint256 amount, uint256 depositTime);
-    event Transferred(uint256 indexed stakingIndex, address from, address to, uint256 amount);
+    event Deposited(uint256 layer2Index, address indexed account, uint256 amount, uint256 depositTime);
+    event Transferred(uint256 layer2Index, address from, address to, uint256 amount);
     event WSTONBridged(uint256 layer2Index, address to, uint256 amount);
 
 

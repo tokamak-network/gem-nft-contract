@@ -131,7 +131,14 @@ contract GemFactoryStorage {
     event GemMelted(uint256 _tokenId, address _from);
 
     // Forging Event
-    event GemForged(uint256[] GemsTokenIds, uint256 newGemCreatedId);
+    event GemForged(
+        uint256[] GemsTokenIds, 
+        uint256 newGemCreatedId, 
+        Rarity newRarity, 
+        uint8[4] forgedQuadrants, 
+        uint8[2] color, 
+        uint256 newValue
+    );
 
     // Pause Events
     event Paused(address account);

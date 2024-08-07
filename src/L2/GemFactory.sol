@@ -302,6 +302,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // Set the token URI
         _setTokenURI(newGemId, "");
 
+        emit GemForged(_tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
         return newGemId;
     }
 

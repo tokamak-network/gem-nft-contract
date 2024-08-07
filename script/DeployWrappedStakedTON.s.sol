@@ -7,6 +7,8 @@ import "../src/L1/L1WrappedStakedTON.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DeployWrappedStakedTON is Script {
+    
+    /*
     address depositManager = 0x90ffcc7F168DceDBEF1Cb6c6eB00cA73F922956F;
     address seigManager = 0x2320542ae933FbAdf8f5B97cA348c7CeDA90fAd7;
     address l1wton = 0x79E0d92670106c85E9067b56B8F674340dCa0Bbd;
@@ -39,4 +41,5 @@ contract DeployWrappedStakedTON is Script {
 
         vm.stopBroadcast();
     }
+    */
 }

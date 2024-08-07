@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DeployL2WSTONVault is Script {
 
+    /*
+
     address wston = 0x35D48A789904E9b15705977192e5d95e2aF7f1D3;
 
     function run() external {
@@ -23,4 +25,5 @@ contract DeployL2WSTONVault is Script {
 
         vm.stopBroadcast();
     }
+    */
 }

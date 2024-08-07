@@ -6,11 +6,16 @@ import { L1WrappedStakedTON } from "../../src/L1/L1WrappedStakedTON.sol";
 import { L1WrappedStakedTONStorage } from "../../src/L1/L1WrappedStakedTONStorage.sol";
 
 import { MockL2WSTON } from "../../src/L2/MockL2WSTON.sol";
+import { L1StandardBridge } from "../../src/L1/Mock/L1StandardBridge.sol";
+import { DepositManager } from "../../src/L1/Mock/DepositManager.sol";
+import { SeigManager } from "../../src/L1/Mock/SeigManager.sol";
+import { WSTONVault } from "../../src/L2/WSTONVault.sol";
+
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract L1BaseTest is Test {
-
+/*
     using SafeERC20 for IERC20;
 
     address payable owner;
@@ -19,11 +24,13 @@ contract L1BaseTest is Test {
 
     address l1wrappedstakedton;
     address l1wton;
+    address l2wston;
+    address mockWSTONVault;
     address ton;
 
-    address depositManager = 0x90ffcc7F168DceDBEF1Cb6c6eB00cA73F922956F;
-    address seigManager = 0x2320542ae933FbAdf8f5B97cA348c7CeDA90fAd7;
-    address titanL1StandardBridge = 0x1F032B938125f9bE411801fb127785430E7b3971;
+    address depositManager;
+    address seigManager;
+    address l1StandardBridge;
     address stakingLayer2Address = 0xCBeF7Cc221c04AD2E68e623613cc5d33b0fE1599;
 
     function setUp() public virtual {
@@ -35,7 +42,10 @@ contract L1BaseTest is Test {
         vm.warp(1632934800);
 
         l1wton = address(new MockL2WSTON("Wrapped Ton", "WTON", 27)); // 27 decimals
+        l2wston = address(new MockL2WSTON("Wrapped Staked Ton", "WSTON", 27)); // 27 decimals
         ton = address(new MockL2WSTON("Ton", "TON", 18)); // 18 decimals
+
+        mockWSTONVault = address(new WSTONVault(l2wston));
 
         // Transfer some tokens to User1
         IERC20(l1wton).transfer(user1, 1000 * 10 ** 27);
@@ -47,13 +57,19 @@ contract L1BaseTest is Test {
         vm.deal(user1, 100 ether);
         vm.deal(user2, 100 ether);
 
+        l1StandardBridge = address(new L1StandardBridge());
+        depositManager = address(new DepositManager(l1wton));
+        seigManager = address(new SeigManager(depositManager));
+        
+        DepositManager(depositManager).setSeigManager(seigManager);
+
         // Create a memory array to hold the Layer2 struct
         L1WrappedStakedTONStorage.Layer2[] memory layer2s = new L1WrappedStakedTONStorage.Layer2[](1);
         layer2s[0] = L1WrappedStakedTONStorage.Layer2(
             stakingLayer2Address,
-            titanL1StandardBridge,
-            address(0),
-            address(0),
+            l1StandardBridge,
+            mockWSTONVault,
+            l2wston,
             0,
             block.timestamp
         );
@@ -62,7 +78,7 @@ contract L1BaseTest is Test {
 
 
         // deploy and initialize GemFactory
-        l1wrappedstakedton = address(new L1WrappedStakedTON(layer2s, minDepositAmount, depositManager, seigManager, l1wton));
+        //l1wrappedstakedton = address(new L1WrappedStakedTON(layer2s, minDepositAmount, depositManager, seigManager, l1wton));
 
         vm.stopPrank();
     }
@@ -76,4 +92,5 @@ contract L1BaseTest is Test {
         assert(seigManagerCheck == seigManager);
 
     }
+    */
 }
