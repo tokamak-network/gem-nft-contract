@@ -6,5 +6,6 @@ interface ISeigManager {
 
   function stakeOf(address layer2, address account) external view returns (uint256);
   function addStake(address user, uint256 amount) external;
+  function updateSeigniorage() external returns(bool);
 
 }

@@ -16,27 +16,26 @@ contract L1WrappedStakedTONFactory is Ownable {
     
     function createWSTONToken(
         address _layer2Address,
-        address _l1StandardBridge,
-        address _l2wston,
         address _depositManager,
         address _seigManager,
-        uint256 _totalAmountStaked,
-        uint256 _lastRewardsDistributionDate
-    ) external onlyOwner {
+        string memory _name,
+        string memory _symbol
+    ) external onlyOwner returns(address) {
         require(_layer2Address != address(0), "Must provide a layer2 candidate");
-        require(_l1StandardBridge != address(0), "Must provide a bridge address");
+        require(_depositManager != address(0), "Must provide the deposit manager address");
+        require(_seigManager != address(0), "Must provide the seig manager address");
 
         L1WrappedStakedTON wston = new L1WrappedStakedTON(
             _layer2Address,
-            _l1StandardBridge,
-            _l2wston,
             l1wton,
             _depositManager,
             _seigManager,
-            _totalAmountStaked,
-            _lastRewardsDistributionDate
+            _name,
+            _symbol
         );
 
         emit WSTONTokenCreated(address(wston),_layer2Address);
+
+        return address(wston);
     }
 }

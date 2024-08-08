@@ -15,10 +15,15 @@ contract DepositManager is IDepositManager, ERC20 {
     address public wton;
     address public seigManager;
 
+    uint256 delay;
+
+    bool requested;
+
     event Deposited(address layer2, address account, uint256 amount);
 
-    constructor(address _wton) ERC20("staked WTON","sWTON"){
+    constructor(address _wton, uint256 _delay) ERC20("staked WTON","sWTON"){
         wton = _wton;
+        delay = _delay;
     }
 
     function setSeigManager(address _seigManager) external {
@@ -37,4 +42,19 @@ contract DepositManager is IDepositManager, ERC20 {
 
         return true;    
     }
+
+    function requestWithdrawal(address /*layer2*/, uint256 /*amount*/) external returns (bool) {
+        requested = true;
+
+        return true;
+    }
+
+    function processRequest(address layer2, bool receiveTON) external returns (bool) {
+
+    }
+
+    function getDelayBlocks(address /*layer2*/) external view returns (uint256) {
+        return delay;
+    }
+
 }

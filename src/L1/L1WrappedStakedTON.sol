@@ -9,48 +9,9 @@ import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
 import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
 
-interface IL1StandardBridge {
-    function depositERC20To(
-        address _l1Token,
-        address _l2Token,
-        address _to,
-        uint256 _amount,
-        uint32 _l2Gas,
-        bytes calldata _data
-    ) external;
-}
 
-contract L1WrappedStakedTON is Ownable, ERC20 {
-    using SafeERC20 for IERC20;
-
-
-    struct StakingTracker {
-        uint256 amount;
-        address depositor;
-        uint256 stakingIndex;
-        uint256 depositTime;
-        uint256 depositBlockNumber;
-    }
-    StakingTracker[] public stakingTrackers;
-
-    bool paused;
-
-    address public layer2Address;
-    address public l1StandardBridge;
-    address public WSTONVault;
-    address public l2wston;
-    address public l1wton;
-    address public depositManager;
-    address public seigManager;
-    uint256 public totalAmountStaked;
-    uint256 public lastRewardsDistributionDate;
-
-    //deposit even
-    event Deposited(address to, uint256 amount, uint256 depositTime, uint256 depositBlockNumber);
-
-    // Pause Events
-    event Paused(address account);
-    event Unpaused(address account);
+contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
+    using SafeERC20 for IERC20;   
 
     modifier whenNotPaused() {
         require(!paused, "Pausable: paused");
@@ -64,22 +25,17 @@ contract L1WrappedStakedTON is Ownable, ERC20 {
 
     constructor(
         address _layer2Address,
-        address _l1StandardBridge,
-        address _l2wston,
-        address _l1wton,
+        address _wton,
         address _depositManager,
         address _seigManager,
-        uint256 _totalAmountStaked,
-        uint256 _lastRewardsDistributionDate
-    ) ERC20("Wrapped Staked TON", "WSTON") Ownable(msg.sender) {
+        string memory _name,
+        string memory _symbol
+    ) ERC20(_name, _symbol) Ownable(msg.sender) {
         depositManager = _depositManager;
         seigManager = _seigManager;
         layer2Address = _layer2Address;
-        l1StandardBridge = _l1StandardBridge;
-        l2wston = _l2wston;
-        l1wton = _l1wton;
-        totalAmountStaked = _totalAmountStaked;
-        lastRewardsDistributionDate = _lastRewardsDistributionDate;
+        wton = _wton;
+        stakingIndex = 1e27;
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -114,14 +70,16 @@ contract L1WrappedStakedTON is Ownable, ERC20 {
         uint256 _amount
     ) internal returns (bool) {
 
+        require(_amount != 0, "amount must be different from 0");
+
         // user transfers wton to this contract
         require(
-            IERC20(l1wton).transferFrom(_to, address(this), _amount),
+            IERC20(wton).transferFrom(_to, address(this), _amount),
             "failed to transfer wton to this contract"
         );
 
         // approve depositManager to spend on behalf of the WrappedStakedTON contract 
-        IERC20(l1wton).approve(depositManager, _amount);
+        IERC20(wton).approve(depositManager, _amount);
 
         // deposit _amount to DepositManager
         require(
@@ -132,32 +90,86 @@ contract L1WrappedStakedTON is Ownable, ERC20 {
             "failed to stake"
         );
 
-        StakingTracker memory _stakingTracker = StakingTracker({
-            amount: _amount,
-            depositor: _to,
-            stakingIndex: 1,
-            depositTime: block.timestamp,
-            depositBlockNumber: block.number
-        });
-        stakingTrackers.push(_stakingTracker);
+        if(stakingIndex != 1e27) {
+            updateStakingIndex();
+        }
+
+        uint256 wstonAmount = getDepositWstonAmount(_amount);
+        totalStakedAmount += _amount;
 
         // we mint WSTON
-        _mint(_to, _amount);
+        _mint(_to, wstonAmount);
 
-        emit Deposited(_to, _amount, block.timestamp, block.number);
+        emit Deposited(_to, _amount, wstonAmount, block.timestamp, block.number);
 
         return true;
     }
 
-
-
-    function setL2wstonAddress(address _l2wston) external onlyOwner {
-        l2wston = _l2wston;
+    function requestWithdrawal(uint256 _wstonAmount) external whenNotPaused {
+        uint256 delay = IDepositManager(depositManager).getDelayBlocks(layer2Address);
+        require(_requestWithdrawal(msg.sender, _wstonAmount, delay), "failed to request withdrawal");
     }
 
-    function setl1StandardBridgeAddress(address _l1StandardBridge) external onlyOwner {
-        l1StandardBridge = _l1StandardBridge;
+    function _requestWithdrawal(address _to, uint256 _wstonAmount, uint256 delay) internal returns(bool) {
+        require(balanceOf(_to) >= _wstonAmount, "not enough funds");
+        require(
+            transferFrom(_to, address(this), _wstonAmount),
+            "failed to transfer WSTON to this contract"
+        );
+
+        uint256 _amountToWithdraw;
+        _amountToWithdraw = _wstonAmount * stakingIndex;
+
+        require(
+            IDepositManager(depositManager).requestWithdrawal(layer2Address, _amountToWithdraw),
+            "failed to request withdraw from the deposit manager"
+        );
+
+        withdrawalRequests[_to].push(WithdrawalRequest({
+            withdrawableBlockNumber: block.number + delay,
+            amount: _amountToWithdraw,
+            processed: false
+        }));
+
+        return true;
     }
+
+    function claimWithdrawal() external whenNotPaused returns(bool){
+        uint256 index = withdrawalRequestIndex[msg.sender];
+        require(withdrawalRequests[msg.sender].length > index, "no request to process");
+
+        WithdrawalRequest storage request = withdrawalRequests[msg.sender][index];
+        require(request.processed == false, "already processed");
+        require(request.withdrawableBlockNumber <= block.number, "wait for withdrawal delay");
+
+        request.processed = true;
+        withdrawalRequestIndex[msg.sender] += 1;
+
+        uint256 amount = request.amount;
+
+        require(IDepositManager(depositManager).processRequest(layer2Address, false));
+
+        IERC20(wton).safeTransfer(msg.sender, amount);
+
+        emit WithdrawalProcessed(msg.sender, amount);
+
+        return true;
+    }
+
+    function updateSeigniorage() external returns(bool) {
+        require(ISeigManager(seigManager).updateSeigniorage());
+        return true;
+    }
+
+    function updateStakingIndex() public whenNotPaused {
+        stakingIndex = totalSupply() / ISeigManager(seigManager).stakeOf(layer2Address, address(this));
+    }
+
+    function getDepositWstonAmount(uint256 _amount) internal view returns(uint256) {
+        uint256 _wstonAmount = (_amount / stakingIndex) * 1e27;
+        return _wstonAmount;
+    }
+
 
     function setDepositManagerAddress(address _depositManager) external onlyOwner {
         depositManager = _depositManager;
@@ -165,6 +177,14 @@ contract L1WrappedStakedTON is Ownable, ERC20 {
 
     function setSeigManagerAddress(address _seigManager) external onlyOwner {
         seigManager = _seigManager;
+    }
+
+    function getStakingIndex() external view returns(uint256){return stakingIndex;}
+
+    function getTotalWSTONSupply() external view returns(uint256) {return totalSupply();} 
+
+    function getstakedTONBalance() external view returns(uint256) {
+        return ISeigManager(seigManager).stakeOf(layer2Address, address(this));
     }
 
 }
