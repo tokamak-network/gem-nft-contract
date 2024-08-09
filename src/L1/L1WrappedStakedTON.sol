@@ -9,6 +9,10 @@ import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
 import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
 
+interface ICandidate {
+    function updateSeigniorage() external returns(bool);
+}
+
 
 contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
     using SafeERC20 for IERC20;   
@@ -78,6 +82,15 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
             "failed to transfer wton to this contract"
         );
 
+        //we update seigniorage to get the latest sWTON balance
+        if(lastSeigBlock != 0 && ISeigManager(seigManager).lastSeigBlock() < block.number) {
+            require(ICandidate(layer2Address).updateSeigniorage(), "failed to update seigniorage");
+        }
+        lastSeigBlock = block.number;
+
+        // updating the staking index
+        stakingIndex = updateStakingIndex();
+
         // approve depositManager to spend on behalf of the WrappedStakedTON contract 
         IERC20(wton).approve(depositManager, _amount);
 
@@ -89,16 +102,14 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
             ),
             "failed to stake"
         );
-
-        if(stakingIndex != 1e27) {
-            updateStakingIndex();
-        }
-
+        
+        // calculates the amount of WSTON to mint
         uint256 wstonAmount = getDepositWstonAmount(_amount);
         totalStakedAmount += _amount;
 
         // we mint WSTON
         _mint(_to, wstonAmount);
+        totalWstonMinted += wstonAmount;
 
         emit Deposited(_to, _amount, wstonAmount, block.timestamp, block.number);
 
@@ -161,12 +172,25 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
         return true;
     }
 
-    function updateStakingIndex() public whenNotPaused {
-        stakingIndex = totalSupply() / ISeigManager(seigManager).stakeOf(layer2Address, address(this));
+    function updateStakingIndex() internal returns (uint256) {
+        uint256 _stakingIndex;
+        uint256 totalStake = stakeOf();
+        
+        if (totalWstonMinted > 0 && totalStake > 0) {
+            // Multiply first to avoid precision loss, then divide
+            _stakingIndex = (totalStake * DECIMALS) / totalWstonMinted;
+            emit StakingIndexUpdated();
+        } else {
+            _stakingIndex = stakingIndex;
+            emit FailedToUpdateStakingIndex();
+        }
+        
+        stakingIndex = _stakingIndex;
+        return _stakingIndex;
     }
 
     function getDepositWstonAmount(uint256 _amount) internal view returns(uint256) {
-        uint256 _wstonAmount = (_amount / stakingIndex) * DECIMALS;
+        uint256 _wstonAmount = (_amount * DECIMALS) / stakingIndex;
         return _wstonAmount;
     }
 
@@ -177,6 +201,14 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
 
     function setSeigManagerAddress(address _seigManager) external onlyOwner {
         seigManager = _seigManager;
+    }
+
+    function stakeOf() public view returns(uint256) {
+        return ISeigManager(seigManager).stakeOf(layer2Address, address(this));
+    }
+
+    function totalSupply() public view override returns(uint256) {
+        return totalWstonMinted;
     }
 
     function getStakingIndex() external view returns(uint256){return stakingIndex;}

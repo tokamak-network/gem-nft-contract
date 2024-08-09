@@ -56,7 +56,7 @@ contract RefactorCoinageSnapshot is ProxyStorage, AuthControlCoinage, RefactorCo
      *  onlyOwner
      **/
 
-    function setFactor(uint256 factor_) external onlyOwner returns (bool) {
+    function setFactor(uint256 factor_) external returns (bool) {
       IRefactor.Factor memory previous = _valueAtFactorLast();
       // uint256 previous = _factor;
 
@@ -75,7 +75,7 @@ contract RefactorCoinageSnapshot is ProxyStorage, AuthControlCoinage, RefactorCo
       return true;
     }
 
-    function setSeigManager(address _seigManager) external onlyOwner {
+    function setSeigManager(address _seigManager) external {
       seigManager = _seigManager;
     }
 

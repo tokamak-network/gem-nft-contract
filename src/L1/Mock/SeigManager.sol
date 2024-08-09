@@ -9,6 +9,8 @@ import { IWTON } from "./interfaces/IWTON.sol";
 import { Layer2I } from "./interfaces/Layer2I.sol";
 import { SeigManagerI } from "./interfaces/SeigManagerI.sol";
 
+import { MockToken } from "./MockToken.sol";
+
 import "../../proxy/ProxyStorage.sol";
 import { AuthControlSeigManager } from "./common/AuthControlSeigManager.sol";
 import { SeigManagerStorage } from "./SeigManagerStorage.sol";
@@ -138,6 +140,8 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
   event CommissionRateSet(address indexed layer2, uint256 previousRate, uint256 newRate);
   event Paused(address account);
   event Unpaused(address account);
+  event LogValues(string message, uint256 value1, uint256 value2);
+  event Transferred(address _to, uint256 amount);
 
   // DEV ONLY
   event UnstakeLog(uint coinageBurnAmount, uint totBurnAmount);
@@ -401,10 +405,10 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
     public
     checkCoinage(msg.sender)
     returns (bool)
-  {
+{
     // short circuit if paused
     if (paused) {
-      return true;
+        return true;
     }
     require(block.number > _lastSeigBlock, "last seig block is not past");
 
@@ -417,61 +421,60 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
 
     _lastCommitBlock[msg.sender] = block.number;
 
-    // 2. increase total supply of {coinages[layer2]}
-    // RefactorCoinageSnapshotI coinage = _coinages[msg.sender];
-
     uint256 prevTotalSupply = coinage.totalSupply();
     uint256 nextTotalSupply = _tot.balanceOf(msg.sender);
 
+    // Log values before arithmetic operations
+
     // short circuit if there is no seigs for the layer2
     if (prevTotalSupply >= nextTotalSupply) {
-      emit Comitted(msg.sender);
-      return true;
+        emit Comitted(msg.sender);
+        return true;
     }
 
     uint256 seigs = nextTotalSupply - prevTotalSupply;
     address operator = Layer2I(msg.sender).operator();
     uint256 operatorSeigs;
 
-    // calculate commission amount
+    // Log values after calculating seigs
+
     bool isCommissionRateNegative_ = _isCommissionRateNegative[msg.sender];
 
     (nextTotalSupply, operatorSeigs) = _calcSeigsDistribution(
-      msg.sender,
-      coinage,
-      prevTotalSupply,
-      seigs,
-      isCommissionRateNegative_,
-      operator
-    );
-
-    // gives seigniorages to the layer2 as coinage
-    coinage.setFactor(
-      _calcNewFactor(
+        msg.sender,
+        coinage,
         prevTotalSupply,
-        nextTotalSupply,
-        coinage.factor()
-      )
+        seigs,
+        isCommissionRateNegative_,
+        operator
     );
 
-    // give commission to operator or delegators
+    // Log values after calculating seigs distribution
+
+    coinage.setFactor(
+        _calcNewFactor(
+            prevTotalSupply,
+            nextTotalSupply,
+            coinage.factor()
+        )
+    );
+
     if (operatorSeigs != 0) {
-      if (isCommissionRateNegative_) {
-        // TODO: adjust arithmetic error
-        // burn by 𝜸
-        coinage.burnFrom(operator, operatorSeigs);
-      } else {
-        coinage.mint(operator, operatorSeigs);
-      }
+        if (isCommissionRateNegative_) {
+            coinage.burnFrom(operator, operatorSeigs);
+        } else {
+            coinage.mint(operator, operatorSeigs);
+        }
     }
 
-    IWTON(_wton).mint(address(_depositManager), seigs);
+    MockToken(_wton).mint(address(_depositManager), seigs);
+    emit Transferred(address(_depositManager), seigs);
 
     emit Comitted(msg.sender);
     emit AddedSeigAtLayer(msg.sender, seigs, operatorSeigs, nextTotalSupply, prevTotalSupply);
 
     return true;
-  }
+}
 
 
   //////////////////////////////
@@ -695,12 +698,12 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
   function _increaseTot() internal returns (bool) {
     // short circuit if already seigniorage is given.
     if (block.number <= _lastSeigBlock) {
-      return false;
+        return false;
     }
 
     if (RefactorCoinageSnapshotI(_tot).totalSupply() == 0) {
-      _lastSeigBlock = block.number;
-      return false;
+        _lastSeigBlock = block.number;
+        return false;
     }
 
     uint256 prevTotalSupply;
@@ -719,41 +722,42 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
 
     // maximum seigniorages * staked rate
     uint256 stakedSeig = rdiv(
-      rmul(
-        maxSeig,
-        // total staked amount
-        _tot.totalSupply()
-      ),
-      tos
+        rmul(
+            maxSeig,
+            // total staked amount
+            _tot.totalSupply()
+        ),
+        tos
     );
-
     // pseig
     uint256 totalPseig = rmul(maxSeig - stakedSeig, relativeSeigRate);
 
     nextTotalSupply = prevTotalSupply + stakedSeig + totalPseig;
+
     _lastSeigBlock = block.number;
 
     _tot.setFactor(_calcNewFactor(prevTotalSupply, nextTotalSupply, _tot.factor()));
 
     uint256 unstakedSeig = maxSeig - stakedSeig;
+
     uint256 powertonSeig;
     uint256 daoSeig;
     uint256 relativeSeig;
 
     if (address(_powerton) != address(0)) {
-      powertonSeig = rmul(unstakedSeig, powerTONSeigRate);
-      IWTON(_wton).mint(address(_powerton), powertonSeig);
-      IPowerTON(_powerton).updateSeigniorage(powertonSeig);
+        powertonSeig = rmul(unstakedSeig, powerTONSeigRate);
+        IWTON(_wton).mint(address(_powerton), powertonSeig);
+        IPowerTON(_powerton).updateSeigniorage(powertonSeig);
     }
 
     if (dao != address(0)) {
-      daoSeig = rmul(unstakedSeig, daoSeigRate);
-      IWTON(_wton).mint(address(dao), daoSeig);
+        daoSeig = rmul(unstakedSeig, daoSeigRate);
+        IWTON(_wton).mint(address(dao), daoSeig);
     }
 
     if (relativeSeigRate != 0) {
-      relativeSeig = totalPseig;
-      accRelativeSeig = accRelativeSeig + relativeSeig;
+        relativeSeig = totalPseig;
+        accRelativeSeig = accRelativeSeig + relativeSeig;
     }
 
     emit SeigGiven(msg.sender, maxSeig, stakedSeig, unstakedSeig, powertonSeig, daoSeig, relativeSeig);
@@ -812,10 +816,9 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
 
   // https://github.com/tokamak-network/TON-total-supply
   // 50,000,000 + 3.92*(target block # - 10837698) - TON in 0x0..1 - 178111.66690985573
-  function totalSupplyOfTon() public view returns (uint256 tos) {
+  function totalSupplyOfTon() public pure returns (uint256 tos) {
 
-    tos = 50000000000000000000000000000000000 + (_seigPerBlock * (block.number - 10837698))
-      - (ITON(_ton).balanceOf(address(1)) * (10 ** 9)) - 178111666909855730000000000000000 ;
+    tos = 50000000000000000000000000000000000 - 178111666909855730000000000000000 ;
   }
 
   // 실제 wton 과 ton 발행량

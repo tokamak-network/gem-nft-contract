@@ -8,7 +8,7 @@ contract L1WrappedStakedTONStorage {
         bool processed;
     }
 
-    uint256 public constant DECIMALS = 1e27;
+    uint256 public constant DECIMALS = 10**27;
 
     bool paused;
 
@@ -18,7 +18,9 @@ contract L1WrappedStakedTONStorage {
     address public seigManager;
 
     uint256 public totalStakedAmount;
+    uint256 public totalWstonMinted;
     uint256 public stakingIndex;
+    uint256 public lastSeigBlock;
 
     mapping(address => WithdrawalRequest[]) public withdrawalRequests;
     mapping (address => uint256) internal withdrawalRequestIndex;
@@ -28,6 +30,10 @@ contract L1WrappedStakedTONStorage {
 
     // Process withdrawal event
     event WithdrawalProcessed(address _to, uint256 amount);
+
+    //staking index event
+    event StakingIndexUpdated();
+    event FailedToUpdateStakingIndex();
 
     // Pause Events
     event Paused(address account);

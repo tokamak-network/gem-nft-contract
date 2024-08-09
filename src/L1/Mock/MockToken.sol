@@ -13,5 +13,8 @@ contract MockToken is ERC20 {
         return 27;
     }
 
+    function mint(address _to, uint256 amount) external {
+        _mint(_to, amount);
+    }
 
 }

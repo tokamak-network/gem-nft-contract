@@ -43,7 +43,6 @@ contract Layer2Registry is  ProxyStorage, AuthControlCoinage, Layer2RegistryStor
     address seigManager
   )
     external
-    onlyMinterOrOperator(layer2) override
     returns (bool)
   {
     require(_register(layer2));

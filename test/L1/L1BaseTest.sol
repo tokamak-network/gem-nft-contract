@@ -12,6 +12,7 @@ import { MockToken } from "../../src/L1/Mock/MockToken.sol";
 import { CoinageFactory } from "../../src/L1/Mock/CoinageFactory.sol";
 import { Layer2Registry } from "../../src/L1/Mock/Layer2Registry.sol";
 import { Candidate } from "../../src/L1/Mock/Candidate.sol";
+import { RefactorCoinageSnapshot } from "../../src/L1/Mock/proxy/RefactorCoinageSnapshot.sol";
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -60,7 +61,7 @@ contract L1BaseTest is Test {
 
         uint256 delay = 93046;
         uint256 seigPerBlock = 3920000000000000000000000000;
-        uint256 lastSeigBlock = 6222410;
+        uint256 lastSeigBlock = block.number;
 
         depositManager = address(new DepositManager());
         seigManager = address(new SeigManager());
@@ -93,7 +94,7 @@ contract L1BaseTest is Test {
             seigManager
         );
 
-        require(SeigManager(seigManager).deployCoinage(candidate));
+        require(Layer2Registry(layer2Registry).registerAndDeployCoinage(candidate, seigManager));
 
         l1wrappedstakedtonFactory = address(new L1WrappedStakedTONFactory(wton));
         

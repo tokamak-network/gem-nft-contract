@@ -94,10 +94,6 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
     /// @return Whether or not the execution succeeded
     function updateSeigniorage() external returns (bool) {
         require(seigManager != address(0), "Candidate: SeigManager is zero");
-        require(
-            !isLayer2Candidate,
-            "Candidate: you should update seigniorage from layer2 contract"
-        );
 
         require(IISeigManager(seigManager).updateSeigniorage(), "fail updateSeigniorage");
         return true;
