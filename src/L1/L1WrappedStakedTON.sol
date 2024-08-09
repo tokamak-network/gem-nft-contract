@@ -35,7 +35,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
         seigManager = _seigManager;
         layer2Address = _layer2Address;
         wton = _wton;
-        stakingIndex = 1e27;
+        stakingIndex = DECIMALS;
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -166,7 +166,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
     }
 
     function getDepositWstonAmount(uint256 _amount) internal view returns(uint256) {
-        uint256 _wstonAmount = (_amount / stakingIndex) * 1e27;
+        uint256 _wstonAmount = (_amount / stakingIndex) * DECIMALS;
         return _wstonAmount;
     }
 

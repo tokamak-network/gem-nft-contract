@@ -7,25 +7,26 @@ When a user wishes to acquire a new Gem from the pre-mined pool, the token is as
 ### Installation
 
 1.  Clone this repository.
-
 ```
 git clone https://github.com/tokamak-network/gem-nft-contracts
 ```
 
 2. Navigate to the project directory.
-
 ```
 cd gem-nft-contracts
 ```
 
-3. Compile 
+3. install dependencies
+```
+yarn install
+```
 
+4. Compile 
 ```
 forge compile
 ```
 
 4. Test
-
 ```
 forge test
 ```

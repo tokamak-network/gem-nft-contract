@@ -8,7 +8,10 @@ import { L1WrappedStakedTON } from "../../src/L1/L1WrappedStakedTON.sol";
 
 import { DepositManager } from "../../src/L1/Mock/DepositManager.sol";
 import { SeigManager } from "../../src/L1/Mock/SeigManager.sol";
-import { MockWTON } from "../../src/L1/Mock/MockWTON.sol";
+import { MockToken } from "../../src/L1/Mock/MockToken.sol";
+import { CoinageFactory } from "../../src/L1/Mock/CoinageFactory.sol";
+import { Layer2Registry } from "../../src/L1/Mock/Layer2Registry.sol";
+import { Candidate } from "../../src/L1/Mock/Candidate.sol";
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -19,44 +22,86 @@ contract L1BaseTest is Test {
     address payable owner;
     address payable user1;
     address payable user2;
+    address payable committee;
 
     address l1wrappedstakedton;
     address l1wrappedstakedtonFactory;
     address wton;
+    address ton;
 
     address depositManager;
     address seigManager;
-    address stakingLayer2Address = 0xCBeF7Cc221c04AD2E68e623613cc5d33b0fE1599;
+    address factory;
+    address layer2Registry;
+    address stakingLayer2Address;
+    address candidate;
 
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
         user1 = payable(makeAddr("User1"));
         user2 = payable(makeAddr("User2"));
+        committee = payable(makeAddr("Committee"));
 
         vm.startPrank(owner);
         vm.warp(1632934800);
 
-        wton = address(new MockWTON("Wrapped Ton", "WTON", 27)); // 27 decimals
+        wton = address(new MockToken("Wrapped Ton", "WTON", 27)); // 27 decimals
+        ton = address(new MockToken("Ton", "TON", 18)); // 18 decimals
 
         // Transfer some tokens to User1
         IERC20(wton).transfer(user1, 10000 * 10 ** 27); // 10000 WTON
         IERC20(wton).transfer(user2, 10000 * 10 ** 27); // 10000 WTON
+        IERC20(ton).transfer(user1, 10000 * 10 ** 18); // 10000 TON
+        IERC20(ton).transfer(user2, 10000 * 10 ** 18); // 10000 TON
 
         // give ETH to User1 to cover gasFees associated with using VRF functions
         vm.deal(user1, 100 ether);
         vm.deal(user2, 100 ether);
 
-        uint256 delay = 1209600;
+        uint256 delay = 93046;
+        uint256 seigPerBlock = 3920000000000000000000000000;
+        uint256 lastSeigBlock = 6222410;
 
-        depositManager = address(new DepositManager(wton, delay));
-        seigManager = address(new SeigManager(depositManager));
+        depositManager = address(new DepositManager());
+        seigManager = address(new SeigManager());
+        factory = address(new CoinageFactory());
+        layer2Registry = address(new Layer2Registry());
+        candidate = address(new Candidate());
+
+        DepositManager(depositManager).initialize(
+            wton,
+            layer2Registry,
+            seigManager,
+            delay
+        );
+
+        SeigManager(seigManager).initialize(
+            ton,
+            wton,
+            layer2Registry,
+            depositManager,
+            seigPerBlock,
+            factory,
+            lastSeigBlock
+        );
+
+        Candidate(candidate).initialize(
+            owner,
+            true,
+            "",
+            committee,
+            seigManager
+        );
+
+        require(SeigManager(seigManager).deployCoinage(candidate));
+
         l1wrappedstakedtonFactory = address(new L1WrappedStakedTONFactory(wton));
         
         DepositManager(depositManager).setSeigManager(seigManager);
 
         // deploy and initialize Wrapped Staked TON
         l1wrappedstakedton = L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).createWSTONToken(
-            stakingLayer2Address,
+            candidate,
             depositManager,
             seigManager,
             "Titan Wrapped Staked TON",

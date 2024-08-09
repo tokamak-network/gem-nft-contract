@@ -16,6 +16,8 @@ contract WrappedStakedTONTest is L1BaseTest {
 
         // Call the depositAndGetWSTON function
         L1WrappedStakedTON(l1wrappedstakedton).depositAndGetWSTON(depositAmount);
+        
+        assert(L1WrappedStakedTON(l1wrappedstakedton).balanceOf(user1) == depositAmount);
 
         vm.stopPrank();
     }

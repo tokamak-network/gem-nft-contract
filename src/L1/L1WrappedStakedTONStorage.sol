@@ -8,6 +8,8 @@ contract L1WrappedStakedTONStorage {
         bool processed;
     }
 
+    uint256 public constant DECIMALS = 1e27;
+
     bool paused;
 
     address public layer2Address;
