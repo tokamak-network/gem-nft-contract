@@ -121,19 +121,18 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
         require(_requestWithdrawal(msg.sender, _wstonAmount, delay), "failed to request withdrawal");
     }
 
-    function _requestWithdrawal(address _to, uint256 _wstonAmount, uint256 delay) internal returns(bool) {
+    function _requestWithdrawal(address _to, uint256 _wstonAmount, uint256 delay) internal returns (bool) {
         require(balanceOf(_to) >= _wstonAmount, "not enough funds");
-        require(
-            transferFrom(_to, address(this), _wstonAmount),
-            "failed to transfer WSTON to this contract"
-        );
+
+        // updating the staking index
+        stakingIndex = updateStakingIndex();
 
         uint256 _amountToWithdraw;
-        _amountToWithdraw = _wstonAmount * stakingIndex;
+        _amountToWithdraw = (_wstonAmount * stakingIndex) / DECIMALS;
 
         require(
             IDepositManager(depositManager).requestWithdrawal(layer2Address, _amountToWithdraw),
-            "failed to request withdraw from the deposit manager"
+            "failed to request withdrawal from the deposit manager"
         );
 
         withdrawalRequests[_to].push(WithdrawalRequest({
@@ -142,8 +141,13 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
             processed: false
         }));
 
+        // Burn wstonAmount
+        _burn(_to, _wstonAmount);
+
+        emit WithdrawalRequested(_to, _wstonAmount);
         return true;
     }
+
 
     function claimWithdrawal() external whenNotPaused returns(bool){
         uint256 index = withdrawalRequestIndex[msg.sender];
@@ -163,7 +167,6 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
         IERC20(wton).safeTransfer(msg.sender, amount);
 
         emit WithdrawalProcessed(msg.sender, amount);
-
         return true;
     }
 
@@ -179,10 +182,8 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
         if (totalWstonMinted > 0 && totalStake > 0) {
             // Multiply first to avoid precision loss, then divide
             _stakingIndex = (totalStake * DECIMALS) / totalWstonMinted;
-            emit StakingIndexUpdated();
         } else {
             _stakingIndex = stakingIndex;
-            emit FailedToUpdateStakingIndex();
         }
         
         stakingIndex = _stakingIndex;
@@ -215,8 +216,10 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
 
     function getTotalWSTONSupply() external view returns(uint256) {return totalSupply();} 
 
-    function getstakedTONBalance() external view returns(uint256) {
-        return ISeigManager(seigManager).stakeOf(layer2Address, address(this));
+    function getWithdrawalRequest(address requester) external view returns(WithdrawalRequest memory) {
+        uint256 index = withdrawalRequestIndex[requester];
+        WithdrawalRequest memory request = withdrawalRequests[requester][index];
+        return request;
     }
 
 }

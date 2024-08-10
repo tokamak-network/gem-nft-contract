@@ -4,6 +4,7 @@ pragma solidity ^0.8.23;
 import "forge-std/Test.sol";
 import { L1WrappedStakedTONFactory } from "../../src/L1/L1WrappedStakedTONFactory.sol";
 import { L1WrappedStakedTON } from "../../src/L1/L1WrappedStakedTON.sol";
+import { L1WrappedStakedTONStorage } from "../../src/L1/L1WrappedStakedTONStorage.sol";
 
 
 import { DepositManager } from "../../src/L1/Mock/DepositManager.sol";
@@ -37,6 +38,14 @@ contract L1BaseTest is Test {
     address stakingLayer2Address;
     address candidate;
 
+    uint256 delay = 93046;
+    uint256 seigPerBlock = 3920000000000000000000000000;
+    uint256 lastSeigBlock = block.number;
+
+    uint256 public constant DECIMALS = 10**27;
+
+    event WithdrawalRequested(address indexed _to, uint256 amount);
+
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
         user1 = payable(makeAddr("User1"));
@@ -58,10 +67,6 @@ contract L1BaseTest is Test {
         // give ETH to User1 to cover gasFees associated with using VRF functions
         vm.deal(user1, 100 ether);
         vm.deal(user2, 100 ether);
-
-        uint256 delay = 93046;
-        uint256 seigPerBlock = 3920000000000000000000000000;
-        uint256 lastSeigBlock = block.number;
 
         depositManager = address(new DepositManager());
         seigManager = address(new SeigManager());

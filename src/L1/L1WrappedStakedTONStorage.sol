@@ -28,12 +28,11 @@ contract L1WrappedStakedTONStorage {
     //deposit even
     event Deposited(address to, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
 
-    // Process withdrawal event
+    // withdrawal events
+    event WithdrawalRequested(address indexed _to, uint256 amount);
+    event DebugAllowance(address indexed owner, address indexed spender, uint256 value);
+    event DebugBalance(address indexed account, uint256 balance);
     event WithdrawalProcessed(address _to, uint256 amount);
-
-    //staking index event
-    event StakingIndexUpdated();
-    event FailedToUpdateStakingIndex();
 
     // Pause Events
     event Paused(address account);
