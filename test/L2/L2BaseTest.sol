@@ -5,10 +5,13 @@ import "forge-std/Test.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
-import { MockL2WSTON } from "../../src/L2/MockL2WSTON.sol";
+import { MockL2WSTON } from "../../src/L2/Mock/MockL2WSTON.sol";
 import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import { DRBCoordinatorMock } from "../../src/L2/Mock/DRBCoordinatorMock.sol";
+import { DRBConsumerBase } from "../../src/L2/Randomness/DRBConsumerBase.sol";
 
 contract L2BaseTest is Test {
 
@@ -46,13 +49,18 @@ contract L2BaseTest is Test {
     address payable owner;
     address payable user1;
     address payable user2;
-    address payable coordinator;
 
     address gemfactory;
     address treasury;
     address marketplace;
     address wston;
     address ton;
+
+    //DRB storage
+    uint256 public avgL2GasUsed = 2100000;
+    uint256 public premiumPercentage = 0;
+    uint256 public flatFee = 0.001 ether;
+    uint256 public calldataSizeBytes = 2071;
 
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
@@ -74,16 +82,24 @@ contract L2BaseTest is Test {
         // give ETH to User1 to cover gasFees associated with using VRF functions
         vm.deal(user1, 100 ether);
 
+        // deploy DRBCoordinatorMock
+        DRBCoordinatorMock drbCoordinatorMock = new DRBCoordinatorMock(
+            avgL2GasUsed,
+            premiumPercentage,
+            flatFee,
+            calldataSizeBytes
+        );
+
         // deploy treasury and marketplace
-        treasury = address(new Treasury(coordinator, wston, ton));
-        marketplace = address(new MarketPlace(coordinator));
+        treasury = address(new Treasury(address(drbCoordinatorMock), wston, ton));
+        marketplace = address(new MarketPlace(address(drbCoordinatorMock)));
 
         // transfer some TON & TITAN WSTON to treasury
         IERC20(wston).transfer(treasury, 100000 * 10 ** 27);
         IERC20(ton).transfer(treasury, 100000 * 10 ** 18);
 
         // deploy and initialize GemFactory
-        gemfactory = address(new GemFactory(coordinator));
+        gemfactory = address(new GemFactory(address(drbCoordinatorMock)));
 
         // Grant admin role to owner
         GemFactory(gemfactory).grantRole(GemFactory(gemfactory).DEFAULT_ADMIN_ROLE(), owner);

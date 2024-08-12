@@ -83,7 +83,7 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
     }
 
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlace returns(bool) {
-        GemFactory(_gemFactory).transferGEM(_to, _tokenId);
+        GemFactory(_gemFactory).transferFrom(address(this), _to, _tokenId);
         return true;
     }
 

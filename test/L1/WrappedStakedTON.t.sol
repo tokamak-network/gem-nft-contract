@@ -97,7 +97,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         L1WrappedStakedTON(l1wrappedstakedton).requestWithdrawal(depositAmount);
         uint256 stakingIndex = L1WrappedStakedTON(l1wrappedstakedton).getStakingIndex();
         uint256 expectedWTONAmount = (depositAmount * stakingIndex) / DECIMALS;
-        L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedton).getWithdrawalRequest(user1);
+        L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedton).getLastWithdrawalRequest(user1);
 
         //console.log("staking index: ", stakingIndex);
         //console.log("expected withdrawal amount: ", expectedWTONAmount);
@@ -106,6 +106,50 @@ contract WrappedStakedTONTest is L1BaseTest {
         assert(request.processed == false);
         assert(request.withdrawableBlockNumber == (block.number + delay));
         vm.stopPrank();
+    }
+
+    function testClaimWithdrawal() public {
+        // user1 deposit
+        vm.startPrank(user1);
+        uint256 depositAmount = 200 * 10**27;
+        IERC20(wton).approve(l1wrappedstakedton, depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositAndGetWSTON(depositAmount);
+        vm.stopPrank();
+
+        // move to the next 100000 block
+        vm.roll(block.number + 100000);
+
+        // user2 deposits
+        vm.startPrank(user2);
+        IERC20(wton).approve(l1wrappedstakedton, depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositAndGetWSTON(depositAmount);
+        vm.stopPrank();
+
+        // move to the next 100000 block
+        vm.roll(block.number + 100000);
+
+        // user1 withdrawal request
+        vm.startPrank(user1);
+        // Request withdrawal
+        L1WrappedStakedTON(l1wrappedstakedton).requestWithdrawal(depositAmount);
+
+        vm.roll(block.number + delay);
+
+        uint256 wtonBalanceBefore = IERC20(wton).balanceOf(user1);
+        uint256 stakingIndexBefore = L1WrappedStakedTON(l1wrappedstakedton).getStakingIndex();
+
+        L1WrappedStakedTON(l1wrappedstakedton).claimWithdrawal();
+        L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedton).getWithdrawalRequest(user1, 0);
+       
+        assert(IERC20(wton).balanceOf(user1) == wtonBalanceBefore + request.amount);
+        assert(request.processed == true);
+
+        //checking the staking index is not affected
+        uint256 stakingIndexAfter = L1WrappedStakedTON(l1wrappedstakedton).getStakingIndex();
+        assert(stakingIndexAfter == stakingIndexBefore);
+
+        vm.stopPrank();
+    
     }
     
 }

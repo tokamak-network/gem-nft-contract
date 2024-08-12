@@ -127,7 +127,7 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
         gemsForSale[_tokenId].isActive = false;
         GemFactory(_gemFactory).setIsLocked(_tokenId, false);
         // transfer NFT ownership
-        GemFactory(_gemFactory).transferGEMFrom(seller, _payer, _tokenId);
+        GemFactory(_gemFactory).transferFrom(seller, _payer, _tokenId);
         
 
         emit GemBought(_tokenId, _payer, seller, price);

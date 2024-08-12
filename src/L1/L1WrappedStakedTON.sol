@@ -121,6 +121,11 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
         require(_requestWithdrawal(msg.sender, _wstonAmount, delay), "failed to request withdrawal");
     }
 
+    function requestWithdrawalTo(address _to, uint256 _wstonAmount) external whenNotPaused {
+        uint256 delay = IDepositManager(depositManager).getDelayBlocks(layer2Address);
+        require(_requestWithdrawal(_to, _wstonAmount, delay), "failed to request withdrawal");       
+    }
+
     function _requestWithdrawal(address _to, uint256 _wstonAmount, uint256 delay) internal returns (bool) {
         require(balanceOf(_to) >= _wstonAmount, "not enough funds");
 
@@ -148,25 +153,32 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
         return true;
     }
 
+    function claimWithdrawalTo(address _to) external whenNotPaused {
+        require(_claimWithdrawal(_to), "failed to claim");
+    }
 
-    function claimWithdrawal() external whenNotPaused returns(bool){
-        uint256 index = withdrawalRequestIndex[msg.sender];
-        require(withdrawalRequests[msg.sender].length > index, "no request to process");
+    function claimWithdrawal() external whenNotPaused {
+        require(_claimWithdrawal(msg.sender), "failed to claim");
+    }
 
-        WithdrawalRequest storage request = withdrawalRequests[msg.sender][index];
+    function _claimWithdrawal(address _to) internal returns(bool){
+        uint256 index = withdrawalRequestIndex[_to];
+        require(withdrawalRequests[_to].length > index, "no request to process");
+
+        WithdrawalRequest storage request = withdrawalRequests[_to][index];
         require(request.processed == false, "already processed");
         require(request.withdrawableBlockNumber <= block.number, "wait for withdrawal delay");
 
         request.processed = true;
-        withdrawalRequestIndex[msg.sender] += 1;
+        withdrawalRequestIndex[_to] += 1;
 
         uint256 amount = request.amount;
 
         require(IDepositManager(depositManager).processRequest(layer2Address, false));
 
-        IERC20(wton).safeTransfer(msg.sender, amount);
+        IERC20(wton).safeTransfer(_to, amount);
 
-        emit WithdrawalProcessed(msg.sender, amount);
+        emit WithdrawalProcessed(_to, amount);
         return true;
     }
 
@@ -216,8 +228,13 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
 
     function getTotalWSTONSupply() external view returns(uint256) {return totalSupply();} 
 
-    function getWithdrawalRequest(address requester) external view returns(WithdrawalRequest memory) {
+    function getLastWithdrawalRequest(address requester) external view returns(WithdrawalRequest memory) {
         uint256 index = withdrawalRequestIndex[requester];
+        WithdrawalRequest memory request = withdrawalRequests[requester][index];
+        return request;
+    }
+
+    function getWithdrawalRequest(address requester, uint256 index) external view returns(WithdrawalRequest memory) {
         WithdrawalRequest memory request = withdrawalRequests[requester][index];
         return request;
     }

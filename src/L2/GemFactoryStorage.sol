@@ -19,6 +19,7 @@ contract GemFactoryStorage {
         uint8[2] color; // id of the color
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
         uint256 miningPeriod; // Mining delay before claiming
+        uint256 miningPower;
         bool isLocked; // Locked if gem is listed on the marketplace
         uint256 value; // 27 decimals
         string tokenURI; // IPFS address of the metadata file
@@ -46,8 +47,6 @@ contract GemFactoryStorage {
 
     mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) public ownershipTokenCount;
-    mapping(uint256 => address) public GEMIndexToApproved;
-    mapping(uint256 => address) public gemAllowedToAddress;
 
     // Mining mappings
     mapping(address => bool) public isUserMining;
@@ -62,12 +61,12 @@ contract GemFactoryStorage {
     bool public paused;
 
     // Mining storage
-    uint256 public CommonMiningFees;
-    uint256 public RareMiningFees;
-    uint256 public UniqueMiningFees;
-    uint256 public EpicMiningFees;
-    uint256 public LegendaryMiningFees;
-    uint256 public MythicMiningFees;
+    uint256 public CommonMiningPower;
+    uint256 public RareMiningPower;
+    uint256 public UniqueMiningPower;
+    uint256 public EpicMiningPower;
+    uint256 public LegendaryMiningPower;
+    uint256 public MythicMiningPower;
 
     uint256 public CommonGemsValue;
     uint256 public RareGemsValue;

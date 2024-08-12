@@ -374,8 +374,8 @@ function testMeltGEM() public {
 
         // Define GEM properties
         uint8[2] memory color = [0, 0];
-        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint8[4] memory quadrants = [1, 2, 1, 1];
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
+        uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
@@ -400,8 +400,8 @@ function testMeltGEM() public {
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
-        uint256 oneWeek = 7 * 24 * 60 * 60; // 7 days in seconds
-        vm.warp(block.timestamp + oneWeek + 1);
+        uint256 twoWeeks = 14 * 24 * 60 * 60; // 7 days in seconds
+        vm.warp(block.timestamp + twoWeeks + 1);
 
         vm.stopPrank();
 
@@ -417,8 +417,8 @@ function testMeltGEM() public {
 
         // Define GEM properties
         uint8[2] memory color = [0, 0];
-        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint8[4] memory quadrants = [1, 2, 1, 1];
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
+        uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
@@ -458,8 +458,8 @@ function testMeltGEM() public {
 
         // Define GEM properties
         uint8[2] memory color = [0, 0];
-        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint8[4] memory quadrants = [1, 2, 1, 1];
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
+        uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
@@ -484,8 +484,8 @@ function testMeltGEM() public {
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
-        uint256 oneWeek = 7 * 24 * 60 * 60; // 7 days in seconds
-        vm.warp(block.timestamp + oneWeek + 1);
+        uint256 twoWeeks = 14 * 24 * 60 * 60; // 7 days in seconds
+        vm.warp(block.timestamp + twoWeeks + 1);
 
         // putGemFor sale before calling startMining to ensure Gem is locked
         uint256 gemPrice = 1500 * 10 ** 27;
@@ -498,7 +498,7 @@ function testMeltGEM() public {
 
         // Expect the transaction to revert with the error message "Gem is listed for sale or already mining"
         vm.expectRevert("Gem is listed for sale or already mining");
-        GemFactory(gemfactory).startMiningGEM(newGemId);
+        GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemId);
 
         vm.stopPrank();
     }
@@ -512,12 +512,12 @@ function testMeltGEM() public {
         colors[1] = [1, 1];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
-        rarities[0] = GemFactoryStorage.Rarity.COMMON;
-        rarities[1] = GemFactoryStorage.Rarity.COMMON;
+        rarities[0] = GemFactoryStorage.Rarity.RARE;
+        rarities[1] = GemFactoryStorage.Rarity.RARE;
 
         uint8[4][] memory quadrants = new uint8[4][](2);
-        quadrants[0] = [1, 2, 1, 1];
-        quadrants[1] = [1, 1, 2, 1];
+        quadrants[0] = [3, 3, 2, 2];
+        quadrants[1] = [2, 3, 2, 3];
 
         string[] memory tokenURIs = new string[](2);
         tokenURIs[0] = "https://example.com/token/1";
@@ -548,7 +548,7 @@ function testMeltGEM() public {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
-        uint256 oneWeek = 7 * 24 * 60 * 60; // 7 days in seconds
+        uint256 oneWeek = 14 * 24 * 60 * 60; // 7 days in seconds
         vm.warp(block.timestamp + oneWeek + 1);
 
         vm.stopPrank();
@@ -556,11 +556,21 @@ function testMeltGEM() public {
         vm.prank(user1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
+        GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemIds[0]);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
+        console.log("randomNumber = ", randomRequest.randomWord);
+        console.log("fulfilled = ", randomRequest.fulfilled);
+        console.log("requested = ", randomRequest.requested);
+        console.log("requester = ", randomRequest.requester);
+        console.log("chosenTokenId = ", randomRequest.chosenTokenId);
 
         // Expect the transaction to revert with the error message "user is already mining"
+
+        vm.stopPrank();
+
+        vm.prank(user1);
         vm.expectRevert("user is already mining");
-        GemFactory(gemfactory).startMiningGEM(newGemIds[1]);
+        GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemIds[1]);
 
         vm.stopPrank();
     }
@@ -570,8 +580,8 @@ function testMeltGEM() public {
 
         // Define GEM properties
         uint8[2] memory color = [0, 0];
-        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint8[4] memory quadrants = [1, 2, 1, 1];
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
+        uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
@@ -593,8 +603,8 @@ function testMeltGEM() public {
         vm.startPrank(user2); // Different user
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
-        uint256 oneWeek = 7 * 24 * 60 * 60; // 7 days in seconds
-        vm.warp(block.timestamp + oneWeek + 1);
+        uint256 twoWeeks = 14 * 24 * 60 * 60; // 7 days in seconds
+        vm.warp(block.timestamp + twoWeeks + 1);
 
         // Verify token existence before starting mining
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
@@ -610,13 +620,13 @@ function testMeltGEM() public {
         vm.stopPrank();
     }
 
-    function testStartMiningGEMRevertsIfNotEnoughFunds() public {
+    function testClaimMinedGem() public {
         vm.startPrank(owner);
 
         // Define GEM properties
         uint8[2] memory color = [0, 0];
-        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
-        uint8[4] memory quadrants = [1, 2, 1, 1];
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
+        uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
@@ -641,21 +651,15 @@ function testMeltGEM() public {
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
-        uint256 oneWeek = 7 * 24 * 60 * 60; // 7 days in seconds
-        vm.warp(block.timestamp + oneWeek + 1);
-
-        // Define the mining fees
-        uint256 miningFees = commonMiningFees;
+        uint256 twoWeeks = 14 * 24 * 60 * 60; // 7 days in seconds
+        vm.warp(block.timestamp + twoWeeks + 1);
 
         vm.stopPrank();
 
+        // Expect the transaction to succeed
         vm.prank(user1);
-
-        // Expect the transaction to revert with the error message "Not enough funds"
-        vm.expectRevert("Not enough funds");
-        GemFactory(gemfactory).startMiningGEM{value: miningFees - 1}(newGemId);
-
-        vm.stopPrank();
+        bool result = GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemId);
+        assert(result == true);
     }
 
 }
