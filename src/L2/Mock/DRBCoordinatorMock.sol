@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity ^0.8.23;
 
 import {ReentrancyGuardTransient} from "./ReentrancyGuardTransient.sol";
 import {OptimismL1Fees} from "./OptimismL1Fees.sol";
@@ -26,7 +26,7 @@ contract DRBCoordinatorMock is
         bool isSent;
     }
 
-    event RandomWordsRequested(uint256 requestId);
+    event RandomWordsRequested(uint256 requestId, uint256 requestedTime);
     event FulfillRandomness(uint256 requestId, bool success, address fulfiller);
 
     error InsufficientAmount();
@@ -41,8 +41,7 @@ contract DRBCoordinatorMock is
     uint256 private s_nextId;
     mapping(uint256 requestId => RandomWordsRequest) private s_requestInfo;
     mapping(uint256 requestId => ValuesAtRequestId) private s_valuesAtRound;
-    mapping(uint256 requestId => RandomWordsFullfill)
-        private s_randomWordsFullfill;
+    mapping(uint256 requestId => RandomWordsFullfill) private s_randomWordsFullfill;
     /// @dev 5k is plenty for an EXTCODESIZE call (2600) + warm CALL (100) and some arithmetic operations
     uint256 private constant GAS_FOR_CALL_EXACT_CHECK = 5_000;
 
@@ -63,21 +62,25 @@ contract DRBCoordinatorMock is
     ) external payable nonReentrant returns (uint256 requestId) {
         uint256 cost = _calculateDirectFundingPrice(tx.gasprice, _request);
         require(msg.value >= cost);
+        requestId = s_nextId++;
         s_requestInfo[requestId] = _request;
         s_valuesAtRound[requestId] = ValuesAtRequestId({
             requestedTime: block.timestamp,
             cost: cost,
             consumer: msg.sender
         });
-        requestId = s_nextId++;
-        emit RandomWordsRequested(requestId);
+        //requestId = s_nextId++;
+        emit RandomWordsRequested(requestId, s_valuesAtRound[requestId].requestedTime);
     }
 
     function fulfillRandomness(uint256 requestId) external nonReentrant {
-        require(s_valuesAtRound[requestId].requestedTime > 0);
-        require(
-            !s_randomWordsFullfill[requestId].isFullfilled
-        );
+        // Check if the request exists
+        require(s_valuesAtRound[requestId].requestedTime > 0, "No request found");
+
+        // Check if the request has already been fulfilled
+        require(!s_randomWordsFullfill[requestId].isFullfilled, "Already fulfilled");
+
+        // Generate a random number
         uint256 random = uint256(
             keccak256(
                 abi.encodePacked(
@@ -87,6 +90,8 @@ contract DRBCoordinatorMock is
                 )
             )
         );
+
+        // Call the consumer contract
         bool success = _call(
             s_valuesAtRound[requestId].consumer,
             abi.encodeWithSelector(
@@ -96,11 +101,15 @@ contract DRBCoordinatorMock is
             ),
             s_requestInfo[requestId].callbackGasLimit
         );
+
+        // Update the state to mark the request as fulfilled
         s_randomWordsFullfill[requestId] = RandomWordsFullfill({
             random: random,
             isFullfilled: true,
             isSent: success
         });
+
+        // Emit an event to log the fulfillment
         emit FulfillRandomness(requestId, success, msg.sender);
     }
 

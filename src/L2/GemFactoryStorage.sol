@@ -101,6 +101,7 @@ contract GemFactoryStorage {
     address public ton;
     address public treasury;
     address public marketplace;
+    address public drbcoordinator;
 
     // constants
     uint32 public constant CALLBACK_GAS_LIMIT = 210000;
@@ -124,7 +125,7 @@ contract GemFactoryStorage {
     event TransferGEM(address from, address to, uint256 tokenId);
 
     // Mining Events
-    event GemMiningStarted(uint256 tokenId, address miner, uint256 startMiningTime);
+    event GemMiningStarted(uint256 tokenId, address miner, uint256 startMiningTime, uint256 newMiningPower);
     event GemMiningClaimed(uint256 tokenId, address miner);
     event GemMelted(uint256 _tokenId, address _from);
 

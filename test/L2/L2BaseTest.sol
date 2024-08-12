@@ -2,6 +2,7 @@
 pragma solidity ^0.8.25;
 
 import "forge-std/Test.sol";
+import "forge-std/console.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
@@ -19,7 +20,7 @@ contract L2BaseTest is Test {
 
     uint256 public commonMiningPower = 1;
     uint256 public rareMiningPower = 2;
-    uint256 public uniqueMiningPower = 5;
+    uint256 public uniqueMiningPower = 1;
     uint256 public epicMiningPower = 10;
     uint256 public LegendaryMiningPower = 15;
     uint256 public MythicMiningPower = 20;
@@ -109,12 +110,6 @@ contract L2BaseTest is Test {
             wston,
             ton,
             treasury,
-            commonMiningPower,
-            rareMiningPower,
-            uniqueMiningPower,
-            epicMiningPower,
-            LegendaryMiningPower,
-            MythicMiningPower, 
             CommonGemsValue,
             RareGemsValue,
             UniqueGemsValue,
@@ -142,12 +137,12 @@ contract L2BaseTest is Test {
         );
 
         GemFactory(gemfactory).setMiningPowers(
-            CommonGemsCooldownPeriod,
-            RareGemsCooldownPeriod,
-            UniqueGemsCooldownPeriod,
-            EpicGemsCooldownPeriod,
-            LegendaryGemsCooldownPeriod,
-            MythicGemsCooldownPeriod
+            commonMiningPower,
+            rareMiningPower,
+            uniqueMiningPower,
+            epicMiningPower,
+            LegendaryMiningPower,
+            MythicMiningPower
         );
 
         MarketPlace(marketplace).initialize(

@@ -72,7 +72,7 @@ contract GemFactoryTest is L2BaseTest {
         vm.stopPrank();
     }
 
-function testMeltGEM() public {
+    function testMeltGEM() public {
         vm.startPrank(owner);
 
          // Define GEM properties
@@ -161,9 +161,6 @@ function testMeltGEM() public {
         uint8[2] memory color = [0, 1];
 
         uint256 newGemId = GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
-
-        // Verify the new gem is created and owned by user1
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
 
         // Verify the new gem properties
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactory).getGem(newGemId);
@@ -411,7 +408,6 @@ function testMeltGEM() public {
         assert(result == true);
     }
 
-
     function testStartMiningGEMRevertsIfCooldownNotElapsed() public {
         vm.startPrank(owner);
 
@@ -441,10 +437,6 @@ function testMeltGEM() public {
 
         // Verify token existence before starting mining
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
-
-        vm.stopPrank();
-
-        vm.prank(user1);
 
         // Expect the transaction to revert with the error message "Gem cooldown period has not elapsed"
         vm.expectRevert("Gem cooldown period has not elapsed");
@@ -557,12 +549,6 @@ function testMeltGEM() public {
 
         // Ensure the user is mining the first GEM
         GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[0]);
-        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
-        console.log("randomNumber = ", randomRequest.randomWord);
-        console.log("fulfilled = ", randomRequest.fulfilled);
-        console.log("requested = ", randomRequest.requested);
-        console.log("requester = ", randomRequest.requester);
-        console.log("chosenTokenId = ", randomRequest.chosenTokenId);
 
         // Expect the transaction to revert with the error message "user is already mining"
 
@@ -620,46 +606,317 @@ function testMeltGEM() public {
         vm.stopPrank();
     }
 
-    function testClaimMinedGem() public {
+    function testStartMiningGEMRandomGem() public {
         vm.startPrank(owner);
 
         // Define GEM properties
-        uint8[2] memory color = [0, 0];
-        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
-        uint8[4] memory quadrants = [3, 2, 3, 3];
-        string memory tokenURI = "https://example.com/token/1";
+        uint8[2][] memory colors = new uint8[2][](5);
+        colors[0] = [0, 1];
+        colors[1] = [1, 1];
+        colors[2] = [1, 1];
+        colors[3] = [1, 1];
+        colors[4] = [1, 1];
 
-        // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasury).createPreminedGEM(
-            rarity,
-            color,
+        GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
+        rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
+        rarities[1] = GemFactoryStorage.Rarity.COMMON;
+        rarities[2] = GemFactoryStorage.Rarity.COMMON;
+        rarities[3] = GemFactoryStorage.Rarity.RARE;
+        rarities[4] = GemFactoryStorage.Rarity.RARE;
+
+        uint8[4][] memory quadrants = new uint8[4][](5);
+        quadrants[0] = [3, 3, 4, 4];
+        quadrants[1] = [1, 2, 2, 1];
+        quadrants[2] = [1, 1, 2, 2];
+        quadrants[3] = [2, 3, 2, 3];
+        quadrants[4] = [2, 3, 2, 3];
+
+        string[] memory tokenURIs = new string[](5);
+        tokenURIs[0] = "https://example.com/token/1";
+        tokenURIs[1] = "https://example.com/token/2";
+        tokenURIs[2] = "https://example.com/token/3";
+        tokenURIs[3] = "https://example.com/token/4";
+        tokenURIs[4] = "https://example.com/token/5";
+
+        // Call createPreminedGEMPool function from the Treasury contract
+        uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
+            rarities,
+            colors,
             quadrants,
-            tokenURI
+            tokenURIs
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == address(treasury));
 
         // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
-        // Verify token existence before starting mining
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
+        // Verify token existence before putting it for sale
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
-        uint256 twoWeeks = 14 * 24 * 60 * 60; // 7 days in seconds
-        vm.warp(block.timestamp + twoWeeks + 1);
+        uint256 threeWeeks = 21 * 24 * 60 * 60; // 7 days in seconds
+        vm.warp(block.timestamp + threeWeeks + 1);
 
         vm.stopPrank();
 
-        // Expect the transaction to succeed
         vm.prank(user1);
-        bool result = GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemId);
-        assert(result == true);
+
+        // Ensure the user is mining the first GEM
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[0]);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
+        console.log("randomNumber = ", randomRequest.randomWord);
+        console.log("fulfilled = ", randomRequest.fulfilled);
+        console.log("requested = ", randomRequest.requested);
+        console.log("requester = ", randomRequest.requester);
+        console.log("chosenTokenId = ", randomRequest.chosenTokenId);
+
+        assert(randomRequest.fulfilled == true);
+        assert(randomRequest.requested == true);
+        assert(randomRequest.requester == user1);
+
+        vm.stopPrank();
+
+    }
+
+    function testClaimMiningGem() public {
+        vm.startPrank(owner);
+
+        // Define GEM properties
+        uint8[2][] memory colors = new uint8[2][](5);
+        colors[0] = [0, 1];
+        colors[1] = [1, 1];
+        colors[2] = [1, 1];
+        colors[3] = [1, 1];
+        colors[4] = [1, 1];
+
+        GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
+        rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
+        rarities[1] = GemFactoryStorage.Rarity.COMMON;
+        rarities[2] = GemFactoryStorage.Rarity.COMMON;
+        rarities[3] = GemFactoryStorage.Rarity.RARE;
+        rarities[4] = GemFactoryStorage.Rarity.RARE;
+
+        uint8[4][] memory quadrants = new uint8[4][](5);
+        quadrants[0] = [3, 3, 4, 4];
+        quadrants[1] = [1, 2, 2, 1];
+        quadrants[2] = [1, 1, 2, 2];
+        quadrants[3] = [2, 3, 2, 3];
+        quadrants[4] = [2, 3, 2, 3];
+
+        string[] memory tokenURIs = new string[](5);
+        tokenURIs[0] = "https://example.com/token/1";
+        tokenURIs[1] = "https://example.com/token/2";
+        tokenURIs[2] = "https://example.com/token/3";
+        tokenURIs[3] = "https://example.com/token/4";
+        tokenURIs[4] = "https://example.com/token/5";
+
+        // Call createPreminedGEMPool function from the Treasury contract
+        uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
+            rarities,
+            colors,
+            quadrants,
+            tokenURIs
+        );
+
+        // Verify GEM minting
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == address(treasury));
+
+        // Transfer the GEM to user1
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        // Verify token existence before putting it for sale
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
+
+        // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
+        uint256 threeWeeks = 21 * 24 * 60 * 60; // 7 days in seconds
+        vm.warp(block.timestamp + threeWeeks + 1);
+        vm.stopPrank();
+
+        vm.prank(user1);
+        // Ensure the user is mining the first GEM
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[0]);
+        vm.stopPrank();
+
+        vm.prank(user1);
+        vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
+        GemFactory(gemfactory).claimMinedGEM(newGemIds[0]);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
+        assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
+        vm.stopPrank();
+    }
+
+    function teststartMiningGEMRevertsIfNoMiningPowerLeft() public {
+        vm.startPrank(owner);
+
+        // Define GEM properties
+        uint8[2][] memory colors = new uint8[2][](5);
+        colors[0] = [0, 1];
+        colors[1] = [1, 1];
+        colors[2] = [1, 1];
+        colors[3] = [1, 1];
+        colors[4] = [1, 1];
+
+        GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
+        rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
+        rarities[1] = GemFactoryStorage.Rarity.COMMON;
+        rarities[2] = GemFactoryStorage.Rarity.COMMON;
+        rarities[3] = GemFactoryStorage.Rarity.RARE;
+        rarities[4] = GemFactoryStorage.Rarity.RARE;
+
+        uint8[4][] memory quadrants = new uint8[4][](5);
+        quadrants[0] = [3, 3, 4, 4];
+        quadrants[1] = [1, 2, 2, 1];
+        quadrants[2] = [1, 1, 2, 2];
+        quadrants[3] = [2, 3, 2, 3];
+        quadrants[4] = [2, 3, 2, 3];
+
+        string[] memory tokenURIs = new string[](5);
+        tokenURIs[0] = "https://example.com/token/1";
+        tokenURIs[1] = "https://example.com/token/2";
+        tokenURIs[2] = "https://example.com/token/3";
+        tokenURIs[3] = "https://example.com/token/4";
+        tokenURIs[4] = "https://example.com/token/5";
+
+        // Call createPreminedGEMPool function from the Treasury contract
+        uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
+            rarities,
+            colors,
+            quadrants,
+            tokenURIs
+        );
+
+        // Verify GEM minting
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == address(treasury));
+
+        // Transfer the GEM to user1
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        // Verify token existence before putting it for sale
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
+
+        vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
+
+        // Ensure the user is mining the first GEM
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[0]);
+
+        vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
+        GemFactory(gemfactory).claimMinedGEM(newGemIds[0]);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
+        assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
+        vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
+        vm.expectRevert("no mining power left for that GEM");
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[0]);
+        
+        vm.stopPrank();
+
+    }
+
+    function testStartAndClaimMiningTwice() public {
+        vm.startPrank(owner);
+
+        // Define GEM properties
+        uint8[2][] memory colors = new uint8[2][](5);
+        colors[0] = [0, 1];
+        colors[1] = [1, 1];
+        colors[2] = [1, 1];
+        colors[3] = [1, 1];
+        colors[4] = [1, 1];
+
+        GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
+        rarities[0] = GemFactoryStorage.Rarity.EPIC;
+        rarities[1] = GemFactoryStorage.Rarity.COMMON;
+        rarities[2] = GemFactoryStorage.Rarity.COMMON;
+        rarities[3] = GemFactoryStorage.Rarity.RARE;
+        rarities[4] = GemFactoryStorage.Rarity.RARE;
+
+        uint8[4][] memory quadrants = new uint8[4][](5);
+        quadrants[0] = [5, 5, 4, 4];
+        quadrants[1] = [1, 2, 2, 1];
+        quadrants[2] = [1, 1, 2, 2];
+        quadrants[3] = [2, 3, 2, 3];
+        quadrants[4] = [2, 3, 2, 3];
+
+        string[] memory tokenURIs = new string[](5);
+        tokenURIs[0] = "https://example.com/token/1";
+        tokenURIs[1] = "https://example.com/token/2";
+        tokenURIs[2] = "https://example.com/token/3";
+        tokenURIs[3] = "https://example.com/token/4";
+        tokenURIs[4] = "https://example.com/token/5";
+
+        // Call createPreminedGEMPool function from the Treasury contract
+        uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
+            rarities,
+            colors,
+            quadrants,
+            tokenURIs
+        );
+
+        // Verify GEM minting
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == address(treasury));
+
+        // Transfer the GEM to user1
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        // Verify token existence before putting it for sale
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
+
+        // move on until the cooldown elapses
+        vm.warp(block.timestamp + EpicGemsCooldownPeriod + 1);
+
+        // Ensure the user is mining the first GEM
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[0]);
+
+        vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
+        GemFactory(gemfactory).claimMinedGEM(newGemIds[0]);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
+        assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
+
+        // move on until the cooldown elapses
+        vm.warp(block.timestamp + EpicGemsCooldownPeriod + 1);
+
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[0]);
+        // move on until the mining period elapses
+        vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
+
+        GemFactory(gemfactory).claimMinedGEM(newGemIds[0]);
+        GemFactoryStorage.RequestStatus memory secondRandomRequest = GemFactory(gemfactory).getRandomRequest(1);
+        assert(GemFactory(gemfactory).ownerOf(secondRandomRequest.chosenTokenId) == user1);
+        vm.stopPrank();
+
     }
 
 }

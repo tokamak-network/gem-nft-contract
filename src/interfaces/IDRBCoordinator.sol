@@ -22,4 +22,6 @@ interface IDRBCoordinator {
     function calculateDirectFundingPrice(
         RandomWordsRequest calldata _request
     ) external view returns (uint256);
+
+    function fulfillRandomness(uint256 requestId) external;
 }
