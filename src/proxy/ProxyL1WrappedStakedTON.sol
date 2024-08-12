@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.25;
 
 import "./ProxyStorage.sol";
 import {AuthControlGemFactory} from "../common/AuthControlGemFactory.sol";

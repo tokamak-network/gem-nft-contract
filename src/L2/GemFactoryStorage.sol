@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.25;
 
 contract GemFactoryStorage {
 
@@ -92,7 +92,6 @@ contract GemFactoryStorage {
     // past random requests Id.
     uint256[] public requestIds;
     uint256 public requestCount;
-    uint256 public lastRequestId;
 
     // color storage
     uint8 public numberOfSolidColors;

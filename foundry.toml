@@ -1,5 +1,5 @@
 [profile.default]
-solc-version = "0.8.23"
+solc-version = "0.8.25"
 src = "src"
 out = "out"
 viaIR = true

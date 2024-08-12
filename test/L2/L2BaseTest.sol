@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.25;
 
 import "forge-std/Test.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
@@ -17,13 +17,14 @@ contract L2BaseTest is Test {
 
     using SafeERC20 for IERC20;
 
-    uint256 public commonMiningFees = 1 * 10 ** 16; // 0,01 eth
-    uint256 public rareMiningFees = 1 * 10 ** 16;
-    uint256 public uniqueMiningFees = 1 * 10 ** 16;
-    uint256 public epicMiningFees = 1 * 10 ** 16;
-    uint256 public LegendaryMiningFees = 1 * 10 ** 16;
-    uint256 public MythicMiningFees = 1 * 10 ** 16;
+    uint256 public commonMiningPower = 1;
+    uint256 public rareMiningPower = 2;
+    uint256 public uniqueMiningPower = 5;
+    uint256 public epicMiningPower = 10;
+    uint256 public LegendaryMiningPower = 15;
+    uint256 public MythicMiningPower = 20;
     uint256 public tonFeesRate = 10; // 10%
+    uint256 public miningFees = 0.01 ether;
 
     uint256 public CommonGemsValue = 10 * 10 ** 27;
     uint256 public RareGemsValue = 19 * 10 ** 27;
@@ -108,12 +109,12 @@ contract L2BaseTest is Test {
             wston,
             ton,
             treasury,
-            commonMiningFees,
-            rareMiningFees,
-            uniqueMiningFees,
-            epicMiningFees,
-            LegendaryMiningFees,
-            MythicMiningFees, 
+            commonMiningPower,
+            rareMiningPower,
+            uniqueMiningPower,
+            epicMiningPower,
+            LegendaryMiningPower,
+            MythicMiningPower, 
             CommonGemsValue,
             RareGemsValue,
             UniqueGemsValue,
@@ -132,6 +133,15 @@ contract L2BaseTest is Test {
         );
 
         GemFactory(gemfactory).setGemsCooldownPeriods(
+            CommonGemsCooldownPeriod,
+            RareGemsCooldownPeriod,
+            UniqueGemsCooldownPeriod,
+            EpicGemsCooldownPeriod,
+            LegendaryGemsCooldownPeriod,
+            MythicGemsCooldownPeriod
+        );
+
+        GemFactory(gemfactory).setMiningPowers(
             CommonGemsCooldownPeriod,
             RareGemsCooldownPeriod,
             UniqueGemsCooldownPeriod,
@@ -169,15 +179,6 @@ contract L2BaseTest is Test {
 
         address treasuryAddress = GemFactory(gemfactory).getTreasury();
         assert(treasuryAddress == address(treasury));
-
-        uint256 CommonMiningFeesCheck = GemFactory(gemfactory).getCommonMiningFees();
-        assert(CommonMiningFeesCheck == commonMiningFees);
-
-        uint256 RareMiningFeesCheck = GemFactory(gemfactory).getRareMiningFees();
-        assert(RareMiningFeesCheck == rareMiningFees);
-
-        uint256 UniqueMiningFeesCheck = GemFactory(gemfactory).getUniqueMiningFees();
-        assert(UniqueMiningFeesCheck == uniqueMiningFees);
 
         // Check that the Treasury has the correct GemFactory address set
         address gemFactoryAddress = Treasury(treasury).getGemFactoryAddress();

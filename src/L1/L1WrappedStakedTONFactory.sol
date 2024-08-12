@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.25;
 
 import { L1WrappedStakedTON } from "./L1WrappedStakedTON.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.25;
 
 import "./L2BaseTest.sol";
 
@@ -407,7 +407,7 @@ function testMeltGEM() public {
 
         // Expect the transaction to succeed
         vm.prank(user1);
-        bool result = GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemId);
+        bool result = GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemId);
         assert(result == true);
     }
 
@@ -498,7 +498,7 @@ function testMeltGEM() public {
 
         // Expect the transaction to revert with the error message "Gem is listed for sale or already mining"
         vm.expectRevert("Gem is listed for sale or already mining");
-        GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemId);
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemId);
 
         vm.stopPrank();
     }
@@ -556,7 +556,7 @@ function testMeltGEM() public {
         vm.prank(user1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemIds[0]);
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[0]);
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
         console.log("randomNumber = ", randomRequest.randomWord);
         console.log("fulfilled = ", randomRequest.fulfilled);
@@ -570,7 +570,7 @@ function testMeltGEM() public {
 
         vm.prank(user1);
         vm.expectRevert("user is already mining");
-        GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemIds[1]);
+        GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemIds[1]);
 
         vm.stopPrank();
     }
@@ -658,7 +658,7 @@ function testMeltGEM() public {
 
         // Expect the transaction to succeed
         vm.prank(user1);
-        bool result = GemFactory(gemfactory).startMiningGEM{value: commonMiningFees}(newGemId);
+        bool result = GemFactory(gemfactory).startMiningGEM{value: miningFees}(newGemId);
         assert(result == true);
     }
 

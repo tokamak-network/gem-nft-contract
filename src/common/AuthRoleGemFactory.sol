@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.25;
 
 contract AuthRoleGemFactory {
     bytes32 public constant TREASURY_ROLE = keccak256("TREASURY");
