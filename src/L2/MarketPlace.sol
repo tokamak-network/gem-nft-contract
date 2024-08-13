@@ -83,6 +83,12 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
         emit SetDiscountRate(_tonFeesRate);
     }
 
+
+    function setStakingIndex(uint256 _stakingIndex) external onlyOwner {
+        require(stakingIndex >= 1, "staking index must be greater or equal to 1");
+        stakingIndex = _stakingIndex;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------INTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
@@ -100,7 +106,7 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
             price: _price,
             isActive: true
         });
-
+        
         emit GemForSale(_tokenId, _seller, _price);
         return true;
     }
@@ -119,7 +125,8 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
         if (_paymentMethod) {     
             IERC20(wston_).safeTransferFrom(_payer, seller, price);
         } else {
-            uint256 totalprice = _toWAD(price + ((price * tonFeesRate) / TON_FEES_RATE_DIVIDER));
+            uint256 wtonPrice = (price * stakingIndex) / DECIMALS;
+            uint256 totalprice = _toWAD(wtonPrice + ((wtonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
             IERC20(ton_).safeTransferFrom(_payer, _treasury, totalprice); // 18 decimals
             IERC20(wston_).safeTransferFrom(_treasury, seller, price); // 27 decimals
         }
@@ -158,6 +165,10 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
 
     function gemFactory() external view returns (address) {
         return _gemFactory;
+    }
+
+    function getStakingIndex() external view returns(uint256) {
+        return stakingIndex;
     }
 
 }

@@ -199,6 +199,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
         }
         
         stakingIndex = _stakingIndex;
+        emit StakingIndexUpdated(_stakingIndex);
         return _stakingIndex;
     }
 

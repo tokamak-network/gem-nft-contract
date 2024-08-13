@@ -18,12 +18,12 @@ contract L2BaseTest is Test {
 
     using SafeERC20 for IERC20;
 
-    uint256 public commonMiningPower = 1;
-    uint256 public rareMiningPower = 2;
-    uint256 public uniqueMiningPower = 1;
-    uint256 public epicMiningPower = 10;
-    uint256 public LegendaryMiningPower = 15;
-    uint256 public MythicMiningPower = 20;
+    uint256 public commonminingTry = 1;
+    uint256 public rareminingTry = 2;
+    uint256 public uniqueminingTry = 1;
+    uint256 public epicminingTry = 10;
+    uint256 public LegendaryminingTry = 15;
+    uint256 public MythicminingTry = 20;
     uint256 public tonFeesRate = 10; // 10%
     uint256 public miningFees = 0.01 ether;
 
@@ -136,13 +136,13 @@ contract L2BaseTest is Test {
             MythicGemsCooldownPeriod
         );
 
-        GemFactory(gemfactory).setMiningPowers(
-            commonMiningPower,
-            rareMiningPower,
-            uniqueMiningPower,
-            epicMiningPower,
-            LegendaryMiningPower,
-            MythicMiningPower
+        GemFactory(gemfactory).setminingTrys(
+            commonminingTry,
+            rareminingTry,
+            uniqueminingTry,
+            epicminingTry,
+            LegendaryminingTry,
+            MythicminingTry
         );
 
         MarketPlace(marketplace).initialize(

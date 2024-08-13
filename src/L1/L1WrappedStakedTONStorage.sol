@@ -34,6 +34,9 @@ contract L1WrappedStakedTONStorage {
     event DebugBalance(address indexed account, uint256 balance);
     event WithdrawalProcessed(address _to, uint256 amount);
 
+    //staking index update
+    event StakingIndexUpdated(uint256 stakingIndex);
+
     // Pause Events
     event Paused(address account);
     event Unpaused(address account);

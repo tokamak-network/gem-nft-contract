@@ -135,20 +135,20 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         MythicGemsCooldownPeriod = _MythicGemsCooldownPeriod;
     }
 
-    function setMiningPowers(
-        uint256 _CommonMiningPower, 
-        uint256 _RareMiningPower,
-        uint256 _UniqueMiningPower,
-        uint256 _EpicMiningPower,
-        uint256 _LegendaryMiningPower,
-        uint256 _MythicMiningPower
+    function setminingTrys(
+        uint256 _CommonminingTry, 
+        uint256 _RareminingTry,
+        uint256 _UniqueminingTry,
+        uint256 _EpicminingTry,
+        uint256 _LegendaryminingTry,
+        uint256 _MythicminingTry
     ) external onlyOwner {
-        CommonMiningPower = _CommonMiningPower;
-        RareMiningPower = _RareMiningPower;
-        UniqueMiningPower = _UniqueMiningPower;
-        EpicMiningPower = _EpicMiningPower;
-        LegendaryMiningPower = _LegendaryMiningPower;
-        MythicMiningPower = _MythicMiningPower;
+        CommonminingTry = _CommonminingTry;
+        RareminingTry = _RareminingTry;
+        UniqueminingTry = _UniqueminingTry;
+        EpicminingTry = _EpicminingTry;
+        LegendaryminingTry = _LegendaryminingTry;
+        MythicminingTry = _MythicminingTry;
     }
 
     //---------------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint256 forgedGemsValue;
         uint256 forgedGemsMiningPeriod;
         uint256 forgedGemsCooldownPeriod;
-        uint256 forgedGemsMiningPower;
+        uint256 forgedGemsminingTry;
 
         uint8 _color_0 = _color[0];
         uint8 _color_1 = _color[1];
@@ -183,31 +183,31 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             require(_tokenIds.length == 2, "wrong number of Gems to be forged");
             forgedGemsValue = RareGemsValue;
             forgedGemsMiningPeriod = RareGemsMiningPeriod;
-            forgedGemsMiningPower = RareMiningPower;
+            forgedGemsminingTry = RareminingTry;
             forgedGemsCooldownPeriod = RareGemsCooldownPeriod;
         } else if(_rarity == Rarity.RARE) {
             require(_tokenIds.length == 3, "wrong number of Gems to be forged");
             forgedGemsValue = UniqueGemsValue;
             forgedGemsMiningPeriod = UniqueGemsMiningPeriod;
-            forgedGemsMiningPower = UniqueMiningPower;
+            forgedGemsminingTry = UniqueminingTry;
             forgedGemsCooldownPeriod = UniqueGemsCooldownPeriod;
         } else if(_rarity == Rarity.UNIQUE) {
             require(_tokenIds.length == 4, "wrong number of Gems to be forged");
             forgedGemsValue = EpicGemsValue;
             forgedGemsMiningPeriod = EpicGemsMiningPeriod;
-            forgedGemsMiningPower = EpicMiningPower;
+            forgedGemsminingTry = EpicminingTry;
             forgedGemsCooldownPeriod = EpicGemsCooldownPeriod;
         } else if(_rarity == Rarity.EPIC) {
             require(_tokenIds.length == 5, "wrong number of Gems to be forged");
             forgedGemsValue = LegendaryGemsValue;
             forgedGemsMiningPeriod = LegendaryGemsMiningPeriod;
-            forgedGemsMiningPower = LegendaryMiningPower;
+            forgedGemsminingTry = LegendaryminingTry;
             forgedGemsCooldownPeriod = LegendaryGemsCooldownPeriod;
         } else if(_rarity == Rarity.LEGENDARY) {
             require(_tokenIds.length == 6, "wrong number of Gems to be forged");
             forgedGemsValue = MythicGemsValue;
             forgedGemsMiningPeriod = MythicGemsMiningPeriod;
-            forgedGemsMiningPower = MythicMiningPower;
+            forgedGemsminingTry = MythicminingTry;
             forgedGemsCooldownPeriod = MythicGemsCooldownPeriod;
         } else {
             revert("wrong rarity");
@@ -296,7 +296,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             value: forgedGemsValue,
             miningPeriod: forgedGemsMiningPeriod,
             gemCooldownPeriod: block.timestamp + forgedGemsCooldownPeriod,
-            miningPower: forgedGemsMiningPower,
+            miningTry: forgedGemsminingTry,
             isLocked: false,
             tokenURI: "",
             randomRequestId: 0
@@ -326,7 +326,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @param _tokenId Id of the token to be mined.
      * @return true if the gem user started mining the gem
      */
-    function startMiningGEM(uint256 _tokenId) external whenNotPaused payable returns(bool) {
+    function startMiningGEM(uint256 _tokenId) external whenNotPaused returns(bool) {
         // safety check on the function caller
         require(msg.sender != address(0), "zero address");
         // user must own the token
@@ -335,38 +335,19 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         require(Gems[_tokenId].gemCooldownPeriod <= block.timestamp, "Gem cooldown period has not elapsed");
         // token must not be listed for sale within the marketplace
         require(!Gems[_tokenId].isLocked, "Gem is listed for sale or already mining");
-        // user must not be mining another gem
-        require(isUserMining[msg.sender] == false, "user is already mining");
         // COMMON Gems cannot be mined
         require(Gems[_tokenId].rarity != Rarity.COMMON, "rarity must be at least RARE");
         // mining power must be greater than 0
-        require(Gems[_tokenId].miningPower != 0, "no mining power left for that GEM");
+        require(Gems[_tokenId].miningTry != 0, "no mining power left for that GEM");
 
         // We set isUserMining to true to prevent the same user to recall the function
-        isUserMining[msg.sender] = true;
         userMiningToken[msg.sender][_tokenId] = true;
         // Store the current timestamp
         userMiningStartTime[msg.sender][_tokenId] = block.timestamp;
-        tokenMiningByUser[msg.sender] = _tokenId;
         Gems[_tokenId].isLocked = true;
-
-        // defining the random value
-        //require(tx.origin == msg.sender, "caller must be EOA");
-        uint256 requestId = requestRandomness(0,0,CALLBACK_GAS_LIMIT);        
-        // storing the requestId computed
-        Gems[_tokenId].randomRequestId = requestId;
-
-        s_requests[requestId].requested = true;
-        s_requests[requestId].requester = msg.sender;
-        unchecked {
-            requestCount++;
-        }
-
-        IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
-        Gems[_tokenId].randomRequestId = requestId;
-        Gems[_tokenId].miningPower --;
+        Gems[_tokenId].miningTry --;
         
-        emit GemMiningStarted(_tokenId, msg.sender, block.timestamp, Gems[_tokenId].miningPower);
+        emit GemMiningStarted(_tokenId, msg.sender, block.timestamp, Gems[_tokenId].miningTry);
         return true;
     }
 
@@ -379,12 +360,35 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // user must wait until the end of the cooldown period
         
         // reset mining variables
-        isUserMining[msg.sender] = false;
         delete userMiningToken[msg.sender][_tokenId];
         delete userMiningStartTime[msg.sender][_tokenId];
-        delete tokenMiningByUser[msg.sender];
         Gems[_tokenId].isLocked = false;
         return true;       
+    }
+
+    function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused returns(bool) {
+        require(ownerOf(_tokenId) == msg.sender || isAdmin(msg.sender) == true, "not GEM owner or not admin");
+        require(block.timestamp > userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
+        require(Gems[_tokenId].isLocked == true, "Gems is not mining");
+        require(userMiningToken[ownerOf(_tokenId)][_tokenId] == true, "gem not mining");
+
+        // defining the random value
+        uint256 requestId = requestRandomness(0,0,CALLBACK_GAS_LIMIT);        
+        // storing the requestId computed
+        Gems[_tokenId].randomRequestId = requestId;
+
+        s_requests[requestId].tokenId = _tokenId;
+        s_requests[requestId].requested = true;
+        s_requests[requestId].requester = msg.sender;
+        unchecked {
+            requestCount++;
+        }
+
+        IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
+        Gems[_tokenId].randomRequestId = requestId;
+
+        emit RandomGemSelected(s_requests[requestId].chosenTokenId, Gems[_tokenId].randomRequestId);
+        return true;
     }
 
     function claimMinedGEM(uint256 _tokenId) external whenNotPaused returns(bool) {
@@ -392,31 +396,33 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         require(ownerOf(_tokenId) == msg.sender, "not GEM owner");
         // user must be the miner
         require(userMiningToken[msg.sender][_tokenId] == true, "user is not mining this Gem");
-        // user must wait until the end of the cooldown period
-        require(block.timestamp > userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
         //Verify that gem was locked 
         require(Gems[_tokenId].isLocked == true, "Gems is not mining");
 
+        uint256 requestId = Gems[_tokenId].randomRequestId;
+        require(s_requests[requestId].fulfilled == true, "you need to call pickMinedGEM function first");
+
         // reset mining variables
-        isUserMining[msg.sender] = false;
         delete userMiningToken[msg.sender][_tokenId];
         delete userMiningStartTime[msg.sender][_tokenId];
-        delete tokenMiningByUser[msg.sender];
         Gems[_tokenId].isLocked = false;
 
-        // fetch the random request Id
-        uint256 requestId = Gems[_tokenId].randomRequestId;
         uint256 newTokenId = s_requests[requestId].chosenTokenId;
-        Gems[newTokenId].isLocked = false;
 
-        require(ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId), "failed to transfer token");
+        if(newTokenId != 0) {
+            Gems[newTokenId].isLocked = false;
 
-        Gems[_tokenId].randomRequestId = 0;
-        Gems[_tokenId].gemCooldownPeriod = block.timestamp + getCooldownPeriod(Gems[_tokenId].rarity);
-        
-        emit GemMiningClaimed(_tokenId, msg.sender);
+            require(ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId), "failed to transfer token");
+
+            Gems[_tokenId].randomRequestId = 0;
+            Gems[_tokenId].gemCooldownPeriod = block.timestamp + getCooldownPeriod(Gems[_tokenId].rarity);
+            
+            emit GemMiningClaimed(_tokenId, msg.sender);
+        } else {
+            emit NoGemAvailable(_tokenId);
+        }
+
         return true;
-
     }
 
     function meltGEM(uint256 _tokenId) external whenNotPaused {
@@ -458,7 +464,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint256 _gemCooldownPeriod;
         uint256 _miningPeriod;
         uint256 _value;
-        uint256 _miningPower;
+        uint256 _miningTry;
 
         uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
 
@@ -475,7 +481,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _gemCooldownPeriod = CommonGemsCooldownPeriod;
             _miningPeriod = CommonGemsMiningPeriod;
             _value = CommonGemsValue;
-            _miningPower = CommonMiningPower;
+            _miningTry = CommonminingTry;
         } else if (_rarity == Rarity.RARE) {
             require(
                 (_quadrants[0] == 2 || _quadrants[0] == 3) &&
@@ -488,7 +494,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _gemCooldownPeriod = RareGemsCooldownPeriod;
             _miningPeriod = RareGemsMiningPeriod;
             _value = RareGemsValue;
-            _miningPower = RareMiningPower;
+            _miningTry = RareminingTry;
         } else if (_rarity == Rarity.UNIQUE) {
             require(
                 (_quadrants[0] == 3 || _quadrants[0] == 4) &&
@@ -501,7 +507,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _gemCooldownPeriod = UniqueGemsCooldownPeriod;
             _miningPeriod = UniqueGemsMiningPeriod;
             _value = UniqueGemsValue;
-            _miningPower = UniqueMiningPower;
+            _miningTry = UniqueminingTry;
         } else if (_rarity == Rarity.EPIC) {
             require(
                 (_quadrants[0] == 4 || _quadrants[0] == 5) &&
@@ -514,7 +520,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _gemCooldownPeriod = EpicGemsCooldownPeriod;
             _miningPeriod = EpicGemsMiningPeriod;
             _value = EpicGemsValue;
-            _miningPower = EpicMiningPower;
+            _miningTry = EpicminingTry;
         } else if (_rarity == Rarity.LEGENDARY) {
             require(
                 (_quadrants[0] == 5 || _quadrants[0] == 6) &&
@@ -527,7 +533,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
             _miningPeriod = LegendaryGemsMiningPeriod;
             _value = LegendaryGemsValue;
-            _miningPower = LegendaryMiningPower;
+            _miningTry = LegendaryminingTry;
         } else if (_rarity == Rarity.MYTHIC) {
             require(
                 (_quadrants[0] == 6) &&
@@ -539,7 +545,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _gemCooldownPeriod = MythicGemsCooldownPeriod;
             _miningPeriod = MythicGemsMiningPeriod;
             _value = MythicGemsValue;
-            _miningPower = MythicMiningPower;
+            _miningTry = MythicminingTry;
         } else {
             revert("wrong Rarity");
         }
@@ -552,7 +558,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             value: _value,
             miningPeriod: _miningPeriod,
             gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
-            miningPower: _miningPower,
+            miningTry: _miningTry,
             isLocked: false,
             tokenURI: _tokenURI,
             randomRequestId: 0
@@ -608,7 +614,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint256 _gemCooldownPeriod;
         uint256 _miningPeriod;
         uint256 _value;
-        uint256 _miningPower;
+        uint256 _miningTry;
 
         for (uint256 i = 0; i < _rarities.length; i++) {
 
@@ -627,7 +633,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 _gemCooldownPeriod = CommonGemsCooldownPeriod;
                 _miningPeriod = CommonGemsMiningPeriod;
                 _value = CommonGemsValue;
-                _miningPower = CommonMiningPower;
+                _miningTry = CommonminingTry;
             }
 
             // Ensure that if rarity is RARE, all quadrants must be either 2 or 3
@@ -643,7 +649,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 _gemCooldownPeriod = RareGemsCooldownPeriod;
                 _miningPeriod = RareGemsMiningPeriod;
                 _value = RareGemsValue;
-                _miningPower = RareMiningPower;
+                _miningTry = RareminingTry;
             }
 
             // Ensure that if rarity is UNIQUE, all quadrants must be either 3 or 4
@@ -659,7 +665,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 _gemCooldownPeriod = UniqueGemsCooldownPeriod;
                 _miningPeriod = UniqueGemsMiningPeriod;
                 _value = UniqueGemsValue;
-                _miningPower = UniqueMiningPower;
+                _miningTry = UniqueminingTry;
             }
 
             // Ensure that if rarity is EPIC, all quadrants must be either 4 or 5
@@ -675,7 +681,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 _gemCooldownPeriod = EpicGemsCooldownPeriod;
                 _miningPeriod = EpicGemsMiningPeriod;
                 _value = EpicGemsValue;
-                _miningPower = EpicMiningPower;
+                _miningTry = EpicminingTry;
             }
 
             // Ensure that if rarity is LEGENDARY, all quadrants must be either 5 or 6
@@ -691,7 +697,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
                 _miningPeriod = LegendaryGemsMiningPeriod;
                 _value = LegendaryGemsValue;
-                _miningPower = LegendaryMiningPower;
+                _miningTry = LegendaryminingTry;
             }
 
             // Ensure that if rarity is MYTHIC, all quadrants must be equal to 6
@@ -706,7 +712,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 _gemCooldownPeriod = MythicGemsCooldownPeriod;
                 _miningPeriod = MythicGemsMiningPeriod;
                 _value = MythicGemsValue;
-                _miningPower = MythicMiningPower;
+                _miningTry = MythicminingTry;
             }
 
             Gem memory _Gem = Gem({
@@ -717,7 +723,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
                 value: _value,
                 miningPeriod: _miningPeriod,
                 gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
-                miningPower: _miningPower,
+                miningTry: _miningTry,
                 isLocked: false,
                 tokenURI: _tokenURIs[i],
                 randomRequestId: 0
@@ -843,19 +849,21 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     // Implement the abstract function from DRBConsumerBase
     function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
         require(s_requests[requestId].requested, "Request not made");
-        address requester = s_requests[requestId].requester;
         s_requests[requestId].fulfilled = true;
         s_requests[requestId].randomWord = randomNumber;
 
-        uint8[4] memory quadrants = Gems[tokenMiningByUser[requester]].quadrants;
+        uint8[4] memory quadrants = Gems[s_requests[requestId].tokenId].quadrants;
         
         (uint256 gemCount, uint256[] memory tokenIds) = countGemsByQuadrant(quadrants[0], quadrants[1], quadrants[2], quadrants[3]);
         emit CountGemsByQuadrant(gemCount, tokenIds);
-        require(gemCount > 0, "No gems available in the specified quadrants");
 
-        uint256 modNbGemsAvailable = (randomNumber % gemCount);
-        s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
-        Gems[tokenIds[modNbGemsAvailable]].isLocked = true;
+        if(gemCount > 0) {
+            uint256 modNbGemsAvailable = (randomNumber % gemCount);
+            s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
+            Gems[tokenIds[modNbGemsAvailable]].isLocked = true;
+        } else {
+            s_requests[requestId].chosenTokenId = 0;
+        }
     }
 
 
@@ -895,28 +903,28 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return wston;
     }
 
-    function getCommonMiningPower() public view returns (uint256) {
-        return CommonMiningPower;
+    function getCommonminingTry() public view returns (uint256) {
+        return CommonminingTry;
     }
 
-    function getRareMiningPower() public view returns (uint256) {
-        return RareMiningPower;
+    function getRareminingTry() public view returns (uint256) {
+        return RareminingTry;
     }
 
-    function getUniqueMiningPower() public view returns (uint256) {
-        return UniqueMiningPower;
+    function getUniqueminingTry() public view returns (uint256) {
+        return UniqueminingTry;
     }
 
-    function getEpicMiningPower() public view returns (uint256) {
-        return EpicMiningPower;
+    function getEpicminingTry() public view returns (uint256) {
+        return EpicminingTry;
     }
 
-    function getLegendaryMiningPower() public view returns (uint256) {
-        return LegendaryMiningPower;
+    function getLegendaryminingTry() public view returns (uint256) {
+        return LegendaryminingTry;
     }
 
-    function getMythicMiningPower() public view returns (uint256) {
-        return MythicMiningPower;
+    function getMythicminingTry() public view returns (uint256) {
+        return MythicminingTry;
     }
 
     function getTon() public view returns (address) {
