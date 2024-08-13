@@ -14,15 +14,17 @@ contract MarketPlaceStorage {
     // Fees rate for purchasing using ton (rate in percentage)
     uint256 public tonFeesRate;
 
-    address internal _gemFactory;
-    address internal _treasury;
-    address internal wston_;
-    address internal ton_;
+    address public gemFactory;
+    address public _treasury;
+    address public wston_;
+    address public ton_;
 
     uint256 constant public TON_FEES_RATE_DIVIDER = 100;
     uint256 constant public DECIMALS = 10**27;
 
     uint256 public stakingIndex = 1;
+
+    bool public paused;
 
     event GemBought(uint256 tokenId, address payer, address seller, uint256 amount);
     event GemForSale(uint256 tokenId, address seller, uint256 price);

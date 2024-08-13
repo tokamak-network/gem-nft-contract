@@ -4,30 +4,48 @@ pragma solidity ^0.8.25;
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { GemFactory } from "./GemFactory.sol";
+import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
 import { GemFactoryStorage } from "./GemFactoryStorage.sol";
+import {AuthControlGemFactory} from "../common/AuthControlGemFactory.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
+contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
     using SafeERC20 for IERC20;
 
-    address internal _gemFactory;
+    address internal gemFactory;
     address internal _marketplace;
+    address internal wston;
+    address internal ton;
 
-    modifier onlyGemFactoryOrMarketPlace() {
-        require(msg.sender == _gemFactory || msg.sender == _marketplace, "caller is neither GemFactory nor MarketPlace");
+    bool paused;
+
+    modifier whenNotPaused() {
+      require(!paused, "Pausable: paused");
+      _;
+    }
+
+
+    modifier whenPaused() {
+        require(paused, "Pausable: not paused");
         _;
     }
 
-    constructor(address coordinator, address _wston, address _ton) GemFactory(coordinator) {
+    modifier onlyGemFactoryOrMarketPlace() {
+        require(msg.sender == gemFactory || msg.sender == _marketplace, "caller is neither GemFactory nor MarketPlace");
+        _;
+    }
+
+    constructor(address _wston, address _ton, address _gemFactory) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        gemFactory = _gemFactory;
         wston = _wston;
         ton = _ton;
     }
 
-    function setGemFactory(address gemFactory) external onlyOwner {
+
+    function setGemFactory(address _gemFactory) external onlyOwner {
         require(gemFactory != address(0), "Invalid address");
-        _gemFactory = gemFactory;
+        gemFactory = _gemFactory;
     }
 
     function setMarketPlace(address marketplace) external onlyOwner {
@@ -37,7 +55,7 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
 
     function approveGemFactory() external onlyOwner {
         require(wston != address(0), "wston address not set");
-        IERC20(wston).approve(_gemFactory, type(uint256).max);
+        IERC20(wston).approve(gemFactory, type(uint256).max);
     }
 
     function approveMarketPlace() external onlyOwner {
@@ -55,12 +73,12 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
     }
 
     function createPreminedGEM( 
-        Rarity _rarity,
+        GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
         uint8[4] memory _quadrants,  
         string memory _tokenURI
     ) external onlyOwner returns (uint256) {
-        return GemFactory(_gemFactory).createGEM(
+        return IGemFactory(gemFactory).createGEM(
             _rarity,
             _color,
             _quadrants,
@@ -69,12 +87,12 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
     }
 
     function createPreminedGEMPool(
-        Rarity[] memory _rarities,
+        GemFactoryStorage.Rarity[] memory _rarities,
         uint8[2][] memory _colors,
         uint8[4][] memory _quadrants, 
         string[] memory _tokenURIs
     ) external onlyOwner returns (uint256[] memory) {
-        return GemFactory(_gemFactory).createGEMPool(
+        return IGemFactory(gemFactory).createGEMPool(
             _rarities,
             _colors,
             _quadrants,
@@ -83,7 +101,7 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
     }
 
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlace returns(bool) {
-        GemFactory(_gemFactory).transferFrom(address(this), _to, _tokenId);
+        IGemFactory(gemFactory).transferFrom(address(this), _to, _tokenId);
         return true;
     }
 
@@ -112,7 +130,7 @@ contract Treasury is GemFactory, IERC721Receiver, ReentrancyGuard {
     }
 
     function getGemFactoryAddress() public view returns (address) {
-        return _gemFactory;
+        return gemFactory;
     }
     
 }

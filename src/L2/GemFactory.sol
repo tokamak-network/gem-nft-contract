@@ -834,6 +834,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         numberOfSolidColors = _numberOfSolidColors;
     }
 
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) external {
+        _setTokenURI(tokenId, _tokenURI);
+    }
+
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal override {
+        require(msg.sender == ownerOf(tokenId) || isAdmin(msg.sender) == true, "not allowed to set token URI");
+        super._setTokenURI(tokenId, _tokenURI);
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------PRIVATE/INERNAL FUNCTIONS------------------------------------
     //---------------------------------------------------------------------------------------

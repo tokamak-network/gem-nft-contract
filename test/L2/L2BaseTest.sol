@@ -92,19 +92,20 @@ contract L2BaseTest is Test {
             calldataSizeBytes
         );
 
-        // deploy treasury and marketplace
-        treasury = address(new Treasury(address(drbCoordinatorMock), wston, ton));
-        marketplace = address(new MarketPlace(address(drbCoordinatorMock)));
-
-        // transfer some TON & TITAN WSTON to treasury
-        IERC20(wston).transfer(treasury, 100000 * 10 ** 27);
-        IERC20(ton).transfer(treasury, 100000 * 10 ** 18);
-
         // deploy and initialize GemFactory
         gemfactory = address(new GemFactory(address(drbCoordinatorMock)));
 
         // Grant admin role to owner
         GemFactory(gemfactory).grantRole(GemFactory(gemfactory).DEFAULT_ADMIN_ROLE(), owner);
+
+        // deploy treasury and marketplace
+        treasury = address(new Treasury(wston, ton, gemfactory));
+        marketplace = address(new MarketPlace());
+
+        // transfer some TON & TITAN WSTON to treasury
+        IERC20(wston).transfer(treasury, 100000 * 10 ** 27);
+        IERC20(ton).transfer(treasury, 100000 * 10 ** 18);
+
 
         GemFactory(gemfactory).initialize(
             wston,
@@ -147,14 +148,13 @@ contract L2BaseTest is Test {
 
         MarketPlace(marketplace).initialize(
             treasury,
-            address(gemfactory),
+            gemfactory,
             tonFeesRate,
             wston,
             ton
         );
 
         GemFactory(gemfactory).setMarketPlaceAddress(marketplace);
-        Treasury(treasury).setGemFactory(gemfactory);
         Treasury(treasury).setMarketPlace(marketplace);
         
         // approve GemFactory to spend treasury wston

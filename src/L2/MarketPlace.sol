@@ -3,39 +3,46 @@ pragma solidity ^0.8.25;
 
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { MarketPlaceStorage } from "./MarketPlaceStorage.sol";
 import { GemFactory } from "./GemFactory.sol";
+import {AuthControlGemFactory} from "../common/AuthControlGemFactory.sol";
 
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
 }
 
-interface IGemFactory {
-    function transferGEMFrom(address _from, address _to, uint256 _tokenId) external; 
-    function isApprovedForAll(address owner, address operator) external view returns (bool);
-    function getApproved(uint256 tokenId) external view returns (address);
-    function approve(address to, uint256 tokenId) external;
-    function setApprovalForAll(address operator, bool approved) external;
-}
 
-
-contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
+contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, AuthControlGemFactory {
     using SafeERC20 for IERC20;
 
-    constructor(address coordinator) GemFactory(coordinator) {}
+    modifier whenNotPaused() {
+      require(!paused, "Pausable: paused");
+      _;
+    }
+
+
+    modifier whenPaused() {
+        require(paused, "Pausable: not paused");
+        _;
+    }
+
+    constructor() {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
 
     function initialize(
         address treasury, 
-        address gemfactory,
+        address _gemfactory,
         uint256 _tonFeesRate,
         address _wston,
         address _ton
     ) external {
         require(_tonFeesRate < 100, "discount rate must be less than 100%");
         tonFeesRate = _tonFeesRate;
-        _gemFactory = gemfactory;
+        gemFactory = _gemfactory;
         _treasury = treasury;
         wston_ = _wston;
         ton_ = _ton;
@@ -95,11 +102,11 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
 
     
     function _putGemForSale(uint256 _tokenId, uint256 _price, address _seller) internal returns (bool) {
-        require(GemFactory(_gemFactory).ownerOf(_tokenId) == _seller, "Not the owner of the GEM");
+        require(IGemFactory(gemFactory).ownerOf(_tokenId) == _seller, "Not the owner of the GEM");
         require(_price > 0, "Price must be greater than zero");
-        require(GemFactory(_gemFactory).isTokenLocked(_tokenId) == false, "Gem is already for sale or mining");
+        require(IGemFactory(gemFactory).isTokenLocked(_tokenId) == false, "Gem is already for sale or mining");
 
-        GemFactory(_gemFactory).setIsLocked(_tokenId, true);
+        GemFactory(gemFactory).setIsLocked(_tokenId, true);
 
         gemsForSale[_tokenId] = Sale({
             seller: _seller,
@@ -132,9 +139,9 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
         }
 
         gemsForSale[_tokenId].isActive = false;
-        GemFactory(_gemFactory).setIsLocked(_tokenId, false);
+        IGemFactory(gemFactory).setIsLocked(_tokenId, false);
         // transfer NFT ownership
-        GemFactory(_gemFactory).transferFrom(seller, _payer, _tokenId);
+        IGemFactory(gemFactory).transferFrom(seller, _payer, _tokenId);
         
 
         emit GemBought(_tokenId, _payer, seller, price);
@@ -163,8 +170,8 @@ contract MarketPlace is MarketPlaceStorage, GemFactory, ReentrancyGuard {
         return tonFeesRate;
     }
 
-    function gemFactory() external view returns (address) {
-        return _gemFactory;
+    function getGemFactory() external view returns (address) {
+        return gemFactory;
     }
 
     function getStakingIndex() external view returns(uint256) {
