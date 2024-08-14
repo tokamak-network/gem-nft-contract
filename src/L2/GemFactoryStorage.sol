@@ -141,6 +141,7 @@ contract GemFactoryStorage {
         uint8[2] color, 
         uint256 newValue
     );
+    event ColorValidated(uint8 color_0, uint8 color_1);
 
     // Pause Events
     event Paused(address account);

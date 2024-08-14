@@ -214,45 +214,30 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         }
 
         uint8[4] memory sumOfQuadrants;
+        bool colorValidated = false;
 
         for (uint256 i = 0; i < _tokenIds.length; i++) {
-            require(GEMIndexToOwner[_tokenIds[i]] == msg.sender);
-            require(isTokenLocked(_tokenIds[i]) == false, "Gem is for sale or is mining");
+            require(GEMIndexToOwner[_tokenIds[i]] == msg.sender, "not owner");
+            require(!isTokenLocked(_tokenIds[i]), "Gem is for sale or is mining");
             require(Gems[_tokenIds[i]].rarity == _rarity, "wrong rarity Gems");
+            
             sumOfQuadrants[0] += Gems[_tokenIds[i]].quadrants[0];
             sumOfQuadrants[1] += Gems[_tokenIds[i]].quadrants[1];
             sumOfQuadrants[2] += Gems[_tokenIds[i]].quadrants[2];
             sumOfQuadrants[3] += Gems[_tokenIds[i]].quadrants[3];
             
+            // Validate color combination
             for(uint256 j = 0; j < _tokenIds.length; j++) {
-                if(i != j) {
-                    uint8[2] memory _color1 = Gems[_tokenIds[i]].color;
-                    uint8 _color1_0 = _color1[0];
-                    uint8 _color1_1 = _color1[1];
-                    uint8[2] memory _color2 = Gems[_tokenIds[j]].color;
-                    uint8 _color2_0 = _color2[0];
-                    uint8 _color2_1 = _color2[1];
-                    bool colorValidated = false;
-
-                    if (
-                        (_color1_0 == _color_0 ||
-                        _color1_1 == _color_0 ||
-                        _color2_0 == _color_0 ||
-                        _color2_1 == _color_0) &&
-                        (_color1_0 == _color_1 ||
-                        _color1_1 == _color_1 ||
-                        _color2_0 == _color_1 ||
-                        _color2_1 == _color_1)
-                    ) {
-                        colorValidated = true;
+                if(!colorValidated) {
+                    colorValidated = _checkColor(_tokenIds[i], _tokenIds[j], _color_0, _color_1);
+                    if(colorValidated) {
+                        emit  ColorValidated(_color_0, _color_1);
                     }
-                
-                    require(colorValidated, "this color can't be obtained");
                 }
             }
-
-            burnToken(msg.sender, _tokenIds[i]);
         }
+        require(colorValidated, "this color can't be obtained");
+        burnTokens(msg.sender, _tokenIds);
 
         sumOfQuadrants[0] %= 2;
         sumOfQuadrants[1] %= 2;
@@ -444,6 +429,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // ERC721 burn function
         _burn(_tokenId);
 
+    }
+
+    function burnTokens(address _from, uint256[] memory _tokenIds) internal {
+        for(uint256 i = 0; i < _tokenIds.length; i++) {
+            burnToken(_from, _tokenIds[i]);
+        }
     }
 
     /**
@@ -838,15 +829,93 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _setTokenURI(tokenId, _tokenURI);
     }
 
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal override {
-        require(msg.sender == ownerOf(tokenId) || isAdmin(msg.sender) == true, "not allowed to set token URI");
-        super._setTokenURI(tokenId, _tokenURI);
-    }
 
     //---------------------------------------------------------------------------------------
     //--------------------------PRIVATE/INERNAL FUNCTIONS------------------------------------
     //---------------------------------------------------------------------------------------
 
+    function _checkColor(uint256 tokenA, uint256 tokenB, uint8 _color_0, uint8 _color_1) internal view returns(bool colorValidated) {
+        colorValidated = false;
+        if(tokenA != tokenB) {
+            uint8[2] memory _color1 = Gems[tokenA].color;
+            uint8 _color1_0 = _color1[0];
+            uint8 _color1_1 = _color1[1];
+            uint8[2] memory _color2 = Gems[tokenB].color;
+            uint8 _color2_0 = _color2[0];
+            uint8 _color2_1 = _color2[1];
+
+            // Two same solid colors
+            if (_color1_0 == _color1_1 && _color2_0 == _color2_1 && _color1_0 == _color2_0) {
+                colorValidated = (_color_0 == _color1_0 && _color_1 == _color1_1); 
+                return colorValidated; 
+            }
+            // Two different solid colors
+            if (_color1_0 == _color1_1 && _color2_0 == _color2_1) {
+                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_0));
+                return colorValidated;
+
+            }
+            // One gradient and one solid (solid exists in gradient)
+            if (((_color1_0 != _color1_1 && _color2_0 == _color2_1) && (_color1_0 == _color2_0 || _color1_1 == _color2_0)) || ((_color1_0 == _color1_1 && _color2_0 != _color2_1) && (_color2_0 == _color1_0 || _color2_1 == _color1_0))) {
+                if (_color1_0 != _color1_1) {
+                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color1_1) || (_color_1 == _color1_0 && _color_0 == _color1_1));
+                    return colorValidated;
+                } else {
+                    colorValidated = ((_color_0 == _color2_0 && _color_1 == _color2_1) || (_color_1 == _color2_0 && _color_0 == _color2_1));
+                    return colorValidated;
+                } 
+            }
+            // One gradient and one solid (solid does not exist in gradient)
+            if (((_color1_0 != _color1_1 && _color2_0 == _color2_1) && (_color1_0 != _color2_0 && _color1_1 != _color2_0)) || ((_color1_0 == _color1_1 && _color2_0 != _color2_1) && (_color1_0 != _color2_0 && _color1_0 != _color2_1))) {
+                if(_color1_0 != _color1_1) {
+                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || 
+                    (_color_0 == _color1_1 && _color_1 == _color2_0) || 
+                    (_color_1 == _color1_0 && _color_0 == _color2_0) || 
+                    (_color_1 == _color1_1 && _color_0 == _color2_0));
+                    return colorValidated;
+                } else {
+                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) ||
+                    (_color_0 == _color1_0 && _color_1 == _color2_1) ||
+                    (_color_1 == _color1_0 && _color_0 == _color2_0) ||
+                    (_color_1 == _color1_0 && _color_0 == _color2_1));   
+                    return colorValidated;  
+                }
+                
+            }
+            // Two same gradients
+            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && ((_color1_0 == _color2_0 && _color1_1 == _color2_1) || (_color1_0 == _color2_1 && _color1_1 == _color2_0))) {
+                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color1_1) || (_color_0 == _color1_1 && _color_1 == _color1_0)); 
+                return colorValidated;
+            }
+            // Two same gradients but one color repetition
+            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && (_color1_0 == _color2_0 || _color1_0 == _color2_1 || _color1_1 == _color2_0 || _color1_1 == _color2_1)) {
+                if (_color1_0 == _color2_0) {
+                    colorValidated = ((_color_0 == _color1_1 && _color_1 == _color2_1) || (_color_0 == _color2_1 && _color_1 == _color1_1)); 
+                    return colorValidated;
+                } else if (_color1_0 == _color2_1) {
+                    colorValidated = ((_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_1)); 
+                    return(_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_1);
+                } else if (_color1_1 == _color2_0) {
+                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_1) || (_color_0 == _color2_1 && _color_1 == _color1_0));
+                    return colorValidated;
+                } else if (_color1_1 == _color2_1) {
+                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_0));
+                    return colorValidated;
+                }
+            }
+            // Two different gradients
+            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && _color1_0 != _color2_0 && _color1_1 != _color2_0 && _color1_0 != _color2_1 && _color1_1 != _color2_1) {
+                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color1_0 && _color_1 == _color2_1) || 
+                (_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color1_1 && _color_1 == _color2_1) ||
+                (_color_0 == _color2_0 && _color_1 == _color1_0) || (_color_0 == _color2_0 && _color_1 == _color1_1) ||
+                (_color_0 == _color2_1 && _color_1 == _color1_0) || (_color_0 == _color2_1 && _color_1 == _color1_1));
+                return colorValidated;
+            }
+        }
+        else {
+            return colorValidated;
+        }
+    }
 
     function _transferGEM(address _from, address _to, uint256 _tokenId) private {
         Gems[_tokenId].gemCooldownPeriod = block.timestamp + getCooldownPeriod(Gems[_tokenId].rarity);
@@ -875,7 +944,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         }
     }
 
-
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal override {
+        require(msg.sender == ownerOf(tokenId) || isAdmin(msg.sender) == true, "not allowed to set token URI");
+        super._setTokenURI(tokenId, _tokenURI);
+    }
 
     //---------------------------------------------------------------------------------------
     //-----------------------------VIEW FUNCTIONS--------------------------------------------

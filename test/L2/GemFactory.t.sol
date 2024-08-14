@@ -178,6 +178,90 @@ contract GemFactoryTest is L2BaseTest {
         vm.stopPrank();
     }
 
+    function testForgeUniqueGems() public {
+         vm.startPrank(owner);
+
+        // Define GEM properties
+        uint8[2][] memory colors = new uint8[2][](4);
+        colors[0] = [0, 0];
+        colors[1] = [1, 1];
+        colors[2] = [3, 1];
+        colors[3] = [2, 2];
+
+        GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](4);
+        rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
+        rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
+        rarities[2] = GemFactoryStorage.Rarity.UNIQUE;
+        rarities[3] = GemFactoryStorage.Rarity.UNIQUE;
+
+        uint8[4][] memory quadrants = new uint8[4][](4);
+        quadrants[0] = [4, 3, 3, 3];
+        quadrants[1] = [4, 4, 4, 3];
+        quadrants[2] = [3, 4, 3, 4];
+        quadrants[3] = [3, 3, 4, 3];
+
+        string[] memory tokenURIs = new string[](4);
+        tokenURIs[0] = "https://example.com/token/1";
+        tokenURIs[1] = "https://example.com/token/2";
+        tokenURIs[2] = "https://example.com/token/3";
+        tokenURIs[3] = "https://example.com/token/4";
+
+        // Call createPreminedGEMPool function from the Treasury contract
+        uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
+            rarities,
+            colors,
+            quadrants,
+            tokenURIs
+        );
+
+        // Verify GEM minting
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
+
+        // Transfer the GEM to user1
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[1]);
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[2]);
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[3]);
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        // Verify token existence before putting it for sale
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == user1);
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == user1);
+
+        uint256[] memory tokenIds = new uint256[](4);
+        tokenIds[0] = newGemIds[0];
+        tokenIds[1] = newGemIds[1];
+        tokenIds[2] = newGemIds[2];
+        tokenIds[3] = newGemIds[3];
+
+        uint8[2] memory color = [1, 3];
+
+        uint256 newGemId = GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
+
+        // Verify the new gem properties
+        GemFactoryStorage.Gem memory newGem = GemFactory(gemfactory).getGem(newGemId);
+        assert(newGem.rarity == GemFactoryStorage.Rarity.EPIC);
+        assert(newGem.color[0] == color[0] && newGem.color[1] == color[1]);
+        assert(newGem.miningPeriod == EpicGemsMiningPeriod);
+        assert(newGem.gemCooldownPeriod == block.timestamp + EpicGemsCooldownPeriod);
+
+        // Verify the new gem quadrants
+        assert(newGem.quadrants[0] == 4);
+        assert(newGem.quadrants[1] == 4);
+        assert(newGem.quadrants[2] == 4);
+        assert(newGem.quadrants[3] == 5);
+
+        vm.stopPrank();
+    }
+
     function testForgeGemRevertsIfRaritiesNotSame() public {
         vm.startPrank(owner);
 
