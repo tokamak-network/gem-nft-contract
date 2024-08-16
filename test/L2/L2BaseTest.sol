@@ -6,7 +6,8 @@ import "forge-std/console.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
-import { MockL2WSTON } from "../../src/L2/Mock/MockL2WSTON.sol";
+import { L2StandardERC20 } from "../../src/L2/Mock/L2StandardERC20.sol";
+import { MockTON } from "../../src/L2/Mock/MockTON.sol";
 import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -75,19 +76,19 @@ contract L2BaseTest is Test {
         vm.startPrank(owner);
         vm.warp(1632934800);
 
-        wston = address(new MockL2WSTON(l2bridge, l1wston, "Wrapped Ston", "WSTON", 27)); // 27 decimals
-        ton = address(new MockL2WSTON(l2bridge, l1ton, "Ton", "TON", 18)); // 18 decimals
+        wston = address(new L2StandardERC20(l2bridge, l1wston, "Wrapped Ston", "WSTON")); // 27 decimals
+        ton = address(new MockTON(l2bridge, l1ton, "Ton", "TON")); // 18 decimals
 
         vm.stopPrank();
         // mint some tokens to User1 and user2
 
         vm.startPrank(l2bridge);
-        MockL2WSTON(wston).mint(owner, 1000000 * 10 ** 27);
-        MockL2WSTON(wston).mint(user1, 1000 * 10 ** 27);
-        MockL2WSTON(wston).mint(user2, 1000 * 10 ** 27);
-        MockL2WSTON(ton).mint(user1, 1000000 * 10 ** 18);
-        MockL2WSTON(ton).mint(user1, 1000 * 10 ** 18);
-        MockL2WSTON(ton).mint(user2, 1000 * 10 ** 18);
+        L2StandardERC20(wston).mint(owner, 1000000 * 10 ** 27);
+        L2StandardERC20(wston).mint(user1, 1000 * 10 ** 27);
+        L2StandardERC20(wston).mint(user2, 1000 * 10 ** 27);
+        MockTON(ton).mint(user1, 1000000 * 10 ** 18);
+        MockTON(ton).mint(user1, 1000 * 10 ** 18);
+        MockTON(ton).mint(user2, 1000 * 10 ** 18);
         vm.stopPrank();
 
         vm.startPrank(owner);
@@ -116,8 +117,8 @@ contract L2BaseTest is Test {
         // mint some TON & TITAN WSTON to treasury
 
         vm.startPrank(l2bridge);
-        MockL2WSTON(wston).mint(treasury, 100000 * 10 ** 27);
-        MockL2WSTON(ton).mint(treasury, 100000 * 10 ** 18);
+        L2StandardERC20(wston).mint(treasury, 100000 * 10 ** 27);
+        MockTON(ton).mint(treasury, 100000 * 10 ** 18);
 
         vm.stopPrank();
 

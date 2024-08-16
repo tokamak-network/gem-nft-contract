@@ -2,12 +2,11 @@
 pragma solidity ^0.8.9;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./IMockL2WSTON.sol";
+import "./IL2StandardERC20.sol";
 
-contract MockL2WSTON is IMockL2WSTON, ERC20 {
+contract L2StandardERC20 is IL2StandardERC20, ERC20 {
     address public l1Token;
     address public l2Bridge;
-    uint8 private _decimals;
 
     /**
      * @param _l2Bridge Address of the L2 standard bridge.
@@ -19,12 +18,10 @@ contract MockL2WSTON is IMockL2WSTON, ERC20 {
         address _l2Bridge,
         address _l1Token,
         string memory _name,
-        string memory _symbol,
-        uint8 decimals_
+        string memory _symbol
     ) ERC20(_name, _symbol) {
         l1Token = _l1Token;
         l2Bridge = _l2Bridge;
-        _decimals = decimals_;
     }
 
     modifier onlyL2Bridge() {
@@ -32,17 +29,17 @@ contract MockL2WSTON is IMockL2WSTON, ERC20 {
         _;
     }
 
-    function decimals() public view virtual override returns (uint8) {
-        return _decimals;
-    }
-
     // slither-disable-next-line external-function
     function supportsInterface(bytes4 _interfaceId) public pure returns (bool) {
         bytes4 firstSupportedInterface = bytes4(keccak256("supportsInterface(bytes4)")); // ERC165
-        bytes4 secondSupportedInterface = IMockL2WSTON.l1Token.selector ^
-            IMockL2WSTON.mint.selector ^
-            IMockL2WSTON.burn.selector;
+        bytes4 secondSupportedInterface = IL2StandardERC20.l1Token.selector ^
+            IL2StandardERC20.mint.selector ^
+            IL2StandardERC20.burn.selector;
         return _interfaceId == firstSupportedInterface || _interfaceId == secondSupportedInterface;
+    }
+
+    function decimals() public pure override returns (uint8) {
+        return 27;
     }
 
     // slither-disable-next-line external-function
