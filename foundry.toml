@@ -11,9 +11,8 @@ fs_permissions = [
 ]
 
 remappings = [
-    '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts',
-    '@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
-    '@chainlink/contracts=lib/foundry-chainlink-toolkit/lib/chainlink-brownie-contracts/',
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
 ]
 
 # Optional: Additional optimizer details
