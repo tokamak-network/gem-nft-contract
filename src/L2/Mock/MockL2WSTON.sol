@@ -1,30 +1,42 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.25;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../../interfaces/IMockL2WSTON.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./IMockL2WSTON.sol";
 
-contract MockL2WSTON is ERC20, IMockL2WSTON {
-
-    struct DepositTracker {
-        uint256 stakingIndex;
-        uint256 depositTime;
-    }
-
-    uint8 private _decimals;
-    address public l2Bridge;
+contract MockL2WSTON is IMockL2WSTON, ERC20 {
     address public l1Token;
+    address public l2Bridge;
+    uint8 private _decimals;
+
+    /**
+     * @param _l2Bridge Address of the L2 standard bridge.
+     * @param _l1Token Address of the corresponding L1 token.
+     * @param _name ERC20 name.
+     * @param _symbol ERC20 symbol.
+     */
+    constructor(
+        address _l2Bridge,
+        address _l1Token,
+        string memory _name,
+        string memory _symbol,
+        uint8 decimals_
+    ) ERC20(_name, _symbol) {
+        l1Token = _l1Token;
+        l2Bridge = _l2Bridge;
+        _decimals = decimals_;
+    }
 
     modifier onlyL2Bridge() {
         require(msg.sender == l2Bridge, "Only L2 Bridge can mint and burn");
         _;
     }
 
-    constructor(string memory _name, string memory _symbol, uint8 decimals_) ERC20(_name, _symbol) {
-        _setupDecimals(decimals_);
-        _mint(msg.sender, 1000000 * 10**uint256(decimals_)); // Mint 1,000,000 tokens to the deployer
+    function decimals() public view virtual override returns (uint8) {
+        return _decimals;
     }
 
+    // slither-disable-next-line external-function
     function supportsInterface(bytes4 _interfaceId) public pure returns (bool) {
         bytes4 firstSupportedInterface = bytes4(keccak256("supportsInterface(bytes4)")); // ERC165
         bytes4 secondSupportedInterface = IMockL2WSTON.l1Token.selector ^
@@ -33,35 +45,17 @@ contract MockL2WSTON is ERC20, IMockL2WSTON {
         return _interfaceId == firstSupportedInterface || _interfaceId == secondSupportedInterface;
     }
 
+    // slither-disable-next-line external-function
     function mint(address _to, uint256 _amount) public virtual onlyL2Bridge {
         _mint(_to, _amount);
 
         emit Mint(_to, _amount);
     }
 
+    // slither-disable-next-line external-function
     function burn(address _from, uint256 _amount) public virtual onlyL2Bridge {
         _burn(_from, _amount);
 
         emit Burn(_from, _amount);
-    }
-
-    function decodeStakingIndex(bytes memory data) public pure returns (DepositTracker memory) {
-        DepositTracker memory depositTracker = abi.decode(data, (DepositTracker));
-        return depositTracker;
-    }
-
-
-    //---------------------------------------------------------------------------------------
-    //------------------------------INTERNAL/VIEW FUNCTIONS----------------------------------
-    //---------------------------------------------------------------------------------------
-
-
-
-    function _setupDecimals(uint8 decimals_) internal {
-        _decimals = decimals_;
-    }
-
-    function decimals() public view virtual override returns (uint8) {
-        return _decimals;
     }
 }

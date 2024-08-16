@@ -57,6 +57,9 @@ contract L2BaseTest is Test {
     address marketplace;
     address wston;
     address ton;
+    address l1wston;
+    address l1ton;
+    address l2bridge;
 
     //DRB storage
     uint256 public avgL2GasUsed = 2100000;
@@ -72,15 +75,22 @@ contract L2BaseTest is Test {
         vm.startPrank(owner);
         vm.warp(1632934800);
 
-        wston = address(new MockL2WSTON("Wrapped Ston", "WSTON", 27)); // 27 decimals
-        ton = address(new MockL2WSTON("Ton", "TON", 18)); // 18 decimals
+        wston = address(new MockL2WSTON(l2bridge, l1wston, "Wrapped Ston", "WSTON", 27)); // 27 decimals
+        ton = address(new MockL2WSTON(l2bridge, l1ton, "Ton", "TON", 18)); // 18 decimals
 
-        // Transfer some tokens to User1
-        IERC20(wston).transfer(user1, 1000 * 10 ** 27);
-        IERC20(wston).transfer(user2, 1000 * 10 ** 27);
-        IERC20(ton).transfer(user1, 1000 * 10 ** 18);
-        IERC20(ton).transfer(user2, 1000 * 10 ** 18);
+        vm.stopPrank();
+        // mint some tokens to User1 and user2
 
+        vm.startPrank(l2bridge);
+        MockL2WSTON(wston).mint(owner, 1000000 * 10 ** 27);
+        MockL2WSTON(wston).mint(user1, 1000 * 10 ** 27);
+        MockL2WSTON(wston).mint(user2, 1000 * 10 ** 27);
+        MockL2WSTON(ton).mint(user1, 1000000 * 10 ** 18);
+        MockL2WSTON(ton).mint(user1, 1000 * 10 ** 18);
+        MockL2WSTON(ton).mint(user2, 1000 * 10 ** 18);
+        vm.stopPrank();
+
+        vm.startPrank(owner);
         // give ETH to User1 to cover gasFees associated with using VRF functions
         vm.deal(user1, 100 ether);
 
@@ -102,10 +112,17 @@ contract L2BaseTest is Test {
         treasury = address(new Treasury(wston, ton, gemfactory));
         marketplace = address(new MarketPlace());
 
-        // transfer some TON & TITAN WSTON to treasury
-        IERC20(wston).transfer(treasury, 100000 * 10 ** 27);
-        IERC20(ton).transfer(treasury, 100000 * 10 ** 18);
+        vm.stopPrank();
+        // mint some TON & TITAN WSTON to treasury
 
+        vm.startPrank(l2bridge);
+        MockL2WSTON(wston).mint(treasury, 100000 * 10 ** 27);
+        MockL2WSTON(ton).mint(treasury, 100000 * 10 ** 18);
+
+        vm.stopPrank();
+
+
+        vm.startPrank(owner);
 
         GemFactory(gemfactory).initialize(
             wston,

@@ -9,12 +9,12 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 contract WstonSwap {
     using SafeERC20 for IERC20;
 
-    IV3SwapRouter public immutable swapRouter;
+    address public immutable swapRouter;
     address public immutable ton;
     address public immutable wston;
     uint24 public constant feeTier = 3000;
 
-    constructor(IV3SwapRouter _swapRouter, address _ton, address _wston) {
+    constructor(address _swapRouter, address _ton, address _wston) {
         swapRouter = _swapRouter;
         wston = _wston;
         ton = _ton;
@@ -29,7 +29,7 @@ contract WstonSwap {
         // Transfer the specified amount of ton to this contract.
         IERC20(ton).safeTransferFrom(msg.sender, address(this), amountIn);
         // Approve the router to spend ton.
-        IERC20(ton).approve(address(swapRouter), amountIn);
+        IERC20(ton).approve(swapRouter, amountIn);
         // Note: To use this example, you should explicitly set slippage limits, omitting for simplicity
         uint256 minOut = /* Calculate min output */ 0;
         uint160 priceLimit = /* Calculate price limit */ 0;
@@ -45,7 +45,7 @@ contract WstonSwap {
                 sqrtPriceLimitX96: priceLimit
             });
         // The call to `exactInputSingle` executes the swap.
-        amountOut = swapRouter.exactInputSingle(params);
+        amountOut = IV3SwapRouter(swapRouter).exactInputSingle(params);
     }
 
     /// @notice swapExactOutputSingle swaps a minimum possible amount of TON for a fixed amount of WSTON.
@@ -74,7 +74,7 @@ contract WstonSwap {
             });
 
         // Executes the swap returning the amountIn needed to spend to receive the desired amountOut.
-        amountIn = swapRouter.exactOutputSingle(params);
+        amountIn = IV3SwapRouter(swapRouter).exactOutputSingle(params);
 
         // For exact output swaps, the amountInMaximum may not have all been spent.
         // If the actual amount spent (amountIn) is less than the specified maximum amount, we must refund the msg.sender and approve the swapRouter to spend 0.
