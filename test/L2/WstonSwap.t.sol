@@ -3,22 +3,26 @@ pragma solidity ^0.8.25;
 
 import "forge-std/Test.sol";
 import "./L2BaseTest.sol";
-import "../../src/L2/Tokamak-uniswap/UniswapV3Pool.sol";
+import "../../src/L2/Tokamak-uniswap/UniswapV3Factory.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract WstonSwapTest is L2BaseTest {
 
-    IERC20 public ton;
-    IERC20 public wston;
-    address public uniswapV3Pool;
-
+    address public uniswapV3Factory;
+    address public WstonPool;
     uint256 fee = 3000;
 
-    function setUp() public {
+    function setUp() public override {
 
         super.setUp();
+
+        vm.startPrank(owner);
         // Deploy the pool contract
-        uniswapV3Pool = address(new UniswapV3Pool{salt: keccak256(abi.encode(address(ton), address(wston), fee))}());
+        uniswapV3Factory = address(new UniswapV3Factory());
+        WstonPool = UniswapV3Factory(uniswapV3Factory).createPool(ton, wston, 3000);
+        
+
+        vm.stopPrank();
 
     }  
 }

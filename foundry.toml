@@ -1,10 +1,11 @@
 [profile.default]
-solc-version = "0.8.25"
+auto_detect_solc = true
+solc_version = "0.8.25"
 src = "src"
 out = "out"
 viaIR = true
 optimizer = true # Enable the optimizer
-optimizer-runs = 200 # Set the number of optimizer runs
+optimizer_runs = 200 # Set the number of optimizer runs
 libs = ["lib"]
 fs_permissions = [
     { access = "read", path = "lib/foundry-chainlink-toolkit/out" },
@@ -23,5 +24,3 @@ yul = true
 [profile.default.optimizer_details.yulDetails]
 stackAllocation = true
 optimizerSteps = 'dhfoDgvulfnTUtnIf'
-
-# See more config options https://github.com/foundry-rs/foundry/tree/master/crates/config
