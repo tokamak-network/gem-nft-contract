@@ -37,8 +37,8 @@ contract L2StandardERC20 is IL2StandardERC20, ERC20 {
             IL2StandardERC20.burn.selector;
         return _interfaceId == firstSupportedInterface || _interfaceId == secondSupportedInterface;
     }
-
-    function decimals() public pure override returns (uint8) {
+    
+    function decimals() public view virtual override returns (uint8) {
         return 27;
     }
 
