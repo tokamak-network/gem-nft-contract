@@ -141,8 +141,14 @@ contract MarketPlaceTest is L2BaseTest {
         vm.startPrank(user2);
         IERC20(wston).approve(address(marketplace), type(uint256).max);
         IERC20(ton).approve(address(marketplace), type(uint256).max);
+
+        uint256 balanceBefore = IERC20(wston).balanceOf(user1);
+
         MarketPlace(marketplace).buyGem(newGemId, false);
-        assert(IERC20(wston).balanceOf(user1) == 1200 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
+        uint256 balanceAfter = IERC20(wston).balanceOf(user1);
+
+        assert(balanceAfter == balanceBefore + gemPrice); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
+        
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user2); // GEM was correctly trransferred
         vm.stopPrank();
     }

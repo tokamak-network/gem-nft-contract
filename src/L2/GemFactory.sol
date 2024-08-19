@@ -984,6 +984,30 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return wston;
     }
 
+    function getCommonValue() public view returns (uint256) {
+        return CommonGemsValue;
+    }
+
+    function getRareValue() public view returns (uint256) {
+        return RareGemsValue;
+    }
+
+    function getUniqueValue() public view returns (uint256) {
+        return UniqueGemsValue;
+    }
+
+    function getEpicValue() public view returns (uint256) {
+        return EpicGemsValue;
+    }
+
+    function getLegendaryValue() public view returns (uint256) {
+        return LegendaryGemsValue;
+    }
+
+    function getMythicValue() public view returns (uint256) {
+        return MythicGemsValue;
+    }
+
     function getCommonminingTry() public view returns (uint256) {
         return CommonminingTry;
     }

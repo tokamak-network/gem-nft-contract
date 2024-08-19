@@ -84,11 +84,11 @@ contract L2BaseTest is Test {
 
         vm.startPrank(l2bridge);
         L2StandardERC20(wston).mint(owner, 1000000 * 10 ** 27);
-        L2StandardERC20(wston).mint(user1, 1000 * 10 ** 27);
-        L2StandardERC20(wston).mint(user2, 1000 * 10 ** 27);
+        L2StandardERC20(wston).mint(user1, 100000 * 10 ** 27);
+        L2StandardERC20(wston).mint(user2, 100000 * 10 ** 27);
         MockTON(ton).mint(user1, 1000000 * 10 ** 18);
-        MockTON(ton).mint(user1, 1000 * 10 ** 18);
-        MockTON(ton).mint(user2, 1000 * 10 ** 18);
+        MockTON(ton).mint(user1, 100000 * 10 ** 18);
+        MockTON(ton).mint(user2, 100000 * 10 ** 18);
         vm.stopPrank();
 
         vm.startPrank(owner);

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.25;
 
 import './interfaces/IUniswapV3Pool.sol';
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import './NoDelegateCall.sol';
 
@@ -459,7 +460,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         int24 tickLower,
         int24 tickUpper,
         uint128 amount,
-        bytes calldata data
+        bytes calldata 
     ) external override lock returns (uint256 amount0, uint256 amount1) {
         require(amount > 0);
         (, int256 amount0Int, int256 amount1Int) =
@@ -469,19 +470,19 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                     tickLower: tickLower,
                     tickUpper: tickUpper,
                     liquidityDelta: int256(uint256(amount)).toInt128()
-                })
+                })  
             );
 
         amount0 = uint256(amount0Int);
         amount1 = uint256(amount1Int);
 
-        uint256 balance0Before;
-        uint256 balance1Before;
-        if (amount0 > 0) balance0Before = balance0();
-        if (amount1 > 0) balance1Before = balance1();
-        IUniswapV3MintCallback(msg.sender).uniswapV3MintCallback(amount0, amount1, data);
-        if (amount0 > 0) require(balance0Before.add(amount0) <= balance0(), 'M0');
-        if (amount1 > 0) require(balance1Before.add(amount1) <= balance1(), 'M1');
+        if(amount0 > 0) {
+            IERC20(token0).transferFrom(msg.sender, address(this), amount0);
+        }
+
+        if(amount1 > 0) {
+            IERC20(token1).transferFrom(msg.sender, address(this), amount1);
+        }
 
         emit Mint(msg.sender, recipient, tickLower, tickUpper, amount, amount0, amount1);
     }

@@ -100,12 +100,13 @@ contract GemFactoryTest is L2BaseTest {
 
         // Start prank as user1 to melt the GEM
         vm.startPrank(user1);
-
+        uint256 balanceBefore = IERC20(wston).balanceOf(user1);
         // Call meltGEM function
         GemFactory(gemfactory).meltGEM(newGemId);
-
+        uint256 balanceAfter = IERC20(wston).balanceOf(user1);
+        uint256 gemValue = GemFactory(gemfactory).getCommonValue();
         // Verify GEM melting
-        assert(IERC20(wston).balanceOf(user1) == 1010 * 10 ** 27); // User1 should receive the WSTON (we now has 1000 + 10 WSWTON)
+        assert(balanceAfter == balanceBefore + gemValue); // User1 should receive the WSTON (we now has 1000 + 10 WSWTON)
 
         vm.stopPrank();
     }
