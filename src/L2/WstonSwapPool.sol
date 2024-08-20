@@ -24,6 +24,7 @@ contract WstonSwapPool is Ownable {
     event Swap(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event StakingIndexUpdated(uint256 newIndex);
     event LiquidityAdded(address indexed user, uint256 tonAmount, uint256 wstonAmount);
+    event LiquidityRemoved(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event FeesCollected(uint256 tonFees, uint256 wstonFees);
 
     modifier onlyTreasury() {
@@ -64,18 +65,41 @@ contract WstonSwapPool is Ownable {
         emit LiquidityAdded(msg.sender, tonAmount, wstonAmount);
     }
 
+    function removeLiquidity(uint256 shares) external {
+        require(lpShares[msg.sender] >= shares, "Insufficient LP shares");
+
+        uint256 tonAmount = (shares * tonReserve) / totalShares;
+        uint256 wstonAmount = (shares * wstonReserve) / totalShares;
+
+        lpShares[msg.sender] -= shares;
+        totalShares -= shares;
+
+        tonReserve -= tonAmount;
+        wstonReserve -= wstonAmount;
+
+        _safeTransfer(IERC20(ton), msg.sender, tonAmount);
+        _safeTransfer(IERC20(wston), msg.sender, wstonAmount);
+
+        emit LiquidityRemoved(msg.sender, tonAmount, wstonAmount);
+    }
+
+
     function swapWSTONforTON(uint256 wstonAmount) external {
         require(IERC20(wston).allowance(msg.sender, address(this)) >= wstonAmount, "TON allowance too low");
         require(IERC20(wston).balanceOf(msg.sender) >= wstonAmount, "TON balance too low");
 
         uint256 tonAmount = ((wstonAmount * stakingIndex) / DECIMALS) / (10**9);
         uint256 fee = (tonAmount * FEE_RATE) / 1000;
-        tonAmount -= fee;
+        uint256 tonAmountToTransfer = tonAmount - fee;
 
         require(IERC20(ton).balanceOf(address(this)) >= tonAmount, "TON balance too low in pool");
 
         _safeTransferFrom(IERC20(wston), msg.sender, address(this), wstonAmount);
-        _safeTransfer(IERC20(ton), msg.sender, tonAmount);
+        _safeTransfer(IERC20(ton), msg.sender, tonAmountToTransfer);
+
+        // Update reserves
+        wstonReserve += wstonAmount;
+        tonReserve -= tonAmount;
 
         _distributeFees(fee, 0);
 
@@ -88,12 +112,16 @@ contract WstonSwapPool is Ownable {
 
         uint256 wstonAmount = (tonAmount * (10**9) * DECIMALS) / stakingIndex;
         uint256 fee = (wstonAmount * FEE_RATE) / 1000;
-        wstonAmount -= fee;
+        uint256 wstonAmountToTransfer = wstonAmount - fee;
 
         require(IERC20(wston).balanceOf(address(this)) >= wstonAmount, "WSTON balance too low in pool");
 
         _safeTransferFrom(IERC20(ton), msg.sender, address(this), tonAmount);
-        _safeTransfer(IERC20(wston), msg.sender, wstonAmount);
+        _safeTransfer(IERC20(wston), msg.sender, wstonAmountToTransfer);
+
+        // Update reserves
+        tonReserve += tonAmount;
+        wstonReserve -= wstonAmount;
 
         _distributeFees(0, fee);
 
@@ -154,5 +182,9 @@ contract WstonSwapPool is Ownable {
 
     function getLpShares(address lp) external view returns (uint256) {
         return lpShares[lp];
+    }
+
+    function getTotalShares() external view returns (uint256) {
+        return totalShares;
     }
 }

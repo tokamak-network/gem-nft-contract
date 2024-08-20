@@ -52,6 +52,7 @@ contract L2BaseTest is Test {
     address payable owner;
     address payable user1;
     address payable user2;
+    address payable user3;
 
     address gemfactory;
     address treasury;
@@ -72,6 +73,7 @@ contract L2BaseTest is Test {
         owner = payable(makeAddr("Owner"));
         user1 = payable(makeAddr("User1"));
         user2 = payable(makeAddr("User2"));
+        user3 = payable(makeAddr("User3"));
 
         vm.startPrank(owner);
         vm.warp(1632934800);
@@ -86,9 +88,11 @@ contract L2BaseTest is Test {
         L2StandardERC20(wston).mint(owner, 1000000 * 10 ** 27);
         L2StandardERC20(wston).mint(user1, 100000 * 10 ** 27);
         L2StandardERC20(wston).mint(user2, 100000 * 10 ** 27);
+        L2StandardERC20(wston).mint(user3, 100000 * 10 ** 27);
         MockTON(ton).mint(user1, 1000000 * 10 ** 18);
         MockTON(ton).mint(user1, 100000 * 10 ** 18);
         MockTON(ton).mint(user2, 100000 * 10 ** 18);
+        MockTON(ton).mint(user3, 100000 * 10 ** 18);
         vm.stopPrank();
 
         vm.startPrank(owner);
