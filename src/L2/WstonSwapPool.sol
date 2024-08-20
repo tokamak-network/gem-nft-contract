@@ -24,6 +24,7 @@ contract WstonSwapPool is Ownable {
     event Swap(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event StakingIndexUpdated(uint256 newIndex);
     event LiquidityAdded(address indexed user, uint256 tonAmount, uint256 wstonAmount);
+    event LiquidityRemoved(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event FeesCollected(uint256 tonFees, uint256 wstonFees);
 
     modifier onlyTreasury() {
@@ -62,6 +63,24 @@ contract WstonSwapPool is Ownable {
         wstonReserve += wstonAmount;
 
         emit LiquidityAdded(msg.sender, tonAmount, wstonAmount);
+    }
+
+    function removeLiquidity(uint256 shares) external {
+        require(lpShares[msg.sender] >= shares, "Insufficient LP shares");
+
+        uint256 tonAmount = (shares * tonReserve) / totalShares;
+        uint256 wstonAmount = (shares * wstonReserve) / totalShares;
+
+        lpShares[msg.sender] -= shares;
+        totalShares -= shares;
+
+        tonReserve -= tonAmount;
+        wstonReserve -= wstonAmount;
+
+        _safeTransfer(IERC20(ton), msg.sender, tonAmount);
+        _safeTransfer(IERC20(wston), msg.sender, wstonAmount);
+
+        emit LiquidityRemoved(msg.sender, tonAmount, wstonAmount);
     }
 
     function swapWSTONforTON(uint256 wstonAmount) external {
