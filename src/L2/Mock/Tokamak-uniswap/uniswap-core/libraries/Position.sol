@@ -58,20 +58,20 @@ library Position {
         }
 
         // calculate accumulated fees
-        uint128 tokensOwed0 =
-            uint128(
+        int128 tokensOwed0 =
+            int128(
                 FullMath.mulDiv(
-                    feeGrowthInside0X128 - _self.feeGrowthInside0LastX128,
-                    _self.liquidity,
-                    FixedPoint128.Q128
+                    int256(feeGrowthInside0X128) - int256(_self.feeGrowthInside0LastX128),
+                    int128(_self.liquidity),
+                    int256(FixedPoint128.Q128)
                 )
             );
-        uint128 tokensOwed1 =
-            uint128(
+        int128 tokensOwed1 =
+            int128(
                 FullMath.mulDiv(
-                    feeGrowthInside1X128 - _self.feeGrowthInside1LastX128,
-                    _self.liquidity,
-                    FixedPoint128.Q128
+                    int256(feeGrowthInside1X128) - int256(_self.feeGrowthInside1LastX128),
+                    int128(_self.liquidity),
+                    int256(FixedPoint128.Q128)
                 )
             );
 
@@ -81,8 +81,8 @@ library Position {
         self.feeGrowthInside1LastX128 = feeGrowthInside1X128;
         if (tokensOwed0 > 0 || tokensOwed1 > 0) {
             // overflow is acceptable, have to withdraw before you hit type(uint128).max fees
-            self.tokensOwed0 += tokensOwed0;
-            self.tokensOwed1 += tokensOwed1;
+            self.tokensOwed0 += uint128(tokensOwed0);
+            self.tokensOwed1 += uint128(tokensOwed1);
         }
     }
 }

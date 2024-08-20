@@ -134,7 +134,8 @@ contract GemFactoryStorage {
 
     // Forging Event
     event GemForged(
-        uint256[] GemsTokenIds, 
+        address gemOwner,
+        uint256[] gemsTokenIds, 
         uint256 newGemCreatedId, 
         Rarity newRarity, 
         uint8[4] forgedQuadrants, 

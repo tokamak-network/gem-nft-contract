@@ -309,13 +309,13 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         noDelegateCall
         returns (
             Position.Info storage position,
-            int256 amount0,
-            int256 amount1
+            uint256 amount0,
+            uint256 amount1
         )
-    {
+        {
         checkTicks(params.tickLower, params.tickUpper);
 
-        Slot0 memory _slot0 = slot0; // SLOAD for gas optimization
+        Slot0 memory _slot0 = slot0;
 
         position = _updatePosition(
             params.owner,
@@ -324,50 +324,52 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             params.liquidityDelta,
             _slot0.tick
         );
-
         if (params.liquidityDelta != 0) {
             if (_slot0.tick < params.tickLower) {
-                // current tick is below the passed range; liquidity can only become in range by crossing from left to
-                // right, when we'll need _more_ token0 (it's becoming more valuable) so user must provide it
-                amount0 = SqrtPriceMath.getAmount0Delta(
-                    TickMath.getSqrtRatioAtTick(params.tickLower),
-                    TickMath.getSqrtRatioAtTick(params.tickUpper),
-                    params.liquidityDelta
-                );
-            } else if (_slot0.tick < params.tickUpper) {
-                // current tick is inside the passed range
-                uint128 liquidityBefore = liquidity; // SLOAD for gas optimization
 
-                // write an oracle entry
-                (slot0.observationIndex, slot0.observationCardinality) = observations.write(
+                uint160 sqrtRatioAtTickLower = TickMath.getSqrtRatioAtTick(params.tickLower);
+                uint160 sqrtRatioAtTickUpper = TickMath.getSqrtRatioAtTick(params.tickUpper);
+
+                amount0 = uint256(SqrtPriceMath.getAmount0Delta(
+                    int160(TickMath.getSqrtRatioAtTick(params.tickLower)),
+                    int160(TickMath.getSqrtRatioAtTick(params.tickUpper)),
+                    params.liquidityDelta,
+                    true
+                ));
+            } else if (_slot0.tick < params.tickUpper) {
+                uint128 liquidityBefore = liquidity; 
+                
+                (slot0.observationIndex, slot0.observationCardinality) = Oracle.write(
+                    observations,
                     _slot0.observationIndex,
-                    _blockTimestamp(),
+                    uint32(block.timestamp),
                     _slot0.tick,
                     liquidityBefore,
                     _slot0.observationCardinality,
                     _slot0.observationCardinalityNext
                 );
 
-                amount0 = SqrtPriceMath.getAmount0Delta(
-                    _slot0.sqrtPriceX96,
-                    TickMath.getSqrtRatioAtTick(params.tickUpper),
-                    params.liquidityDelta
-                );
-                amount1 = SqrtPriceMath.getAmount1Delta(
-                    TickMath.getSqrtRatioAtTick(params.tickLower),
-                    _slot0.sqrtPriceX96,
-                    params.liquidityDelta
-                );
+                amount0 = uint256(SqrtPriceMath.getAmount0Delta(
+                    int160(_slot0.sqrtPriceX96),
+                    int160(TickMath.getSqrtRatioAtTick(params.tickUpper)),
+                    params.liquidityDelta,
+                    true
+                ));
+                amount1 = uint256(SqrtPriceMath.getAmount1Delta(
+                    int160(TickMath.getSqrtRatioAtTick(params.tickLower)),
+                    int160(_slot0.sqrtPriceX96),
+                    params.liquidityDelta,
+                    true
+                ));
 
                 liquidity = LiquidityMath.addDelta(liquidityBefore, params.liquidityDelta);
             } else {
-                // current tick is above the passed range; liquidity can only become in range by crossing from right to
-                // left, when we'll need _more_ token1 (it's becoming more valuable) so user must provide it
-                amount1 = SqrtPriceMath.getAmount1Delta(
-                    TickMath.getSqrtRatioAtTick(params.tickLower),
-                    TickMath.getSqrtRatioAtTick(params.tickUpper),
-                    params.liquidityDelta
-                );
+                amount1 = uint256(SqrtPriceMath.getAmount1Delta(
+                    int160(TickMath.getSqrtRatioAtTick(params.tickLower)),
+                    int160(TickMath.getSqrtRatioAtTick(params.tickUpper)),
+                    params.liquidityDelta,
+                    true
+                ));
             }
         }
     }
@@ -463,7 +465,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         bytes calldata 
     ) external override lock returns (uint256 amount0, uint256 amount1) {
         require(amount > 0);
-        (, int256 amount0Int, int256 amount1Int) =
+        (, uint256 amount0Int, uint256 amount1Int) =
             _modifyPosition(
                 ModifyPositionParams({
                     owner: recipient,
@@ -520,7 +522,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         int24 tickUpper,
         uint128 amount
     ) external override lock returns (uint256 amount0, uint256 amount1) {
-        (Position.Info storage position, int256 amount0Int, int256 amount1Int) =
+        (Position.Info storage position, uint256 amount0Int, uint256 amount1Int) =
             _modifyPosition(
                 ModifyPositionParams({
                     owner: msg.sender,
@@ -530,8 +532,8 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
                 })
             );
 
-        amount0 = uint256(-amount0Int);
-        amount1 = uint256(-amount1Int);
+        amount0 = amount0Int;
+        //amount1 = -amount1Int;
 
         if (amount0 > 0 || amount1 > 0) {
             (position.tokensOwed0, position.tokensOwed1) = (
@@ -688,7 +690,7 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
 
             // update global fee tracker
             if (state.liquidity > 0)
-                state.feeGrowthGlobalX128 += FullMath.mulDiv(step.feeAmount, FixedPoint128.Q128, state.liquidity);
+                state.feeGrowthGlobalX128 += uint256(FullMath.mulDiv(int256(step.feeAmount), int256(FixedPoint128.Q128), int128(state.liquidity)));
 
             // shift tick if we reached the next price
             if (state.sqrtPriceX96 == step.sqrtPriceNextX96) {
@@ -798,8 +800,8 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         uint128 _liquidity = liquidity;
         require(_liquidity > 0, 'L');
 
-        uint256 fee0 = FullMath.mulDivRoundingUp(amount0, fee, 1e6);
-        uint256 fee1 = FullMath.mulDivRoundingUp(amount1, fee, 1e6);
+        uint256 fee0 = uint256(FullMath.mulDivRoundingUp(int256(amount0), int24(fee), 1e6));
+        uint256 fee1 = uint256(FullMath.mulDivRoundingUp(int256(amount1), int24(fee), 1e6));
         uint256 balance0Before = balance0();
         uint256 balance1Before = balance1();
 
@@ -822,13 +824,13 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             uint8 feeProtocol0 = slot0.feeProtocol % 16;
             uint256 fees0 = feeProtocol0 == 0 ? 0 : paid0 / feeProtocol0;
             if (uint128(fees0) > 0) protocolFees.token0 += uint128(fees0);
-            feeGrowthGlobal0X128 += FullMath.mulDiv(paid0 - fees0, FixedPoint128.Q128, _liquidity);
+            feeGrowthGlobal0X128 += uint256(FullMath.mulDiv(int256(paid0 - fees0), int256(FixedPoint128.Q128), int128(_liquidity)));
         }
         if (paid1 > 0) {
             uint8 feeProtocol1 = slot0.feeProtocol >> 4;
             uint256 fees1 = feeProtocol1 == 0 ? 0 : paid1 / feeProtocol1;
             if (uint128(fees1) > 0) protocolFees.token1 += uint128(fees1);
-            feeGrowthGlobal1X128 += FullMath.mulDiv(paid1 - fees1, FixedPoint128.Q128, _liquidity);
+            feeGrowthGlobal0X128 += uint256(FullMath.mulDiv(int256(paid1 - fees1), int256(FixedPoint128.Q128), int128(_liquidity)));
         }
 
         emit Flash(msg.sender, recipient, amount0, amount1, paid0, paid1);

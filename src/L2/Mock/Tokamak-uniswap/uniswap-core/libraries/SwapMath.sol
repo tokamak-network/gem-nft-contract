@@ -38,30 +38,30 @@ library SwapMath {
         bool exactIn = amountRemaining >= 0;
 
         if (exactIn) {
-            uint256 amountRemainingLessFee = FullMath.mulDiv(uint256(amountRemaining), 1e6 - feePips, 1e6);
+            uint256 amountRemainingLessFee = uint256(FullMath.mulDiv(amountRemaining, int24(1e6 - feePips), 1e6));
             amountIn = zeroForOne
-                ? SqrtPriceMath.getAmount0Delta(sqrtRatioTargetX96, sqrtRatioCurrentX96, liquidity, true)
-                : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX96, sqrtRatioTargetX96, liquidity, true);
+                ? uint256(SqrtPriceMath.getAmount0Delta(int160(sqrtRatioTargetX96), int160(sqrtRatioCurrentX96), int128(liquidity), true))
+                : uint256(SqrtPriceMath.getAmount1Delta(int160(sqrtRatioCurrentX96), int160(sqrtRatioTargetX96), int128(liquidity), true));
             if (amountRemainingLessFee >= amountIn) sqrtRatioNextX96 = sqrtRatioTargetX96;
             else
-                sqrtRatioNextX96 = SqrtPriceMath.getNextSqrtPriceFromInput(
-                    sqrtRatioCurrentX96,
-                    liquidity,
-                    amountRemainingLessFee,
+                (sqrtRatioNextX96) = uint160(SqrtPriceMath.getNextSqrtPriceFromInput(
+                    int160(sqrtRatioCurrentX96),
+                    int128(liquidity),
+                    int256(amountRemainingLessFee),
                     zeroForOne
-                );
+                ));
         } else {
             amountOut = zeroForOne
-                ? SqrtPriceMath.getAmount1Delta(sqrtRatioTargetX96, sqrtRatioCurrentX96, liquidity, false)
-                : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX96, sqrtRatioTargetX96, liquidity, false);
+                ? uint256(SqrtPriceMath.getAmount1Delta(int160(sqrtRatioCurrentX96), int160(sqrtRatioTargetX96), int128(liquidity), true))
+                : uint256(SqrtPriceMath.getAmount0Delta(int160(sqrtRatioTargetX96), int160(sqrtRatioCurrentX96), int128(liquidity), true));
             if (uint256(-amountRemaining) >= amountOut) sqrtRatioNextX96 = sqrtRatioTargetX96;
             else
-                sqrtRatioNextX96 = SqrtPriceMath.getNextSqrtPriceFromOutput(
-                    sqrtRatioCurrentX96,
-                    liquidity,
-                    uint256(-amountRemaining),
+                (sqrtRatioNextX96) = uint160(SqrtPriceMath.getNextSqrtPriceFromOutput(
+                    int160(sqrtRatioCurrentX96),
+                    int128(liquidity),
+                    -int256(amountRemaining),
                     zeroForOne
-                );
+                ));
         }
 
         bool max = sqrtRatioTargetX96 == sqrtRatioNextX96;
@@ -70,17 +70,17 @@ library SwapMath {
         if (zeroForOne) {
             amountIn = max && exactIn
                 ? amountIn
-                : SqrtPriceMath.getAmount0Delta(sqrtRatioNextX96, sqrtRatioCurrentX96, liquidity, true);
+                : uint256(SqrtPriceMath.getAmount0Delta(int160(sqrtRatioTargetX96), int160(sqrtRatioCurrentX96), int128(liquidity), true));
             amountOut = max && !exactIn
                 ? amountOut
-                : SqrtPriceMath.getAmount1Delta(sqrtRatioNextX96, sqrtRatioCurrentX96, liquidity, false);
+                : uint256(SqrtPriceMath.getAmount1Delta(int160(sqrtRatioCurrentX96), int160(sqrtRatioTargetX96), int128(liquidity), true));
         } else {
             amountIn = max && exactIn
                 ? amountIn
-                : SqrtPriceMath.getAmount1Delta(sqrtRatioCurrentX96, sqrtRatioNextX96, liquidity, true);
+                : uint256(SqrtPriceMath.getAmount1Delta(int160(sqrtRatioCurrentX96), int160(sqrtRatioTargetX96), int128(liquidity), true));
             amountOut = max && !exactIn
                 ? amountOut
-                : SqrtPriceMath.getAmount0Delta(sqrtRatioCurrentX96, sqrtRatioNextX96, liquidity, false);
+                : uint256(SqrtPriceMath.getAmount0Delta(int160(sqrtRatioTargetX96), int160(sqrtRatioCurrentX96), int128(liquidity), true));
         }
 
         // cap the output amount to not exceed the remaining output amount
@@ -92,7 +92,7 @@ library SwapMath {
             // we didn't reach the target, so take the remainder of the maximum input as fee
             feeAmount = uint256(amountRemaining) - amountIn;
         } else {
-            feeAmount = FullMath.mulDivRoundingUp(amountIn, feePips, 1e6 - feePips);
+            feeAmount = uint256(FullMath.mulDivRoundingUp(int256(amountIn), int24(feePips), int24(1e6 - feePips)));
         }
     }
 }

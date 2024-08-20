@@ -26,7 +26,7 @@ abstract contract LiquidityManagement is IUniswapV3MintCallback, PeripheryImmuta
         uint256 amount0Owed,
         uint256 amount1Owed,
         bytes calldata data
-    ) external override {
+    ) external {
         MintCallbackData memory decoded = abi.decode(data, (MintCallbackData));
         CallbackValidation.verifyCallback(factory, decoded.poolKey);
 
@@ -49,7 +49,7 @@ abstract contract LiquidityManagement is IUniswapV3MintCallback, PeripheryImmuta
 
     /// @notice Add liquidity to an initialized pool
     function addLiquidity(AddLiquidityParams memory params)
-        internal
+        public
         returns (
             uint128 liquidity,
             uint256 amount0,
