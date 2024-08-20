@@ -1,3 +1,9 @@
+# OPAL project
+
+<div align="center">
+<img src="images/gem.png" alt="Mythic gem" width="250" />
+</div>
+
 ### Description
 
 The project is an NFT collection and marketplace featuring Gems, which rewards users with monetary value through staking TON. Users interact with a game-like interface to mine new Gems, as well as to buy, sell, and burn them. Additionally, users can forge two Gems to obtain a rarer Gem. Users can deposit WTON on Layer 1 (L1) and receive a wrapped version called WSTON on L2. Users utilize L2 WSTON to buy GEMs at a discount price.
@@ -16,7 +22,7 @@ git clone https://github.com/tokamak-network/gem-nft-contracts
 cd gem-nft-contracts
 ```
 
-3. install dependencies
+3. install dependencies (foundry must be installed and updated first)
 ```
 yarn install
 ```
