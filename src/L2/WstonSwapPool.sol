@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract WstonSwapPool is Ownable {
 
     uint256 public constant DECIMALS = 10**27;
-    uint256 public constant FEE_RATE = 3; // 0.3% fee
+    uint256 public constant FEE_RATE_DIVIDER = 10000; // bps to percent
 
     address public ton;
     address public wston;
@@ -16,6 +16,7 @@ contract WstonSwapPool is Ownable {
     uint256 public stakingIndex;
     uint256 public tonReserve;
     uint256 public wstonReserve;
+    uint256 public feeRate; // in bps => 100 = 1%
 
     mapping(address => uint256) public lpShares;
     address[] public lpAddresses;
@@ -35,11 +36,12 @@ contract WstonSwapPool is Ownable {
         _;
     }
 
-    constructor(address _ton, address _wston, uint256 _initialStakingIndex, address _treasury) Ownable(msg.sender) {
+    constructor(address _ton, address _wston, uint256 _initialStakingIndex, address _treasury, uint256 _feeRate) Ownable(msg.sender) {
         ton = _ton;
         wston = _wston;
         treasury = _treasury;
         stakingIndex = _initialStakingIndex;
+        feeRate = _feeRate;
     }
 
     function addLiquidity(uint256 tonAmount, uint256 wstonAmount) external {
@@ -89,7 +91,7 @@ contract WstonSwapPool is Ownable {
         require(IERC20(wston).balanceOf(msg.sender) >= wstonAmount, "TON balance too low");
 
         uint256 tonAmount = ((wstonAmount * stakingIndex) / DECIMALS) / (10**9);
-        uint256 fee = (tonAmount * FEE_RATE) / 1000;
+        uint256 fee = (tonAmount * feeRate) / FEE_RATE_DIVIDER;
         uint256 tonAmountToTransfer = tonAmount - fee;
 
         require(IERC20(ton).balanceOf(address(this)) >= tonAmount, "TON balance too low in pool");
@@ -111,7 +113,7 @@ contract WstonSwapPool is Ownable {
         require(IERC20(ton).balanceOf(msg.sender) >= tonAmount, "TON balance too low");
 
         uint256 wstonAmount = (tonAmount * (10**9) * DECIMALS) / stakingIndex;
-        uint256 fee = (wstonAmount * FEE_RATE) / 1000;
+        uint256 fee = (wstonAmount * feeRate) / FEE_RATE_DIVIDER;
         uint256 wstonAmountToTransfer = wstonAmount - fee;
 
         require(IERC20(wston).balanceOf(address(this)) >= wstonAmount, "WSTON balance too low in pool");
