@@ -9,13 +9,14 @@ contract WstonSwap is L2BaseTest {
     address wstonSwapPool;
 
     uint256 public constant INITIAL_STAKING_INDEX = 10**27;
+    uint256 public feeRate = 30; // 0.3%
 
     function setUp() public override {
         super.setUp();
 
         vm.startPrank(owner);
 
-        wstonSwapPool = address(new WstonSwapPool(ton, wston, INITIAL_STAKING_INDEX, treasury));
+        wstonSwapPool = address(new WstonSwapPool(ton, wston, INITIAL_STAKING_INDEX, treasury, feeRate));
 
         vm.stopPrank();
 
@@ -195,6 +196,39 @@ contract WstonSwap is L2BaseTest {
         WstonSwapPool(wstonSwapPool).swapTONforWSTON(tonAmount);
 
         vm.stopPrank();
+    }
+
+    function testSwapWSTONforTONWithUpdatedStakingIndex() public {
+        testAddLiquidity();
+        uint256 user1tonBalanceBefore = IERC20(ton).balanceOf(user1);
+
+        vm.startPrank(owner);
+        uint256 newStakingIndex = 12*10**26; // 1.2 
+        WstonSwapPool(wstonSwapPool).updateStakingIndex(newStakingIndex);
+        vm.stopPrank();
+
+        vm.startPrank(user2);
+         uint256 user2tonBalanceBefore = IERC20(ton).balanceOf(user2);
+
+        //user wants to swap 50 WSTON for TON
+        uint256 wstonAmount = 50*10**27;
+        IERC20(wston).approve(wstonSwapPool, wstonAmount);
+        WstonSwapPool(wstonSwapPool).swapWSTONforTON(wstonAmount);
+        vm.stopPrank();
+
+        uint256 user1tonBalanceAfter = IERC20(ton).balanceOf(user1);
+        uint256 user2tonBalanceAfter = IERC20(ton).balanceOf(user2);
+
+        uint256 tonAmount = ((wstonAmount * newStakingIndex) / 10**27) / (10**9);
+        uint256 tonFees = (tonAmount * feeRate) / 10000; // 0.3%
+        tonAmount -= tonFees;
+
+        // ensuring user2 received his TON
+        assert(user2tonBalanceAfter == user2tonBalanceBefore + tonAmount);
+
+        // ensureing user1 received associated fees in TON
+        assert(user1tonBalanceAfter == user1tonBalanceBefore + tonFees);
+
     }
 
 }

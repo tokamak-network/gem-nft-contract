@@ -151,6 +151,22 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         MythicminingTry = _MythicminingTry;
     }
 
+    function setGemsValue(
+        uint256 _CommonGemsValue,
+        uint256 _RareGemsValue,
+        uint256 _UniqueGemsValue,
+        uint256 _EpicGemsValue,
+        uint256 _LegendaryGemsValue,
+        uint256 _MythicGemsValue
+    ) external onlyOwner {
+        CommonGemsValue = _CommonGemsValue;
+        RareGemsValue = _RareGemsValue;
+        UniqueGemsValue = _UniqueGemsValue;
+        EpicGemsValue = _EpicGemsValue;
+        LegendaryGemsValue = _LegendaryGemsValue;
+        MythicGemsValue = _MythicGemsValue;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
