@@ -1,0 +1,96 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IDRBCoordinator",
+  "sourceName": "src/interfaces/IDRBCoordinator.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint16",
+              "name": "security",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "mode",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint32",
+              "name": "callbackGasLimit",
+              "type": "uint32"
+            }
+          ],
+          "internalType": "struct IDRBCoordinator.RandomWordsRequest",
+          "name": "_request",
+          "type": "tuple"
+        }
+      ],
+      "name": "calculateDirectFundingPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "fulfillRandomness",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint16",
+              "name": "security",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "mode",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint32",
+              "name": "callbackGasLimit",
+              "type": "uint32"
+            }
+          ],
+          "internalType": "struct IDRBCoordinator.RandomWordsRequest",
+          "name": "_request",
+          "type": "tuple"
+        }
+      ],
+      "name": "requestRandomWordDirectFunding",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

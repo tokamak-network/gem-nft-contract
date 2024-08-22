@@ -3,8 +3,9 @@ pragma solidity ^0.8.25;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract WstonSwapPool is Ownable {
+contract WstonSwapPool is Ownable, ReentrancyGuard {
 
     uint256 public constant DECIMALS = 10**27;
     uint256 public constant FEE_RATE_DIVIDER = 10000; // bps to percent
@@ -44,7 +45,7 @@ contract WstonSwapPool is Ownable {
         feeRate = _feeRate;
     }
 
-    function addLiquidity(uint256 tonAmount, uint256 wstonAmount) external {
+    function addLiquidity(uint256 tonAmount, uint256 wstonAmount) external nonReentrant {
         require(IERC20(ton).allowance(msg.sender, address(this)) >= tonAmount, "TON allowance too low");
         require(IERC20(wston).allowance(msg.sender, address(this)) >= wstonAmount, "WSTON allowance too low");
         require(IERC20(ton).balanceOf(msg.sender) >= tonAmount, "TON balance too low");
@@ -67,7 +68,7 @@ contract WstonSwapPool is Ownable {
         emit LiquidityAdded(msg.sender, tonAmount, wstonAmount);
     }
 
-    function removeLiquidity(uint256 shares) external {
+    function removeLiquidity(uint256 shares) external nonReentrant {
         require(lpShares[msg.sender] >= shares, "Insufficient LP shares");
 
         uint256 tonAmount = (shares * tonReserve) / totalShares;
@@ -86,7 +87,7 @@ contract WstonSwapPool is Ownable {
     }
 
 
-    function swapWSTONforTON(uint256 wstonAmount) external {
+    function swapWSTONforTON(uint256 wstonAmount) external nonReentrant {
         require(IERC20(wston).allowance(msg.sender, address(this)) >= wstonAmount, "TON allowance too low");
         require(IERC20(wston).balanceOf(msg.sender) >= wstonAmount, "TON balance too low");
 
@@ -108,7 +109,7 @@ contract WstonSwapPool is Ownable {
         emit Swap(msg.sender, tonAmount, wstonAmount);
     }
 
-    function swapTONforWSTON(uint256 tonAmount) external onlyTreasury {
+    function swapTONforWSTON(uint256 tonAmount) external onlyTreasury nonReentrant {
         require(IERC20(ton).allowance(msg.sender, address(this)) >= tonAmount, "TON allowance too low");
         require(IERC20(ton).balanceOf(msg.sender) >= tonAmount, "TON balance too low");
 

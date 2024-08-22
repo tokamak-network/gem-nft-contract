@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "../proxy/ProxyStorage.sol";
 
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
 
@@ -23,7 +25,7 @@ interface ITreasury {
  * @dev GemFactory handles the creation of GEMs. It allows for admin to premine GEMs for the treasury contract.
  * it also allows for users to mine forge and melt GEMs.
  */
-contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthControlGemFactory, DRBConsumerBase {
+contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthControlGemFactory, DRBConsumerBase, ReentrancyGuard {
 
     using SafeERC20 for IERC20;
 
@@ -341,7 +343,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         // mining power must be greater than 0
         require(Gems[_tokenId].miningTry != 0, "no mining power left for that GEM");
 
-        // We set isUserMining to true to prevent the same user to recall the function
         userMiningToken[msg.sender][_tokenId] = true;
         // Store the current timestamp
         userMiningStartTime[msg.sender][_tokenId] = block.timestamp;
@@ -367,7 +368,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return true;       
     }
 
-    function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused returns(bool) {
+    function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns(bool) {
         require(ownerOf(_tokenId) == msg.sender || isAdmin(msg.sender) == true, "not GEM owner or not admin");
         require(block.timestamp > userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
         require(Gems[_tokenId].isLocked == true, "Gems is not mining");
@@ -774,7 +775,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public override(ERC721, IERC721) whenNotPaused {
+        // Check if the caller is authorized to transfer the token
+        _checkAuthorized(from, _msgSender(), tokenId);
+
         this.transferFrom(from, to, tokenId);
+
+        // Check if the recipient is a contract and if it can handle ERC721 tokens
         _checkOnERC721(from, to, tokenId, data);
     }
 
@@ -1058,10 +1064,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function isTokenLocked(uint256 _tokenId) public view returns(bool) {
         return Gems[_tokenId].isLocked;
-    }
-
-    function getIsUserMining(address _user) external view returns(bool) {
-        return isUserMining[_user];
     }
 
     function getRandomRequest(uint256 _requestId) external view returns(RequestStatus memory) {

@@ -9,12 +9,14 @@ import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
 import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
 
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 interface ICandidate {
     function updateSeigniorage() external returns(bool);
 }
 
 
-contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
+contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage, ReentrancyGuard {
     using SafeERC20 for IERC20;   
 
     modifier whenNotPaused() {
@@ -58,14 +60,14 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage {
 
     function depositAndGetWSTON(
         uint256 _amount
-    ) external whenNotPaused {
+    ) external whenNotPaused nonReentrant {
         require(_depositAndGetWSTONTo(msg.sender, _amount), "failed to deposit and get WSTON");
     }
 
     function depositAndGetWSTONTo(
         address _to,
         uint256 _amount
-    ) external whenNotPaused {
+    ) external whenNotPaused nonReentrant {
         require(_depositAndGetWSTONTo(_to, _amount), "failed to deposit and get WSTON");
     }
 

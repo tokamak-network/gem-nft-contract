@@ -17,7 +17,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
     address internal wston;
     address internal ton;
 
-    bool paused;
+    bool paused = false;
 
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");

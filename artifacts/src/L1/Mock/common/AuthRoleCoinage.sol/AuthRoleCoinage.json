@@ -1,0 +1,37 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "AuthRoleCoinage",
+  "sourceName": "src/L1/Mock/common/AuthRoleCoinage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "MINTER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OPERATOR_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460135760e1908160198239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c908163d539139314606f575063f5b541a614603457600080fd5b34606c5780600319360112606c5760206040517f523a704056dcd17bcf83bed8b68c59416dac1119be77755efe3bde0a64e46e0c8152f35b80fd5b90503460a7578160031936011260a757807ff0887ba65ee2024ea881d91b74c2450ef19e1557f03bed3ea9f16b037cbe2dc960209252f35b5080fdfea2646970667358221220187a0e8a65e3c1648968c2f6a18795067de1f00a16630835f3605f07668da3e164736f6c63430008190033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c908163d539139314606f575063f5b541a614603457600080fd5b34606c5780600319360112606c5760206040517f523a704056dcd17bcf83bed8b68c59416dac1119be77755efe3bde0a64e46e0c8152f35b80fd5b90503460a7578160031936011260a757807ff0887ba65ee2024ea881d91b74c2450ef19e1557f03bed3ea9f16b037cbe2dc960209252f35b5080fdfea2646970667358221220187a0e8a65e3c1648968c2f6a18795067de1f00a16630835f3605f07668da3e164736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
