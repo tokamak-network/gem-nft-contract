@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "LibAgenda",
+  "sourceName": "src/L1/Mock/libraries/Agenda.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea26469706673582212206bf58cd5329398ae4a375f8b6066a3d0132827c25348208db85edf3657a75be364736f6c63430008190033",
+  "deployedBytecode": "0x600080fdfea26469706673582212206bf58cd5329398ae4a375f8b6066a3d0132827c25348208db85edf3657a75be364736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

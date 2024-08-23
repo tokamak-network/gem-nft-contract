@@ -24,7 +24,7 @@ contract MarketPlaceStorage {
 
     uint256 public stakingIndex = 1;
 
-    bool public paused;
+    bool public paused = false;
 
     event GemBought(uint256 tokenId, address payer, address seller, uint256 amount);
     event GemForSale(uint256 tokenId, address seller, uint256 price);

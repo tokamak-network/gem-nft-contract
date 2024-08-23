@@ -50,7 +50,6 @@ contract GemFactoryStorage {
     mapping(address => uint256) public ownershipTokenCount;
 
     // Mining mappings
-    mapping(address => bool) public isUserMining;
     mapping(address => uint256) public tokenMiningByUser;
     mapping(address => mapping(uint256 => bool)) public userMiningToken;
     mapping(address => mapping(uint256 => uint256)) public userMiningStartTime;

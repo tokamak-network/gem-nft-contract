@@ -9,6 +9,18 @@ import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import {AuthControlGemFactory} from "../common/AuthControlGemFactory.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
+
+interface IMarketPlace {
+    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external;
+    function putGemForSale(uint256 _tokenId, uint256 _price) external;
+    function buyGem(uint256 _tokenId, bool _paymentMethod) external;
+}
+
+interface IWstonSwapPool {
+    function swapTONforWSTON(uint256 tonAmount) external;
+}
+
+
 contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
     using SafeERC20 for IERC20;
 
@@ -16,8 +28,9 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
     address internal _marketplace;
     address internal wston;
     address internal ton;
+    address internal wstonSwapPool;
 
-    bool paused;
+    bool paused = false;
 
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
@@ -30,8 +43,8 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
         _;
     }
 
-    modifier onlyGemFactoryOrMarketPlace() {
-        require(msg.sender == gemFactory || msg.sender == _marketplace, "caller is neither GemFactory nor MarketPlace");
+    modifier onlyGemFactoryOrMarketPlaceOrOwner() {
+        require(msg.sender == gemFactory || msg.sender == _marketplace || isAdmin(msg.sender), "caller is neither GemFactory nor MarketPlace");
         _;
     }
 
@@ -53,6 +66,11 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
         _marketplace = marketplace;
     }
 
+    function setWstonSwapPool(address _wstonSwapPool) external onlyOwner {
+        require(_wstonSwapPool != address(0), "Invalid address");
+        wstonSwapPool = _wstonSwapPool;
+    }
+
     function approveGemFactory() external onlyOwner {
         require(wston != address(0), "wston address not set");
         IERC20(wston).approve(gemFactory, type(uint256).max);
@@ -63,7 +81,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
         IERC20(wston).approve(_marketplace, type(uint256).max);
     }
 
-    function transferWSTON(address _to, uint256 _amount) external whenNotPaused onlyGemFactoryOrMarketPlace nonReentrant returns(bool) {
+    function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrOwner nonReentrant returns(bool) {
         require(_to != address(0), "address zero");
         uint256 contractWSTONBalance = getWSTONBalance();
         require(contractWSTONBalance >= _amount, "Unsuffiscient WSTON balance");
@@ -72,6 +90,16 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
         return true;
     }
 
+    function transferTON(address _to, uint256 _amount) external onlyOwner returns(bool) {
+        require(_to != address(0), "address zero");
+        uint256 contractTONBalance = getTONBalance();
+        require(contractTONBalance >= _amount, "Unsuffiscient TON balance");
+
+        IERC20(ton).safeTransfer(_to, _amount);
+        return true;
+    }
+
+    // @audit-issue safety checks on solvability => make sure that there is enough WSTON inside of the contract
     function createPreminedGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
@@ -86,6 +114,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
         );
     }
 
+    // @audit-issue safety checks on solvability => make sure that there is enough WSTON inside of the contract
     function createPreminedGEMPool(
         GemFactoryStorage.Rarity[] memory _rarities,
         uint8[2][] memory _colors,
@@ -100,9 +129,25 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
         );
     }
 
-    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlace returns(bool) {
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlaceOrOwner returns(bool) {
         IGemFactory(gemFactory).transferFrom(address(this), _to, _tokenId);
         return true;
+    }
+
+    function putGemForSale(uint256 _tokenId, uint256 _price) external onlyOwner {
+        IMarketPlace(_marketplace).putGemForSale(_tokenId, _price);
+    }
+
+    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external onlyOwner {
+        IMarketPlace(_marketplace).putGemListForSale(tokenIds, prices);
+    }
+
+    function buyGem(uint256 _tokenId, bool _paymentMethod) external onlyOwner {
+        IMarketPlace(_marketplace).buyGem(_tokenId, _paymentMethod);
+    }
+
+    function swapTONforWSTON(uint256 tonAmount) external onlyOwner {
+        IWstonSwapPool(wstonSwapPool).swapTONforWSTON(tonAmount);
     }
 
     // onERC721Received function to accept ERC721 tokens

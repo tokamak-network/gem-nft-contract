@@ -1,0 +1,16 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Math",
+  "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "MathOverflowedMulDiv",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea26469706673582212200297d4ced3ee49842601a2f15d84d38238064e0a3ad74c154c6ce8dd4d304e1864736f6c63430008190033",
+  "deployedBytecode": "0x600080fdfea26469706673582212200297d4ced3ee49842601a2f15d84d38238064e0a3ad74c154c6ce8dd4d304e1864736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

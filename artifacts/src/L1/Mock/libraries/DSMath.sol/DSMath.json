@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "DSMath",
+  "sourceName": "src/L1/Mock/libraries/DSMath.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601357603a908160198239f35b600080fdfe600080fdfea26469706673582212200cbe4a53da34cb9eb6db6c19e723ed6dda8223fdbd5141502d113cfa4ec2597264736f6c63430008190033",
+  "deployedBytecode": "0x600080fdfea26469706673582212200cbe4a53da34cb9eb6db6c19e723ed6dda8223fdbd5141502d113cfa4ec2597264736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

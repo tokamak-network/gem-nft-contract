@@ -1,0 +1,320 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "L1WrappedStakedTONStorage",
+  "sourceName": "src/L1/L1WrappedStakedTONStorage.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "DebugAllowance",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "name": "DebugBalance",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "wstonAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "depositTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "depositBlockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "Deposited",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Paused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "stakingIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakingIndexUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Unpaused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "WithdrawalProcessed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "WithdrawalRequested",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DECIMALS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "depositManager",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastSeigBlock",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "layer2Address",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "seigManager",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "stakingIndex",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalStakedAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalWstonMinted",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawalRequests",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "withdrawableBlockNumber",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "processed",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "wton",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x60808060405234601557610280908161001b8239f35b600080fdfe60806040818152600436101561001457600080fd5b600091823560e01c9081632e0f2625146102255750806330f50859146102075780634d3d629f146101dc5780634e5a232814610165578063567e98f91461014757806363b07568146101295780636c7ac9d8146101015780636fb7f558146100d95780638d62d949146100b15763f35c89e81461009057600080fd5b346100ad57816003193601126100ad576020906007549051908152f35b5080fd5b50346100ad57816003193601126100ad5760015490516001600160a01b039091168152602090f35b50346100ad57816003193601126100ad5760035490516001600160a01b039091168152602090f35b50346100ad57816003193601126100ad5760025490516001600160a01b039091168152602090f35b50346100ad57816003193601126100ad576020906005549051908152f35b50346100ad57816003193601126100ad576020906004549051908152f35b50346100ad57806003193601126100ad576004356001600160a01b038116908190036101d857602435908352600860205281832080548210156101d45760208460039260609652209102019081549160ff60026001830154920154169082519384526020840152151590820152f35b8380fd5b8280fd5b50346100ad57816003193601126100ad579054905160089190911c6001600160a01b03168152602090f35b50346100ad57816003193601126100ad576020906006549051908152f35b8390346100ad57816003193601126100ad57676765c793fa10079d601b1b8152602090f3fea26469706673582212205de1791857ee5d7dde41f57bad1a9cfcff675917542b2c1bf89653433ed3e62964736f6c63430008190033",
+  "deployedBytecode": "0x60806040818152600436101561001457600080fd5b600091823560e01c9081632e0f2625146102255750806330f50859146102075780634d3d629f146101dc5780634e5a232814610165578063567e98f91461014757806363b07568146101295780636c7ac9d8146101015780636fb7f558146100d95780638d62d949146100b15763f35c89e81461009057600080fd5b346100ad57816003193601126100ad576020906007549051908152f35b5080fd5b50346100ad57816003193601126100ad5760015490516001600160a01b039091168152602090f35b50346100ad57816003193601126100ad5760035490516001600160a01b039091168152602090f35b50346100ad57816003193601126100ad5760025490516001600160a01b039091168152602090f35b50346100ad57816003193601126100ad576020906005549051908152f35b50346100ad57816003193601126100ad576020906004549051908152f35b50346100ad57806003193601126100ad576004356001600160a01b038116908190036101d857602435908352600860205281832080548210156101d45760208460039260609652209102019081549160ff60026001830154920154169082519384526020840152151590820152f35b8380fd5b8280fd5b50346100ad57816003193601126100ad579054905160089190911c6001600160a01b03168152602090f35b50346100ad57816003193601126100ad576020906006549051908152f35b8390346100ad57816003193601126100ad57676765c793fa10079d601b1b8152602090f3fea26469706673582212205de1791857ee5d7dde41f57bad1a9cfcff675917542b2c1bf89653433ed3e62964736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
