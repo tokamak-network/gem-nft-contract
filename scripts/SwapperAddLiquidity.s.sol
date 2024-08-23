@@ -29,9 +29,6 @@ contract AddLiquidityScript is Script {
         ton.approve(poolAddress, tonAmount);
         wston.approve(poolAddress, wstonAmount);
 
-        // Call addLiquidity function
-        pool.addLiquidity(tonAmount, wstonAmount);
-
         vm.stopBroadcast();
     }
 }
