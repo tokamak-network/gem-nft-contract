@@ -2,7 +2,7 @@
 pragma solidity ^0.8.25;
 
 import "./ProxyStorage.sol";
-import {AuthControlGemFactory} from "../common/AuthControlGemFactory.sol";
+import {AuthControl} from "../common/AuthControl.sol";
 import "../interfaces/IProxyEvent.sol";
 import "../interfaces/IProxyAction.sol";
 
@@ -10,7 +10,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract ProxyL1WrappedStakedTON is
     ProxyStorage,
-    AuthControlGemFactory,
+    AuthControl,
     IProxyEvent,
     IProxyAction
 {
@@ -18,7 +18,6 @@ contract ProxyL1WrappedStakedTON is
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setRoleAdmin(TREASURY_ROLE, DEFAULT_ADMIN_ROLE);
     }
 
     /* ========== onlyOwner ========== */

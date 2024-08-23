@@ -3,11 +3,16 @@ pragma solidity ^0.8.4;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./AuthRoleGemFactory.sol";
+import {AuthRole} from "./AuthRole.sol";
 
-contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
-    modifier onlyOwner() {
+contract AuthControl is AuthRole, ERC165, AccessControl {
+    modifier onlyAdmin() {
         require(isAdmin(msg.sender), "AuthControl: Caller is not an admin");
+        _;
+    }
+
+    modifier onlyOwner() {
+        require(isOwner(), "AuthControl: Caller is not the owner");
         _;
     }
 
@@ -19,10 +24,10 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
         _;
     }
 
-    modifier onlyTreasuryOrAdmin() {
+    modifier onlyOwnerOrAdmin() {
         require(
-            isAdmin(msg.sender) || hasRole(TREASURY_ROLE, msg.sender),
-            "not onlyTreasuryOrAdmin"
+            isAdmin(msg.sender) || isOwner(),
+            "not Owner or Admin"
         );
         _;
     }
@@ -30,21 +35,21 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
     /// @dev add admin
     /// @param account  address to add
     function addAdmin(address account) public virtual onlyOwner {
-        grantRole(DEFAULT_ADMIN_ROLE, account);
+        grantRole(ADMIN_ROLE, account);
     }
 
-    function addMinter(address account) public virtual onlyOwner {
-        grantRole(TREASURY_ROLE, account);
+    function addPauser(address account) public virtual onlyOwnerOrAdmin {
+        grantRole(PAUSE_ROLE, account);
     }
 
     /// @dev remove admin
     /// @param account  address to remove
     function removeAdmin(address account) public virtual onlyOwner {
-        renounceRole(DEFAULT_ADMIN_ROLE, account);
+        renounceRole(ADMIN_ROLE, account);
     }
 
-    function removeMinter(address account) public virtual onlyOwner {
-        renounceRole(TREASURY_ROLE, account);
+    function removePauser(address account) public virtual onlyOwner {
+        renounceRole(PAUSE_ROLE, account);
     }
 
     /// @dev transfer admin
@@ -53,8 +58,8 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
         require(newAdmin != address(0), "Accessible: zero address");
         require(msg.sender != newAdmin, "Accessible: same admin");
 
-        grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
-        renounceRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        grantRole(ADMIN_ROLE, newAdmin);
+        renounceRole(ADMIN_ROLE, msg.sender);
     }
 
     function transferOwnership(address newAdmin) public virtual onlyOwner {
@@ -65,26 +70,15 @@ contract AuthControlGemFactory is AuthRoleGemFactory, ERC165, AccessControl {
         renounceRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function renounceMinter() public {
-        renounceRole(TREASURY_ROLE, msg.sender);
-    }
-
-    function revokeMinter(address account) public onlyOwner {
-        revokeRole(TREASURY_ROLE, account);
-    }
 
     /// @dev whether admin
     /// @param account  address to check
     function isAdmin(address account) public view virtual returns (bool) {
-        return hasRole(DEFAULT_ADMIN_ROLE, account);
+        return hasRole(ADMIN_ROLE, account);
     }
 
     function isOwner() public view virtual returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
-
-    function isMinter(address account) public view virtual returns (bool) {
-        return hasRole(TREASURY_ROLE, account);
     }
 
     function supportsInterface(
