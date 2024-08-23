@@ -109,7 +109,7 @@ contract WstonSwapPool is Ownable, ReentrancyGuard {
         emit Swap(msg.sender, tonAmount, wstonAmount);
     }
 
-    function swapTONforWSTON(uint256 tonAmount) external onlyTreasury nonReentrant {
+    function swapTONforWSTON(uint256 tonAmount) external onlyTreasury {
         require(IERC20(ton).allowance(msg.sender, address(this)) >= tonAmount, "TON allowance too low");
         require(IERC20(ton).balanceOf(msg.sender) >= tonAmount, "TON balance too low");
 
