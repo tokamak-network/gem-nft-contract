@@ -6,7 +6,7 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
 import { GemFactoryStorage } from "./GemFactoryStorage.sol";
-import {AuthControlGemFactory} from "../common/AuthControlGemFactory.sol";
+import {AuthControl} from "../common/AuthControl.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 
@@ -21,7 +21,7 @@ interface IWstonSwapPool {
 }
 
 
-contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
+contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     using SafeERC20 for IERC20;
 
     address internal gemFactory;
@@ -90,7 +90,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
         return true;
     }
 
-    function transferTON(address _to, uint256 _amount) external onlyOwner returns(bool) {
+    function transferTON(address _to, uint256 _amount) external onlyOwnerOrAdmin returns(bool) {
         require(_to != address(0), "address zero");
         uint256 contractTONBalance = getTONBalance();
         require(contractTONBalance >= _amount, "Unsuffiscient TON balance");
@@ -134,19 +134,19 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControlGemFactory {
         return true;
     }
 
-    function putGemForSale(uint256 _tokenId, uint256 _price) external onlyOwner {
+    function putGemForSale(uint256 _tokenId, uint256 _price) external onlyOwnerOrAdmin {
         IMarketPlace(_marketplace).putGemForSale(_tokenId, _price);
     }
 
-    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external onlyOwner {
+    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external onlyOwnerOrAdmin {
         IMarketPlace(_marketplace).putGemListForSale(tokenIds, prices);
     }
 
-    function buyGem(uint256 _tokenId, bool _paymentMethod) external onlyOwner {
+    function buyGem(uint256 _tokenId, bool _paymentMethod) external onlyOwnerOrAdmin {
         IMarketPlace(_marketplace).buyGem(_tokenId, _paymentMethod);
     }
 
-    function swapTONforWSTON(uint256 tonAmount) external onlyOwner {
+    function swapTONforWSTON(uint256 tonAmount) external onlyOwnerOrAdmin {
         IWstonSwapPool(wstonSwapPool).swapTONforWSTON(tonAmount);
     }
 

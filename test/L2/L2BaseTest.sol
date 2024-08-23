@@ -110,9 +110,6 @@ contract L2BaseTest is Test {
         // deploy and initialize GemFactory
         gemfactory = address(new GemFactory(address(drbCoordinatorMock)));
 
-        // Grant admin role to owner
-        GemFactory(gemfactory).grantRole(GemFactory(gemfactory).DEFAULT_ADMIN_ROLE(), owner);
-
         // deploy treasury and marketplace
         treasury = address(new Treasury(wston, ton, gemfactory));
         marketplace = address(new MarketPlace());

@@ -7,7 +7,7 @@ import { IGemFactory } from "../interfaces/IGemFactory.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { MarketPlaceStorage } from "./MarketPlaceStorage.sol";
 import { GemFactory } from "./GemFactory.sol";
-import {AuthControlGemFactory} from "../common/AuthControlGemFactory.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
@@ -15,7 +15,7 @@ interface ITreasury {
 }
 
 
-contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, AuthControlGemFactory {
+contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {
@@ -29,9 +29,7 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, AuthControlGemFacto
         _;
     }
 
-    constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
+    constructor() Ownable(msg.sender) {}
 
     function initialize(
         address treasury, 
