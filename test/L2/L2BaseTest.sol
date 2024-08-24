@@ -175,10 +175,12 @@ contract L2BaseTest is Test {
 
         GemFactory(gemfactory).setMarketPlaceAddress(marketplace);
         Treasury(treasury).setMarketPlace(marketplace);
+    
         
         // approve GemFactory to spend treasury wston
         Treasury(treasury).approveGemFactory();
-        Treasury(treasury).approveMarketPlace();
+        Treasury(treasury).wstonApproveMarketPlace();
+        Treasury(treasury).tonApproveMarketPlace();
 
         vm.stopPrank();
     }

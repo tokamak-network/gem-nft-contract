@@ -92,8 +92,15 @@ async function main() {
   console.log("GemFactory approved to spend Treasury WSTON");
 
   // Approve MarketPlace to spend Treasury WSTON
-  await Treasury.approveMarketPlace();
+  await Treasury.wstonApproveMarketPlace();
   console.log("MarketPlace approved to spend Treasury WSTON");
+
+  // Approve MarketPlace to spend Treasury TON
+  await Treasury.tonApproveMarketPlace();
+  console.log("MarketPlace approved to spend Treasury TON");
+
+  await Treasury.tonApproveWstonSwapPool();
+  console.log("WstonSwapPool approved to spend Treasury TON")
 }
 
 main()

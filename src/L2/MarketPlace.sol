@@ -65,7 +65,7 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
      * @param _price price asked for the transaction
      */
     function putGemForSale(uint256 _tokenId, uint256 _price) external whenNotPaused {
-        require(_putGemForSale(_tokenId, _price, msg.sender), "failed to put gem for sale");
+        require(_putGemForSale(_tokenId, _price), "failed to put gem for sale");
     }
 
     /**
@@ -78,8 +78,23 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         require(tokenIds.length == prices.length, "wrong length");
 
         for (uint256 i = 0; i < tokenIds.length; i++){
-            require(_putGemForSale(tokenIds[i], prices[i], msg.sender), "failed to put gem for sale");
+            require(_putGemForSale(tokenIds[i], prices[i]), "failed to put gem for sale");
         }
+    }
+
+    /**
+     * @notice Remove a gem that was put for sale
+     * @param _tokenId the ID of the token to be removed from the list
+     */
+    function removeGemForSale(uint256 _tokenId) external whenNotPaused {
+        require(gemsForSale[_tokenId].isActive == true, "Gem is not for sale");
+        require(IGemFactory(gemFactory).ownerOf(_tokenId) == msg.sender, "Not the owner of the GEM");
+
+        GemFactory(gemFactory).setIsLocked(_tokenId, false);
+
+        delete gemsForSale[_tokenId];
+        emit GemRemovedFromSale(_tokenId);
+
     }
 
     function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {
@@ -87,7 +102,6 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         tonFeesRate = _tonFeesRate;
         emit SetDiscountRate(_tonFeesRate);
     }
-
 
     function setStakingIndex(uint256 _stakingIndex) external onlyOwner {
         require(stakingIndex >= 1, "staking index must be greater or equal to 1");
@@ -99,20 +113,20 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
     //---------------------------------------------------------------------------------------
 
     
-    function _putGemForSale(uint256 _tokenId, uint256 _price, address _seller) internal returns (bool) {
-        require(IGemFactory(gemFactory).ownerOf(_tokenId) == _seller, "Not the owner of the GEM");
+    function _putGemForSale(uint256 _tokenId, uint256 _price) internal returns (bool) {
+        require(IGemFactory(gemFactory).ownerOf(_tokenId) == msg.sender, "Not the owner of the GEM");
         require(_price > 0, "Price must be greater than zero");
         require(IGemFactory(gemFactory).isTokenLocked(_tokenId) == false, "Gem is already for sale or mining");
 
         GemFactory(gemFactory).setIsLocked(_tokenId, true);
 
         gemsForSale[_tokenId] = Sale({
-            seller: _seller,
+            seller: msg.sender,
             price: _price,
             isActive: true
         });
         
-        emit GemForSale(_tokenId, _seller, _price);
+        emit GemForSale(_tokenId, msg.sender, _price);
         return true;
     }
     

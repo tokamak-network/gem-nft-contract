@@ -126,7 +126,8 @@ contract DeployL2Contracts is Script {
         
         // approve GemFactory to spend treasury wston
         treasury.approveGemFactory();
-        treasury.approveMarketPlace();
+        treasury.wstonApproveMarketPlace();
+        treasury.tonApproveMarketPlace();
 
         // Deploy the WstonSwapPool contract
         WstonSwapPool wstonSwapPool = new WstonSwapPool(l2ton, l2wston, stakingIndex, address(treasury), swapPoolfeeRate);
