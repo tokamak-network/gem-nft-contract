@@ -14,6 +14,7 @@ interface IMarketPlace {
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external;
     function putGemForSale(uint256 _tokenId, uint256 _price) external;
     function buyGem(uint256 _tokenId, bool _paymentMethod) external;
+    function removeGemForSale(uint256 _tokenId) external;
 }
 
 interface IWstonSwapPool {
@@ -76,9 +77,19 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         IERC20(wston).approve(gemFactory, type(uint256).max);
     }
 
-    function approveMarketPlace() external onlyOwner {
+    function wstonApproveMarketPlace() external onlyOwner {
         require(wston != address(0), "wston address not set");
         IERC20(wston).approve(_marketplace, type(uint256).max);
+    }
+
+    function tonApproveMarketPlace() external onlyOwner {
+        require(ton != address(0), "wston address not set");
+        IERC20(ton).approve(_marketplace, type(uint256).max);
+    }
+
+    function tonApproveWstonSwapPool() external onlyOwner {
+        require(ton != address(0), "wston address not set");
+        IERC20(ton).approve(wstonSwapPool, type(uint256).max);
     }
 
     function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrOwner nonReentrant returns(bool) {
@@ -140,6 +151,10 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
 
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external onlyOwnerOrAdmin {
         IMarketPlace(_marketplace).putGemListForSale(tokenIds, prices);
+    }
+
+    function removeGemFromSale(uint256 _tokenId) external onlyOwnerOrAdmin {
+        IMarketPlace(_marketplace).removeGemForSale(_tokenId);
     }
 
     function buyGem(uint256 _tokenId, bool _paymentMethod) external onlyOwnerOrAdmin {

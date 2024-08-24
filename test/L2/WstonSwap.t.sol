@@ -17,6 +17,7 @@ contract WstonSwap is L2BaseTest {
         vm.startPrank(owner);
 
         wstonSwapPool = address(new WstonSwapPool(ton, wston, INITIAL_STAKING_INDEX, treasury, feeRate));
+        Treasury(treasury).setWstonSwapPool(wstonSwapPool);
 
         vm.stopPrank();
 
@@ -77,7 +78,7 @@ contract WstonSwap is L2BaseTest {
     function testSwapTONforWSTON() public {
         // user 1 deposit 100 TON and 100 WSTON
         testAddLiquidity();
-        uint256 user1wstonBalanceBefore = IERC20(wston).balanceOf(treasury);
+        uint256 treasurywstonBalanceBefore = IERC20(wston).balanceOf(treasury);
 
         vm.startPrank(treasury);
         //treasury wants to swap 50 TON for WSTON
@@ -89,9 +90,9 @@ contract WstonSwap is L2BaseTest {
         uint256 wstonFees = (wstonAmountSwapped * 3) / 1000;
         
         //ensuring treasury received the WSTON swapped
-        uint256 user1wstonBalanceAfter = IERC20(wston).balanceOf(treasury);
+        uint256 treasurywstonBalanceAfter = IERC20(wston).balanceOf(treasury);
 
-        assert(user1wstonBalanceAfter == user1wstonBalanceBefore + wstonAmountSwapped - wstonFees);
+        assert(treasurywstonBalanceAfter == treasurywstonBalanceBefore + wstonAmountSwapped - wstonFees);
 
         vm.stopPrank;
     }
@@ -194,6 +195,26 @@ contract WstonSwap is L2BaseTest {
 
         vm.expectRevert("function callable from treasury contract only");
         WstonSwapPool(wstonSwapPool).swapTONforWSTON(tonAmount);
+
+        vm.stopPrank();
+    }
+
+    function testSwapTONforWSTONFromTreasury() public {
+        testAddLiquidity();
+        vm.startPrank(owner);
+        uint256 treasurywstonBalanceBefore = IERC20(wston).balanceOf(treasury);
+        uint256 tonAmount = 50*10**18;
+        Treasury(treasury).tonApproveWstonSwapPool();
+
+        Treasury(treasury).swapTONforWSTON(tonAmount);
+
+        uint256 wstonAmountSwapped = tonAmount * (10**9);
+        uint256 wstonFees = (wstonAmountSwapped * 3) / 1000;
+        
+        //ensuring treasury received the WSTON swapped
+        uint256 treasurywstonBalanceAfter = IERC20(wston).balanceOf(treasury);
+
+        assert(treasurywstonBalanceAfter == treasurywstonBalanceBefore + wstonAmountSwapped - wstonFees);
 
         vm.stopPrank();
     }
