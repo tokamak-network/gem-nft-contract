@@ -45,12 +45,20 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         _;
     }
 
+    modifier onlyOwnerOrRandomPack() {
+        require(
+            msg.sender == randomPack ||
+            isOwner(), "caller is neither owner nor randomPack contract"
+        );
+        _;
+    }
+
     modifier onlyGemFactoryOrMarketPlaceOrRandomPackOrOwner() {
         require(
             msg.sender == gemFactory || 
             msg.sender == _marketplace || 
             msg.sender == randomPack ||
-            isAdmin(msg.sender), "caller is neither GemFactory nor MarketPlace"
+            isOwner(), "caller is neither Owner nor GemFactory nor MarketPlace nor RandomPack"
         );
         _;
     }
@@ -127,7 +135,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         uint8[2] memory _color, 
         uint8[4] memory _quadrants,  
         string memory _tokenURI
-    ) external onlyOwner returns (uint256) {
+    ) external onlyOwnerOrRandomPack returns (uint256) {
         return IGemFactory(gemFactory).createGEM(
             _rarity,
             _color,
@@ -142,7 +150,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         uint8[2][] memory _colors,
         uint8[4][] memory _quadrants, 
         string[] memory _tokenURIs
-    ) external onlyOwner returns (uint256[] memory) {
+    ) external onlyOwnerOrRandomPack returns (uint256[] memory) {
         return IGemFactory(gemFactory).createGEMPool(
             _rarities,
             _colors,

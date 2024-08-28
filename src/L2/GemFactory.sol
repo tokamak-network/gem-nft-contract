@@ -15,6 +15,11 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
 
+import { GemLibrary } from "../libraries/GemLibrary.sol";
+import { MiningLibrary } from "../libraries/MiningLibrary.sol";
+import { TransferLibrary } from "../libraries/TransferLibrary.sol";
+import { ForgeLibrary } from "../libraries/ForgeLibrary.sol";
+
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
@@ -28,8 +33,10 @@ interface ITreasury {
 contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthControl, DRBConsumerBase, ReentrancyGuard {
 
     using SafeERC20 for IERC20;
-
-    event CountGemsByQuadrant(uint256 gemCount, uint256[] tokenIds);
+    using GemLibrary for GemFactoryStorage.Gem[];
+    using MiningLibrary for GemFactoryStorage.Gem[];
+    using TransferLibrary for GemFactoryStorage.Gem[];
+    using ForgeLibrary for GemFactoryStorage.Gem[];
 
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
@@ -42,9 +49,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _;
     }
 
-    modifier onlyTreasury() {
+    modifier onlyTreasuryOrRandomPack() {
         require(
-            msg.sender == treasury, 
+            msg.sender == treasury ||
+            msg.sender == randomPack, 
             "function callable from treasury contract only"
         );
         _;
@@ -169,6 +177,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         MythicGemsValue = _MythicGemsValue;
     }
 
+    function setRandomPack(address _randomPack) external onlyOwnerOrAdmin {
+        randomPack = _randomPack;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
@@ -182,145 +194,59 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @param _color color desired of the forged gem
      */
     function forgeTokens(
-        uint256[] memory _tokenIds, 
-        Rarity _rarity, 
+        uint256[] memory _tokenIds,
+        Rarity _rarity,
         uint8[2] memory _color
-    ) external whenNotPaused returns(uint256 newGemId) {
-        
-        require(msg.sender != address(0), "zero address"); 
-        
+    ) external whenNotPaused returns (uint256 newGemId) {
+        ForgeLibrary.ForgeParams memory params = ForgeLibrary.ForgeParams({
+            RareGemsValue: RareGemsValue,
+            UniqueGemsValue: UniqueGemsValue,
+            EpicGemsValue: EpicGemsValue,
+            LegendaryGemsValue: LegendaryGemsValue,
+            MythicGemsValue: MythicGemsValue,
+            RareGemsMiningPeriod: RareGemsMiningPeriod,
+            UniqueGemsMiningPeriod: UniqueGemsMiningPeriod,
+            EpicGemsMiningPeriod: EpicGemsMiningPeriod,
+            LegendaryGemsMiningPeriod: LegendaryGemsMiningPeriod,
+            MythicGemsMiningPeriod: MythicGemsMiningPeriod,
+            RareminingTry: RareminingTry,
+            UniqueminingTry: UniqueminingTry,
+            EpicminingTry: EpicminingTry,
+            LegendaryminingTry: LegendaryminingTry,
+            MythicminingTry: MythicminingTry,
+            RareGemsCooldownPeriod: RareGemsCooldownPeriod,
+            UniqueGemsCooldownPeriod: UniqueGemsCooldownPeriod,
+            EpicGemsCooldownPeriod: EpicGemsCooldownPeriod,
+            LegendaryGemsCooldownPeriod: LegendaryGemsCooldownPeriod,
+            MythicGemsCooldownPeriod: MythicGemsCooldownPeriod
+        });
+
+        uint8[4] memory forgedQuadrants;
+        Rarity newRarity;
         uint256 forgedGemsValue;
         uint256 forgedGemsMiningPeriod;
         uint256 forgedGemsCooldownPeriod;
         uint256 forgedGemsminingTry;
 
-        uint8 _color_0 = _color[0];
-        uint8 _color_1 = _color[1];
+        (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry) = Gems.forgeTokens(
+            GEMIndexToOwner,
+            ownershipTokenCount,
+            msg.sender,
+            _tokenIds,
+            _rarity,
+            _color,
+            params
+        );
 
-        if(_rarity == Rarity.COMMON) {
-            require(_tokenIds.length == 2, "wrong number of Gems to be forged");
-            forgedGemsValue = RareGemsValue;
-            forgedGemsMiningPeriod = RareGemsMiningPeriod;
-            forgedGemsminingTry = RareminingTry;
-            forgedGemsCooldownPeriod = RareGemsCooldownPeriod;
-        } else if(_rarity == Rarity.RARE) {
-            require(_tokenIds.length == 3, "wrong number of Gems to be forged");
-            forgedGemsValue = UniqueGemsValue;
-            forgedGemsMiningPeriod = UniqueGemsMiningPeriod;
-            forgedGemsminingTry = UniqueminingTry;
-            forgedGemsCooldownPeriod = UniqueGemsCooldownPeriod;
-        } else if(_rarity == Rarity.UNIQUE) {
-            require(_tokenIds.length == 4, "wrong number of Gems to be forged");
-            forgedGemsValue = EpicGemsValue;
-            forgedGemsMiningPeriod = EpicGemsMiningPeriod;
-            forgedGemsminingTry = EpicminingTry;
-            forgedGemsCooldownPeriod = EpicGemsCooldownPeriod;
-        } else if(_rarity == Rarity.EPIC) {
-            require(_tokenIds.length == 5, "wrong number of Gems to be forged");
-            forgedGemsValue = LegendaryGemsValue;
-            forgedGemsMiningPeriod = LegendaryGemsMiningPeriod;
-            forgedGemsminingTry = LegendaryminingTry;
-            forgedGemsCooldownPeriod = LegendaryGemsCooldownPeriod;
-        } else if(_rarity == Rarity.LEGENDARY) {
-            require(_tokenIds.length == 6, "wrong number of Gems to be forged");
-            forgedGemsValue = MythicGemsValue;
-            forgedGemsMiningPeriod = MythicGemsMiningPeriod;
-            forgedGemsminingTry = MythicminingTry;
-            forgedGemsCooldownPeriod = MythicGemsCooldownPeriod;
-        } else {
-            revert("wrong rarity");
-        }
-
-        uint8[4] memory sumOfQuadrants;
-        bool colorValidated = false;
-
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
-            require(GEMIndexToOwner[_tokenIds[i]] == msg.sender, "not owner");
-            require(!isTokenLocked(_tokenIds[i]), "Gem is for sale or is mining");
-            require(Gems[_tokenIds[i]].rarity == _rarity, "wrong rarity Gems");
-            
-            sumOfQuadrants[0] += Gems[_tokenIds[i]].quadrants[0];
-            sumOfQuadrants[1] += Gems[_tokenIds[i]].quadrants[1];
-            sumOfQuadrants[2] += Gems[_tokenIds[i]].quadrants[2];
-            sumOfQuadrants[3] += Gems[_tokenIds[i]].quadrants[3];
-            
-            // Validate color combination
-            for(uint256 j = 0; j < _tokenIds.length; j++) {
-                if(!colorValidated) {
-                    colorValidated = _checkColor(_tokenIds[i], _tokenIds[j], _color_0, _color_1);
-                    if(colorValidated) {
-                        emit  ColorValidated(_color_0, _color_1);
-                    }
-                }
-            }
-        }
-        require(colorValidated, "this color can't be obtained");
+        // Burn the old tokens{ 
         burnTokens(msg.sender, _tokenIds);
-
-        sumOfQuadrants[0] %= 2;
-        sumOfQuadrants[1] %= 2;
-        sumOfQuadrants[2] %= 2;
-        sumOfQuadrants[3] %= 2;
-
-        uint8[4] memory forgedQuadrants;
-
-        uint8 baseValue;
-        if (_rarity == Rarity.COMMON) baseValue = 2;
-        else if (_rarity == Rarity.RARE) baseValue = 3;
-        else if (_rarity == Rarity.UNIQUE) baseValue = 4;
-        else if (_rarity == Rarity.EPIC) baseValue = 5;
-        else if (_rarity == Rarity.LEGENDARY) baseValue = 6;
-
-        for (uint8 i = 0; i < 4; i++) {
-            forgedQuadrants[i] = baseValue + sumOfQuadrants[i];
-        }
-
-        // handling the case of sumOfQuadrants = 1111
-        if (
-            forgedQuadrants[0] == baseValue + 1 && 
-            forgedQuadrants[1] == baseValue + 1 && 
-            forgedQuadrants[2] == baseValue + 1 && 
-            forgedQuadrants[3] == baseValue + 1
-        ) {
-            forgedQuadrants[0] = baseValue;
-            forgedQuadrants[1] = baseValue;
-            forgedQuadrants[2] = baseValue;
-            forgedQuadrants[3] = baseValue;
-        }
-
-        // Increment the rarity to the next level
-        Rarity newRarity = Rarity(uint8(_rarity) + 1);
-
-        Gem memory _Gem = Gem({
-            tokenId: 0,
-            rarity: newRarity,
-            quadrants: forgedQuadrants,
-            color: _color,
-            value: forgedGemsValue,
-            miningPeriod: forgedGemsMiningPeriod,
-            gemCooldownPeriod: block.timestamp + forgedGemsCooldownPeriod,
-            miningTry: forgedGemsminingTry,
-            isLocked: false,
-            tokenURI: "",
-            randomRequestId: 0
-        });
-        Gems.push(_Gem);
-        newGemId = Gems.length - 1;
-        // Update the tokenId of the Gem in the array
-        Gems[newGemId].tokenId = newGemId;
-
-        // safe check on the token Id created
-        require(newGemId == uint256(uint32(newGemId)));
-        GEMIndexToOwner[newGemId] = msg.sender;
-        ownershipTokenCount[msg.sender]++;
         
-        // Use the ERC721 _safeMint function to handle the token creation
-        _safeMint(msg.sender, newGemId);
 
-        // Set the token URI
+        // Mint the new token
+        _safeMint(msg.sender, newGemId);
         _setTokenURI(newGemId, "");
 
-        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
+        emit Created(newGemId, newRarity, _color, forgedGemsValue, forgedQuadrants, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, "", msg.sender);
         return newGemId;
     }
 
@@ -329,54 +255,36 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @param _tokenId Id of the token to be mined.
      * @return true if the gem user started mining the gem
      */
-    function startMiningGEM(uint256 _tokenId) external whenNotPaused returns(bool) {
-        // safety check on the function caller
+    function startMiningGEM(uint256 _tokenId) external whenNotPaused returns (bool) {
         require(msg.sender != address(0), "zero address");
-        // user must own the token
         require(ownerOf(_tokenId) == msg.sender, "not gem owner");
-        // gem must be mineable
         require(Gems[_tokenId].gemCooldownPeriod <= block.timestamp, "Gem cooldown period has not elapsed");
-        // token must not be listed for sale within the marketplace
         require(!Gems[_tokenId].isLocked, "Gem is listed for sale or already mining");
-        // COMMON Gems cannot be mined
         require(Gems[_tokenId].rarity != Rarity.COMMON, "rarity must be at least RARE");
-        // mining power must be greater than 0
         require(Gems[_tokenId].miningTry != 0, "no mining power left for that GEM");
 
-        userMiningToken[msg.sender][_tokenId] = true;
-        // Store the current timestamp
-        userMiningStartTime[msg.sender][_tokenId] = block.timestamp;
-        Gems[_tokenId].isLocked = true;
-        Gems[_tokenId].miningTry --;
-        
+        Gems.startMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
+
         emit GemMiningStarted(_tokenId, msg.sender, block.timestamp, Gems[_tokenId].miningTry);
         return true;
     }
 
-    function cancelMining(uint256 _tokenId) external whenNotPaused returns(bool) {
-        // user must be owner of token
+    function cancelMining(uint256 _tokenId) external whenNotPaused returns (bool) {
         require(GEMIndexToOwner[_tokenId] == msg.sender, "not GEM owner");
-        //Verify that gem was locked 
         require(Gems[_tokenId].isLocked == true, "Gems is not mining");
         require(userMiningToken[msg.sender][_tokenId] == true, "user is not mining this Gem");
-        // user must wait until the end of the cooldown period
-        
-        // reset mining variables
-        delete userMiningToken[msg.sender][_tokenId];
-        delete userMiningStartTime[msg.sender][_tokenId];
-        Gems[_tokenId].isLocked = false;
-        return true;       
+
+        Gems.cancelMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
+        return true;
     }
 
-    function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns(bool) {
+    function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (bool) {
         require(ownerOf(_tokenId) == msg.sender || isAdmin(msg.sender) == true, "not GEM owner or not admin");
         require(block.timestamp > userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
         require(Gems[_tokenId].isLocked == true, "Gems is not mining");
         require(userMiningToken[ownerOf(_tokenId)][_tokenId] == true, "gem not mining");
 
-        // defining the random value
-        uint256 requestId = requestRandomness(0,0,CALLBACK_GAS_LIMIT);        
-        // storing the requestId computed
+        uint256 requestId = requestRandomness(0, 0, CALLBACK_GAS_LIMIT);
         Gems[_tokenId].randomRequestId = requestId;
 
         s_requests[requestId].tokenId = _tokenId;
@@ -393,32 +301,26 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return true;
     }
 
-    function claimMinedGEM(uint256 _tokenId) external whenNotPaused returns(bool) {
-        // user must be owner of token
+    function claimMinedGEM(uint256 _tokenId) external whenNotPaused returns (bool) {
         require(ownerOf(_tokenId) == msg.sender, "not GEM owner");
-        // user must be the miner
         require(userMiningToken[msg.sender][_tokenId] == true, "user is not mining this Gem");
-        //Verify that gem was locked 
         require(Gems[_tokenId].isLocked == true, "Gems is not mining");
 
         uint256 requestId = Gems[_tokenId].randomRequestId;
         require(s_requests[requestId].fulfilled == true, "you need to call pickMinedGEM function first");
 
-        // reset mining variables
-        delete userMiningToken[msg.sender][_tokenId];
-        delete userMiningStartTime[msg.sender][_tokenId];
-        Gems[_tokenId].isLocked = false;
+        Gems.claimMinedGem(userMiningToken, userMiningStartTime, _tokenId);
 
         uint256 newTokenId = s_requests[requestId].chosenTokenId;
 
-        if(newTokenId != 0) {
+        if (newTokenId != 0) {
             Gems[newTokenId].isLocked = false;
 
             require(ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId), "failed to transfer token");
 
             Gems[_tokenId].randomRequestId = 0;
-            Gems[_tokenId].gemCooldownPeriod = block.timestamp + getCooldownPeriod(Gems[_tokenId].rarity);
-            
+            Gems[_tokenId].gemCooldownPeriod = block.timestamp + TransferLibrary.getCooldownPeriod(Gems[_tokenId].rarity);
+
             emit GemMiningClaimed(_tokenId, msg.sender);
         } else {
             emit NoGemAvailable(_tokenId);
@@ -428,29 +330,26 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function meltGEM(uint256 _tokenId) external whenNotPaused {
-        require(msg.sender != address(0), "zero address"); 
+        require(msg.sender != address(0), "zero address");
         require(GEMIndexToOwner[_tokenId] == msg.sender);
         uint256 amount = Gems[_tokenId].value;
-        burnToken(msg.sender, _tokenId);
+        Gems.burnGem(GEMIndexToOwner, ownershipTokenCount, msg.sender, _tokenId);
+        // ERC721 burn function
+        _burn(_tokenId);
+        
         require(ITreasury(treasury).transferWSTON(msg.sender, amount), "transfer failed");
 
         emit GemMelted(_tokenId, msg.sender);
-    } 
-
-    function burnToken(address _from, uint256 _tokenId) internal {
-        // delete GEM from the Gems array and every other ownership/approve storage
-        delete Gems[_tokenId];
-        ownershipTokenCount[_from]--;
-        delete GEMIndexToOwner[_tokenId];
-
-        // ERC721 burn function
-        _burn(_tokenId);
-
     }
 
     function burnTokens(address _from, uint256[] memory _tokenIds) internal {
         for(uint256 i = 0; i < _tokenIds.length; i++) {
-            burnToken(_from, _tokenIds[i]);
+            // delete GEM from the Gems array and every other ownership/approve storage
+            delete Gems[_tokenIds[i]];
+            ownershipTokenCount[_from]--;
+            delete GEMIndexToOwner[_tokenIds[i]];
+            // ERC721 burn function
+            _burn(_tokenIds[i]);
         }
     }
 
@@ -462,13 +361,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @param _tokenURI TokenURIs of each GEM
      * @return The IDs of the newly created GEM.
      */
-    function createGEM( 
+    function createGEM(
         Rarity _rarity,
-        uint8[2] memory _color,  
+        uint8[2] memory _color,
         uint8[4] memory _quadrants,
-        string memory _tokenURI) 
-    external onlyTreasury whenNotPaused returns (uint256) {
-        
+        string memory _tokenURI
+    ) public onlyTreasuryOrRandomPack whenNotPaused returns (uint256) {
         uint256 _gemCooldownPeriod;
         uint256 _miningPeriod;
         uint256 _value;
@@ -476,7 +374,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
 
-        // Ensure that if rarity is COMMON, all quadrants must be either 1 or 2
         if (_rarity == Rarity.COMMON) {
             require(
                 (_quadrants[0] == 1 || _quadrants[0] == 2) &&
@@ -558,37 +455,24 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             revert("wrong Rarity");
         }
 
-        Gem memory _Gem = Gem({
-            tokenId: 0,
-            rarity: _rarity,
-            quadrants: _quadrants,
-            color: _color,
-            value: _value,
-            miningPeriod: _miningPeriod,
-            gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
-            miningTry: _miningTry,
-            isLocked: false,
-            tokenURI: _tokenURI,
-            randomRequestId: 0
-        });
-        // storage update
-        Gems.push(_Gem);
-        uint256 newGemId = Gems.length - 1;
-        // Update the tokenId of the Gem in the array
-        Gems[newGemId].tokenId = newGemId;
+        uint256 newGemId = Gems.createGem(
+            GEMIndexToOwner,
+            ownershipTokenCount,
+            msg.sender,
+            _rarity,
+            _color,
+            _quadrants,
+            _value,
+            _miningPeriod,
+            block.timestamp + _gemCooldownPeriod,
+            _miningTry,
+            _tokenURI
+        );
 
-        // safe check on the token Id created
-        require(newGemId == uint256(uint32(newGemId)));
-        GEMIndexToOwner[newGemId] = msg.sender;
-        ownershipTokenCount[msg.sender]++;
-        
-        // Use the ERC721 _safeMint function to handle the token creation
         _safeMint(msg.sender, newGemId);
-
-        // Set the token URI
         _setTokenURI(newGemId, _tokenURI);
 
-        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI,  msg.sender);
+        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI, msg.sender);
         return newGemId;
     }
 
@@ -605,12 +489,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint8[2][] memory _colors,
         uint8[4][] memory _quadrants,
         string[] memory _tokenURIs
-    )
-        external
-        onlyTreasury
-        whenNotPaused
-        returns (uint256[] memory)
-    {
+    ) public onlyTreasuryOrRandomPack whenNotPaused returns (uint256[] memory) {
         require(
             _rarities.length == _colors.length &&
             _colors.length == _quadrants.length &&
@@ -619,156 +498,21 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         );
 
         uint256[] memory newGemIds = new uint256[](_rarities.length);
-        uint256 _gemCooldownPeriod;
-        uint256 _miningPeriod;
-        uint256 _value;
-        uint256 _miningTry;
 
         for (uint256 i = 0; i < _rarities.length; i++) {
-
-            uint8 sumOfQuadrants = _quadrants[i][0] + _quadrants[i][1] + _quadrants[i][2] + _quadrants[i][3];
-
-            // Ensure that if rarity is COMMON, all quadrants must be either 1 or 2
-            if (_rarities[i] == Rarity.COMMON) {
-                require(
-                    (_quadrants[i][0] == 1 || _quadrants[i][0] == 2) &&
-                    (_quadrants[i][1] == 1 || _quadrants[i][1] == 2) &&
-                    (_quadrants[i][2] == 1 || _quadrants[i][2] == 2) &&
-                    (_quadrants[i][3] == 1 || _quadrants[i][3] == 2),
-                    "All quadrants must be 1 or 2 for COMMON rarity"
-                );
-                require(sumOfQuadrants < 8, "2222 is RARE not COMMON");
-                _gemCooldownPeriod = CommonGemsCooldownPeriod;
-                _miningPeriod = CommonGemsMiningPeriod;
-                _value = CommonGemsValue;
-                _miningTry = CommonminingTry;
-            }
-
-            // Ensure that if rarity is RARE, all quadrants must be either 2 or 3
-            if (_rarities[i] == Rarity.RARE) {
-                require(
-                    (_quadrants[i][0] == 2 || _quadrants[i][0] == 3) &&
-                    (_quadrants[i][1] == 2 || _quadrants[i][1] == 3) &&
-                    (_quadrants[i][2] == 2 || _quadrants[i][2] == 3) &&
-                    (_quadrants[i][3] == 2 || _quadrants[i][3] == 3),
-                    "All quadrants must be 2 or 3 for RARE rarity"
-                );
-                require(sumOfQuadrants < 12, "3333 is UNIQUE not RARE");
-                _gemCooldownPeriod = RareGemsCooldownPeriod;
-                _miningPeriod = RareGemsMiningPeriod;
-                _value = RareGemsValue;
-                _miningTry = RareminingTry;
-            }
-
-            // Ensure that if rarity is UNIQUE, all quadrants must be either 3 or 4
-            if (_rarities[i] == Rarity.UNIQUE) {
-                require(
-                    (_quadrants[i][0] == 3 || _quadrants[i][0] == 4) &&
-                    (_quadrants[i][1] == 3 || _quadrants[i][1] == 4) &&
-                    (_quadrants[i][2] == 3 || _quadrants[i][2] == 4) &&
-                    (_quadrants[i][3] == 3 || _quadrants[i][3] == 4),
-                    "All quadrants must be 3 or 4 for UNIQUE rarity"
-                );
-                require(sumOfQuadrants < 16, "4444 is EPIC not UNIQUE");
-                _gemCooldownPeriod = UniqueGemsCooldownPeriod;
-                _miningPeriod = UniqueGemsMiningPeriod;
-                _value = UniqueGemsValue;
-                _miningTry = UniqueminingTry;
-            }
-
-            // Ensure that if rarity is EPIC, all quadrants must be either 4 or 5
-            if (_rarities[i] == Rarity.EPIC) {
-                require(
-                    (_quadrants[i][0] == 4 || _quadrants[i][0] == 5) &&
-                    (_quadrants[i][1] == 4 || _quadrants[i][1] == 5) &&
-                    (_quadrants[i][2] == 4 || _quadrants[i][2] == 5) &&
-                    (_quadrants[i][3] == 4 || _quadrants[i][3] == 5),
-                    "All quadrants must be 4 or 5 for EPIC rarity"
-                );
-                require(sumOfQuadrants < 20, "5555 is LEGENDARY not EPIC");
-                _gemCooldownPeriod = EpicGemsCooldownPeriod;
-                _miningPeriod = EpicGemsMiningPeriod;
-                _value = EpicGemsValue;
-                _miningTry = EpicminingTry;
-            }
-
-            // Ensure that if rarity is LEGENDARY, all quadrants must be either 5 or 6
-            if (_rarities[i] == Rarity.LEGENDARY) {
-                require(
-                    (_quadrants[i][0] == 5 || _quadrants[i][0] == 6) &&
-                    (_quadrants[i][1] == 5 || _quadrants[i][1] == 6) &&
-                    (_quadrants[i][2] == 5 || _quadrants[i][2] == 6) &&
-                    (_quadrants[i][3] == 5 || _quadrants[i][3] == 6),
-                    "All quadrants must be 5 or 6 for LEGENDARY rarity"
-                );
-                require(sumOfQuadrants < 24, "6666 is MYTHIC not LEGENDARY");
-                _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
-                _miningPeriod = LegendaryGemsMiningPeriod;
-                _value = LegendaryGemsValue;
-                _miningTry = LegendaryminingTry;
-            }
-
-            // Ensure that if rarity is MYTHIC, all quadrants must be equal to 6
-            if (_rarities[i] == Rarity.MYTHIC) {
-                require(
-                    (_quadrants[i][0] == 6) &&
-                    (_quadrants[i][1] == 6) &&
-                    (_quadrants[i][2] == 6) &&
-                    (_quadrants[i][3] == 6),
-                    "All quadrants must be 6 for MYTHIC rarity"
-                );
-                _gemCooldownPeriod = MythicGemsCooldownPeriod;
-                _miningPeriod = MythicGemsMiningPeriod;
-                _value = MythicGemsValue;
-                _miningTry = MythicminingTry;
-            }
-
-            Gem memory _Gem = Gem({
-                tokenId: 0,
-                rarity: _rarities[i],
-                quadrants: _quadrants[i],
-                color: _colors[i],
-                value: _value,
-                miningPeriod: _miningPeriod,
-                gemCooldownPeriod: block.timestamp + _gemCooldownPeriod,
-                miningTry: _miningTry,
-                isLocked: false,
-                tokenURI: _tokenURIs[i],
-                randomRequestId: 0
-            });
-            Gems.push(_Gem);
-            uint256 newGemId = Gems.length - 1;
-
-            // safe check on the token Id created
-            require(newGemId == uint256(uint32(newGemId)));
-            Gems[newGemId].tokenId = uint32(newGemId);
-            GEMIndexToOwner[newGemId] = msg.sender;
-            ownershipTokenCount[msg.sender]++;
-
-            // Use the ERC721 _safeMint function to handle the token creation
-            _safeMint(msg.sender, newGemId);
-            _setTokenURI(newGemId, _tokenURIs[i]);
-
-            emit Created(newGemId, _rarities[i], _colors[i], _value, _quadrants[i], _miningPeriod, _gemCooldownPeriod, _tokenURIs[i],  msg.sender);
-            newGemIds[i] = newGemId;
+            newGemIds[i] = createGEM(_rarities[i], _colors[i], _quadrants[i], _tokenURIs[i]);
         }
 
         return newGemIds;
     }
 
     function transferFrom(address from, address to, uint256 tokenId) public override(ERC721, IERC721) whenNotPaused {
-        // Safety check to prevent against an unexpected 0x0 default.
         require(to != address(0));
         require(to != from);
         require(!Gems[tokenId].isLocked, "Gem is locked");
-
-        // You can only send your own gem.
         require(ownerOf(tokenId) == from, "sender is not the token owner");
 
-        // storage variables update
-        _transferGEM(from, to, tokenId);
-
-        // Reassign ownership,
+        Gems.transferGem(GEMIndexToOwner, ownershipTokenCount, from, to, tokenId);
         super.transferFrom(from, to, tokenId);
 
         emit TransferGEM(from, to, tokenId);
@@ -1173,6 +917,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function totalSupply() public view returns (uint256) {
         return Gems.length - 1;
+    }
+
+    function getGemsSupplyTotalValue() external view returns(uint256 totalValue) {
+        for (uint256 i = 0; i < Gems.length; i++) {
+            totalValue += Gems[i].value;
+        }
     }
 
 }

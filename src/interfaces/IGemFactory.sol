@@ -40,4 +40,8 @@ interface IGemFactory {
 
     function getGemListAvailableForRandomPack() external view returns (uint256, uint256[] memory);
 
+    function getGemsSupplyTotalValue() external view returns(uint256 totalValue);
+
+     function getMythicValue() external view returns (uint256);
+
 }

@@ -102,6 +102,7 @@ contract GemFactoryStorage {
     address public treasury;
     address public marketplace;
     address public drbcoordinator;
+    address public randomPack;
 
     // constants
     uint32 public constant CALLBACK_GAS_LIMIT = 210000;
@@ -130,6 +131,7 @@ contract GemFactoryStorage {
     event GemMelted(uint256 _tokenId, address _from);
     event RandomGemSelected(uint256 chosenTokenId, uint256 requestNumber);
     event NoGemAvailable(uint256 tokenId);
+    event CountGemsByQuadrant(uint256 gemCount, uint256[] tokenIds);
 
     // Forging Event
     event GemForged(

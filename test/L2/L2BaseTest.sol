@@ -6,6 +6,7 @@ import "forge-std/console.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
+import { RandomPack } from "../../src/L2/RandomPack.sol";
 import { L2StandardERC20 } from "../../src/L2/Mock/L2StandardERC20.sol";
 import { MockTON } from "../../src/L2/Mock/MockTON.sol";
 import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
@@ -57,6 +58,7 @@ contract L2BaseTest is Test {
     address gemfactory;
     address treasury;
     address marketplace;
+    address randomPack;
     address wston;
     address ton;
     address l1wston;
@@ -68,6 +70,12 @@ contract L2BaseTest is Test {
     uint256 public premiumPercentage = 0;
     uint256 public flatFee = 0.001 ether;
     uint256 public calldataSizeBytes = 2071;
+
+    //random pack storage
+    uint256 randomPackFees = 40*10**18;
+    uint256 randomBeaconFees = 0.005 ether;
+
+    event CommonGemMinted();
 
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
@@ -181,6 +189,19 @@ contract L2BaseTest is Test {
         Treasury(treasury).approveGemFactory();
         Treasury(treasury).wstonApproveMarketPlace();
         Treasury(treasury).tonApproveMarketPlace();
+
+        // We deploy the RandomPack contract
+        randomPack = address(new RandomPack(
+            address(drbCoordinatorMock),
+            wston,
+            ton,
+            gemfactory,
+            treasury,
+            randomPackFees
+        ));
+
+        Treasury(treasury).setRandomPack(randomPack);
+        GemFactory(gemfactory).setRandomPack(randomPack);
 
         vm.stopPrank();
     }

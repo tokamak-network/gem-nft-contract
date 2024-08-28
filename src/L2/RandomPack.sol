@@ -4,8 +4,10 @@ pragma solidity ^0.8.25;
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
+import { IGemFactory } from "../interfaces/IGemFactory.sol";
+import { GemFactoryStorage } from "./GemFactoryStorage.sol";  
 import {AuthControl} from "../common/AuthControl.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
@@ -13,9 +15,10 @@ import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
+    function getWSTONBalance() external view returns (uint256);
 }
 
-contract RandomPack is ReentrancyGuard, AuthControl, DRBConsumerBase {
+contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase {
     using SafeERC20 for IERC20;
 
     struct GemPackRequestStatus {
@@ -38,13 +41,14 @@ contract RandomPack is ReentrancyGuard, AuthControl, DRBConsumerBase {
     bool paused = false;
 
     // constants
-    uint32 public constant CALLBACK_GAS_LIMIT = 210000;
+    uint32 public constant CALLBACK_GAS_LIMIT = 2100000;
 
     uint256 public requestCount;
     uint256 public randomPackFees; // in TON (18 decimals)
+    string public perfectCommonGemURI;
 
     event RandomGemTransferred(uint256 tokenId, address newOwner);
-    event NoRandomGemAvailable();
+    event CommonGemMinted();
 
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
@@ -77,8 +81,14 @@ contract RandomPack is ReentrancyGuard, AuthControl, DRBConsumerBase {
         randomPackFees = _randomPackFees;
     }
 
+    function setPerfectCommonGemURI(string memory _tokenURI) external onlyOwner {
+        perfectCommonGemURI = _tokenURI;
+    }
+
     function getRandomGem() external payable whenNotPaused nonReentrant returns(bool) {
         require(msg.sender != address(0), "address 0 not allowed");
+        // we require treasury to have at least enough funds to cover the value of a potential new Mythic gem
+        require(ITreasury(treasury).getWSTONBalance() >= IGemFactory(gemFactory).getGemsSupplyTotalValue() + IGemFactory(gemFactory).getMythicValue(), "no enough funds available in Treasury");
 
         //users pays upfront fees
         //user must approve the contract for the fees amount before calling the function
@@ -98,7 +108,7 @@ contract RandomPack is ReentrancyGuard, AuthControl, DRBConsumerBase {
         return true;
     }
 
-        // Implement the abstract function from DRBConsumerBase
+    // Implement the abstract function from DRBConsumerBase
     function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
         require(s_requests[requestId].requested, "Request not made");
         s_requests[requestId].fulfilled = true;
@@ -114,11 +124,21 @@ contract RandomPack is ReentrancyGuard, AuthControl, DRBConsumerBase {
             ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
             emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
         } else {
-            s_requests[requestId].chosenTokenId = 0;
-            emit NoRandomGemAvailable();
+            s_requests[requestId].chosenTokenId = IGemFactory(gemFactory).createGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], "");
+            
+            IGemFactory(gemFactory).transferFrom(address(this), s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
+            emit CommonGemMinted();
         }
+    }
 
-
+    // onERC721Received function to accept ERC721 tokens
+    function onERC721Received(
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*tokenId*/,
+        bytes calldata /*data*/
+    ) external pure override returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 
 }
