@@ -58,7 +58,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _;
     }
 
-    constructor(address coordinator) ERC721("TokamakGEM", "GEM") DRBConsumerBase(coordinator) {
+    constructor(address coordinator) ERC721("GemSTON", "GEM") DRBConsumerBase(coordinator) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         drbcoordinator = coordinator;
     }
@@ -1108,6 +1108,36 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     function getGem(uint256 _tokenId) external view returns (Gem memory) {
         require(_tokenId < Gems.length, "Gem does not exist");
         return Gems[_tokenId];
+    }
+
+    function getGemList() external view returns (Gem[] memory) {
+        return Gems;
+    }
+
+    function getGemListAvailableForRandomPack() external view returns (uint256, uint256[] memory) {
+        uint256 count = 0;
+        uint256[] memory tokenIds = new uint256[](Gems.length);
+        uint256 index = 0;
+        
+        for (uint256 i = 0; i < Gems.length; i++) {
+            if (GEMIndexToOwner[i] == treasury &&
+                !Gems[i].isLocked
+            ) {
+                tokenIds[index] = Gems[i].tokenId;
+                unchecked{
+                    index++;
+                    count++;
+                } 
+            }
+        }
+
+        // Resize the array to the actual count
+        uint256[] memory result = new uint256[](count);
+        for (uint256 j = 0; j < count; j++) {
+            result[j] = tokenIds[j];
+        }
+
+        return (count, result);
     }
 
     /// @notice Returns a list of all tkGEM IDs assigned to an address.

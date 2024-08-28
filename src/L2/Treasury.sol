@@ -27,6 +27,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
 
     address internal gemFactory;
     address internal _marketplace;
+    address internal randomPack;
     address internal wston;
     address internal ton;
     address internal wstonSwapPool;
@@ -44,8 +45,13 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         _;
     }
 
-    modifier onlyGemFactoryOrMarketPlaceOrOwner() {
-        require(msg.sender == gemFactory || msg.sender == _marketplace || isAdmin(msg.sender), "caller is neither GemFactory nor MarketPlace");
+    modifier onlyGemFactoryOrMarketPlaceOrRandomPackOrOwner() {
+        require(
+            msg.sender == gemFactory || 
+            msg.sender == _marketplace || 
+            msg.sender == randomPack ||
+            isAdmin(msg.sender), "caller is neither GemFactory nor MarketPlace"
+        );
         _;
     }
 
@@ -60,6 +66,11 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     function setGemFactory(address _gemFactory) external onlyOwner {
         require(gemFactory != address(0), "Invalid address");
         gemFactory = _gemFactory;
+    }
+
+    function setRandomPack(address _randomPack) external onlyOwner {
+        require(_randomPack != address(0), "Invalid address");
+        randomPack = _randomPack;
     }
 
     function setMarketPlace(address marketplace) external onlyOwner {
@@ -92,7 +103,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         IERC20(ton).approve(wstonSwapPool, type(uint256).max);
     }
 
-    function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrOwner nonReentrant returns(bool) {
+    function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrRandomPackOrOwner nonReentrant returns(bool) {
         require(_to != address(0), "address zero");
         uint256 contractWSTONBalance = getWSTONBalance();
         require(contractWSTONBalance >= _amount, "Unsuffiscient WSTON balance");
@@ -140,7 +151,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         );
     }
 
-    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlaceOrOwner returns(bool) {
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlaceOrRandomPackOrOwner returns(bool) {
         IGemFactory(gemFactory).transferFrom(address(this), _to, _tokenId);
         return true;
     }

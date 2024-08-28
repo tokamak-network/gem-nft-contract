@@ -1,0 +1,124 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.25;
+
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
+import {AuthControl} from "../common/AuthControl.sol";
+
+import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
+import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
+
+interface ITreasury {
+    function transferWSTON(address _to, uint256 _amount) external returns(bool);
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
+}
+
+contract RandomPack is ReentrancyGuard, AuthControl, DRBConsumerBase {
+    using SafeERC20 for IERC20;
+
+    struct GemPackRequestStatus {
+        bool requested; // whether the request has been made
+        bool fulfilled; // whether the request has been successfully fulfilled
+        uint256 randomWord;
+        uint256 chosenTokenId;
+        address requester;
+    }
+
+    mapping(uint256 => GemPackRequestStatus) public s_requests; /* requestId --> requestStatus */
+
+
+    address internal gemFactory;
+    address internal treasury;
+    address internal wston;
+    address internal ton;
+    address internal drbcoordinator;
+
+    bool paused = false;
+
+    // constants
+    uint32 public constant CALLBACK_GAS_LIMIT = 210000;
+
+    uint256 public requestCount;
+    uint256 public randomPackFees; // in TON (18 decimals)
+
+    event RandomGemTransferred(uint256 tokenId, address newOwner);
+    event NoRandomGemAvailable();
+
+    modifier whenNotPaused() {
+      require(!paused, "Pausable: paused");
+      _;
+    }
+
+    modifier whenPaused() {
+        require(paused, "Pausable: not paused");
+        _;
+    }
+
+    constructor(address coordinator, address _wston, address _ton, address _gemFactory, address _treasury, uint256 _randomPackFees) DRBConsumerBase(coordinator) {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        gemFactory = _gemFactory;
+        treasury = _treasury;
+        wston = _wston;
+        ton = _ton;
+        drbcoordinator = coordinator;
+        randomPackFees = _randomPackFees;
+    }
+
+
+    function setGemFactory(address _gemFactory) external onlyOwner {
+        require(gemFactory != address(0), "Invalid address");
+        gemFactory = _gemFactory;
+    }
+
+    function setRandomPackFees(uint256 _randomPackFees) external onlyOwner {
+        require(randomPackFees != 0, "fees must be greater than 0");
+        randomPackFees = _randomPackFees;
+    }
+
+    function getRandomGem() external payable whenNotPaused nonReentrant returns(bool) {
+        require(msg.sender != address(0), "address 0 not allowed");
+
+        //users pays upfront fees
+        //user must approve the contract for the fees amount before calling the function
+        IERC20(ton).safeTransferFrom(msg.sender, address(this), randomPackFees);
+        
+        // defining the random value
+        uint256 requestId = requestRandomness(0,0,CALLBACK_GAS_LIMIT);        
+
+        s_requests[requestId].requested = true;
+        s_requests[requestId].requester = msg.sender;
+        unchecked {
+            requestCount++;
+        }
+
+        IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
+
+        return true;
+    }
+
+        // Implement the abstract function from DRBConsumerBase
+    function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
+        require(s_requests[requestId].requested, "Request not made");
+        s_requests[requestId].fulfilled = true;
+        s_requests[requestId].randomWord = randomNumber;
+
+        (uint256 gemCount, uint256[] memory tokenIds) = IGemFactory(gemFactory).getGemListAvailableForRandomPack();
+
+        if(gemCount > 0) {
+            // same calculation as for the mining process
+            uint256 modNbGemsAvailable = (randomNumber % gemCount);
+            s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
+            // we send the token to the user
+            ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
+            emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
+        } else {
+            s_requests[requestId].chosenTokenId = 0;
+            emit NoRandomGemAvailable();
+        }
+
+
+    }
+
+}
