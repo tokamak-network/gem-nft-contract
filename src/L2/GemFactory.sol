@@ -49,10 +49,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _;
     }
 
-    modifier onlyTreasuryOrRandomPack() {
+    modifier onlyTreasury() {
         require(
-            msg.sender == treasury ||
-            msg.sender == randomPack, 
+            msg.sender == treasury,
             "function callable from treasury contract only"
         );
         _;
@@ -366,7 +365,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint8[2] memory _color,
         uint8[4] memory _quadrants,
         string memory _tokenURI
-    ) public onlyTreasuryOrRandomPack whenNotPaused returns (uint256) {
+    ) public onlyTreasury whenNotPaused returns (uint256) {
         uint256 _gemCooldownPeriod;
         uint256 _miningPeriod;
         uint256 _value;
@@ -489,7 +488,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint8[2][] memory _colors,
         uint8[4][] memory _quadrants,
         string[] memory _tokenURIs
-    ) public onlyTreasuryOrRandomPack whenNotPaused returns (uint256[] memory) {
+    ) public onlyTreasury whenNotPaused returns (uint256[] memory) {
         require(
             _rarities.length == _colors.length &&
             _colors.length == _quadrants.length &&
@@ -505,7 +504,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         return newGemIds;
     }
-
+        
     function transferFrom(address from, address to, uint256 tokenId) public override(ERC721, IERC721) whenNotPaused {
         require(to != address(0));
         require(to != from);
@@ -772,6 +771,24 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function getMythicValue() public view returns (uint256) {
         return MythicGemsValue;
+    }
+
+    function getValueBasedOnRarity(Rarity _rarity) public view returns(uint256 value) {
+        if(_rarity == Rarity.COMMON) {
+            value = CommonGemsValue;
+        } else if(_rarity == Rarity.RARE) {
+            value = RareGemsValue;
+        } else if(_rarity == Rarity.UNIQUE) {
+            value = UniqueGemsValue;
+        } else if(_rarity == Rarity.EPIC) {
+            value = EpicGemsValue;
+        } else if(_rarity == Rarity.LEGENDARY) {
+            value = LegendaryGemsValue;
+        } else if(_rarity == Rarity.MYTHIC) {
+            value = MythicGemsValue;
+        } else {
+            revert("wrong rarity");
+        }
     }
 
     function getCommonminingTry() public view returns (uint256) {

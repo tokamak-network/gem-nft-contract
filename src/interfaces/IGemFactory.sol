@@ -42,6 +42,6 @@ interface IGemFactory {
 
     function getGemsSupplyTotalValue() external view returns(uint256 totalValue);
 
-     function getMythicValue() external view returns (uint256);
+    function getValueBasedOnRarity(GemFactoryStorage.Rarity _rarity) external view returns(uint256 value);
 
 }
