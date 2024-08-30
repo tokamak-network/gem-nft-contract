@@ -51,7 +51,9 @@ contract MarketPlaceTest is L2BaseTest {
         vm.startPrank(user1);
 
         MockTON(ton).approve(randomPack, randomPackFees);
-        RandomPack(randomPack).getRandomGem{value: randomBeaconFees}();
+        uint256 requestId = RandomPack(randomPack).getRandomGem{value: randomBeaconFees}();
+
+        RandomPack(randomPack).collectRandomGem(requestId);
 
         assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1 || GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
 
@@ -63,11 +65,16 @@ contract MarketPlaceTest is L2BaseTest {
 
         MockTON(ton).approve(randomPack, randomPackFees);
 
+        // Expect the CommonGemToBeMinted event to be emitted
+        vm.expectEmit(false, false, false, true);
+        emit CommonGemToBeMinted();
+
+        uint256 requestId = RandomPack(randomPack).getRandomGem{value: randomBeaconFees}();
+
         // Expect the CommonGemMinted event to be emitted
         vm.expectEmit(false, false, false, true);
         emit CommonGemMinted();
-
-        RandomPack(randomPack).getRandomGem{value: randomBeaconFees}();
+        RandomPack(randomPack).collectRandomGem(requestId);
 
         vm.stopPrank();
     }

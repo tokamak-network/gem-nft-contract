@@ -129,13 +129,17 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         return true;
     }
 
-    // @audit-issue safety checks on solvability => make sure that there is enough WSTON inside of the contract
     function createPreminedGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
         uint8[4] memory _quadrants,  
         string memory _tokenURI
     ) external onlyOwnerOrRandomPack returns (uint256) {
+        // safety check for WSTON solvency
+        require(
+            getWSTONBalance() >= IGemFactory(gemFactory).getGemsSupplyTotalValue() + IGemFactory(gemFactory).getValueBasedOnRarity(_rarity),
+            "Not enough WSTON available in Treasury"
+        );
         return IGemFactory(gemFactory).createGEM(
             _rarity,
             _color,
@@ -144,13 +148,22 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         );
     }
 
-    // @audit-issue safety checks on solvability => make sure that there is enough WSTON inside of the contract
     function createPreminedGEMPool(
         GemFactoryStorage.Rarity[] memory _rarities,
         uint8[2][] memory _colors,
         uint8[4][] memory _quadrants, 
         string[] memory _tokenURIs
     ) external onlyOwnerOrRandomPack returns (uint256[] memory) {
+        uint256 sumOfNewPoolValues;
+        for (uint256 i = 0; i < _rarities.length; i++) {
+        sumOfNewPoolValues += IGemFactory(gemFactory).getValueBasedOnRarity(_rarities[i]);
+        }
+
+        require(
+            getWSTONBalance() >= IGemFactory(gemFactory).getGemsSupplyTotalValue() + sumOfNewPoolValues,
+            "Not enough WSTON available in Treasury"
+        );
+
         return IGemFactory(gemFactory).createGEMPool(
             _rarities,
             _colors,
@@ -210,6 +223,10 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
 
     function getGemFactoryAddress() public view returns (address) {
         return gemFactory;
+    }
+
+    function getRandomPackAddress() public view returns(address) {
+        return randomPack;
     }
     
 }

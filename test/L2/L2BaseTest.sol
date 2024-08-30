@@ -76,6 +76,7 @@ contract L2BaseTest is Test {
     uint256 randomBeaconFees = 0.005 ether;
 
     event CommonGemMinted();
+    event CommonGemToBeMinted();
 
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
@@ -193,7 +194,6 @@ contract L2BaseTest is Test {
         // We deploy the RandomPack contract
         randomPack = address(new RandomPack(
             address(drbCoordinatorMock),
-            wston,
             ton,
             gemfactory,
             treasury,

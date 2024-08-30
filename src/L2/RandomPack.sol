@@ -16,6 +16,12 @@ interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
     function getWSTONBalance() external view returns (uint256);
+    function createPreminedGEM( 
+        GemFactoryStorage.Rarity _rarity,
+        uint8[2] memory _color, 
+        uint8[4] memory _quadrants,  
+        string memory _tokenURI
+    ) external returns (uint256);
 }
 
 contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase {
@@ -34,20 +40,21 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
 
     address internal gemFactory;
     address internal treasury;
-    address internal wston;
     address internal ton;
     address internal drbcoordinator;
 
     bool paused = false;
 
     // constants
-    uint32 public constant CALLBACK_GAS_LIMIT = 2100000;
+    uint32 public callbackGasLimit;
 
     uint256 public requestCount;
     uint256 public randomPackFees; // in TON (18 decimals)
     string public perfectCommonGemURI;
 
+    event RandomGemToBeTransferred(uint256 tokenId, address newOwner);
     event RandomGemTransferred(uint256 tokenId, address newOwner);
+    event CommonGemToBeMinted();
     event CommonGemMinted();
 
     modifier whenNotPaused() {
@@ -60,14 +67,21 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
         _;
     }
 
-    constructor(address coordinator, address _wston, address _ton, address _gemFactory, address _treasury, uint256 _randomPackFees) DRBConsumerBase(coordinator) {
+    constructor(
+        address coordinator,  
+        address _ton, 
+        address _gemFactory, 
+        address _treasury, 
+        uint256 _randomPackFees
+    ) DRBConsumerBase(coordinator) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         gemFactory = _gemFactory;
         treasury = _treasury;
-        wston = _wston;
         ton = _ton;
         drbcoordinator = coordinator;
         randomPackFees = _randomPackFees;
+        callbackGasLimit = 210000;
+        perfectCommonGemURI = "";
     }
 
 
@@ -81,21 +95,27 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
         randomPackFees = _randomPackFees;
     }
 
+    function setTreasury(address _treasury) external onlyOwner {
+        require(_treasury != address(0), "Invalid address");
+        treasury = _treasury;
+    }
+
     function setPerfectCommonGemURI(string memory _tokenURI) external onlyOwner {
         perfectCommonGemURI = _tokenURI;
     }
 
-    function getRandomGem() external payable whenNotPaused nonReentrant returns(bool) {
-        require(msg.sender != address(0), "address 0 not allowed");
-        // we require treasury to have at least enough funds to cover the value of a potential new Mythic gem
-        require(ITreasury(treasury).getWSTONBalance() >= IGemFactory(gemFactory).getGemsSupplyTotalValue() + IGemFactory(gemFactory).getMythicValue(), "no enough funds available in Treasury");
+    function setCallbackGasLimit(uint32 _callbackGasLimit) external onlyOwner {
+        callbackGasLimit = _callbackGasLimit;
+    }
 
+    function getRandomGem() external payable whenNotPaused nonReentrant returns(uint256) {
+        require(msg.sender != address(0), "address 0 not allowed");
         //users pays upfront fees
         //user must approve the contract for the fees amount before calling the function
         IERC20(ton).safeTransferFrom(msg.sender, address(this), randomPackFees);
         
         // defining the random value
-        uint256 requestId = requestRandomness(0,0,CALLBACK_GAS_LIMIT);        
+        uint256 requestId = requestRandomness(0,0,callbackGasLimit);        
 
         s_requests[requestId].requested = true;
         s_requests[requestId].requester = msg.sender;
@@ -105,7 +125,24 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
 
         IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
 
-        return true;
+        return requestId;
+    }
+
+    function collectRandomGem(uint256 requestId) external whenNotPaused {
+        require(s_requests[requestId].requester == msg.sender, "not the right requester");
+        require(s_requests[requestId].fulfilled == true, "random word is not fullfiled");
+
+        if(s_requests[requestId].chosenTokenId != 0) {
+
+            ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
+            emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
+
+        } else {
+            
+            s_requests[requestId].chosenTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], "");
+            ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId);
+            emit CommonGemMinted();
+        }
     }
 
     // Implement the abstract function from DRBConsumerBase
@@ -120,14 +157,10 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
             // same calculation as for the mining process
             uint256 modNbGemsAvailable = (randomNumber % gemCount);
             s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
-            // we send the token to the user
-            ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
-            emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
+            emit RandomGemToBeTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
         } else {
-            s_requests[requestId].chosenTokenId = IGemFactory(gemFactory).createGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], "");
-            
-            IGemFactory(gemFactory).transferFrom(address(this), s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
-            emit CommonGemMinted();
+            s_requests[requestId].chosenTokenId = 0;
+            emit CommonGemToBeMinted();
         }
     }
 
@@ -140,5 +173,25 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
     ) external pure override returns (bytes4) {
         return this.onERC721Received.selector;
     }
+
+    //---------------------------------------------------------------------------------------
+    //-----------------------------VIEW FUNCTIONS--------------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    function getTreasuryAddress() external view returns(address) {
+        return treasury;
+    }
+
+    function getGemFactoryAddress() external view returns(address) {
+        return gemFactory;
+    }   
+
+    function getDrbCoordinatorAddress() external view returns(address) {
+        return drbcoordinator;
+    }
+
+    function getTonAddress() external view returns(address) {
+        return ton;
+    }      
 
 }
