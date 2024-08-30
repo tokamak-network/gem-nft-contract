@@ -37,7 +37,7 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         uint256 _tonFeesRate,
         address _wston,
         address _ton
-    ) external {
+    ) external onlyOwner {
         require(_tonFeesRate < 100, "discount rate must be less than 100%");
         tonFeesRate = _tonFeesRate;
         gemFactory = _gemfactory;

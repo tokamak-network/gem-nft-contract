@@ -40,7 +40,6 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
 
     address internal gemFactory;
     address internal treasury;
-    address internal wston;
     address internal ton;
     address internal drbcoordinator;
 
@@ -82,6 +81,7 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
         drbcoordinator = coordinator;
         randomPackFees = _randomPackFees;
         callbackGasLimit = 210000;
+        perfectCommonGemURI = "";
     }
 
 
@@ -93,6 +93,11 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
     function setRandomPackFees(uint256 _randomPackFees) external onlyOwner {
         require(randomPackFees != 0, "fees must be greater than 0");
         randomPackFees = _randomPackFees;
+    }
+
+    function setTreasury(address _treasury) external onlyOwner {
+        require(_treasury != address(0), "Invalid address");
+        treasury = _treasury;
     }
 
     function setPerfectCommonGemURI(string memory _tokenURI) external onlyOwner {
@@ -128,9 +133,12 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
         require(s_requests[requestId].fulfilled == true, "random word is not fullfiled");
 
         if(s_requests[requestId].chosenTokenId != 0) {
-            emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
+
             ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
+            emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
+
         } else {
+            
             s_requests[requestId].chosenTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], "");
             ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId);
             emit CommonGemMinted();
@@ -165,5 +173,25 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
     ) external pure override returns (bytes4) {
         return this.onERC721Received.selector;
     }
+
+    //---------------------------------------------------------------------------------------
+    //-----------------------------VIEW FUNCTIONS--------------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    function getTreasuryAddress() external view returns(address) {
+        return treasury;
+    }
+
+    function getGemFactoryAddress() external view returns(address) {
+        return gemFactory;
+    }   
+
+    function getDrbCoordinatorAddress() external view returns(address) {
+        return drbcoordinator;
+    }
+
+    function getTonAddress() external view returns(address) {
+        return ton;
+    }      
 
 }

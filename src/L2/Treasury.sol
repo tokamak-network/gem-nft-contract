@@ -224,5 +224,9 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     function getGemFactoryAddress() public view returns (address) {
         return gemFactory;
     }
+
+    function getRandomPackAddress() public view returns(address) {
+        return randomPack;
+    }
     
 }

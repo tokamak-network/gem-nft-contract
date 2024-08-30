@@ -10,6 +10,8 @@ async function main() {
   const gemFactoryAddress = process.env.GEM_FACTORY;
   const marketPlaceAddress = process.env.MARKETPLACE;
   const treasuryAddress = process.env.TREASURY;
+  const swapPool = process.env.WSTON_SWAP_POOL;
+  const randomPack = process.env.RANDOM_PACK;
 
   if (!gemFactoryAddress || !marketPlaceAddress || !treasuryAddress) {
     throw new Error("Environment variables GEM_FACTORY, MARKETPLACE, and TREASURY must be set");
@@ -21,6 +23,7 @@ async function main() {
   const Treasury = await ethers.getContractAt("Treasury", treasuryAddress);
 
   // Call the initialize function
+  /*
   const tx = await GemFactory.initialize(
     process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
@@ -37,6 +40,7 @@ async function main() {
   await tx.wait();
 
   console.log("GemFactory initialized");
+  */
 
   await GemFactory.setGemsMiningPeriods(
     BigInt(1 * 7 * 24 * 60 * 60), // CommonGemsMiningPeriod (1 week)
@@ -86,6 +90,12 @@ async function main() {
 
   await Treasury.setMarketPlace(marketPlaceAddress);
   console.log("MarketPlace address set in Treasury");
+
+  await Treasury.setWstonSwapPool(swapPool);
+  console.log("Swap pool address set in Treasury");
+
+  await Treasury.setRandomPack(randomPack);
+  console.log("Random pack address set in Treasury");
 
   // Approve GemFactory to spend Treasury WSTON
   await Treasury.approveGemFactory();

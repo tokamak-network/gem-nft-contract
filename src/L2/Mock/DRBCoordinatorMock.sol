@@ -91,16 +91,16 @@ contract DRBCoordinatorMock is
             )
         );
 
-        // Call the consumer contract
-        bool success = _call(
-            s_valuesAtRound[requestId].consumer,
-            abi.encodeWithSelector(
-                DRBConsumerBase.rawFulfillRandomWords.selector,
-                requestId,
-                random
-            ),
-            s_requestInfo[requestId].callbackGasLimit
-        );
+// Call the consumer contract
+bool success = _call(
+    s_valuesAtRound[requestId].consumer,
+    abi.encodeWithSelector(
+        DRBConsumerBase.rawFulfillRandomWords.selector,
+        requestId,
+        random
+    ),
+    s_requestInfo[requestId].callbackGasLimit
+);
 
         // Update the state to mark the request as fulfilled
         s_randomWordsFullfill[requestId] = RandomWordsFullfill({
