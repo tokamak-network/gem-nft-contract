@@ -691,7 +691,7 @@ contract GemFactoryTest is L2BaseTest {
         GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
 
-        assert(randomRequest.fulfilled == true);
+        assert(randomRequest.fulfilled == false);
         assert(randomRequest.requested == true);
         assert(randomRequest.requester == user1);
 
@@ -699,7 +699,7 @@ contract GemFactoryTest is L2BaseTest {
 
     }
 
-    function testClaimMiningGem() public {
+    function testRandomBeaconMiningGem() public {
         vm.startPrank(owner);
 
         // Define GEM properties
@@ -765,9 +765,9 @@ contract GemFactoryTest is L2BaseTest {
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
 
         // call the pick function to get a random tokenid
-        GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 requestId = GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        drbCoordinatorMock.fulfillRandomness(requestId);
 
-        GemFactory(gemfactory).claimMinedGEM(newGemIds[0]);
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
         assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
         vm.stopPrank();
@@ -836,8 +836,9 @@ contract GemFactoryTest is L2BaseTest {
         GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
 
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
-        GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
-        GemFactory(gemfactory).claimMinedGEM(newGemIds[0]);
+        uint256 requestId = GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        drbCoordinatorMock.fulfillRandomness(requestId);
+
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
         assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
@@ -848,7 +849,7 @@ contract GemFactoryTest is L2BaseTest {
 
     }
 
-    function testStartAndClaimMiningTwice() public {
+    function testStartAndPickMiningTwice() public {
         vm.startPrank(owner);
 
         // Define GEM properties
@@ -912,8 +913,9 @@ contract GemFactoryTest is L2BaseTest {
         GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
 
         vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
-        GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
-        GemFactory(gemfactory).claimMinedGEM(newGemIds[0]);
+        uint256 firstRequestId = GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        drbCoordinatorMock.fulfillRandomness(firstRequestId);
+
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
         assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
 
@@ -924,8 +926,8 @@ contract GemFactoryTest is L2BaseTest {
 
         // move on until the mining period elapses
         vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
-        GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
-        GemFactory(gemfactory).claimMinedGEM(newGemIds[0]);
+        uint256 secondRequestId = GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        drbCoordinatorMock.fulfillRandomness(secondRequestId);
         GemFactoryStorage.RequestStatus memory secondRandomRequest = GemFactory(gemfactory).getRandomRequest(1);
         assert(GemFactory(gemfactory).ownerOf(secondRandomRequest.chosenTokenId) == user1);
         vm.stopPrank();

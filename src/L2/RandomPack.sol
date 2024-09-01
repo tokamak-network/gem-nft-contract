@@ -80,7 +80,7 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
         ton = _ton;
         drbcoordinator = coordinator;
         randomPackFees = _randomPackFees;
-        callbackGasLimit = 210000;
+        callbackGasLimit = 600000;
         perfectCommonGemURI = "";
     }
 
@@ -108,7 +108,7 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
         callbackGasLimit = _callbackGasLimit;
     }
 
-    function getRandomGem() external payable whenNotPaused nonReentrant returns(uint256) {
+    function requestRandomGem() external payable whenNotPaused nonReentrant returns(uint256) {
         require(msg.sender != address(0), "address 0 not allowed");
         //users pays upfront fees
         //user must approve the contract for the fees amount before calling the function
@@ -123,26 +123,9 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
             requestCount++;
         }
 
-        IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
+        //IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
 
         return requestId;
-    }
-
-    function collectRandomGem(uint256 requestId) external whenNotPaused {
-        require(s_requests[requestId].requester == msg.sender, "not the right requester");
-        require(s_requests[requestId].fulfilled == true, "random word is not fullfiled");
-
-        if(s_requests[requestId].chosenTokenId != 0) {
-
-            ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
-            emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
-
-        } else {
-            
-            s_requests[requestId].chosenTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], "");
-            ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId);
-            emit CommonGemMinted();
-        }
     }
 
     // Implement the abstract function from DRBConsumerBase
@@ -157,10 +140,14 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
             // same calculation as for the mining process
             uint256 modNbGemsAvailable = (randomNumber % gemCount);
             s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
-            emit RandomGemToBeTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
+            // transfer the gem from the treasury to the user.
+            ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
+            emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
         } else {
-            s_requests[requestId].chosenTokenId = 0;
-            emit CommonGemToBeMinted();
+            // if there is no gem available in the pool, we mint a new perfect common gem. note that it reverts if the treasury does not have enough WSTON.
+            s_requests[requestId].chosenTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], "");
+            ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId);
+            emit CommonGemMinted();
         }
     }
 

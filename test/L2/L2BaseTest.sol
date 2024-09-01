@@ -22,7 +22,7 @@ contract L2BaseTest is Test {
 
     uint256 public commonminingTry = 1;
     uint256 public rareminingTry = 2;
-    uint256 public uniqueminingTry = 1;
+    uint256 public uniqueminingTry = 1; // for testing purpose
     uint256 public epicminingTry = 10;
     uint256 public LegendaryminingTry = 15;
     uint256 public MythicminingTry = 20;
@@ -58,6 +58,7 @@ contract L2BaseTest is Test {
     address gemfactory;
     address treasury;
     address marketplace;
+    DRBCoordinatorMock drbCoordinatorMock;
     address randomPack;
     address wston;
     address ton;
@@ -76,8 +77,6 @@ contract L2BaseTest is Test {
     uint256 randomBeaconFees = 0.005 ether;
 
     event CommonGemMinted();
-    event CommonGemToBeMinted();
-
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
         user1 = payable(makeAddr("User1"));
@@ -109,7 +108,7 @@ contract L2BaseTest is Test {
         vm.deal(user1, 100 ether);
 
         // deploy DRBCoordinatorMock
-        DRBCoordinatorMock drbCoordinatorMock = new DRBCoordinatorMock(
+        drbCoordinatorMock = new DRBCoordinatorMock(
             avgL2GasUsed,
             premiumPercentage,
             flatFee,
