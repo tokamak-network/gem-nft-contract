@@ -92,6 +92,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage, Reentr
 
         // updating the staking index
         stakingIndex = updateStakingIndex();
+        emit StakingIndexUpdated(stakingIndex);
 
         // approve depositManager to spend on behalf of the WrappedStakedTON contract 
         IERC20(wton).approve(depositManager, _amount);
@@ -133,6 +134,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage, Reentr
 
         // updating the staking index
         stakingIndex = updateStakingIndex();
+        emit StakingIndexUpdated(stakingIndex);
 
         uint256 _amountToWithdraw;
         _amountToWithdraw = (_wstonAmount * stakingIndex) / DECIMALS;
@@ -226,8 +228,6 @@ contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage, Reentr
     function totalSupply() public view override returns(uint256) {
         return totalWstonMinted;
     }
-
-    function getStakingIndex() external view returns(uint256){return stakingIndex;}
 
     function getTotalWSTONSupply() external view returns(uint256) {return totalSupply();} 
 

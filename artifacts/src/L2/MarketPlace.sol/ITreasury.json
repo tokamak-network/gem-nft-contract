@@ -6,6 +6,40 @@
     {
       "inputs": [
         {
+          "internalType": "enum GemFactoryStorage.Rarity",
+          "name": "_rarity",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8[2]",
+          "name": "_color",
+          "type": "uint8[2]"
+        },
+        {
+          "internalType": "uint8[4]",
+          "name": "_quadrants",
+          "type": "uint8[4]"
+        },
+        {
+          "internalType": "string",
+          "name": "_tokenURI",
+          "type": "string"
+        }
+      ],
+      "name": "createPreminedGEM",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "_to",
           "type": "address"

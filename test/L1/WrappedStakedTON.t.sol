@@ -54,7 +54,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         IERC20(wton).approve(l1wrappedstakedton, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedton).depositAndGetWSTON(depositAmount);
 
-        uint256 stakingIndex = L1WrappedStakedTON(l1wrappedstakedton).getStakingIndex();
+        uint256 stakingIndex = L1WrappedStakedTON(l1wrappedstakedton).stakingIndex();
         uint256 wstonTotalSupply = L1WrappedStakedTON(l1wrappedstakedton).getTotalWSTONSupply();
         uint256 sWtonBalance = L1WrappedStakedTON(l1wrappedstakedton).stakeOf();
 
@@ -95,7 +95,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         vm.startPrank(user1);
         // Request withdrawal
         L1WrappedStakedTON(l1wrappedstakedton).requestWithdrawal(depositAmount);
-        uint256 stakingIndex = L1WrappedStakedTON(l1wrappedstakedton).getStakingIndex();
+        uint256 stakingIndex = L1WrappedStakedTON(l1wrappedstakedton).stakingIndex();
         uint256 expectedWTONAmount = (depositAmount * stakingIndex) / DECIMALS;
         L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedton).getLastWithdrawalRequest(user1);
 
@@ -136,7 +136,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         vm.roll(block.number + delay);
 
         uint256 wtonBalanceBefore = IERC20(wton).balanceOf(user1);
-        uint256 stakingIndexBefore = L1WrappedStakedTON(l1wrappedstakedton).getStakingIndex();
+        uint256 stakingIndexBefore = L1WrappedStakedTON(l1wrappedstakedton).stakingIndex();
 
         L1WrappedStakedTON(l1wrappedstakedton).claimWithdrawal();
         L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedton).getWithdrawalRequest(user1, 0);
@@ -145,7 +145,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         assert(request.processed == true);
 
         //checking the staking index is not affected
-        uint256 stakingIndexAfter = L1WrappedStakedTON(l1wrappedstakedton).getStakingIndex();
+        uint256 stakingIndexAfter = L1WrappedStakedTON(l1wrappedstakedton).stakingIndex();
         assert(stakingIndexAfter == stakingIndexBefore);
 
         vm.stopPrank();

@@ -24,7 +24,7 @@ contract WstonSwap is L2BaseTest {
     }
 
     function testSetUp() public view {
-        uint256 stakingIndex = WstonSwapPool(wstonSwapPool).getStakingIndex();
+        uint256 stakingIndex = WstonSwapPool(wstonSwapPool).stakingIndex();
         uint256 tonInitialReserve = WstonSwapPool(wstonSwapPool).getTonReserve();
         uint256 wstonInitialReserve = WstonSwapPool(wstonSwapPool).getWstonReserve();
 
@@ -250,6 +250,45 @@ contract WstonSwap is L2BaseTest {
         // ensureing user1 received associated fees in TON
         assert(user1tonBalanceAfter == user1tonBalanceBefore + tonFees);
 
+    }
+
+    function testRemoveLiquidityIfTONReserveIsEmpty() public {
+        testAddLiquidity();
+
+        uint256 user2tonBalanceBefore = IERC20(ton).balanceOf(user2);
+        uint256 user1tonBalanceBefore = IERC20(ton).balanceOf(user1);
+        uint256 user1wstonBalanceBefore = IERC20(wston).balanceOf(user1);
+
+        vm.startPrank(user2);
+        //user wants to swap 100 WSTON for TON
+        uint256 wstonAmount = 100*10**27;
+        IERC20(wston).approve(wstonSwapPool, wstonAmount);
+        WstonSwapPool(wstonSwapPool).swapWSTONforTON(wstonAmount);
+        vm.stopPrank();
+
+        // TON reserve = 0
+        // WSTON reserve = 200
+
+        uint256 user2tonBalanceAfter = IERC20(ton).balanceOf(user2);
+
+        uint256 user1tonBalanceAfter = IERC20(ton).balanceOf(user1);
+
+        vm.startPrank(user1);
+        uint256 user1Shares = WstonSwapPool(wstonSwapPool).getLpShares(user1);
+        uint256 wstonReserveBeforeRemovingLiquidity = WstonSwapPool(wstonSwapPool).getWstonReserve();
+        WstonSwapPool(wstonSwapPool).removeLiquidity(user1Shares);
+
+        vm.stopPrank();
+
+        uint256 user1wstonBalanceAfter = IERC20(wston).balanceOf(user1);
+
+        uint256 tonAmount = ((wstonAmount * 10**27) / 10**27) / (10**9);
+        uint256 tonFees = (tonAmount * feeRate) / 10000; // 0.3%
+        uint256 tonAmountTransferred = tonAmount - tonFees;
+
+        assert(user2tonBalanceAfter == user2tonBalanceBefore + tonAmountTransferred); 
+        assert(user1tonBalanceAfter == user1tonBalanceBefore + tonFees); 
+        assert(user1wstonBalanceAfter == user1wstonBalanceBefore + wstonReserveBeforeRemovingLiquidity);
     }
 
 }

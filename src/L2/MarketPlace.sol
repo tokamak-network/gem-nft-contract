@@ -209,8 +209,4 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         return gemFactory;
     }
 
-    function getStakingIndex() external view returns(uint256) {
-        return stakingIndex;
-    }
-
 }
