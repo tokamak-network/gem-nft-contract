@@ -33,6 +33,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     address internal wstonSwapPool;
 
     bool paused = false;
+    string public commonGemTokenUri;
 
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
@@ -68,6 +69,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         gemFactory = _gemFactory;
         wston = _wston;
         ton = _ton;
+        commonGemTokenUri = "";
     }
 
 
@@ -89,6 +91,10 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     function setWstonSwapPool(address _wstonSwapPool) external onlyOwner {
         require(_wstonSwapPool != address(0), "Invalid address");
         wstonSwapPool = _wstonSwapPool;
+    }
+
+    function setCommonGemTokenUri(string memory _tokenURI) external onlyOwner {
+        commonGemTokenUri = _tokenURI;
     }
 
     function approveGemFactory() external onlyOwner {
@@ -134,7 +140,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         uint8[2] memory _color, 
         uint8[4] memory _quadrants,  
         string memory _tokenURI
-    ) external onlyOwnerOrRandomPack returns (uint256) {
+    ) public onlyOwnerOrRandomPack returns (uint256) {
         // safety check for WSTON solvency
         require(
             getWSTONBalance() >= IGemFactory(gemFactory).getGemsSupplyTotalValue() + IGemFactory(gemFactory).getValueBasedOnRarity(_rarity),
@@ -153,7 +159,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         uint8[2][] memory _colors,
         uint8[4][] memory _quadrants, 
         string[] memory _tokenURIs
-    ) external onlyOwnerOrRandomPack returns (uint256[] memory) {
+    ) public onlyOwnerOrRandomPack returns (uint256[] memory) {
         uint256 sumOfNewPoolValues;
         for (uint256 i = 0; i < _rarities.length; i++) {
         sumOfNewPoolValues += IGemFactory(gemFactory).getValueBasedOnRarity(_rarities[i]);
@@ -195,6 +201,18 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
 
     function swapTONforWSTON(uint256 tonAmount) external onlyOwnerOrAdmin {
         IWstonSwapPool(wstonSwapPool).swapTONforWSTON(tonAmount);
+    }
+
+
+    function buyCommonGem() external whenNotPaused returns(uint256 newTokenId) {
+        // we fetch the value of a common gem
+        uint256 commonGemValue = IGemFactory(gemFactory).getCommonValue();
+        // the function caller pays a WSTON amount equal to the value of the GEM.
+        IERC20(wston).safeTransferFrom(msg.sender, address(this), commonGemValue);
+        // we mint from scratch a perfect common GEM 
+        newTokenId = createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], commonGemTokenUri);
+        // the new gem is transferred to the user
+        IGemFactory(gemFactory).transferFrom(address(this), msg.sender, newTokenId);
     }
 
     // onERC721Received function to accept ERC721 tokens

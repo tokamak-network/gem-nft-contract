@@ -32,7 +32,7 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
     constructor() Ownable(msg.sender) {}
 
     function initialize(
-        address treasury, 
+        address _treasury, 
         address _gemfactory,
         uint256 _tonFeesRate,
         address _wston,
@@ -41,9 +41,9 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         require(_tonFeesRate < 100, "discount rate must be less than 100%");
         tonFeesRate = _tonFeesRate;
         gemFactory = _gemfactory;
-        _treasury = treasury;
-        wston_ = _wston;
-        ton_ = _ton;
+        treasury = _treasury;
+        wston = _wston;
+        ton = _ton;
     }
 
     //---------------------------------------------------------------------------------------
@@ -142,12 +142,12 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         
         //  transfer TON or WSTON to the treasury contract 
         if (_paymentMethod) {     
-            IERC20(wston_).safeTransferFrom(_payer, seller, price);
+            IERC20(wston).safeTransferFrom(_payer, seller, price);
         } else {
             uint256 wtonPrice = (price * stakingIndex) / DECIMALS;
             uint256 totalprice = _toWAD(wtonPrice + ((wtonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
-            IERC20(ton_).safeTransferFrom(_payer, _treasury, totalprice); // 18 decimals
-            IERC20(wston_).safeTransferFrom(_treasury, seller, price); // 27 decimals
+            IERC20(ton).safeTransferFrom(_payer, treasury, totalprice); // 18 decimals
+            IERC20(wston).safeTransferFrom(treasury, seller, price); // 27 decimals
         }
 
         gemsForSale[_tokenId].isActive = false;

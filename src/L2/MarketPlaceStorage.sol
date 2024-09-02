@@ -15,9 +15,9 @@ contract MarketPlaceStorage {
     uint256 public tonFeesRate;
 
     address public gemFactory;
-    address public _treasury;
-    address public wston_;
-    address public ton_;
+    address public treasury;
+    address public wston;
+    address public ton;
 
     uint256 constant public TON_FEES_RATE_DIVIDER = 100;
     uint256 constant public DECIMALS = 10**27;
