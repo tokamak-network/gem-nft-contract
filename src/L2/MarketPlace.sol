@@ -5,6 +5,7 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import { MarketPlaceStorage } from "./MarketPlaceStorage.sol";
 import { GemFactory } from "./GemFactory.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -12,6 +13,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
+    function createPreminedGEM( 
+        GemFactoryStorage.Rarity _rarity,
+        uint8[2] memory _color, 
+        uint8[4] memory _quadrants,  
+        string memory _tokenURI
+    ) external returns (uint256);
 }
 
 
@@ -44,6 +51,11 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         treasury = _treasury;
         wston = _wston;
         ton = _ton;
+        commonGemTokenUri = "";
+    }
+
+    function setCommonGemTokenUri(string memory _tokenURI) external onlyOwner {
+        commonGemTokenUri = _tokenURI;
     }
 
     //---------------------------------------------------------------------------------------
@@ -95,6 +107,17 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         delete gemsForSale[_tokenId];
         emit GemRemovedFromSale(_tokenId);
 
+    }
+
+    function buyCommonGem() external whenNotPaused returns(uint256 newTokenId) {
+        // we fetch the value of a common gem
+        uint256 commonGemValue = IGemFactory(gemFactory).getCommonValue();
+        // the function caller pays a WSTON amount equal to the value of the GEM.
+        IERC20(wston).safeTransferFrom(msg.sender, treasury, commonGemValue);
+        // we mint from scratch a perfect common GEM 
+        newTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], commonGemTokenUri);
+        // the new gem is transferred to the user
+        ITreasury(treasury).transferTreasuryGEMto(msg.sender, newTokenId);
     }
 
     function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {

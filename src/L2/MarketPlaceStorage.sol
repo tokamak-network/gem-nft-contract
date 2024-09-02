@@ -19,6 +19,8 @@ contract MarketPlaceStorage {
     address public wston;
     address public ton;
 
+    string public commonGemTokenUri;
+
     uint256 constant public TON_FEES_RATE_DIVIDER = 100;
     uint256 constant public DECIMALS = 10**27;
 
