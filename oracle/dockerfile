@@ -1,0 +1,21 @@
+# Use the official Golang image as a base
+FROM golang:1.22-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the Go module files and download dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the Go source file
+COPY fetchStakingIndexTitan.go .
+
+# Build the Go application
+RUN go build -o fetchStakingIndexTitan fetchStakingIndexTitan.go
+
+# Expose the port your application runs on (if applicable)
+# EXPOSE 8080
+
+# Run the application
+CMD ["./fetchStakingIndexTitan"]
