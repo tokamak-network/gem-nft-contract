@@ -11,16 +11,17 @@ async function main() {
   const marketPlaceAddress = process.env.MARKETPLACE;
   const treasuryAddress = process.env.TREASURY;
   const swapPool = process.env.WSTON_SWAP_POOL;
-  const randomPack = process.env.RANDOM_PACK;
+  const randomPackAddress = process.env.RANDOM_PACK;
 
-  if (!gemFactoryAddress || !marketPlaceAddress || !treasuryAddress) {
-    throw new Error("Environment variables GEM_FACTORY, MARKETPLACE, and TREASURY must be set");
+  if (!gemFactoryAddress || !marketPlaceAddress || !treasuryAddress || !randomPackAddress) {
+    throw new Error("Environment variables GEM_FACTORY, MARKETPLACE, TREASURY and RANDOM_PACK must be set");
   }
 
   // Get contract instances
   const GemFactory = await ethers.getContractAt("GemFactory", gemFactoryAddress);
   const MarketPlace = await ethers.getContractAt("MarketPlace", marketPlaceAddress);
   const Treasury = await ethers.getContractAt("Treasury", treasuryAddress);
+  const RandomPack = await ethers.getContractAt("RandomPack", randomPackAddress)
 
   // Call the initialize function
   /*
@@ -88,13 +89,16 @@ async function main() {
   await GemFactory.setMarketPlaceAddress(marketPlaceAddress);
   console.log("MarketPlace address set in GemFactory");
 
+  await GemFactory.setTreasury(treasuryAddress);
+  console.log("teasury set in Gemfactory");
+
   await Treasury.setMarketPlace(marketPlaceAddress);
   console.log("MarketPlace address set in Treasury");
 
   await Treasury.setWstonSwapPool(swapPool);
   console.log("Swap pool address set in Treasury");
 
-  await Treasury.setRandomPack(randomPack);
+  await Treasury.setRandomPack(randomPackAddress);
   console.log("Random pack address set in Treasury");
 
   // Approve GemFactory to spend Treasury WSTON
@@ -111,6 +115,12 @@ async function main() {
 
   await Treasury.tonApproveWstonSwapPool();
   console.log("WstonSwapPool approved to spend Treasury TON")
+
+  await RandomPack.setGemFactory(gemFactoryAddress);
+  console.log("gemFactory set in RandomPack")
+
+  await RandomPack.setTreasury(treasuryAddress);
+  console.log("Treasury set in RandomPack")
 }
 
 main()

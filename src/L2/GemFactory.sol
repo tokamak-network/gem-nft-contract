@@ -180,6 +180,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         randomPack = _randomPack;
     }
 
+    function setTreasury(address _treasury) external onlyOwnerOrAdmin {
+        treasury = _treasury;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
@@ -479,7 +483,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         require(to != address(0));
         require(to != from);
         require(!Gems[tokenId].isLocked, "Gem is locked");
-        require(ownerOf(tokenId) == from, "sender is not the token owner");
 
         Gems.transferGem(GEMIndexToOwner, ownershipTokenCount, from, to, tokenId);
         super.transferFrom(from, to, tokenId);

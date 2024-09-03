@@ -46,4 +46,8 @@ interface IGemFactory {
 
     function getCommonValue() external view returns (uint256);
 
+    function getApproved(uint256 tokenId) external view returns (address);
+
+    function approve(address to, uint256 tokenId) external;
+
 }
