@@ -45,6 +45,11 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         _;
     }
 
+    modifier onlyMarketPlace() {
+        require(msg.sender == _marketplace, "caller is  not the marketplace contract");
+        _;
+    }
+
     modifier onlyOwnerOrRandomPackOrMarketplace() {
         require(
             msg.sender == randomPack ||
@@ -110,6 +115,14 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     function tonApproveWstonSwapPool() external onlyOwner {
         require(ton != address(0), "wston address not set");
         IERC20(ton).approve(wstonSwapPool, type(uint256).max);
+    }
+
+    function approveGem(address operator, uint256 _tokenId) external onlyOwner {
+        IGemFactory(gemFactory).approve(operator, _tokenId);
+    }
+
+    function approveWstonForMarketplace(uint256 amount) external onlyMarketPlace {
+        IERC20(wston).approve(_marketplace, amount);
     }
 
     function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrRandomPackOrOwner nonReentrant returns(bool) {
@@ -179,6 +192,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     }
 
     function putGemForSale(uint256 _tokenId, uint256 _price) external onlyOwnerOrAdmin {
+        IGemFactory(gemFactory).approve(_marketplace, _tokenId);
         IMarketPlace(_marketplace).putGemForSale(_tokenId, _price);
     }
 

@@ -41,6 +41,7 @@ contract MarketPlaceTest is L2BaseTest {
         // Verify token existence before putting it for sale
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
 
+        GemFactory(gemfactory).approve(address(marketplace), newGemId);
         MarketPlace(marketplace).putGemForSale(newGemId, gemPrice);
         assert(GemFactory(gemfactory).isTokenLocked(newGemId) == true);
 
@@ -68,7 +69,7 @@ contract MarketPlaceTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
         uint256 gemPrice = 1500 * 10 ** 27;
-
+        Treasury(treasury).approveGem(address(marketplace), newGemId);
         Treasury(treasury).putGemForSale(newGemId, gemPrice);
         assert(GemFactory(gemfactory).isTokenLocked(newGemId) == true);
         vm.stopPrank();
@@ -91,6 +92,7 @@ contract MarketPlaceTest is L2BaseTest {
             quadrants,
             tokenURI
         );
+        Treasury(treasury).approveGem(address(marketplace), newGemId);
 
         vm.stopPrank();
         vm.startPrank(user1);
@@ -155,6 +157,7 @@ contract MarketPlaceTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
 
         GemFactory(gemfactory).approve(address(marketplace), newGemIds[0]);
+        GemFactory(gemfactory).approve(address(marketplace), newGemIds[1]);
         MarketPlace(marketplace).putGemListForSale(newGemIds, prices);
         assert(GemFactory(gemfactory).isTokenLocked(newGemIds[0]) == true);
         assert(GemFactory(gemfactory).isTokenLocked(newGemIds[1]) == true);
@@ -198,6 +201,9 @@ contract MarketPlaceTest is L2BaseTest {
         uint256[] memory prices = new uint256[](2);
         prices[0] = 20 * 10 ** 27; // 10 WSTON
         prices[1] = 300 * 10 ** 27; 
+
+        Treasury(treasury).approveGem(address(marketplace), newGemIds[0]);
+        Treasury(treasury).approveGem(address(marketplace), newGemIds[1]);
 
         Treasury(treasury).putGemListForSale(newGemIds, prices);
         assert(GemFactory(gemfactory).isTokenLocked(newGemIds[0]) == true);
@@ -250,6 +256,58 @@ contract MarketPlaceTest is L2BaseTest {
         uint256 balanceBefore = IERC20(wston).balanceOf(user1);
 
         MarketPlace(marketplace).buyGem(newGemId, false);
+        uint256 balanceAfter = IERC20(wston).balanceOf(user1);
+
+        assert(balanceAfter == balanceBefore + gemPrice); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
+        
+        assert(GemFactory(gemfactory).ownerOf(newGemId) == user2); // GEM was correctly trransferred
+        vm.stopPrank();
+    }
+
+    function testBuyGemInWston() public {
+        vm.startPrank(owner);
+        
+        // Define GEM properties
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
+        uint8[2] memory color = [0,0];
+        uint8[4] memory quadrants = [1, 1, 1, 2];
+        string memory tokenURI = "https://example.com/token/1";
+
+        // Call createGEM function from the Treasury contract
+        uint256 newGemId = Treasury(treasury).createPreminedGEM(
+            rarity,
+            color,
+            quadrants,
+            tokenURI
+        );
+
+        // Verify GEM minting
+        assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
+
+        // Transfer the GEM to user1
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        uint256 gemPrice = 200 * 10 ** 27;
+
+        // Verify token existence before putting it for sale
+        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
+
+        GemFactory(gemfactory).approve(address(marketplace), newGemId);
+        MarketPlace(marketplace).putGemForSale(newGemId, gemPrice);
+
+        vm.stopPrank();
+
+        vm.startPrank(user2);
+        IERC20(wston).approve(address(marketplace), type(uint256).max);
+        IERC20(ton).approve(address(marketplace), type(uint256).max);
+
+        uint256 balanceBefore = IERC20(wston).balanceOf(user1);
+
+        MarketPlace(marketplace).buyGem(newGemId, true);
         uint256 balanceAfter = IERC20(wston).balanceOf(user1);
 
         assert(balanceAfter == balanceBefore + gemPrice); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
@@ -366,5 +424,59 @@ contract MarketPlaceTest is L2BaseTest {
         assert(wstonTreasuryBalanceAfter == wstonTreasuryBalanceBefore + CommonGemsValue);
 
         vm.stopPrank;
+    }
+
+    function testBuyGemWithNewStakingIndex() public {
+         vm.startPrank(owner);
+        
+        // Define GEM properties
+        GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
+        uint8[2] memory color = [0,0];
+        uint8[4] memory quadrants = [1, 1, 1, 2];
+        string memory tokenURI = "https://example.com/token/1";
+
+        // Call createGEM function from the Treasury contract
+        uint256 newGemId = Treasury(treasury).createPreminedGEM(
+            rarity,
+            color,
+            quadrants,
+            tokenURI
+        );
+
+        // Verify GEM minting
+        assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
+
+        // Transfer the GEM to user1
+        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+
+        MarketPlace(marketplace).setStakingIndex(1063100206614753047688069608);
+
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+
+        uint256 gemPrice = 200 * 10 ** 27;
+
+        // Verify token existence before putting it for sale
+        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
+
+        GemFactory(gemfactory).approve(address(marketplace), newGemId);
+        MarketPlace(marketplace).putGemForSale(newGemId, gemPrice);
+
+        vm.stopPrank();
+
+        vm.startPrank(user2);
+        IERC20(wston).approve(address(marketplace), type(uint256).max);
+        IERC20(ton).approve(address(marketplace), type(uint256).max);
+
+        uint256 balanceBefore = IERC20(wston).balanceOf(user1);
+
+        MarketPlace(marketplace).buyGem(newGemId, false);
+        uint256 balanceAfter = IERC20(wston).balanceOf(user1);
+
+        assert(balanceAfter == balanceBefore + gemPrice); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
+        
+        assert(GemFactory(gemfactory).ownerOf(newGemId) == user2); // GEM was correctly trransferred
+        vm.stopPrank();
     }
 }

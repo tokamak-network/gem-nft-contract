@@ -7,7 +7,7 @@ import { GemFactory } from "../../src/L2/GemFactory.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
 import { RandomPack } from "../../src/L2/RandomPack.sol";
-import { L2StandardERC20 } from "../../src/L2/Mock/L2StandardERC20.sol";
+import { L2StandardERC20 } from "../../src/L2/L2StandardERC20.sol";
 import { MockTON } from "../../src/L2/Mock/MockTON.sol";
 import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";

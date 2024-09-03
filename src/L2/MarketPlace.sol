@@ -19,6 +19,7 @@ interface ITreasury {
         uint8[4] memory _quadrants,  
         string memory _tokenURI
     ) external returns (uint256);
+    function approveWstonForMarketplace(uint256 amount) external;
 }
 
 
@@ -77,6 +78,7 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
      * @param _price price asked for the transaction
      */
     function putGemForSale(uint256 _tokenId, uint256 _price) external whenNotPaused {
+        require(IGemFactory(gemFactory).getApproved(_tokenId) == address(this), "the NFT is not approved");
         require(_putGemForSale(_tokenId, _price), "failed to put gem for sale");
     }
 
@@ -90,6 +92,7 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         require(tokenIds.length == prices.length, "wrong length");
 
         for (uint256 i = 0; i < tokenIds.length; i++){
+            require(IGemFactory(gemFactory).getApproved(tokenIds[i]) == address(this), "the NFT is not approved");
             require(_putGemForSale(tokenIds[i], prices[i]), "failed to put gem for sale");
         }
     }
@@ -165,12 +168,15 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         
         //  transfer TON or WSTON to the treasury contract 
         if (_paymentMethod) {     
-            IERC20(wston).safeTransferFrom(_payer, seller, price);
+            IERC20(wston).transferFrom(_payer, seller, price);
         } else {
             uint256 wtonPrice = (price * stakingIndex) / DECIMALS;
             uint256 totalprice = _toWAD(wtonPrice + ((wtonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
-            IERC20(ton).safeTransferFrom(_payer, treasury, totalprice); // 18 decimals
-            IERC20(wston).safeTransferFrom(treasury, seller, price); // 27 decimals
+            IERC20(ton).transferFrom(_payer, treasury, totalprice); // 18 decimals
+            if (seller != treasury) {
+                ITreasury(treasury).approveWstonForMarketplace(price);
+                IERC20(wston).transferFrom(treasury, seller, price); // 27 decimals
+            }
         }
 
         gemsForSale[_tokenId].isActive = false;
