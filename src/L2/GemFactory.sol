@@ -272,14 +272,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         require(GEMIndexToOwner[_tokenId] == msg.sender, "not GEM owner");
         require(Gems[_tokenId].isLocked == true, "Gems is not mining");
         require(userMiningToken[msg.sender][_tokenId] == true, "user is not mining this Gem");
+        require(Gems[_tokenId].randomRequestId == 0, "already called pickMinedGEM");
 
         Gems.cancelMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
         return true;
     }
 
-    function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (bool) {
+    function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (uint256) {
         require(ownerOf(_tokenId) == msg.sender || isAdmin(msg.sender) == true, "not GEM owner or not admin");
-        require(block.timestamp > userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
+        require(block.timestamp >= userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
         require(Gems[_tokenId].isLocked == true, "Gems is not mining");
         require(userMiningToken[ownerOf(_tokenId)][_tokenId] == true, "gem not mining");
 
@@ -293,39 +294,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             requestCount++;
         }
 
-        IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
-        Gems[_tokenId].randomRequestId = requestId;
-
-        emit RandomGemSelected(s_requests[requestId].chosenTokenId, Gems[_tokenId].randomRequestId);
-        return true;
-    }
-
-    function claimMinedGEM(uint256 _tokenId) external whenNotPaused returns (bool) {
-        require(ownerOf(_tokenId) == msg.sender, "not GEM owner");
-        require(userMiningToken[msg.sender][_tokenId] == true, "user is not mining this Gem");
-        require(Gems[_tokenId].isLocked == true, "Gems is not mining");
-
-        uint256 requestId = Gems[_tokenId].randomRequestId;
-        require(s_requests[requestId].fulfilled == true, "you need to call pickMinedGEM function first");
-
-        Gems.claimMinedGem(userMiningToken, userMiningStartTime, _tokenId);
-
-        uint256 newTokenId = s_requests[requestId].chosenTokenId;
-
-        if (newTokenId != 0) {
-            Gems[newTokenId].isLocked = false;
-
-            require(ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId), "failed to transfer token");
-
-            Gems[_tokenId].randomRequestId = 0;
-            Gems[_tokenId].gemCooldownPeriod = block.timestamp + TransferLibrary.getCooldownPeriod(Gems[_tokenId].rarity);
-
-            emit GemMiningClaimed(_tokenId, msg.sender);
-        } else {
-            emit NoGemAvailable(_tokenId);
-        }
-
-        return true;
+        emit RandomGemRequested(_tokenId, Gems[_tokenId].randomRequestId);
+        return requestId;
     }
 
     function meltGEM(uint256 _tokenId) external whenNotPaused {
@@ -694,6 +664,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         require(s_requests[requestId].requested, "Request not made");
         s_requests[requestId].fulfilled = true;
         s_requests[requestId].randomWord = randomNumber;
+        uint256 _tokenId = s_requests[requestId].tokenId;
 
         uint8[4] memory quadrants = Gems[s_requests[requestId].tokenId].quadrants;
         
@@ -703,9 +674,21 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         if(gemCount > 0) {
             uint256 modNbGemsAvailable = (randomNumber % gemCount);
             s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
-            Gems[tokenIds[modNbGemsAvailable]].isLocked = true;
+
+            // reset storage variable of the initial GEM
+            Gems[_tokenId].isLocked = false;
+            Gems[_tokenId].randomRequestId = 0;
+            Gems[_tokenId].gemCooldownPeriod = block.timestamp + TransferLibrary.getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
+
+            delete userMiningToken[ownerOf(_tokenId)][_tokenId];
+            delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
+
+            require(ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId), "failed to transfer token");
+
+            emit GemMiningClaimed(_tokenId, msg.sender);
         } else {
             s_requests[requestId].chosenTokenId = 0;
+            emit NoGemAvailable(_tokenId);
         }
     }
 

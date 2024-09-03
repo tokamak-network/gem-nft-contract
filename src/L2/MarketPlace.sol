@@ -5,6 +5,7 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import { MarketPlaceStorage } from "./MarketPlaceStorage.sol";
 import { GemFactory } from "./GemFactory.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -12,6 +13,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
+    function createPreminedGEM( 
+        GemFactoryStorage.Rarity _rarity,
+        uint8[2] memory _color, 
+        uint8[4] memory _quadrants,  
+        string memory _tokenURI
+    ) external returns (uint256);
 }
 
 
@@ -32,7 +39,7 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
     constructor() Ownable(msg.sender) {}
 
     function initialize(
-        address treasury, 
+        address _treasury, 
         address _gemfactory,
         uint256 _tonFeesRate,
         address _wston,
@@ -41,9 +48,14 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         require(_tonFeesRate < 100, "discount rate must be less than 100%");
         tonFeesRate = _tonFeesRate;
         gemFactory = _gemfactory;
-        _treasury = treasury;
-        wston_ = _wston;
-        ton_ = _ton;
+        treasury = _treasury;
+        wston = _wston;
+        ton = _ton;
+        commonGemTokenUri = "";
+    }
+
+    function setCommonGemTokenUri(string memory _tokenURI) external onlyOwner {
+        commonGemTokenUri = _tokenURI;
     }
 
     //---------------------------------------------------------------------------------------
@@ -97,6 +109,17 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
 
     }
 
+    function buyCommonGem() external whenNotPaused returns(uint256 newTokenId) {
+        // we fetch the value of a common gem
+        uint256 commonGemValue = IGemFactory(gemFactory).getCommonValue();
+        // the function caller pays a WSTON amount equal to the value of the GEM.
+        IERC20(wston).safeTransferFrom(msg.sender, treasury, commonGemValue);
+        // we mint from scratch a perfect common GEM 
+        newTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], commonGemTokenUri);
+        // the new gem is transferred to the user
+        ITreasury(treasury).transferTreasuryGEMto(msg.sender, newTokenId);
+    }
+
     function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {
         require(_tonFeesRate < 100, "discount rate must be less than 100%");
         tonFeesRate = _tonFeesRate;
@@ -142,12 +165,12 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
         
         //  transfer TON or WSTON to the treasury contract 
         if (_paymentMethod) {     
-            IERC20(wston_).safeTransferFrom(_payer, seller, price);
+            IERC20(wston).safeTransferFrom(_payer, seller, price);
         } else {
             uint256 wtonPrice = (price * stakingIndex) / DECIMALS;
             uint256 totalprice = _toWAD(wtonPrice + ((wtonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
-            IERC20(ton_).safeTransferFrom(_payer, _treasury, totalprice); // 18 decimals
-            IERC20(wston_).safeTransferFrom(_treasury, seller, price); // 27 decimals
+            IERC20(ton).safeTransferFrom(_payer, treasury, totalprice); // 18 decimals
+            IERC20(wston).safeTransferFrom(treasury, seller, price); // 27 decimals
         }
 
         gemsForSale[_tokenId].isActive = false;
@@ -184,10 +207,6 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
 
     function getGemFactory() external view returns (address) {
         return gemFactory;
-    }
-
-    function getStakingIndex() external view returns(uint256) {
-        return stakingIndex;
     }
 
 }

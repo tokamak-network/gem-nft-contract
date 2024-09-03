@@ -132,9 +132,13 @@ contract WstonSwapPool is Ownable, ReentrancyGuard {
     }
 
     function updateStakingIndex(uint256 newIndex) external onlyOwner {
-        require(newIndex >= stakingIndex, "cannot decrease the staking index");
+        require(newIndex >= 10**27, "staking index cannot be less than 1");
         stakingIndex = newIndex;
         emit StakingIndexUpdated(newIndex);
+    }
+
+    function updateFeeRate(uint256 _feeRate) external onlyOwner {
+        feeRate = _feeRate;
     }
 
     function _safeTransferFrom(IERC20 token, address sender, address recipient, uint256 amount) private {
@@ -176,11 +180,6 @@ contract WstonSwapPool is Ownable, ReentrancyGuard {
 
     function getTonReserve() external view returns(uint256) {
         return tonReserve;
-    }
-
-    function getStakingIndex() external view returns (uint256) {
-        // Assuming the staking index is the multiplier for WSTON value
-        return stakingIndex;
     }
 
     function getLpShares(address lp) external view returns (uint256) {

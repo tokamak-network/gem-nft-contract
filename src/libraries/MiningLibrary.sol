@@ -28,15 +28,4 @@ library MiningLibrary {
         delete userMiningStartTime[owner][tokenId];
         Gems[tokenId].isLocked = false;
     }
-
-    function claimMinedGem(
-        GemFactoryStorage.Gem[] storage Gems,
-        mapping(address => mapping(uint256 => bool)) storage userMiningToken,
-        mapping(address => mapping(uint256 => uint256)) storage userMiningStartTime,
-        uint256 tokenId
-    ) internal {
-        delete userMiningToken[msg.sender][tokenId];
-        delete userMiningStartTime[msg.sender][tokenId];
-        Gems[tokenId].isLocked = false;
-    }
 }

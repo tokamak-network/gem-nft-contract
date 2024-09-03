@@ -44,4 +44,6 @@ interface IGemFactory {
 
     function getValueBasedOnRarity(GemFactoryStorage.Rarity _rarity) external view returns(uint256 value);
 
+    function getCommonValue() external view returns (uint256);
+
 }
