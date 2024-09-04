@@ -13,8 +13,8 @@ async function main() {
   const Wston = await ethers.getContractAt("L2StandardERC20", wstonAddress);
 
   await Wston.approve(
-    "0x06aD364247B4F8e491Ce401B6DD7552B8eD289dE",
-    4000000000000000000000000000000n
+    "0x9dbFDA1De782a918E8d8e9c355da830A5ee70d6E",
+    1000000000000000000000000000000n
   );
   console.log("approve is sucessful");
 
