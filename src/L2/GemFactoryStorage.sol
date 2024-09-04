@@ -36,9 +36,9 @@ contract GemFactoryStorage {
     }
 
     Gem[] public Gems;
-    mapping(uint8 => string) public customColors;
-    uint8 public customColorsCount;
-    string[] public colors;
+    mapping(uint8 => mapping(uint8 => string)) public colorName;
+    uint8 public colorsCount;
+    uint8[2][] public colors;
 
     mapping(uint8 => string) public customBackgroundColors;
     uint8 public customBackgroundColorsCount;
@@ -92,9 +92,6 @@ contract GemFactoryStorage {
     // past random requests Id.
     uint256[] public requestIds;
     uint256 public requestCount;
-
-    // color storage
-    uint8 public numberOfSolidColors;
 
     // contract addresses
     address public wston;
