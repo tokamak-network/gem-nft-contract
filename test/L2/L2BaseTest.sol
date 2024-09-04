@@ -202,6 +202,21 @@ contract L2BaseTest is Test {
         Treasury(treasury).setRandomPack(randomPack);
         GemFactory(gemfactory).setRandomPack(randomPack);
 
+        // we set up the list of colors available for the GEM
+        GemFactory(gemfactory).addColor("Ruby",0,0);
+        GemFactory(gemfactory).addColor("Ruby/Amber",0,1);
+        GemFactory(gemfactory).addColor("Amber",1,1);
+        GemFactory(gemfactory).addColor("Topaz",2,2);
+        GemFactory(gemfactory).addColor("Topaz/Emerald",2,3);
+        GemFactory(gemfactory).addColor("Emerald/Topaz",3,2);
+        GemFactory(gemfactory).addColor("Emerald",3,3);
+        GemFactory(gemfactory).addColor("Emerald/Amber",3,1);
+        GemFactory(gemfactory).addColor("Turquoise",4,4);
+        GemFactory(gemfactory).addColor("Sapphire",5,5);
+        GemFactory(gemfactory).addColor("Amethyst",6,6);
+        GemFactory(gemfactory).addColor("Amethyst/Amber",6,1);
+        GemFactory(gemfactory).addColor("Garnet",7,7);
+
         vm.stopPrank();
     }
 

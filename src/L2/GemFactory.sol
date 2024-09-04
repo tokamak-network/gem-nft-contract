@@ -340,6 +340,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint8[4] memory _quadrants,
         string memory _tokenURI
     ) public onlyTreasury whenNotPaused returns (uint256) {
+        
+        require(colorExists(_color[0], _color[1]), "This color does not exist");
+        
         uint256 _gemCooldownPeriod;
         uint256 _miningPeriod;
         uint256 _value;
@@ -541,12 +544,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         Gems[_tokenId].isLocked = _isLocked;
     }
 
-    function addColor(string memory _color) external onlyOwnerOrAdmin {
-        customColors[customColorsCount] = _color;
-        colors.push(_color);
-        customColorsCount++;
+    function addColor(string memory _colorName, uint8 _index1, uint8 _index2) external onlyOwnerOrAdmin {
+        colorName[_index1][_index2] = _colorName;
+        colors.push([_index1, _index2]);
+        colorsCount++;
 
-        emit ColorAdded(customColorsCount, _color);
+        emit ColorAdded(colorsCount, _colorName);
 
     }
 
@@ -559,18 +562,19 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     }
 
-    function setNumberOfSolidColors(uint8 _numberOfSolidColors) external onlyOwnerOrAdmin {
-        numberOfSolidColors = _numberOfSolidColors;
-    }
-
     function setTokenURI(uint256 tokenId, string memory _tokenURI) external {
         _setTokenURI(tokenId, _tokenURI);
     }
 
-
     //---------------------------------------------------------------------------------------
     //--------------------------PRIVATE/INERNAL FUNCTIONS------------------------------------
     //---------------------------------------------------------------------------------------
+
+    // View function to check if a color exists
+    function colorExists(uint8 _index1, uint8 _index2) internal view returns (bool) {
+        // Check if the color name is not an empty string
+        return bytes(colorName[_index1][_index2]).length > 0;
+    }
 
     function _checkColor(uint256 tokenA, uint256 tokenB, uint8 _color_0, uint8 _color_1) internal view returns(bool colorValidated) {
         colorValidated = false;
@@ -817,9 +821,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return s_requests[_requestId];
     }
 
-    function getCustomColor(uint8 _index) public view returns (string memory) {
-        require(_index < customColorsCount, "Index out of bounds");
-        return customColors[_index];
+    function getColorName(uint8 _index1, uint8 _index2) public view returns (string memory) {
+            return colorName[_index1][_index2];
     }
 
     // Function to count the number of Gems from treasury where quadrants < given quadrant and return their tokenIds

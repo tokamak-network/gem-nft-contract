@@ -6,67 +6,64 @@
 
 ### Description
 
-The project is an NFT collection and marketplace featuring Gems, which rewards users with monetary value through staking TON. Users interact with a game-like interface to mine new Gems, as well as to buy, sell, and burn them. Additionally, users can forge two Gems to obtain a rarer Gem. To get WSTON tokens, users can either deposit WTON on L1 => receive WSTON on the same layer or use the Wston sapper on L2. Users utilize L2 WSTON to buy GEMs at a discount price. 
+The GEM NFTs project is a sophisticated NFT collection and marketplace centered around Gems. This platform allows users to earn monetary rewards by staking TON tokens. Users engage with a gamified interface to mine new Gems, as well as to buy, sell, and burn them. Additionally, users have the ability to forge two Gems to create a rarer Gem. To acquire WSTON tokens, users can either deposit WTON on Layer 1 (L1) to receive WSTON on the same layer or utilize the WSTON swapper on Layer 2 (L2). L2 WSTON can be used to purchase GEMs at a discounted rate.
 
-When a user claim for a mined GEM, the token is assigned randomly using the VDF verifier implementation. 
-The RandomPack allows user to get a random GEM in exchange of an upfront fee. the probability is equaly distributed.
+When a user claims a mined GEM, the token is assigned randomly using the VDF random beacon. The RandomPack feature allows users to obtain a random GEM in exchange for an upfront fee, with the probability being equally distributed.
 
 GEMs have the following specifications:
-- value: each gem has a specific value based on the rarity. (Example: Common Gems inherrits from 10 WSTON).
-- rarity: there is 6 different types of rarity => Common, Rare, Unique, Epic, Legendary & Mythic.
-- quadrants: each gem is defined by quadrants number. For exemple, [1, 1, 1, 1] is associated to a perfect common gem, [2, 2, 2, 2] perfect rare gem etc...
-[2, 1, 1, 1] would be a gem that has the top left part of the gem associated to a rare gem and the 3 other parts associated to a common gem. Please note that the value for perfect and non-perfect gems is the same (value depends on the global rarity only).
-- color: the color could be either solid (ex: solid Turquoise) or gradient (ex: semi Amber/ semi Ruby). The color is defined by ```uint256 color[2]``` variable.
-- cooldown period: each GEM holder must wait until the cooldown period elapses before being able to mine this particular GEM. 
-- mining period: each GEM has a particular mining period for which the holder must wait until it elapse whenever the mining process has started.
-- mining try: Gems cannot be mined infinitely. When the mining try is equal to 0, it means that the GEM cannot mine anymore.
-- randomRequest: it is used to track the random token that is associated to the GEM whenever the mining process ends. 
-- tokenURI: holds the IPFS address of the metadata file.
+- Value: Each Gem has a specific value based on its rarity. For example, a Common Gem inherits a value of 10 WSTON.
+- Rarity: There are six different rarity levels: Common, Rare, Unique, Epic, Legendary, and Mythic.
+- Quadrants: Each Gem is defined by a set of quadrant numbers. For example, [1, 1, 1, 1] represents a perfect Common Gem, while [2, 2, 2, 2] represents a perfect Rare Gem. A Gem with [2, 1, 1, 1] would have its top-left quadrant associated with a Rare Gem and the other three quadrants associated with a Common Gem. Note that the value for perfect and non-perfect Gems remains the same, as it depends solely on the overall rarity.
+- Color: The color of a Gem can be either solid (e.g., solid Turquoise) or gradient (e.g., semi-Amber/semi-Ruby). The color is defined by a ```uint256 color[2]``` variable.
+- Cooldown Period: Each GEM holder must wait until the cooldown period elapses before being able to mine that particular GEM.
+- Mining Period: Each GEM has a specific mining period, which the holder must wait for before the mining process can be completed.
+- Mining Attempts: Gems cannot be mined indefinitely. Once the mining attempts reach zero, the GEM can no longer be mined.
+- Random Request: This tracks the random token associated with the GEM when the mining process concludes.
+- Token URI: This holds the IPFS address of the metadata file.
 
 
 ### Contracts
 
 #### MarketPlace (L2)
 
-the marketplace is where users put their GEMs for sale at desired prices (in WSTON). A user showing interests for a particular gem will be able to either pay in L2 TON or in L2 WSTON (at a discount price). Whenever the transfer passes, the NFT is sent to the new owner. Users can use ```putGemListForSale```function to put multiple GEMs for sale using one transaction only. GEM holders don't transfer the ownership of the NFT when calling ```putGemForSale```function. Instead, the GEM's sanity check ```isLocked``` is set to true and it is not possible to transfer it until the GEM is not bought or removed from sale.
+The marketplace allows users to list their GEMs for sale at desired prices in WSTON. Interested buyers can pay in L2 TON or L2 WSTON (at a discounted price). Upon successful transfer, the NFT is sent to the new owner. Users can list multiple GEMs for sale in a single transaction using the ```putGemListForSale``` function. Ownership of the NFT is not transferred when calling the ```putGemForSale``` function; instead, the GEM's ```isLocked``` status is set to true, preventing its transfer until it is either purchased or removed from sale.
 
 #### Treasury (L2)
 
-The treasury is where pools of premined GEMs are created (by the admin only). This contract aims to handle every transaction that is made buy users (locks GEMs associated value, keeps TON tokens in reserve). The admin can put premined gem for sale onto the marketplace or use the swapper to get WSTON. note that it is not possible to create new GEM if the WSTON collateral amount does not cover the new GEM's value.
+The Treasury contract is responsible for creating pools of pre-mined GEMs (admin-only). It handles all transactions made by users, including locking GEM values and holding TON/WSTON tokens in reserve. The admin can list pre-mined GEMs for sale on the marketplace or use the swapper to obtain WSTON. Note that new GEMs cannot be created if the WSTON collateral does not cover the new GEM's value.
 
 #### GemFactory (L2)
 
 This contract carries the logic behind GEMs Minting, Forging, mining and melting.
 - Minting: there is two cases where NFTs are minted: 
-    - If a new gem is forged, we burn the GEMs that were used to forge and we mint a brand new NFT that inherrits from the WSTON value of the burnt GEMs (following a precise valuation model shown below). 
-    - Whenever the admin calls ```createGEMPool``` or ```createGEM``` from the ```Treasury``` contract with specific GEMs parammeters.
+    - When a new Gem is forged, the GEMs used in the process are burned, and a new NFT is minted, inheriting the WSTON value of the burned GEMs (following a specific valuation model).
+    - When the admin calls createGEMPool or createGEM from the Treasury contract with specific GEM parameters. The color must exist in the colors array; otherwise, the admin must add the color using the addColor function.
 - Forging: any user can forge their GEMs if it respects specific rules:
-    - two gems must be forged to get one rare, three rare for one unique, four unique for one epic, five epics for one legendary and six legendaries for one mythic.
-    - the user can choose the color he wants to get for his new token. However, it must respect the following rules on at least 2 of the token forged: 
+    - Two Gems must be forged to obtain one Rare Gem, three Rares for one Unique, four Uniques for one Epic, five Epics for one Legendary, and six Legendaries for one Mythic.
+    - Users can choose the color of the new token, but it must adhere to specific rules based on the colors of at least two of the tokens forged: 
         - two same solids (ex: [1,1] + [1,1]): the new token color can be [1,1].
         - two different solids (ex: [1,1] + [2,2]): the new token color can be either [1,2] or [2,1].
         - one solid and one gradient & one gradient color is the same as the solid color (ex: [1,1] + [2,1]): the new token color can be [2,1].
         - one solid and one gradient & solid different from both gradients (ex: [1,1] + [3,2]): the new token color can be either [3,1] or [2,1] or [1,3] or [1,2].
         - two same gradients (ex: [1,2] + [1+2]): the new color can be either [1,2] or [2,1].
         - two different gradients (ex: [1,2] + [3,4]): the new color can be either [1,3] or [1,4] or [2,3] or [2,4] or [3,1] or [4,1] or [3,2] or [4,2].
-    - quadrants calculation is the following : each quadrants of each gem are added up. the sum is even, the new gem quadrant will be equal of the next rarity base quadrant number. If the sum is odd, we +1 the next rarity quadrant base quandrant number. Exemple [1,2,2,1] + [2,2,1,1] => [3,4,3,2] 3 is odd, 4 and 2 are even => final gem quadrants is [3,2,3,2]. If, using this method, the result is equal to a perfect gem, we substract 1 to the last quadrant in order to avoid jumping from one level to two levels above.
-- Mining: As mentioned previously, user must wait until the cooldown period has elapsed in order to mine the Gem. After starting mining, he will have to wait until the mining period has elapsed in order to pick randomly one gem and claim it. The probability of getting a Gem is equally distributed to the overall pool of premined gem. However, the user cannot get a gem which is rarer than the GEM is mining with.
-- Melting: melting will burn the GEM and send the associated WSTON from the treasury to the user.
+    - Quadrants are calculated by summing the quadrants of each Gem. If the sum is even, the new Gem's quadrant will match the next rarity base quadrant number. If the sum is odd, the next rarity quadrant base number is incremented by one. If the result is a perfect Gem, the last quadrant is decremented by one to avoid jumping two levels in rarity.
+- Mining: Users must wait for the cooldown period to elapse before mining a Gem. After initiating mining, they must wait for the mining period to complete before randomly selecting and claiming a Gem. The probability of obtaining a Gem is equally distributed across the pool of pre-mined Gems, but users cannot obtain a Gem rarer than the one they are mining with.
+- Melting: Melting burns the GEM and sends the associated WSTON from the Treasury to the user.
 
 #### RandomPack (L2)
 
-This is where users get a random GEM from the premined GEM pool (held in treasury) in exchange of an upfront fee. The fee rate is can be freely customized by the admin. In order to get a random value, we are using the VDF random beacon that runs the off chain node and calls ```fulfillRandomWords``` function which transfers the ownership of the selected GEM. If there is no GEM available in the pool, we mint a new perfect common GEM after ensuring that there is enough funds available in the treasury contract. 
+This contract allows users to obtain a random GEM from the pre-mined GEM pool (held in the Treasury) in exchange for an upfront fee. The fee rate can be customized by the admin. The VDF random beacon is used to generate a random value, which runs an off-chain node and calls the ```fulfillRandomWords``` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted, provided there are sufficient funds in the Treasury contract.
 
 #### L1WrappedStakedTON (L1)
 
-This contract is responsible of staking user's WTON and minting WSTON for the same user. WSTON is an indexed token which value is pegged to TON * stakingIndex. The staking index evolves over time depending on the seigniorage received by the pool of sWTON owned by the contract.
+This contract is responsible for staking users' WTON and minting WSTON for the same user. WSTON is an indexed token whose value is pegged to TON * stakingIndex. The staking index evolves over time based on the seigniorage received by the pool of sWTON owned by the contract.
 <div align="center">
 <img src="images/stakingIndex.png" alt="stakingIndex" width="500" />
 </div>
 
-Therefore, WSTON value is increasing the more seigniorage the pool has received. This is done to reward old depositors in accordance with the Layer2 candidate reward distribution.
-
-Note that an instance of L1WrappedStakedTON must be created for each layer2 candidate (Titan, Thanos ...). This must be done through the L1WrappedStakingTONFactory contract.
+- Staking Index: The value of WSTON increases as the pool receives more seigniorage, rewarding long-term depositors in line with the Layer 2 candidate reward distribution.
+- Note: An instance of L1WrappedStakedTON must be created for each Layer 2 candidate (e.g., Titan, Thanos). This is done through the L1WrappedStakingTONFactory contract.
 
 
 ### Installation
