@@ -86,8 +86,8 @@ async function main() {
   // Deploy WstonSwapPool
   const WstonSwapPool = await ethers.getContractFactory("WstonSwapPool");
   const wstonSwapPool = await WstonSwapPool.deploy(
-    process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
+    process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     10n ** 27n, // stakingIndex
     treasury.target, // treasury
     30 // swapPoolfeeRate
