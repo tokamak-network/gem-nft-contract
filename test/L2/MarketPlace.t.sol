@@ -29,8 +29,12 @@ contract MarketPlaceTest is L2BaseTest {
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         vm.stopPrank();
 
@@ -140,9 +144,13 @@ contract MarketPlaceTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[1]);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[1]);
 
         vm.stopPrank();
 
@@ -232,8 +240,12 @@ contract MarketPlaceTest is L2BaseTest {
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         vm.stopPrank();
 
@@ -284,8 +296,12 @@ contract MarketPlaceTest is L2BaseTest {
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         vm.stopPrank();
 
@@ -336,8 +352,12 @@ contract MarketPlaceTest is L2BaseTest {
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         vm.stopPrank();
 
@@ -384,8 +404,12 @@ contract MarketPlaceTest is L2BaseTest {
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         vm.stopPrank();
 
@@ -427,8 +451,8 @@ contract MarketPlaceTest is L2BaseTest {
     }
 
     function testBuyGemWithNewStakingIndex() public {
+         
          vm.startPrank(owner);
-        
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
@@ -442,27 +466,23 @@ contract MarketPlaceTest is L2BaseTest {
             quadrants,
             tokenURI
         );
-
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
-
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
-
         MarketPlace(marketplace).setStakingIndex(1063100206614753047688069608);
+        vm.stopPrank();
 
+        // prank the treasury to transfer ownership of the GEM to user 1
+        vm.startPrank(treasury);
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
         vm.stopPrank();
 
         vm.startPrank(user1);
-
         uint256 gemPrice = 200 * 10 ** 27;
-
         // Verify token existence before putting it for sale
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
-
         GemFactory(gemfactory).approve(address(marketplace), newGemId);
         MarketPlace(marketplace).putGemForSale(newGemId, gemPrice);
-
         vm.stopPrank();
 
         vm.startPrank(user2);

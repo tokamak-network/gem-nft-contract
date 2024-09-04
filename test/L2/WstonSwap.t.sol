@@ -25,8 +25,8 @@ contract WstonSwap is L2BaseTest {
 
     function testSetUp() public view {
         uint256 stakingIndex = WstonSwapPool(wstonSwapPool).stakingIndex();
-        uint256 tonInitialReserve = WstonSwapPool(wstonSwapPool).getTonReserve();
-        uint256 wstonInitialReserve = WstonSwapPool(wstonSwapPool).getWstonReserve();
+        uint256 tonInitialReserve = WstonSwapPool(wstonSwapPool).tonReserve();
+        uint256 wstonInitialReserve = WstonSwapPool(wstonSwapPool).wstonReserve();
 
         assert(stakingIndex == INITIAL_STAKING_INDEX);
         assert(tonInitialReserve == 0);
@@ -102,8 +102,8 @@ contract WstonSwap is L2BaseTest {
 
         vm.startPrank(user1);
         uint256 user1Shares = WstonSwapPool(wstonSwapPool).getLpShares(user1);
-        uint256 wstonReserve = WstonSwapPool(wstonSwapPool).getWstonReserve();
-        uint256 tonReserve = WstonSwapPool(wstonSwapPool).getTonReserve();
+        uint256 wstonReserve = WstonSwapPool(wstonSwapPool).wstonReserve();
+        uint256 tonReserve = WstonSwapPool(wstonSwapPool).tonReserve();
 
         uint256 user1wstonBalanceBefore = IERC20(wston).balanceOf(user1);
         uint256 user1tonBalanceBefore = IERC20(ton).balanceOf(user1);
@@ -162,7 +162,7 @@ contract WstonSwap is L2BaseTest {
         vm.stopPrank();
 
         uint256 user1Shares = WstonSwapPool(wstonSwapPool).getLpShares(user1);
-        uint256 totalShares = WstonSwapPool(wstonSwapPool).getTotalShares();
+        uint256 totalShares = WstonSwapPool(wstonSwapPool).totalShares();
         uint256 tonReserve = WstonSwapPool(wstonSwapPool).tonReserve();
         uint256 wstonReserve = WstonSwapPool(wstonSwapPool).wstonReserve();
 
@@ -275,7 +275,7 @@ contract WstonSwap is L2BaseTest {
 
         vm.startPrank(user1);
         uint256 user1Shares = WstonSwapPool(wstonSwapPool).getLpShares(user1);
-        uint256 wstonReserveBeforeRemovingLiquidity = WstonSwapPool(wstonSwapPool).getWstonReserve();
+        uint256 wstonReserveBeforeRemovingLiquidity = WstonSwapPool(wstonSwapPool).wstonReserve();
         WstonSwapPool(wstonSwapPool).removeLiquidity(user1Shares);
 
         vm.stopPrank();

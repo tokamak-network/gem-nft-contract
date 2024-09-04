@@ -38,10 +38,10 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
     mapping(uint256 => GemPackRequestStatus) public s_requests; /* requestId --> requestStatus */
 
 
-    address internal gemFactory;
-    address internal treasury;
-    address internal ton;
-    address internal drbcoordinator;
+    address public gemFactory;
+    address public treasury;
+    address public ton;
+    address public drbcoordinator;
 
     bool paused = false;
 
@@ -160,25 +160,5 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
     ) external pure override returns (bytes4) {
         return this.onERC721Received.selector;
     }
-
-    //---------------------------------------------------------------------------------------
-    //-----------------------------VIEW FUNCTIONS--------------------------------------------
-    //---------------------------------------------------------------------------------------
-
-    function getTreasuryAddress() external view returns(address) {
-        return treasury;
-    }
-
-    function getGemFactoryAddress() external view returns(address) {
-        return gemFactory;
-    }   
-
-    function getDrbCoordinatorAddress() external view returns(address) {
-        return drbcoordinator;
-    }
-
-    function getTonAddress() external view returns(address) {
-        return ton;
-    }      
 
 }

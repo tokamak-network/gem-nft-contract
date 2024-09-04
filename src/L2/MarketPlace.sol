@@ -114,7 +114,7 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
 
     function buyCommonGem() external whenNotPaused returns(uint256 newTokenId) {
         // we fetch the value of a common gem
-        uint256 commonGemValue = IGemFactory(gemFactory).getCommonValue();
+        uint256 commonGemValue = IGemFactory(gemFactory).CommonGemsValue();
         // the function caller pays a WSTON amount equal to the value of the GEM.
         IERC20(wston).safeTransferFrom(msg.sender, treasury, commonGemValue);
         // we mint from scratch a perfect common GEM 
@@ -202,17 +202,4 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
     function _toWAD(uint256 v) internal pure returns (uint256) {
         return v / 10 ** 9;
     }
-
-    //---------------------------------------------------------------------------------------
-    //-----------------------------VIEW FUNCTIONS--------------------------------------------
-    //---------------------------------------------------------------------------------------
-
-    function getTonFeesRate() external view returns (uint256) {
-        return tonFeesRate;
-    }
-
-    function getGemFactory() external view returns (address) {
-        return gemFactory;
-    }
-
 }

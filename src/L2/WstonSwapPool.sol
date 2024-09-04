@@ -174,19 +174,8 @@ contract WstonSwapPool is Ownable, ReentrancyGuard {
     }
 
 
-    function getWstonReserve() external view returns(uint256) {
-        return wstonReserve;
-    }
-
-    function getTonReserve() external view returns(uint256) {
-        return tonReserve;
-    }
-
     function getLpShares(address lp) external view returns (uint256) {
         return lpShares[lp];
     }
 
-    function getTotalShares() external view returns (uint256) {
-        return totalShares;
-    }
 }

@@ -88,10 +88,12 @@ contract GemFactoryTest is L2BaseTest {
             quadrants,
             tokenURI
         );
+        vm.stopPrank();
 
+        vm.startPrank(treasury);
 
         // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         // Verify GEM transfer
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
@@ -104,7 +106,7 @@ contract GemFactoryTest is L2BaseTest {
         // Call meltGEM function
         GemFactory(gemfactory).meltGEM(newGemId);
         uint256 balanceAfter = IERC20(wston).balanceOf(user1);
-        uint256 gemValue = GemFactory(gemfactory).getCommonValue();
+        uint256 gemValue = GemFactory(gemfactory).CommonGemsValue();
         // Verify GEM melting
         assert(balanceAfter == balanceBefore + gemValue); // User1 should receive the WSTON (we now has 1000 + 10 WSWTON)
 
@@ -143,9 +145,13 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
 
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
         // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[1]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[1]);
 
         vm.stopPrank();
 
@@ -221,11 +227,15 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[1]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[2]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[3]);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[1]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[2]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[3]);
 
         vm.stopPrank();
 
@@ -295,9 +305,13 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
 
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[1]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[1]);
 
         vm.stopPrank();
 
@@ -352,9 +366,13 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
 
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[1]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[1]);
 
         vm.stopPrank();
 
@@ -420,11 +438,15 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
 
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[1]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[2]);
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[3]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[1]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[2]);
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[3]);
 
         vm.stopPrank();
 
@@ -471,8 +493,12 @@ contract GemFactoryTest is L2BaseTest {
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         vm.stopPrank();
 
@@ -512,9 +538,13 @@ contract GemFactoryTest is L2BaseTest {
 
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
+        
+        vm.stopPrank();
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         vm.stopPrank();
 
@@ -550,8 +580,12 @@ contract GemFactoryTest is L2BaseTest {
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
 
         vm.stopPrank();
 
@@ -600,9 +634,12 @@ contract GemFactoryTest is L2BaseTest {
         // Verify GEM minting
         assert(GemFactory(gemfactory).ownerOf(newGemId) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemId);
+        vm.stopPrank();
 
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemId);
         vm.stopPrank();
 
         vm.startPrank(user2); // Different user
@@ -672,8 +709,12 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
 
         vm.stopPrank();
 
@@ -746,8 +787,12 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
 
         vm.stopPrank();
 
@@ -820,8 +865,12 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
 
         vm.stopPrank();
 
@@ -896,8 +945,12 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == address(treasury));
         assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == address(treasury));
 
-        // Transfer the GEM to user1
-        GemFactory(gemfactory).adminTransferGEM(user1, newGemIds[0]);
+        vm.stopPrank();
+
+        vm.startPrank(treasury);
+
+        // Transfer the GEMs to user1
+        GemFactory(gemfactory).transferFrom(treasury, user1, newGemIds[0]);
 
         vm.stopPrank();
 

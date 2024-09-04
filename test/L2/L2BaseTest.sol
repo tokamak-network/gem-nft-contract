@@ -222,13 +222,13 @@ contract L2BaseTest is Test {
 
 
     function testSetup() public view {
-        address wstonAddress = GemFactory(gemfactory).getWston();
+        address wstonAddress = GemFactory(gemfactory).wston();
         assert(wstonAddress == address(wston));
 
-        address tonAddress = GemFactory(gemfactory).getTon();
+        address tonAddress = GemFactory(gemfactory).ton();
         assert(tonAddress == address(ton));
 
-        address treasuryAddress = GemFactory(gemfactory).getTreasury();
+        address treasuryAddress = GemFactory(gemfactory).treasury();
         assert(treasuryAddress == address(treasury));
 
         // Check that the Treasury has the correct GemFactory address set
