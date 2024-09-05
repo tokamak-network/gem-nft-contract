@@ -1,0 +1,17 @@
+{
+    "name": "oracle",
+    "version": "1.0.0",
+    "description": "Oracle script for interacting with Ethereum contracts",
+    "main": "fetchStakingIndexTitan.js",
+    "scripts": {
+        "start": "node fetchStakingIndexTitan.js"
+    },
+    "dependencies": {
+        "aws-sdk": "^2.1689.0",
+        "dotenv": "^16.4.5",
+        "ethers": "^6.13.2",
+        "ethers-aws-kms-signer": "^1.3.2"
+    },
+    "author": "Tokamak",
+    "license": "MIT"
+}
