@@ -4,7 +4,7 @@
 <img src="images/gem.png" alt="Mythic gem" width="250" />
 </div>
 
-### Description
+## Description
 
 The GEM NFTs project is a sophisticated NFT collection and marketplace centered around Gems. This platform allows users to earn monetary rewards by staking TON tokens. Users engage with a gamified interface to mine new Gems, as well as to buy, sell, and burn them. Additionally, users have the ability to forge two Gems to create a rarer Gem. To acquire WSTON tokens, users can either deposit WTON on Layer 1 (L1) to receive WSTON on the same layer or utilize the WSTON swapper on Layer 2 (L2). L2 WSTON can be used to purchase GEMs at a discounted rate.
 
@@ -22,17 +22,17 @@ GEMs have the following specifications:
 - Token URI: This holds the IPFS address of the metadata file.
 
 
-### Contracts
+## Contracts
 
-#### MarketPlace (L2)
+### MarketPlace (L2)
 
 The marketplace allows users to list their GEMs for sale at desired prices in WSTON. Interested buyers can pay in L2 TON or L2 WSTON (at a discounted price). Upon successful transfer, the NFT is sent to the new owner. Users can list multiple GEMs for sale in a single transaction using the ```putGemListForSale``` function. Ownership of the NFT is not transferred when calling the ```putGemForSale``` function; instead, the GEM's ```isLocked``` status is set to true, preventing its transfer until it is either purchased or removed from sale.
 
-#### Treasury (L2)
+### Treasury (L2)
 
 The Treasury contract is responsible for creating pools of pre-mined GEMs (admin-only). It handles all transactions made by users, including locking GEM values and holding TON/WSTON tokens in reserve. The admin can list pre-mined GEMs for sale on the marketplace or use the swapper to obtain WSTON. Note that new GEMs cannot be created if the WSTON collateral does not cover the new GEM's value.
 
-#### GemFactory (L2)
+### GemFactory (L2)
 
 This contract carries the logic behind GEMs Minting, Forging, mining and melting.
 - Minting: there is two cases where NFTs are minted: 
@@ -51,11 +51,11 @@ This contract carries the logic behind GEMs Minting, Forging, mining and melting
 - Mining: Users must wait for the cooldown period to elapse before mining a Gem. After initiating mining, they must wait for the mining period to complete before randomly selecting and claiming a Gem. The probability of obtaining a Gem is equally distributed across the pool of pre-mined Gems, but users cannot obtain a Gem rarer than the one they are mining with.
 - Melting: Melting burns the GEM and sends the associated WSTON from the Treasury to the user.
 
-#### RandomPack (L2)
+### RandomPack (L2)
 
 This contract allows users to obtain a random GEM from the pre-mined GEM pool (held in the Treasury) in exchange for an upfront fee. The fee rate can be customized by the admin. The VDF random beacon is used to generate a random value, which runs an off-chain node and calls the ```fulfillRandomWords``` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted, provided there are sufficient funds in the Treasury contract.
 
-#### L1WrappedStakedTON (L1)
+### L1WrappedStakedTON (L1)
 
 This contract is responsible for staking users' WTON and minting WSTON for the same user. WSTON is an indexed token whose value is pegged to TON * stakingIndex. The staking index evolves over time based on the seigniorage received by the pool of sWTON owned by the contract.
 <div align="center">
@@ -66,7 +66,7 @@ This contract is responsible for staking users' WTON and minting WSTON for the s
 - Note: An instance of L1WrappedStakedTON must be created for each Layer 2 candidate (e.g., Titan, Thanos). This is done through the L1WrappedStakingTONFactory contract.
 
 
-### Installation
+## Installation
 
 1.  Clone this repository.
 ```
@@ -98,7 +98,7 @@ forge compile
 forge test
 ```
 
-### Contract addresses
+## Contract addresses
 
 Titan Sepolia
 ```
@@ -118,7 +118,7 @@ L1_WRAPPED_STAKED_TON=0x17Ddb5CEaE35A40a520c4DcF1f70409BE9a25406
 ```
 
 
-### Contact
+## Contact
 
 For any inquiries, you can reach me through [my GitHub profile](https://github.com/mehdi-defiesta)
 

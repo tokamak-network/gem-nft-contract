@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  fetchstakingindextitan:
+    image: fetchstakingindextitan
+    secrets:
+      - private_key
+
+secrets:
+  private_key:
+    external: true

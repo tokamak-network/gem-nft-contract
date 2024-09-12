@@ -81,11 +81,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         emit Unpaused(msg.sender);
     }
 
-    // Override supportsInterface to delegate to AuthControlGemFactory's implementation
+    // Override supportsInterface to delegate to AuthControl's implementation
     function supportsInterface(bytes4 interfaceId) public view override(ERC721URIStorage, AuthControl) returns (bool) {
         // Delegates to AuthControlGemFactory's supportsInterface which aggregates checks across ERC165 and AccessControl
         return super.supportsInterface(interfaceId);
     }
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------INITIALIZATION FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
 
     function initialize(
         address _wston, 
@@ -184,6 +188,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         treasury = _treasury;
     }
 
+    function setMarketPlaceAddress(address _marketplace) external onlyOwnerOrAdmin {
+        marketplace = _marketplace;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
@@ -240,6 +248,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _color,
             params
         );
+        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
+
 
         // Burn the old tokens{ 
         burnTokens(msg.sender, _tokenIds);
@@ -503,43 +513,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _checkOnERC721(from, to, tokenId, data);
     }
 
-    function _checkOnERC721(address from, address to, uint256 tokenId, bytes memory data) private {
-        if (to.code.length > 0) {
-            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
-                if (retval != IERC721Receiver.onERC721Received.selector) {
-                    revert ERC721InvalidReceiver(to);
-                }
-            } catch (bytes memory reason) {
-                if (reason.length == 0) {
-                    revert ERC721InvalidReceiver(to);
-                } else {
-                    /// @solidity memory-safe-assembly
-                    assembly {
-                        revert(add(32, reason), mload(reason))
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @notice allow contract owner to manually send NFTs owned by Treasury
-     * @param _to address to send the token
-     * @param _tokenId Id related to the token to be send
-     */
-    function adminTransferGEM(address _to, uint256 _tokenId) external onlyOwnerOrAdmin returns (bool) {
-        require(ITreasury(treasury).transferTreasuryGEMto(_to, _tokenId), "failed to transfer token");
-        return true;
-    }
-
-    function setMarketPlaceAddress(address _marketplace) external onlyOwnerOrAdmin {
-        marketplace = _marketplace;
-    }
-
-    function setApprovalForMarketplace() external whenNotPaused {
-        setApprovalForAll(marketplace, true);
-    }
-
     function setIsLocked(uint256 _tokenId, bool _isLocked) external onlyMarketPlace {
         Gems[_tokenId].isLocked = _isLocked;
     }
@@ -704,6 +677,26 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         super._setTokenURI(tokenId, _tokenURI);
     }
 
+
+    function _checkOnERC721(address from, address to, uint256 tokenId, bytes memory data) private {
+        if (to.code.length > 0) {
+            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
+                if (retval != IERC721Receiver.onERC721Received.selector) {
+                    revert ERC721InvalidReceiver(to);
+                }
+            } catch (bytes memory reason) {
+                if (reason.length == 0) {
+                    revert ERC721InvalidReceiver(to);
+                } else {
+                    /// @solidity memory-safe-assembly
+                    assembly {
+                        revert(add(32, reason), mload(reason))
+                    }
+                }
+            }
+        }
+    }
+
     //---------------------------------------------------------------------------------------
     //-----------------------------VIEW FUNCTIONS--------------------------------------------
     //---------------------------------------------------------------------------------------
@@ -735,33 +728,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return GEMIndexToOwner[tokenId] != address(0);
     }
 
-    function getWston() public view returns (address) {
-        return wston;
+    function getGem(uint256 tokenId) public view returns (Gem memory) {
+        for (uint256 i = 0; i < Gems.length; i++) {
+            if (Gems[i].tokenId == tokenId) {
+                return Gems[i];
+            }
+        }
+        revert("Gem with the specified tokenId does not exist");
     }
 
-    function getCommonValue() public view returns (uint256) {
-        return CommonGemsValue;
-    }
-
-    function getRareValue() public view returns (uint256) {
-        return RareGemsValue;
-    }
-
-    function getUniqueValue() public view returns (uint256) {
-        return UniqueGemsValue;
-    }
-
-    function getEpicValue() public view returns (uint256) {
-        return EpicGemsValue;
-    }
-
-    function getLegendaryValue() public view returns (uint256) {
-        return LegendaryGemsValue;
-    }
-
-    function getMythicValue() public view returns (uint256) {
-        return MythicGemsValue;
-    }
 
     function getValueBasedOnRarity(Rarity _rarity) public view returns(uint256 value) {
         if(_rarity == Rarity.COMMON) {
@@ -779,38 +754,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         } else {
             revert("wrong rarity");
         }
-    }
-
-    function getCommonminingTry() public view returns (uint256) {
-        return CommonminingTry;
-    }
-
-    function getRareminingTry() public view returns (uint256) {
-        return RareminingTry;
-    }
-
-    function getUniqueminingTry() public view returns (uint256) {
-        return UniqueminingTry;
-    }
-
-    function getEpicminingTry() public view returns (uint256) {
-        return EpicminingTry;
-    }
-
-    function getLegendaryminingTry() public view returns (uint256) {
-        return LegendaryminingTry;
-    }
-
-    function getMythicminingTry() public view returns (uint256) {
-        return MythicminingTry;
-    }
-
-    function getTon() public view returns (address) {
-        return ton;
-    }
-
-    function getTreasury() public view returns (address) {
-        return treasury;
     }
 
     function isTokenLocked(uint256 _tokenId) public view returns(bool) {
@@ -852,16 +795,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         }
 
         return (count, result);
-    }
-
-    // Function to get the details of a gem by its tokenId
-    function getGem(uint256 _tokenId) external view returns (Gem memory) {
-        require(_tokenId < Gems.length, "Gem does not exist");
-        return Gems[_tokenId];
-    }
-
-    function getGemList() external view returns (Gem[] memory) {
-        return Gems;
     }
 
     function getGemListAvailableForRandomPack() external view returns (uint256, uint256[] memory) {
