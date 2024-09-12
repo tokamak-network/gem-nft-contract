@@ -248,6 +248,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _color,
             params
         );
+        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
+
 
         // Burn the old tokens{ 
         burnTokens(msg.sender, _tokenIds);

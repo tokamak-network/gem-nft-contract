@@ -28,7 +28,6 @@ library ForgeLibrary {
     }
 
     event ColorValidated(uint8 color0, uint8 color1);
-    event GemForged(address indexed owner, uint256[] tokenIds, uint256 newGemId, GemFactoryStorage.Rarity newRarity, uint8[4] quadrants, uint8[2] color, uint256 value);
 
     function forgeTokens(
         GemFactoryStorage.Gem[] storage Gems,
@@ -151,7 +150,6 @@ library ForgeLibrary {
         GEMIndexToOwner[newGemId] = msgSender;
         ownershipTokenCount[msgSender]++;
 
-        emit GemForged(msgSender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
         return (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry);
     }
 
