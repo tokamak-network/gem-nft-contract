@@ -8,6 +8,8 @@ import { IGemFactory } from "../interfaces/IGemFactory.sol";
 import { GemFactoryStorage } from "./GemFactoryStorage.sol";  
 import {AuthControl} from "../common/AuthControl.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { RandomPackStorage } from "./RandomPackStorage.sol";
+import "../proxy/ProxyStorage.sol";
 
 import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
@@ -24,38 +26,8 @@ interface ITreasury {
     ) external returns (uint256);
 }
 
-contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase {
+contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase, RandomPackStorage, ProxyStorage {
     using SafeERC20 for IERC20;
-
-    struct GemPackRequestStatus {
-        bool requested; // whether the request has been made
-        bool fulfilled; // whether the request has been successfully fulfilled
-        uint256 randomWord;
-        uint256 chosenTokenId;
-        address requester;
-    }
-
-    mapping(uint256 => GemPackRequestStatus) public s_requests; /* requestId --> requestStatus */
-
-
-    address public gemFactory;
-    address public treasury;
-    address public ton;
-    address public drbcoordinator;
-
-    bool paused = false;
-
-    // constants
-    uint32 public callbackGasLimit;
-
-    uint256 public requestCount;
-    uint256 public randomPackFees; // in TON (18 decimals)
-    string public perfectCommonGemURI;
-
-    event RandomGemToBeTransferred(uint256 tokenId, address newOwner);
-    event RandomGemTransferred(uint256 tokenId, address newOwner);
-    event CommonGemToBeMinted();
-    event CommonGemMinted();
 
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");

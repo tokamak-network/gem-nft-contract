@@ -9,6 +9,7 @@ import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import { MarketPlaceStorage } from "./MarketPlaceStorage.sol";
 import { GemFactory } from "./GemFactory.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "../proxy/ProxyStorage.sol";
 
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
@@ -23,7 +24,7 @@ interface ITreasury {
 }
 
 
-contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable {
+contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable, ProxyStorage {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {

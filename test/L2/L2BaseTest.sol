@@ -164,7 +164,7 @@ contract L2BaseTest is Test {
             MythicGemsCooldownPeriod
         );
 
-        GemFactory(gemfactory).setminingTrys(
+        GemFactory(gemfactory).setMiningTrys(
             commonminingTry,
             rareminingTry,
             uniqueminingTry,
