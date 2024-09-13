@@ -148,7 +148,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         MythicGemsCooldownPeriod = _MythicGemsCooldownPeriod;
     }
 
-    function setminingTrys(
+    function setMiningTrys(
         uint256 _CommonminingTry, 
         uint256 _RareminingTry,
         uint256 _UniqueminingTry,
@@ -293,7 +293,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (uint256) {
-        require(ownerOf(_tokenId) == msg.sender || isAdmin(msg.sender) == true, "not GEM owner or not admin");
+        require(ownerOf(_tokenId) == msg.sender || isAdmin(msg.sender) == true, "neither GEM owner nor admin");
         require(block.timestamp >= userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
         require(Gems[_tokenId].isLocked == true, "Gems is not mining");
         require(userMiningToken[ownerOf(_tokenId)][_tokenId] == true, "gem not mining");
@@ -736,7 +736,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         }
         revert("Gem with the specified tokenId does not exist");
     }
-
 
     function getValueBasedOnRarity(Rarity _rarity) public view returns(uint256 value) {
         if(_rarity == Rarity.COMMON) {

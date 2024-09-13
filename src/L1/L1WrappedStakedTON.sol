@@ -8,6 +8,7 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
 import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
+import "../proxy/ProxyStorage.sol";
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -16,7 +17,7 @@ interface ICandidate {
 }
 
 
-contract L1WrappedStakedTON is Ownable, ERC20, L1WrappedStakedTONStorage, ReentrancyGuard {
+contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONStorage, ReentrancyGuard {
     using SafeERC20 for IERC20;   
 
     modifier whenNotPaused() {

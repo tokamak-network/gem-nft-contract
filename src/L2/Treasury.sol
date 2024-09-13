@@ -170,7 +170,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     ) public onlyOwnerOrRandomPackOrMarketplace returns (uint256[] memory) {
         uint256 sumOfNewPoolValues;
         for (uint256 i = 0; i < _rarities.length; i++) {
-        sumOfNewPoolValues += IGemFactory(gemFactory).getValueBasedOnRarity(_rarities[i]);
+            sumOfNewPoolValues += IGemFactory(gemFactory).getValueBasedOnRarity(_rarities[i]);
         }
 
         require(

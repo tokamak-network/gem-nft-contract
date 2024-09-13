@@ -104,7 +104,7 @@ contract DeployL2Contracts is Script {
             MythicGemsCooldownPeriod
         );
 
-        gemfactory.setminingTrys(
+        gemfactory.setMiningTrys(
             commonminingTry,
             rareminingTry,
             uniqueminingTry,
