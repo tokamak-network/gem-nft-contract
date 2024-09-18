@@ -62,7 +62,7 @@ This contract is responsible for staking users' WTON and minting WSTON for the s
 <img src="images/stakingIndex.png" alt="stakingIndex" width="500" />
 </div>
 
-- Staking Index: The value of WSTON increases as the pool receives more seigniorage, rewarding long-term depositors in line with the Layer 2 candidate reward distribution.
+- Staking Index: The value of WSTON increases as the pool receives more seigniorage, rewarding long-term depositors in line with the Layer 2 candidate reward distribution. The staking index is updated before each deposit or requestWithdrawal transaction.
 - Note: An instance of L1WrappedStakedTON must be created for each Layer 2 candidate (e.g., Titan, Thanos). This is done through the L1WrappedStakingTONFactory contract.
 
 
@@ -71,32 +71,67 @@ This contract is responsible for staking users' WTON and minting WSTON for the s
 1.  Clone this repository.
 ```
 git clone https://github.com/tokamak-network/gem-nft-contracts
-```
-
-2. Navigate to the project directory.
-```
 cd gem-nft-contracts
 ```
 
-3. install foundry dependencies (foundry must be installed and updated first. See foundry [documentation](https://book.getfoundry.sh/getting-started/installation) for more info)
+2. install foundry dependencies (foundry must be installed and updated first. See foundry [documentation](https://book.getfoundry.sh/getting-started/installation) for more info)
 ```
 forge install
 ```
 
-4. install hardhat dependencies (optionnal)
+3. install hardhat dependencies (optionnal)
 ```
 yarn install
 ```
 
-5. Compile 
+4. Compile 
 ```
 forge compile
 ```
 
-6. Test
+5. Test
 ```
 forge test
 ```
+
+## Code Review instruction
+
+Below is the list of contracts to be reviewed
+
+|         Smart Contract Name           |      nSLOC      |
+|---------------------------------------|-----------------|
+| common/AuthControl.sol                | 61              |
+| common/AuthRole.sol                   | 5               |
+| L1/L1WrappedStakedTON.sol             | 169             |
+| L1/L1WrappedStakedTONFactory.sol.sol  | 25              |
+| L1/L1WrappedStakedTONProxy.sol        | 5               |
+| L1/L1WrappedStakedTONStorage.sol      | 28              |
+| L2/GemFactory.sol                     | 604             |
+| L2/GemFactoryProxy.sol                | 5               |
+| L2/GemFactoryStorage.sol              | 113             |
+| L2/L2StandardERC20.sol                | 38              |
+| L2/MarketPlace.sol                    | 116             |
+| L2/MarketPlaceStorage.sol             | 24              |
+| L2/MarketPlaceProxy.sol               | 5               |
+| L2/RandomPack.sol                     | 83              |
+| L2/RandomPackStorage.sol              | 24              |
+| L2/RandomPackProxy.sol                | 5               |
+| L2/Treasury.sol                       | 170             |
+| L2/WstonSwapPool.sol                  | 116             |
+| L2/WstonSwapPoolStorage.sol           | 20              |
+| L2/WstonSwapPoolProxy.sol             | 5               |
+| L2/Randomness/DRBConsumerBase.sol     | 30              |
+| library/ForgeLibrary.sol              | 193             |
+| library/GemLibrary.sol                | 35              |
+| library/MiningLibrary.sol             | 15              |
+| library/TransferLibrary.sol           | 19              |
+| proxy/ProxyGemFactory.sol             | 97              |
+| proxy/ProxyL1WrappedStakedTON.sol     | 97              |
+| proxy/ProxyMarketPlace.sol            | 97              |
+| proxy/ProxyRandomPack.sol             | 97              |
+| proxy/ProxyStorage.sol                | 7               |
+| proxy/ProxyWstonSwapPool.sol          | 97              |
+| **Total**                             | **2379**        |
 
 ## Contract addresses
 
@@ -116,7 +151,6 @@ Ethereum Sepolia
 ```
 L1_WRAPPED_STAKED_TON=0x17Ddb5CEaE35A40a520c4DcF1f70409BE9a25406
 ```
-
 
 ## Contact
 

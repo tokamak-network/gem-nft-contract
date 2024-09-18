@@ -134,7 +134,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         return true;
     }
 
-    function transferTON(address _to, uint256 _amount) external onlyOwnerOrAdmin returns(bool) {
+    function transferTON(address _to, uint256 _amount) external onlyOwner returns(bool) {
         require(_to != address(0), "address zero");
         uint256 contractTONBalance = getTONBalance();
         require(contractTONBalance >= _amount, "Unsuffiscient TON balance");
