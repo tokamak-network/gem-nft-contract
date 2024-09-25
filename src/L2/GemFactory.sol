@@ -477,6 +477,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             revert("wrong Rarity");
         }
 
+        uint256 _cooldownDueDate = block.timestamp + _gemCooldownPeriod;
+
         uint256 newGemId = Gems.createGem(
             GEMIndexToOwner,
             ownershipTokenCount,
@@ -486,7 +488,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _quadrants,
             _value,
             _miningPeriod,
-            block.timestamp + _gemCooldownPeriod,
+            _cooldownDueDate,
             _miningTry,
             _tokenURI
         );
@@ -494,7 +496,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _safeMint(msg.sender, newGemId);
         _setTokenURI(newGemId, _tokenURI);
 
-        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI, msg.sender);
+        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _cooldownDueDate, _tokenURI, msg.sender);
         return newGemId;
     }
 

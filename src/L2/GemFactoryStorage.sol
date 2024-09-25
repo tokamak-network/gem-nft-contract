@@ -116,7 +116,7 @@ contract GemFactoryStorage {
         uint256 value,
         uint8[4] quadrants, 
         uint256 miningPeriod,
-        uint256 cooldownPeriod,
+        uint256 cooldownDueDate,
         string tokenURI, 
         address owner
     );
