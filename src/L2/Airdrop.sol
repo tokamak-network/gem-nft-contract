@@ -61,10 +61,6 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
                 }
             }
 
-            if (isDuplicate) {
-                continue;
-            }
-
             require(IGemFactory(gemFactory).ownerOf(tokenId) == treasury, "Token not owned by the treasury");
             require(IGemFactory(gemFactory).isTokenLocked(tokenId) == false, "Token is not available");
 

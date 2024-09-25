@@ -149,4 +149,38 @@ contract GemFactoryStorage {
     //storage setter events
     event ColorAdded(uint8 indexed id, string color);
     event BackgroundColorAdded(uint8 indexed id, string backgroundColor);
+
+    //storage modification events
+    event GemsCoolDownPeriodModified(
+        uint256 CommonGemsCooldownPeriod,
+        uint256 RareGemsCooldownPeriod,
+        uint256 UniqueGemsCooldownPeriod,
+        uint256 EpicGemsCooldownPeriod,
+        uint256 LegendaryGemsCooldownPeriod,
+        uint256 MythicGemsCooldownPeriod
+    );
+    event GemsMiningPeriodModified(
+        uint256 CommonGemsMiningPeriod,
+        uint256 RareGemsMiningPeriod,
+        uint256 UniqueGemsMiningPeriod,
+        uint256 EpicGemsMiningPeriod,
+        uint256 LegendaryGemsMiningPeriod,
+        uint256 MythicGemsMiningPeriod
+    );
+    event GemsMiningTryModified(
+        uint256 CommonGemsMiningTry,
+        uint256 RareGemsMiningTry,
+        uint256 UniqueGemsMiningTry,
+        uint256 EpicGemsMiningTry,
+        uint256 LegendaryGemsMiningTry,
+        uint256 MythicGemsMiningTry
+    );
+    event GemsValueModified(
+        uint256 CommonGemsValue,
+        uint256 RareGemsValue,
+        uint256 UniqueGemsValue,
+        uint256 EpicGemsValue,
+        uint256 LegendaryValue,
+        uint256 MythicValue
+    );
 }

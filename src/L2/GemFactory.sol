@@ -130,6 +130,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         EpicGemsMiningPeriod = _EpicGemsMiningPeriod;
         LegendaryGemsMiningPeriod = _LegendaryGemsMiningPeriod;
         MythicGemsMiningPeriod = _MythicGemsMiningPeriod;
+
+        emit GemsMiningPeriodModified(
+            _CommonGemsMiningPeriod,
+            _RareGemsMiningPeriod,
+            _UniqueGemsMiningPeriod,
+            _EpicGemsMiningPeriod,
+            _LegendaryGemsMiningPeriod,
+            _MythicGemsMiningPeriod
+        );
     }
 
     function setGemsCooldownPeriods(
@@ -146,6 +155,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         EpicGemsCooldownPeriod = _EpicGemsCooldownPeriod;
         LegendaryGemsCooldownPeriod = _LegendaryGemsCooldownPeriod;
         MythicGemsCooldownPeriod = _MythicGemsCooldownPeriod;
+        
+        emit GemsCoolDownPeriodModified(
+            _CommonGemsCooldownPeriod, 
+            RareGemsCooldownPeriod, 
+            UniqueGemsCooldownPeriod, 
+            EpicGemsCooldownPeriod, 
+            LegendaryGemsCooldownPeriod, 
+            MythicGemsCooldownPeriod
+        );
     }
 
     function setMiningTrys(
@@ -162,6 +180,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         EpicminingTry = _EpicminingTry;
         LegendaryminingTry = _LegendaryminingTry;
         MythicminingTry = _MythicminingTry;
+
+        emit GemsMiningTryModified(
+            _CommonminingTry,
+            _RareminingTry,
+            _UniqueminingTry,
+            _EpicminingTry,
+            _LegendaryminingTry,
+            _MythicminingTry
+        );
     }
 
     function setGemsValue(
@@ -178,6 +205,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         EpicGemsValue = _EpicGemsValue;
         LegendaryGemsValue = _LegendaryGemsValue;
         MythicGemsValue = _MythicGemsValue;
+
+        emit GemsValueModified(
+            _CommonGemsValue,
+            _RareGemsValue,
+            _UniqueGemsValue,
+            _EpicGemsValue,
+            _LegendaryGemsValue,
+            _MythicGemsValue
+        );
     }
 
     function setRandomPack(address _randomPack) external onlyOwnerOrAdmin {
