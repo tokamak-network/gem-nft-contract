@@ -24,4 +24,14 @@ contract WstonSwapPoolStorage {
     event LiquidityAdded(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event LiquidityRemoved(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event FeesCollected(uint256 tonFees, uint256 wstonFees);
+
+    error TonAllowanceTooLow();
+    error WstonAllowanceTooLow();
+    error TonBalanceTooLow();
+    error WstonBalanceTooLow();
+    error InsufficientLpShares();
+    error ContractTonBalanceTooLow();
+    error ContractWstonBalanceTooLow();
+    error WrongStakingIndex();
+
 }

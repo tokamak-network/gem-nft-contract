@@ -12,4 +12,9 @@ contract AirdropStorage {
 
     event TokensClaimed(uint256[] tokenIds, address to);
     event TokensAssigned(uint256[] tokenIds, address _to);
+
+    error TokenNotOwnedByTreasury();
+    error TokenNotAvailable();
+    error UserAlreadyClaimedCurrentAirdrop();
+    error UserNotEligible();
 }

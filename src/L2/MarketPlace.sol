@@ -89,10 +89,14 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable, ProxyStora
      * @param prices price asked for the transaction
      */
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused {
-        require(tokenIds.length != 0, "no tokens");
-        require(tokenIds.length == prices.length, "wrong length");
+        if(tokenIds.length == 0) {
+            revert NoTokens();
+        }
+        if(tokenIds.length != prices.length) {
+            revert WrongLength();
+        }
 
-        for (uint256 i = 0; i < tokenIds.length; i++){
+        for (uint256 i = 0; i < tokenIds.length; ++i){
             require(IGemFactory(gemFactory).getApproved(tokenIds[i]) == address(this), "the NFT is not approved");
             require(_putGemForSale(tokenIds[i], prices[i]), "failed to put gem for sale");
         }
@@ -103,8 +107,12 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable, ProxyStora
      * @param _tokenId the ID of the token to be removed from the list
      */
     function removeGemForSale(uint256 _tokenId) external whenNotPaused {
-        require(gemsForSale[_tokenId].isActive == true, "Gem is not for sale");
-        require(IGemFactory(gemFactory).ownerOf(_tokenId) == msg.sender, "Not the owner of the GEM");
+        if(gemsForSale[_tokenId].isActive != true) {
+            revert GemIsNotForSale();
+        }
+        if(IGemFactory(gemFactory).ownerOf(_tokenId) != msg.sender) {
+            revert NotGemOwner();
+        }
 
         GemFactory(gemFactory).setIsLocked(_tokenId, false);
 
@@ -113,25 +121,18 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable, ProxyStora
 
     }
 
-    function buyCommonGem() external whenNotPaused returns(uint256 newTokenId) {
-        // we fetch the value of a common gem
-        uint256 commonGemValue = IGemFactory(gemFactory).CommonGemsValue();
-        // the function caller pays a WSTON amount equal to the value of the GEM.
-        IERC20(wston).safeTransferFrom(msg.sender, treasury, commonGemValue);
-        // we mint from scratch a perfect common GEM 
-        newTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], commonGemTokenUri);
-        // the new gem is transferred to the user
-        ITreasury(treasury).transferTreasuryGEMto(msg.sender, newTokenId);
-    }
-
     function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {
-        require(_tonFeesRate < 100, "discount rate must be less than 100%");
+        if(_tonFeesRate >= 100) {
+            revert WrongDiscountRate();
+        }
         tonFeesRate = _tonFeesRate;
         emit SetDiscountRate(_tonFeesRate);
     }
 
     function setStakingIndex(uint256 _stakingIndex) external onlyOwner {
-        require(stakingIndex >= 1, "staking index must be greater or equal to 1");
+        if(stakingIndex < 1) {
+            revert WrongStakingIndex();
+        }
         stakingIndex = _stakingIndex;
     }
 
@@ -141,9 +142,15 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable, ProxyStora
 
     
     function _putGemForSale(uint256 _tokenId, uint256 _price) internal returns (bool) {
-        require(IGemFactory(gemFactory).ownerOf(_tokenId) == msg.sender, "Not the owner of the GEM");
-        require(_price > 0, "Price must be greater than zero");
-        require(IGemFactory(gemFactory).isTokenLocked(_tokenId) == false, "Gem is already for sale or mining");
+        if(IGemFactory(gemFactory).ownerOf(_tokenId) != msg.sender) {
+            revert NotGemOwner();
+        }
+        if(_price == 0) {
+            revert WrongPrice();
+        }
+        if(IGemFactory(gemFactory).isTokenLocked(_tokenId) == true) {
+            revert GemIsAlreadyForSaleOrIsMining();
+        }   
 
         GemFactory(gemFactory).setIsLocked(_tokenId, true);
 
@@ -158,14 +165,22 @@ contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable, ProxyStora
     }
     
     function _buyGem(uint256 _tokenId, address _payer, bool _paymentMethod) internal nonReentrant returns(bool) {
-        require(_payer != address(0), "zero address");
-        require(gemsForSale[_tokenId].isActive, "not for sale");
+        if(_payer == address(0)) {
+            revert AddressZero();
+        }
+        if(!gemsForSale[_tokenId].isActive) {
+            revert GemIsNotForSale();
+        }
         
         uint256 price = gemsForSale[_tokenId].price;
-        require(price != 0, "wrong price");
+        if(price == 0) {
+            revert WrongPrice();
+        }
 
         address seller = gemsForSale[_tokenId].seller;
-        require(seller != address(0), "wrong seller");
+        if(seller == address(0)) {
+            revert WrongSeller();
+        }
         
         //  transfer TON or WSTON to the treasury contract 
         if (_paymentMethod) {     

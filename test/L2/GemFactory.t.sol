@@ -554,7 +554,7 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
 
         // Expect the transaction to revert with the error message "Gem cooldown period has not elapsed"
-        vm.expectRevert("Gem cooldown period has not elapsed");
+        vm.expectRevert(abi.encodeWithSignature("CooldownPeriodNotElapsed()"));
         GemFactory(gemfactory).startMiningGEM(newGemId);
 
         vm.stopPrank();
@@ -608,7 +608,7 @@ contract GemFactoryTest is L2BaseTest {
         vm.prank(user1);
 
         // Expect the transaction to revert with the error message "Gem is listed for sale or already mining"
-        vm.expectRevert("Gem is listed for sale or already mining");
+        vm.expectRevert(abi.encodeWithSignature("GemIsLocked()"));
         GemFactory(gemfactory).startMiningGEM(newGemId);
 
         vm.stopPrank();
@@ -656,7 +656,7 @@ contract GemFactoryTest is L2BaseTest {
         vm.prank(user2);
 
         // Expect the transaction to revert with the error message "GEMIndexToOwner[_tokenId] == msg.sender"
-        vm.expectRevert("not gem owner");
+        vm.expectRevert(abi.encodeWithSignature("NotGemOwner()"));
         GemFactory(gemfactory).startMiningGEM(newGemId);
 
         vm.stopPrank();
@@ -891,7 +891,7 @@ contract GemFactoryTest is L2BaseTest {
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
         assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
-        vm.expectRevert("no mining power left for that GEM");
+        vm.expectRevert(abi.encodeWithSignature("NoMiningTryLeft()"));
         GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
         
         vm.stopPrank();

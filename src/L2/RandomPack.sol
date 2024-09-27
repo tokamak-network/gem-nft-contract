@@ -58,17 +58,23 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
 
 
     function setGemFactory(address _gemFactory) external onlyOwner {
-        require(gemFactory != address(0), "Invalid address");
+        if(gemFactory == address(0)) {
+            revert InvalidAddress();
+        }
         gemFactory = _gemFactory;
     }
 
     function setRandomPackFees(uint256 _randomPackFees) external onlyOwner {
-        require(randomPackFees != 0, "fees must be greater than 0");
+        if(randomPackFees == 0) {
+            revert RandomPackFeesEqualToZero();
+        }
         randomPackFees = _randomPackFees;
     }
 
     function setTreasury(address _treasury) external onlyOwner {
-        require(_treasury != address(0), "Invalid address");
+        if(_treasury == address(0)) {
+            revert InvalidAddress();
+        }
         treasury = _treasury;
     }
 
@@ -81,7 +87,9 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
     }
 
     function requestRandomGem() external payable whenNotPaused nonReentrant returns(uint256) {
-        require(msg.sender != address(0), "address 0 not allowed");
+        if(msg.sender == address(0)) {
+            revert InvalidAddress();
+        }
         //users pays upfront fees
         //user must approve the contract for the fees amount before calling the function
         IERC20(ton).safeTransferFrom(msg.sender, address(this), randomPackFees);
@@ -102,7 +110,9 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
 
     // Implement the abstract function from DRBConsumerBase
     function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
-        require(s_requests[requestId].requested, "Request not made");
+        if(!s_requests[requestId].requested) {
+            revert RequestNotMade();
+        }
         s_requests[requestId].fulfilled = true;
         s_requests[requestId].randomWord = randomNumber;
 

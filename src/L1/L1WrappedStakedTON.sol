@@ -95,9 +95,10 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         address _to,
         uint256 _amount
     ) internal returns (bool) {
-
-        require(_amount != 0, "amount must be different from 0");
-
+        
+        if(_amount == 0) {
+            revert WrontAmount();
+        }
         // user transfers wton to this contract
         require(
             IERC20(wton).transferFrom(_to, address(this), _amount),
@@ -150,7 +151,9 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
     }
 
     function _requestWithdrawal(address _to, uint256 _wstonAmount, uint256 delay) internal returns (bool) {
-        require(balanceOf(_to) >= _wstonAmount, "not enough funds");
+        if(balanceOf(_to) < _wstonAmount) {
+            revert NotEnoughFunds();
+        }
 
         // updating the staking index
         stakingIndex = updateStakingIndex();
@@ -187,14 +190,22 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
 
     function _claimWithdrawal(address _to) internal returns(bool){
         uint256 index = withdrawalRequestIndex[_to];
-        require(withdrawalRequests[_to].length > index, "no request to process");
+        if(withdrawalRequests[_to].length <= index) {
+            revert NoRequestToProcess();
+        }
 
         WithdrawalRequest storage request = withdrawalRequests[_to][index];
-        require(request.processed == false, "already processed");
-        require(request.withdrawableBlockNumber <= block.number, "wait for withdrawal delay");
+        if(request.processed == true) {
+            revert RequestAlreadyProcessed();
+        }
+        if(request.withdrawableBlockNumber > block.number) {
+            revert WithdrawalDelayNotElapsed();
+        }
 
         request.processed = true;
-        withdrawalRequestIndex[_to] += 1;
+        unchecked {
+            withdrawalRequestIndex[_to] += 1;
+        }
 
         uint256 amount = request.amount;
 

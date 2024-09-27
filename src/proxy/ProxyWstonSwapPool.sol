@@ -61,7 +61,7 @@ contract ProxyWstonSwapPool is
         require(_selectors.length > 0, "Proxy: _selectors's size is zero");
         require(aliveImplementation[_imp], "Proxy: _imp is not alive");
 
-        for (uint256 i = 0; i < _selectors.length; i++) {
+        for (uint256 i = 0; i < _selectors.length; ++i) {
             require(
                 selectorImplementation[_selectors[i]] != _imp,
                 "LiquidityVaultProxy: same imp"

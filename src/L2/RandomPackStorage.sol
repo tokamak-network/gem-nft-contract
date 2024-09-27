@@ -33,4 +33,9 @@ contract RandomPackStorage {
     event RandomGemTransferred(uint256 tokenId, address newOwner);
     event CommonGemToBeMinted();
     event CommonGemMinted();
+
+    error InvalidAddress();
+    error RandomPackFeesEqualToZero();
+    error RequestNotMade();
+    
 }

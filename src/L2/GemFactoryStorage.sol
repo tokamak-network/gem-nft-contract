@@ -35,6 +35,10 @@ contract GemFactoryStorage {
         address requester;
     }
 
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------STORAGE-------------------------------------------
+    //---------------------------------------------------------------------------------------
+
     Gem[] public Gems;
     mapping(uint8 => mapping(uint8 => string)) public colorName;
     uint8 public colorsCount;
@@ -105,9 +109,9 @@ contract GemFactoryStorage {
     // constants
     uint32 public constant CALLBACK_GAS_LIMIT = 210000;
 
-    /**
-     * EVENTS **
-     */
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------EVENTS--------------------------------------------
+    //---------------------------------------------------------------------------------------
 
     // Premining events
     event Created(
@@ -185,8 +189,32 @@ contract GemFactoryStorage {
         uint256 MythicValue
     );
 
-    // errors
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------ERRORS--------------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    // Forging errors
     error InvalidQuadrant(uint8 quadrant, uint8 value);
     error InvalidSumOfQuadrants();
     error ColorNotExist();
+
+    // Mining errors
+    error MismatchedArrayLengths();
+    error AddressZero();
+    error NotGemOwner();
+    error CooldownPeriodNotElapsed();
+    error GemIsLocked();
+    error GemIsNotLocked();
+    error WrongRarity();
+    error NoMiningTryLeft();
+    error NotMining();
+    error GemAlreadyPicked();
+    error NeitherGemOwnerNorAdmin();
+    error MiningPeriodNotElapsed();
+
+    // Transfer error
+    error SameSenderAndRecipient();
+
+    // Random fullfil error
+    error RequestNotMade();
 }

@@ -33,4 +33,16 @@ contract MarketPlaceStorage {
     event GemRemovedFromSale(uint256 tokenId);
     event WSTONClaimed(uint256 tokenId, address claimer);
     event SetDiscountRate(uint256 discountRate);
+
+
+    error NoTokens();
+    error WrongLength();
+    error GemIsNotForSale();
+    error NotGemOwner();
+    error WrongDiscountRate();
+    error WrongStakingIndex();
+    error WrongPrice();
+    error GemIsAlreadyForSaleOrIsMining();
+    error AddressZero();
+    error WrongSeller();
 }

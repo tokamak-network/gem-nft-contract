@@ -35,6 +35,13 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
 
     bool paused = false;
 
+    error InvalidAddress();
+    error WstonAddressIsNotSet();
+    error TonAddressIsNotSet();
+    error UnsuffiscientWstonBalance();
+    error UnsuffiscientTonBalance();
+    error NotEnoughWstonAvailableInTreasury();
+
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
       _;
@@ -80,47 +87,66 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
 
 
     function setGemFactory(address _gemFactory) external onlyOwner {
-        require(gemFactory != address(0), "Invalid address");
+        if(gemFactory == address(0)) {
+            revert InvalidAddress();
+        }
         gemFactory = _gemFactory;
     }
 
     function setRandomPack(address _randomPack) external onlyOwner {
-        require(_randomPack != address(0), "Invalid address");
+        if(_randomPack == address(0)) {
+            revert InvalidAddress();
+        }
         randomPack = _randomPack;
     }
 
     function setMarketPlace(address marketplace) external onlyOwner {
-        require(marketplace != address(0), "Invalid address");
+        if(marketplace == address(0)) {
+            revert InvalidAddress();
+        }
         _marketplace = marketplace;
     }
 
     function setAirdrop(address _airdrop) external onlyOwner {
-        require(_airdrop != address(0), "Invialid address");
+        if(_airdrop == address(0)) {
+            revert InvalidAddress();
+        }
         airdrop = _airdrop;
     }
 
     function setWstonSwapPool(address _wstonSwapPool) external onlyOwner {
-        require(_wstonSwapPool != address(0), "Invalid address");
+        if(_wstonSwapPool == address(0)) {
+            revert InvalidAddress();
+        }
         wstonSwapPool = _wstonSwapPool;
     }
 
     function approveGemFactory() external onlyOwner {
+        if(wston == address(0)) {
+            revert WstonAddressIsNotSet();
+        }
         require(wston != address(0), "wston address not set");
         IERC20(wston).approve(gemFactory, type(uint256).max);
     }
 
     function wstonApproveMarketPlace() external onlyOwner {
-        require(wston != address(0), "wston address not set");
+        if(wston == address(0)) {
+            revert WstonAddressIsNotSet();
+        }
         IERC20(wston).approve(_marketplace, type(uint256).max);
     }
 
     function tonApproveMarketPlace() external onlyOwner {
-        require(ton != address(0), "wston address not set");
+        if(wston == address(0)) {
+            revert WstonAddressIsNotSet();
+        }
         IERC20(ton).approve(_marketplace, type(uint256).max);
     }
 
     function tonApproveWstonSwapPool() external onlyOwner {
-        require(ton != address(0), "wston address not set");
+        if(ton == address(0)) {
+            revert TonAddressIsNotSet();
+        }
         IERC20(ton).approve(wstonSwapPool, type(uint256).max);
     }
 
@@ -133,19 +159,26 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     }
 
     function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrRandomPackOrAirdropOrOwner nonReentrant returns(bool) {
-        require(_to != address(0), "address zero");
+        if(_to == address(0)) {
+            revert InvalidAddress();
+        }
         uint256 contractWSTONBalance = getWSTONBalance();
-        require(contractWSTONBalance >= _amount, "Unsuffiscient WSTON balance");
+        if(contractWSTONBalance < _amount) {
+            revert UnsuffiscientWstonBalance();
+        }
 
         IERC20(wston).safeTransfer(_to, _amount);
         return true;
     }
 
     function transferTON(address _to, uint256 _amount) external onlyOwner returns(bool) {
-        require(_to != address(0), "address zero");
+        if(_to == address(0)) {
+            revert InvalidAddress();
+        }        
         uint256 contractTONBalance = getTONBalance();
-        require(contractTONBalance >= _amount, "Unsuffiscient TON balance");
-
+        if(contractTONBalance < _amount) {
+            revert UnsuffiscientTonBalance();
+        }
         IERC20(ton).safeTransfer(_to, _amount);
         return true;
     }
@@ -157,10 +190,10 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         string memory _tokenURI
     ) external onlyOwnerOrRandomPackOrMarketplace returns (uint256) {
         // safety check for WSTON solvency
-        require(
-            getWSTONBalance() >= IGemFactory(gemFactory).getGemsSupplyTotalValue() + IGemFactory(gemFactory).getValueBasedOnRarity(_rarity),
-            "Not enough WSTON available in Treasury"
-        );
+        if(getWSTONBalance() < IGemFactory(gemFactory).getGemsSupplyTotalValue() + IGemFactory(gemFactory).getValueBasedOnRarity(_rarity)) {
+            revert NotEnoughWstonAvailableInTreasury();
+        }
+
         return IGemFactory(gemFactory).createGEM(
             _rarity,
             _color,
@@ -176,14 +209,12 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         string[] memory _tokenURIs
     ) public onlyOwnerOrRandomPackOrMarketplace returns (uint256[] memory) {
         uint256 sumOfNewPoolValues;
-        for (uint256 i = 0; i < _rarities.length; i++) {
+        for (uint256 i = 0; i < _rarities.length; ++i) {
             sumOfNewPoolValues += IGemFactory(gemFactory).getValueBasedOnRarity(_rarities[i]);
         }
-
-        require(
-            getWSTONBalance() >= IGemFactory(gemFactory).getGemsSupplyTotalValue() + sumOfNewPoolValues,
-            "Not enough WSTON available in Treasury"
-        );
+        if(getWSTONBalance() < IGemFactory(gemFactory).getGemsSupplyTotalValue() + sumOfNewPoolValues) {
+            revert NotEnoughWstonAvailableInTreasury();
+        }
 
         return IGemFactory(gemFactory).createGEMPool(
             _rarities,

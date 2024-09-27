@@ -310,12 +310,24 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
      * @return true if the gem user started mining the gem
      */
     function startMiningGEM(uint256 _tokenId) external whenNotPaused returns (bool) {
-        require(msg.sender != address(0), "zero address");
-        require(ownerOf(_tokenId) == msg.sender, "not gem owner");
-        require(Gems[_tokenId].gemCooldownPeriod <= block.timestamp, "Gem cooldown period has not elapsed");
-        require(!Gems[_tokenId].isLocked, "Gem is listed for sale or already mining");
-        require(Gems[_tokenId].rarity != Rarity.COMMON, "rarity must be at least RARE");
-        require(Gems[_tokenId].miningTry != 0, "no mining power left for that GEM");
+        if(msg.sender == address(0)) {
+            revert AddressZero();
+        }
+        if(ownerOf(_tokenId) != msg.sender) {
+            revert NotGemOwner();
+        }
+        if(Gems[_tokenId].gemCooldownPeriod > block.timestamp) {
+            revert CooldownPeriodNotElapsed();
+        }
+        if(Gems[_tokenId].isLocked) {
+            revert GemIsLocked();
+        }
+        if(Gems[_tokenId].rarity == Rarity.COMMON) {
+            revert WrongRarity();
+        }
+        if(Gems[_tokenId].miningTry == 0) {
+            revert NoMiningTryLeft();
+        }
 
         Gems.startMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
 
@@ -324,20 +336,36 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function cancelMining(uint256 _tokenId) external whenNotPaused returns (bool) {
-        require(GEMIndexToOwner[_tokenId] == msg.sender, "not GEM owner");
-        require(Gems[_tokenId].isLocked == true, "Gems is not mining");
-        require(userMiningToken[msg.sender][_tokenId] == true, "user is not mining this Gem");
-        require(Gems[_tokenId].randomRequestId == 0, "already called pickMinedGEM");
-
+        if(GEMIndexToOwner[_tokenId] != msg.sender) {
+            revert NotGemOwner();
+        }
+        if(Gems[_tokenId].isLocked != true) {
+            revert GemIsNotLocked();
+        }
+        if(userMiningToken[msg.sender][_tokenId] != true) {
+            revert NotMining();
+        }
+        if(Gems[_tokenId].randomRequestId != 0) {
+            revert GemAlreadyPicked();
+        }
+        
         Gems.cancelMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
         return true;
     }
 
     function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (uint256) {
-        require(ownerOf(_tokenId) == msg.sender || isAdmin(msg.sender) == true, "neither GEM owner nor admin");
-        require(block.timestamp >= userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod, "mining period has not elapsed");
-        require(Gems[_tokenId].isLocked == true, "Gems is not mining");
-        require(userMiningToken[ownerOf(_tokenId)][_tokenId] == true, "gem not mining");
+        if(ownerOf(_tokenId) != msg.sender && isAdmin(msg.sender) != true) {
+            revert NeitherGemOwnerNorAdmin();
+        }
+        if(block.timestamp < userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod) {
+            revert MiningPeriodNotElapsed();
+        }
+        if(Gems[_tokenId].isLocked == false) {
+            revert GemIsNotLocked();
+        }
+        if(userMiningToken[ownerOf(_tokenId)][_tokenId] != true) {
+            revert NotMining();
+        }
 
         uint256 requestId = requestRandomness(0, 0, CALLBACK_GAS_LIMIT);
         Gems[_tokenId].randomRequestId = requestId;
@@ -354,8 +382,12 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function meltGEM(uint256 _tokenId) external whenNotPaused {
-        require(msg.sender != address(0), "zero address");
-        require(GEMIndexToOwner[_tokenId] == msg.sender);
+        if(msg.sender == address(0)) {
+            revert AddressZero();
+        }
+        if(GEMIndexToOwner[_tokenId] != msg.sender) {
+            revert NotGemOwner();
+        }
         uint256 amount = Gems[_tokenId].value;
         Gems.burnGem(GEMIndexToOwner, ownershipTokenCount, msg.sender, _tokenId);
         // ERC721 burn function
@@ -367,7 +399,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function burnTokens(address _from, uint256[] memory _tokenIds) internal {
-        for(uint256 i = 0; i < _tokenIds.length; i++) {
+        for(uint256 i = 0; i < _tokenIds.length; ++i) {
             // delete GEM from the Gems array and every other ownership/approve storage
             delete Gems[_tokenIds[i]];
             ownershipTokenCount[_from]--;
@@ -511,16 +543,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint8[4][] memory _quadrants,
         string[] memory _tokenURIs
     ) public onlyTreasury whenNotPaused returns (uint256[] memory) {
-        require(
-            _rarities.length == _colors.length &&
-            _colors.length == _quadrants.length &&
-            _quadrants.length == _tokenURIs.length,
-            "Input arrays must have the same length"
-        );
+
+        uint256 length = _rarities.length;  // Cache the length for gas optimization
+        if (length != _colors.length || length != _quadrants.length || length != _tokenURIs.length) {
+            revert MismatchedArrayLengths();
+        }
 
         uint256[] memory newGemIds = new uint256[](_rarities.length);
 
-        for (uint256 i = 0; i < _rarities.length; i++) {
+        for (uint256 i = 0; i < _rarities.length; ++i) {
             newGemIds[i] = createGEM(_rarities[i], _colors[i], _quadrants[i], _tokenURIs[i]);
         }
 
@@ -528,9 +559,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
         
     function transferFrom(address from, address to, uint256 tokenId) public override(ERC721, IERC721) whenNotPaused {
-        require(to != address(0));
-        require(to != from);
-        require(!Gems[tokenId].isLocked, "Gem is locked");
+        if(to == address(0)) {
+            revert AddressZero();
+        }
+        if(to == from) {
+            revert SameSenderAndRecipient();
+        }
+        if(Gems[tokenId].isLocked) {
+            revert GemIsLocked();
+        }
 
         Gems.transferGem(GEMIndexToOwner, ownershipTokenCount, from, to, tokenId);
         super.transferFrom(from, to, tokenId);
@@ -584,89 +621,6 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         return bytes(colorName[_index1][_index2]).length > 0;
     }
 
-    function _checkColor(uint256 tokenA, uint256 tokenB, uint8 _color_0, uint8 _color_1) internal view returns(bool colorValidated) {
-        colorValidated = false;
-        if(tokenA != tokenB) {
-            uint8[2] memory _color1 = Gems[tokenA].color;
-            uint8 _color1_0 = _color1[0];
-            uint8 _color1_1 = _color1[1];
-            uint8[2] memory _color2 = Gems[tokenB].color;
-            uint8 _color2_0 = _color2[0];
-            uint8 _color2_1 = _color2[1];
-
-            // Two same solid colors
-            if (_color1_0 == _color1_1 && _color2_0 == _color2_1 && _color1_0 == _color2_0) {
-                colorValidated = (_color_0 == _color1_0 && _color_1 == _color1_1); 
-                return colorValidated; 
-            }
-            // Two different solid colors
-            if (_color1_0 == _color1_1 && _color2_0 == _color2_1) {
-                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_0));
-                return colorValidated;
-
-            }
-            // One gradient and one solid (solid exists in gradient)
-            if (((_color1_0 != _color1_1 && _color2_0 == _color2_1) && (_color1_0 == _color2_0 || _color1_1 == _color2_0)) || ((_color1_0 == _color1_1 && _color2_0 != _color2_1) && (_color2_0 == _color1_0 || _color2_1 == _color1_0))) {
-                if (_color1_0 != _color1_1) {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color1_1) || (_color_1 == _color1_0 && _color_0 == _color1_1));
-                    return colorValidated;
-                } else {
-                    colorValidated = ((_color_0 == _color2_0 && _color_1 == _color2_1) || (_color_1 == _color2_0 && _color_0 == _color2_1));
-                    return colorValidated;
-                } 
-            }
-            // One gradient and one solid (solid does not exist in gradient)
-            if (((_color1_0 != _color1_1 && _color2_0 == _color2_1) && (_color1_0 != _color2_0 && _color1_1 != _color2_0)) || ((_color1_0 == _color1_1 && _color2_0 != _color2_1) && (_color1_0 != _color2_0 && _color1_0 != _color2_1))) {
-                if(_color1_0 != _color1_1) {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || 
-                    (_color_0 == _color1_1 && _color_1 == _color2_0) || 
-                    (_color_1 == _color1_0 && _color_0 == _color2_0) || 
-                    (_color_1 == _color1_1 && _color_0 == _color2_0));
-                    return colorValidated;
-                } else {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) ||
-                    (_color_0 == _color1_0 && _color_1 == _color2_1) ||
-                    (_color_1 == _color1_0 && _color_0 == _color2_0) ||
-                    (_color_1 == _color1_0 && _color_0 == _color2_1));   
-                    return colorValidated;  
-                }
-                
-            }
-            // Two same gradients
-            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && ((_color1_0 == _color2_0 && _color1_1 == _color2_1) || (_color1_0 == _color2_1 && _color1_1 == _color2_0))) {
-                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color1_1) || (_color_0 == _color1_1 && _color_1 == _color1_0)); 
-                return colorValidated;
-            }
-            // Two same gradients but one color repetition
-            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && (_color1_0 == _color2_0 || _color1_0 == _color2_1 || _color1_1 == _color2_0 || _color1_1 == _color2_1)) {
-                if (_color1_0 == _color2_0) {
-                    colorValidated = ((_color_0 == _color1_1 && _color_1 == _color2_1) || (_color_0 == _color2_1 && _color_1 == _color1_1)); 
-                    return colorValidated;
-                } else if (_color1_0 == _color2_1) {
-                    colorValidated = ((_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_1)); 
-                    return(_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_1);
-                } else if (_color1_1 == _color2_0) {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_1) || (_color_0 == _color2_1 && _color_1 == _color1_0));
-                    return colorValidated;
-                } else if (_color1_1 == _color2_1) {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_0));
-                    return colorValidated;
-                }
-            }
-            // Two different gradients
-            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && _color1_0 != _color2_0 && _color1_1 != _color2_0 && _color1_0 != _color2_1 && _color1_1 != _color2_1) {
-                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color1_0 && _color_1 == _color2_1) || 
-                (_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color1_1 && _color_1 == _color2_1) ||
-                (_color_0 == _color2_0 && _color_1 == _color1_0) || (_color_0 == _color2_0 && _color_1 == _color1_1) ||
-                (_color_0 == _color2_1 && _color_1 == _color1_0) || (_color_0 == _color2_1 && _color_1 == _color1_1));
-                return colorValidated;
-            }
-        }
-        else {
-            return colorValidated;
-        }
-    }
-
     function _transferGEM(address _from, address _to, uint256 _tokenId) private {
         Gems[_tokenId].gemCooldownPeriod = block.timestamp + getCooldownPeriod(Gems[_tokenId].rarity);
         ownershipTokenCount[_to]++;
@@ -676,7 +630,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     // Implement the abstract function from DRBConsumerBase
     function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
-        require(s_requests[requestId].requested, "Request not made");
+        if(!s_requests[requestId].requested) {
+            revert RequestNotMade();
+        }
         s_requests[requestId].fulfilled = true;
         s_requests[requestId].randomWord = randomNumber;
         uint256 _tokenId = s_requests[requestId].tokenId;
@@ -708,7 +664,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal override {
-        require(msg.sender == ownerOf(tokenId) || isAdmin(msg.sender) == true, "not allowed to set token URI");
+        if(msg.sender != ownerOf(tokenId) && isAdmin(msg.sender) != true) {
+            revert NeitherGemOwnerNorAdmin();
+        }
         super._setTokenURI(tokenId, _tokenURI);
     }
 
@@ -764,7 +722,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function getGem(uint256 tokenId) public view returns (Gem memory) {
-        for (uint256 i = 0; i < Gems.length; i++) {
+        for (uint256 i = 0; i < Gems.length; ++i) {
             if (Gems[i].tokenId == tokenId) {
                 return Gems[i];
             }
@@ -799,7 +757,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function getColorName(uint8 _index1, uint8 _index2) public view returns (string memory) {
-            return colorName[_index1][_index2];
+        return colorName[_index1][_index2];
     }
 
     // Function to count the number of Gems from treasury where quadrants < given quadrant and return their tokenIds
@@ -809,7 +767,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint256 index = 0;
         uint8 sumOfQuadrants = quadrant1 + quadrant2 + quadrant3+ quadrant4;
 
-        for (uint256 i = 0; i < Gems.length; i++) {
+        for (uint256 i = 0; i < Gems.length; ++i) {
             uint8 GemSumOfQuadrants = Gems[i].quadrants[0] + Gems[i].quadrants[1] + Gems[i].quadrants[2] + Gems[i].quadrants[3];
             if (GemSumOfQuadrants < sumOfQuadrants && 
                 GEMIndexToOwner[i] == treasury &&
@@ -824,7 +782,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         }
         // Resize the array to the actual count
         uint256[] memory result = new uint256[](count);
-        for (uint256 j = 0; j < count; j++) {
+        for (uint256 j = 0; j < count; ++j) {
             result[j] = tokenIds[j];
         }
 
@@ -836,7 +794,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint256[] memory tokenIds = new uint256[](Gems.length);
         uint256 index = 0;
         
-        for (uint256 i = 0; i < Gems.length; i++) {
+        for (uint256 i = 0; i < Gems.length; ++i) {
             if (GEMIndexToOwner[i] == treasury &&
                 !Gems[i].isLocked
             ) {
@@ -850,7 +808,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
         // Resize the array to the actual count
         uint256[] memory result = new uint256[](count);
-        for (uint256 j = 0; j < count; j++) {
+        for (uint256 j = 0; j < count; ++j) {
             result[j] = tokenIds[j];
         }
 
@@ -877,7 +835,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             // sequentially up to the totalCat count.
             uint256 gemId;
 
-            for (gemId = 1; gemId <= totalGems; gemId++) {
+            for (gemId = 1; gemId <= totalGems; ++gemId) {
                 if (GEMIndexToOwner[gemId] == _owner) {
                     result[resultIndex] = gemId;
                     resultIndex++;
@@ -893,7 +851,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
     }
 
     function getGemsSupplyTotalValue() external view returns(uint256 totalValue) {
-        for (uint256 i = 0; i < Gems.length; i++) {
+        for (uint256 i = 0; i < Gems.length; ++i) {
             totalValue += Gems[i].value;
         }
     }

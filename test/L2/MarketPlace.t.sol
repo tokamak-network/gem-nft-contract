@@ -434,22 +434,6 @@ contract MarketPlaceTest is L2BaseTest {
         vm.stopPrank();
     }
 
-    function testBuyCommonGem() public {
-        vm.startPrank(user1);
-
-        uint256 wstonTreasuryBalanceBefore = IERC20(wston).balanceOf(treasury);
-
-        IERC20(wston).approve(marketplace, CommonGemsValue);
-        uint256 newTokenId = MarketPlace(marketplace).buyCommonGem();
-
-        uint256 wstonTreasuryBalanceAfter = IERC20(wston).balanceOf(treasury);
-
-        assert(GemFactory(gemfactory).ownerOf(newTokenId) == user1);
-        assert(wstonTreasuryBalanceAfter == wstonTreasuryBalanceBefore + CommonGemsValue);
-
-        vm.stopPrank;
-    }
-
     function testBuyGemWithNewStakingIndex() public {
          
          vm.startPrank(owner);

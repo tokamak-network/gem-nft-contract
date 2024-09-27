@@ -42,6 +42,12 @@ contract L1WrappedStakedTONStorage {
     event Unpaused(address account);
 
     // errors
-    error DepositFailed();  
+    error DepositFailed();
+    error NotEnoughFunds();
+    error WrontAmount();
+    error NoRequestToProcess();
+    error RequestAlreadyProcessed();
+    error WithdrawalDelayNotElapsed();
+      
 
 }

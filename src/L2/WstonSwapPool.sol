@@ -27,10 +27,18 @@ contract WstonSwapPool is Ownable, ReentrancyGuard, WstonSwapPoolStorage, ProxyS
     }
 
     function addLiquidity(uint256 tonAmount, uint256 wstonAmount) external nonReentrant {
-        require(IERC20(ton).allowance(msg.sender, address(this)) >= tonAmount, "TON allowance too low");
-        require(IERC20(wston).allowance(msg.sender, address(this)) >= wstonAmount, "WSTON allowance too low");
-        require(IERC20(ton).balanceOf(msg.sender) >= tonAmount, "TON balance too low");
-        require(IERC20(wston).balanceOf(msg.sender) >= wstonAmount, "WSTON balance too low");
+        if(IERC20(ton).allowance(msg.sender, address(this)) < tonAmount) {
+            revert TonAllowanceTooLow();
+        }
+        if(IERC20(wston).allowance(msg.sender, address(this)) < wstonAmount) {
+            revert WstonAllowanceTooLow();
+        }
+        if(IERC20(ton).balanceOf(msg.sender) < tonAmount) {
+            revert TonBalanceTooLow();
+        }
+        if(IERC20(wston).balanceOf(msg.sender) < wstonAmount) {
+            revert WstonBalanceTooLow();
+        }
 
         _safeTransferFrom(IERC20(ton), msg.sender, address(this), tonAmount);
         _safeTransferFrom(IERC20(wston), msg.sender, address(this), wstonAmount);
@@ -50,7 +58,9 @@ contract WstonSwapPool is Ownable, ReentrancyGuard, WstonSwapPoolStorage, ProxyS
     }
 
     function removeLiquidity(uint256 shares) external nonReentrant {
-        require(lpShares[msg.sender] >= shares, "Insufficient LP shares");
+        if(lpShares[msg.sender] < shares) {
+            revert InsufficientLpShares();
+        }
 
         uint256 tonAmount = (shares * tonReserve) / totalShares;
         uint256 wstonAmount = (shares * wstonReserve) / totalShares;
@@ -69,14 +79,20 @@ contract WstonSwapPool is Ownable, ReentrancyGuard, WstonSwapPoolStorage, ProxyS
 
 
     function swapWSTONforTON(uint256 wstonAmount) external nonReentrant {
-        require(IERC20(wston).allowance(msg.sender, address(this)) >= wstonAmount, "TON allowance too low");
-        require(IERC20(wston).balanceOf(msg.sender) >= wstonAmount, "TON balance too low");
+        if(IERC20(wston).allowance(msg.sender, address(this)) < wstonAmount) {
+            revert WstonAllowanceTooLow();
+        }
+        if(IERC20(wston).balanceOf(msg.sender) < wstonAmount) {
+            revert TonBalanceTooLow();
+        }
 
         uint256 tonAmount = ((wstonAmount * stakingIndex) / DECIMALS) / (10**9);
         uint256 fee = (tonAmount * feeRate) / FEE_RATE_DIVIDER;
         uint256 tonAmountToTransfer = tonAmount - fee;
 
-        require(IERC20(ton).balanceOf(address(this)) >= tonAmount, "TON balance too low in pool");
+        if(IERC20(ton).balanceOf(address(this)) < tonAmount) {
+            revert ContractTonBalanceTooLow();
+        }
 
         _safeTransferFrom(IERC20(wston), msg.sender, address(this), wstonAmount);
         _safeTransfer(IERC20(ton), msg.sender, tonAmountToTransfer);
@@ -91,14 +107,20 @@ contract WstonSwapPool is Ownable, ReentrancyGuard, WstonSwapPoolStorage, ProxyS
     }
 
     function swapTONforWSTON(uint256 tonAmount) external onlyTreasury {
-        require(IERC20(ton).allowance(msg.sender, address(this)) >= tonAmount, "TON allowance too low");
-        require(IERC20(ton).balanceOf(msg.sender) >= tonAmount, "TON balance too low");
+        if(IERC20(ton).allowance(msg.sender, address(this)) < tonAmount) {
+            revert TonAllowanceTooLow();
+        }
+        if(IERC20(ton).balanceOf(msg.sender) < tonAmount) {
+            revert TonBalanceTooLow();
+        }
 
         uint256 wstonAmount = (tonAmount * (10**9) * DECIMALS) / stakingIndex;
         uint256 fee = (wstonAmount * feeRate) / FEE_RATE_DIVIDER;
         uint256 wstonAmountToTransfer = wstonAmount - fee;
 
-        require(IERC20(wston).balanceOf(address(this)) >= wstonAmount, "WSTON balance too low in pool");
+        if(IERC20(wston).balanceOf(address(this)) < wstonAmount) {
+            revert ContractWstonBalanceTooLow();
+        }
 
         _safeTransferFrom(IERC20(ton), msg.sender, address(this), tonAmount);
         _safeTransfer(IERC20(wston), msg.sender, wstonAmountToTransfer);
@@ -113,7 +135,9 @@ contract WstonSwapPool is Ownable, ReentrancyGuard, WstonSwapPoolStorage, ProxyS
     }
 
     function updateStakingIndex(uint256 newIndex) external onlyOwner {
-        require(newIndex >= 10**27, "staking index cannot be less than 1");
+        if(newIndex < 10**27) {
+            revert WrongStakingIndex();
+        }
         stakingIndex = newIndex;
         emit StakingIndexUpdated(newIndex);
     }
@@ -135,7 +159,7 @@ contract WstonSwapPool is Ownable, ReentrancyGuard, WstonSwapPoolStorage, ProxyS
    function _distributeFees(uint256 tonFees, uint256 wstonFees) private {
         if (totalShares == 0) return;
 
-        for (uint256 i = 0; i < lpAddresses.length; i++) {
+        for (uint256 i = 0; i < lpAddresses.length; ++i) {
             address lp = lpAddresses[i];
             uint256 share = lpShares[lp];
             if (share > 0) {

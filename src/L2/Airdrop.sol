@@ -51,7 +51,7 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
             bool isDuplicate = false;
 
             // Check for duplicates within _tokenIds
-            for (uint256 j = 0; j < uniqueCount; j++) {
+            for (uint256 j = 0; j < uniqueCount; ++j) {
                 if (uniqueTokenIds[j] == tokenId) {
                     isDuplicate = true;
                     break;
@@ -60,7 +60,7 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
 
             // Check for duplicates in existing tokensEligible
             if (!isDuplicate) {
-                for (uint256 k = 0; k < existingTokens.length; k++) {
+                for (uint256 k = 0; k < existingTokens.length; ++k) {
                     if (existingTokens[k] == tokenId) {
                         isDuplicate = true;
                         break;
@@ -68,8 +68,12 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
                 }
             }
 
-            require(IGemFactory(gemFactory).ownerOf(tokenId) == treasury, "Token not owned by the treasury");
-            require(IGemFactory(gemFactory).isTokenLocked(tokenId) == false, "Token is not available");
+            if(IGemFactory(gemFactory).ownerOf(tokenId) != treasury) {
+                revert TokenNotOwnedByTreasury();
+            }
+            if(IGemFactory(gemFactory).isTokenLocked(tokenId) == true) {
+                revert TokenNotAvailable();
+            }
 
             // we lock the token so that it cannot be sent to another user through the mining or random pack process
             IGemFactory(gemFactory).setIsLocked(tokenId, true);
@@ -79,7 +83,7 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
 
         // Resize the array to fit the number of unique tokens
         uint256[] memory finalTokenIds = new uint256[](uniqueCount);
-        for (uint256 j = 0; j < uniqueCount; j++) {
+        for (uint256 j = 0; j < uniqueCount; ++j) {
             finalTokenIds[j] = uniqueTokenIds[j];
         }
 
@@ -96,12 +100,16 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
      * @notice claimAirdrop function transfers ownership of each GEM assigned to msg.sender.
      */
     function claimAirdrop() external whenNotPaused nonReentrant {
-        require(userClaimed[msg.sender] == false, "user already claimed");
+        if(userClaimed[msg.sender] == true) {
+            revert UserAlreadyClaimedCurrentAirdrop();
+        }
         uint256[] memory _tokenIds = tokensEligible[msg.sender];
-        require(_tokenIds.length > 0, "user is not eligible for any token");
+        if(_tokenIds.length == 0) {
+            revert UserNotEligible();
+        }
 
         userClaimed[msg.sender] = true;
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
+        for (uint256 i = 0; i < _tokenIds.length; ++i) {
             IGemFactory(gemFactory).setIsLocked(_tokenIds[i], false);
             ITreasury(treasury).transferTreasuryGEMto(msg.sender, _tokenIds[i]);
         }
