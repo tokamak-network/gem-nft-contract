@@ -16,6 +16,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { DRBCoordinatorMock } from "../../src/L2/Mock/DRBCoordinatorMock.sol";
 import { DRBConsumerBase } from "../../src/L2/Randomness/DRBConsumerBase.sol";
 
+import { Airdrop } from "../../src/L2/Airdrop.sol";
+
 contract L2BaseTest is Test {
 
     using SafeERC20 for IERC20;
@@ -65,6 +67,7 @@ contract L2BaseTest is Test {
     address l1wston;
     address l1ton;
     address l2bridge;
+    address airdrop;
 
     //DRB storage
     uint256 public avgL2GasUsed = 2100000;
@@ -216,6 +219,15 @@ contract L2BaseTest is Test {
         GemFactory(gemfactory).addColor("Amethyst",6,6);
         GemFactory(gemfactory).addColor("Amethyst/Amber",6,1);
         GemFactory(gemfactory).addColor("Garnet",7,7);
+
+        //deploying the airdrop contract
+        airdrop = address(new Airdrop(
+            treasury,
+            gemfactory
+        ));
+
+        Treasury(treasury).setAirdrop(airdrop);
+        GemFactory(gemfactory).setAirdrop(airdrop);
 
         vm.stopPrank();
     }

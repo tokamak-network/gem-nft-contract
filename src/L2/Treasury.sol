@@ -28,6 +28,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     address internal gemFactory;
     address internal _marketplace;
     address internal randomPack;
+    address internal airdrop;
     address internal wston;
     address internal ton;
     address internal wstonSwapPool;
@@ -53,17 +54,18 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     modifier onlyOwnerOrRandomPackOrMarketplace() {
         require(
             msg.sender == randomPack ||
-            msg.sender == _marketplace || 
+            msg.sender == _marketplace ||
             isOwner(), "caller is neither owner nor randomPack contract"
         );
         _;
     }
 
-    modifier onlyGemFactoryOrMarketPlaceOrRandomPackOrOwner() {
+    modifier onlyGemFactoryOrMarketPlaceOrRandomPackOrAirdropOrOwner() {
         require(
             msg.sender == gemFactory || 
             msg.sender == _marketplace || 
             msg.sender == randomPack ||
+            msg.sender == airdrop ||
             isOwner(), "caller is neither Owner nor GemFactory nor MarketPlace nor RandomPack"
         );
         _;
@@ -90,6 +92,11 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     function setMarketPlace(address marketplace) external onlyOwner {
         require(marketplace != address(0), "Invalid address");
         _marketplace = marketplace;
+    }
+
+    function setAirdrop(address _airdrop) external onlyOwner {
+        require(_airdrop != address(0), "Invialid address");
+        airdrop = _airdrop;
     }
 
     function setWstonSwapPool(address _wstonSwapPool) external onlyOwner {
@@ -125,7 +132,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         IERC20(wston).approve(_marketplace, amount);
     }
 
-    function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrRandomPackOrOwner nonReentrant returns(bool) {
+    function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrRandomPackOrAirdropOrOwner nonReentrant returns(bool) {
         require(_to != address(0), "address zero");
         uint256 contractWSTONBalance = getWSTONBalance();
         require(contractWSTONBalance >= _amount, "Unsuffiscient WSTON balance");
@@ -134,7 +141,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         return true;
     }
 
-    function transferTON(address _to, uint256 _amount) external onlyOwnerOrAdmin returns(bool) {
+    function transferTON(address _to, uint256 _amount) external onlyOwner returns(bool) {
         require(_to != address(0), "address zero");
         uint256 contractTONBalance = getTONBalance();
         require(contractTONBalance >= _amount, "Unsuffiscient TON balance");
@@ -186,7 +193,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         );
     }
 
-    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlaceOrRandomPackOrOwner returns(bool) {
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlaceOrRandomPackOrAirdropOrOwner returns(bool) {
         IGemFactory(gemFactory).transferFrom(address(this), _to, _tokenId);
         return true;
     }

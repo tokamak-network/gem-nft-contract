@@ -57,10 +57,11 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _;
     }
 
-    modifier onlyMarketPlace() {
+    modifier onlyMarketPlaceOrAirdrop() {
         require(
+            msg.sender == airdrop ||
             msg.sender == marketplace, 
-            "function callable from treasury contract only"
+            "function callable from the marketplace or airdrop contracts only"
         );
         _;
     }
@@ -130,6 +131,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         EpicGemsMiningPeriod = _EpicGemsMiningPeriod;
         LegendaryGemsMiningPeriod = _LegendaryGemsMiningPeriod;
         MythicGemsMiningPeriod = _MythicGemsMiningPeriod;
+
+        emit GemsMiningPeriodModified(
+            _CommonGemsMiningPeriod,
+            _RareGemsMiningPeriod,
+            _UniqueGemsMiningPeriod,
+            _EpicGemsMiningPeriod,
+            _LegendaryGemsMiningPeriod,
+            _MythicGemsMiningPeriod
+        );
     }
 
     function setGemsCooldownPeriods(
@@ -146,6 +156,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         EpicGemsCooldownPeriod = _EpicGemsCooldownPeriod;
         LegendaryGemsCooldownPeriod = _LegendaryGemsCooldownPeriod;
         MythicGemsCooldownPeriod = _MythicGemsCooldownPeriod;
+        
+        emit GemsCoolDownPeriodModified(
+            _CommonGemsCooldownPeriod, 
+            RareGemsCooldownPeriod, 
+            UniqueGemsCooldownPeriod, 
+            EpicGemsCooldownPeriod, 
+            LegendaryGemsCooldownPeriod, 
+            MythicGemsCooldownPeriod
+        );
     }
 
     function setMiningTrys(
@@ -162,6 +181,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         EpicminingTry = _EpicminingTry;
         LegendaryminingTry = _LegendaryminingTry;
         MythicminingTry = _MythicminingTry;
+
+        emit GemsMiningTryModified(
+            _CommonminingTry,
+            _RareminingTry,
+            _UniqueminingTry,
+            _EpicminingTry,
+            _LegendaryminingTry,
+            _MythicminingTry
+        );
     }
 
     function setGemsValue(
@@ -178,6 +206,15 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         EpicGemsValue = _EpicGemsValue;
         LegendaryGemsValue = _LegendaryGemsValue;
         MythicGemsValue = _MythicGemsValue;
+
+        emit GemsValueModified(
+            _CommonGemsValue,
+            _RareGemsValue,
+            _UniqueGemsValue,
+            _EpicGemsValue,
+            _LegendaryGemsValue,
+            _MythicGemsValue
+        );
     }
 
     function setRandomPack(address _randomPack) external onlyOwnerOrAdmin {
@@ -190,6 +227,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function setMarketPlaceAddress(address _marketplace) external onlyOwnerOrAdmin {
         marketplace = _marketplace;
+    }
+
+    function setAirdrop(address _airdrop) external onlyOwnerOrAdmin {
+        airdrop = _airdrop;
     }
 
     //---------------------------------------------------------------------------------------
@@ -441,6 +482,8 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             revert("wrong Rarity");
         }
 
+        uint256 _cooldownDueDate = block.timestamp + _gemCooldownPeriod;
+
         uint256 newGemId = Gems.createGem(
             GEMIndexToOwner,
             ownershipTokenCount,
@@ -450,7 +493,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
             _quadrants,
             _value,
             _miningPeriod,
-            block.timestamp + _gemCooldownPeriod,
+            _cooldownDueDate,
             _miningTry,
             _tokenURI
         );
@@ -458,7 +501,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _safeMint(msg.sender, newGemId);
         _setTokenURI(newGemId, _tokenURI);
 
-        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _gemCooldownPeriod, _tokenURI, msg.sender);
+        emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _cooldownDueDate, _tokenURI, msg.sender);
         return newGemId;
     }
 
@@ -513,7 +556,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _checkOnERC721(from, to, tokenId, data);
     }
 
-    function setIsLocked(uint256 _tokenId, bool _isLocked) external onlyMarketPlace {
+    function setIsLocked(uint256 _tokenId, bool _isLocked) external onlyMarketPlaceOrAirdrop {
         Gems[_tokenId].isLocked = _isLocked;
     }
 
