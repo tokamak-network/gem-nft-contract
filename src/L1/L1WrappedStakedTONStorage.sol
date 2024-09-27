@@ -40,4 +40,8 @@ contract L1WrappedStakedTONStorage {
     // Pause Events
     event Paused(address account);
     event Unpaused(address account);
+
+    // errors
+    error DepositFailed();  
+
 }

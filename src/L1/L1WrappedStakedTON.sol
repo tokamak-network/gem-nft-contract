@@ -20,8 +20,6 @@ interface ICandidate {
 contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONStorage, ReentrancyGuard {
     using SafeERC20 for IERC20; 
 
-    error DepositFailed();  
-
     modifier whenNotPaused() {
         require(!paused, "Pausable: paused");
         _;

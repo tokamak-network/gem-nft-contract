@@ -392,7 +392,9 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         string memory _tokenURI
     ) public onlyTreasury whenNotPaused returns (uint256) {
         
-        require(colorExists(_color[0], _color[1]), "This color does not exist");
+        if (!colorExists(_color[0], _color[1])) {
+            revert ColorNotExist();
+        }        
         
         uint256 _gemCooldownPeriod;
         uint256 _miningPeriod;
@@ -402,66 +404,56 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
 
         if (_rarity == Rarity.COMMON) {
-            require(
-                (_quadrants[0] == 1 || _quadrants[0] == 2) &&
-                (_quadrants[1] == 1 || _quadrants[1] == 2) &&
-                (_quadrants[2] == 1 || _quadrants[2] == 2) &&
-                (_quadrants[3] == 1 || _quadrants[3] == 2),
-                "All quadrants must be 1 or 2 for COMMON rarity"
-            );
+            require(_quadrants[0] == 1 || _quadrants[0] == 2, "Quadrant 0 must be 1 or 2 for COMMON rarity");
+            require(_quadrants[1] == 1 || _quadrants[1] == 2, "Quadrant 1 must be 1 or 2 for COMMON rarity");
+            require(_quadrants[2] == 1 || _quadrants[2] == 2, "Quadrant 2 must be 1 or 2 for COMMON rarity");
+            require(_quadrants[3] == 1 || _quadrants[3] == 2, "Quadrant 3 must be 1 or 2 for COMMON rarity");
             require(sumOfQuadrants < 8, "2222 is RARE not COMMON");
+
             _gemCooldownPeriod = CommonGemsCooldownPeriod;
             _miningPeriod = CommonGemsMiningPeriod;
             _value = CommonGemsValue;
             _miningTry = CommonminingTry;
         } else if (_rarity == Rarity.RARE) {
-            require(
-                (_quadrants[0] == 2 || _quadrants[0] == 3) &&
-                (_quadrants[1] == 2 || _quadrants[1] == 3) &&
-                (_quadrants[2] == 2 || _quadrants[2] == 3) &&
-                (_quadrants[3] == 2 || _quadrants[3] == 3),
-                "All quadrants must be 2 or 3 for RARE rarity"
-            );
+            require(_quadrants[0] == 2 || _quadrants[0] == 3, "Quadrant 0 must be 2 or 3 for RARE rarity");
+            require(_quadrants[1] == 2 || _quadrants[1] == 3, "Quadrant 1 must be 2 or 3 for RARE rarity");
+            require(_quadrants[2] == 2 || _quadrants[2] == 3, "Quadrant 2 must be 2 or 3 for RARE rarity");
+            require(_quadrants[3] == 2 || _quadrants[3] == 3, "Quadrant 3 must be 2 or 3 for RARE rarity");
             require(sumOfQuadrants < 12, "3333 is UNIQUE not RARE");
+            
             _gemCooldownPeriod = RareGemsCooldownPeriod;
             _miningPeriod = RareGemsMiningPeriod;
             _value = RareGemsValue;
             _miningTry = RareminingTry;
         } else if (_rarity == Rarity.UNIQUE) {
-            require(
-                (_quadrants[0] == 3 || _quadrants[0] == 4) &&
-                (_quadrants[1] == 3 || _quadrants[1] == 4) &&
-                (_quadrants[2] == 3 || _quadrants[2] == 4) &&
-                (_quadrants[3] == 3 || _quadrants[3] == 4),
-                "All quadrants must be 3 or 4 for UNIQUE rarity"
-            );
+            require(_quadrants[0] == 3 || _quadrants[0] == 4, "Quadrant 0 must be 3 or 4 for UNIQUE rarity");
+            require(_quadrants[1] == 3 || _quadrants[1] == 4, "Quadrant 1 must be 3 or 4 for UNIQUE rarity");
+            require(_quadrants[2] == 3 || _quadrants[2] == 4, "Quadrant 2 must be 3 or 4 for UNIQUE rarity");
+            require(_quadrants[3] == 3 || _quadrants[3] == 4, "Quadrant 3 must be 3 or 4 for UNIQUE rarity");
             require(sumOfQuadrants < 16, "4444 is EPIC not UNIQUE");
+
             _gemCooldownPeriod = UniqueGemsCooldownPeriod;
             _miningPeriod = UniqueGemsMiningPeriod;
             _value = UniqueGemsValue;
             _miningTry = UniqueminingTry;
         } else if (_rarity == Rarity.EPIC) {
-            require(
-                (_quadrants[0] == 4 || _quadrants[0] == 5) &&
-                (_quadrants[1] == 4 || _quadrants[1] == 5) &&
-                (_quadrants[2] == 4 || _quadrants[2] == 5) &&
-                (_quadrants[3] == 4 || _quadrants[3] == 5),
-                "All quadrants must be 4 or 5 for EPIC rarity"
-            );
+            require(_quadrants[0] == 4 || _quadrants[0] == 5, "Quadrant 0 must be 4 or 5 for EPIC rarity");
+            require(_quadrants[1] == 4 || _quadrants[1] == 5, "Quadrant 1 must be 4 or 5 for EPIC rarity");
+            require(_quadrants[2] == 4 || _quadrants[2] == 5, "Quadrant 2 must be 4 or 5 for EPIC rarity");
+            require(_quadrants[3] == 4 || _quadrants[3] == 5, "Quadrant 3 must be 4 or 5 for EPIC rarity");
             require(sumOfQuadrants < 20, "5555 is LEGENDARY not EPIC");
+            
             _gemCooldownPeriod = EpicGemsCooldownPeriod;
             _miningPeriod = EpicGemsMiningPeriod;
             _value = EpicGemsValue;
             _miningTry = EpicminingTry;
         } else if (_rarity == Rarity.LEGENDARY) {
-            require(
-                (_quadrants[0] == 5 || _quadrants[0] == 6) &&
-                (_quadrants[1] == 5 || _quadrants[1] == 6) &&
-                (_quadrants[2] == 5 || _quadrants[2] == 6) &&
-                (_quadrants[3] == 5 || _quadrants[3] == 6),
-                "All quadrants must be 5 or 6 for LEGENDARY rarity"
-            );
+            require(_quadrants[0] == 5 || _quadrants[0] == 6, "Quadrant 0 must be 5 or 6 for LEGENDARY rarity");
+            require(_quadrants[1] == 5 || _quadrants[1] == 6, "Quadrant 1 must be 5 or 6 for LEGENDARY rarity");
+            require(_quadrants[2] == 5 || _quadrants[2] == 6, "Quadrant 2 must be 5 or 6 for LEGENDARY rarity");
+            require(_quadrants[3] == 5 || _quadrants[3] == 6, "Quadrant 3 must be 5 or 6 for LEGENDARY rarity");
             require(sumOfQuadrants < 24, "6666 is MYTHIC not LEGENDARY");
+
             _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
             _miningPeriod = LegendaryGemsMiningPeriod;
             _value = LegendaryGemsValue;

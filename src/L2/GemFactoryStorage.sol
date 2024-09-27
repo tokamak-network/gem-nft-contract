@@ -184,4 +184,9 @@ contract GemFactoryStorage {
         uint256 LegendaryValue,
         uint256 MythicValue
     );
+
+    // errors
+    error InvalidQuadrant(uint8 quadrant, uint8 value);
+    error InvalidSumOfQuadrants();
+    error ColorNotExist();
 }
