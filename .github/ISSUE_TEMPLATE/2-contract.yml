@@ -1,0 +1,26 @@
+name: gem-nft-contract - Contract Bugs
+description: Report CodeReview by October 8, 2024. Report contract bugs for gem-nft-contract service.
+title: "[Gem-nft-contact - Contract Bugs]: "
+labels: ["codeReivew: gem-nft"]
+assignees:
+  - mehdi-defiesta
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Make sure you are referencing codeReview branch. 
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen? 
+      placeholder: Tell us what you see! 
+      value: "Describe the bug and its behavior! You can reference the problematic code using links (codeReview branch)"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
