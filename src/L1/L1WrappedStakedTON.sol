@@ -18,7 +18,9 @@ interface ICandidate {
 
 
 contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONStorage, ReentrancyGuard {
-    using SafeERC20 for IERC20;   
+    using SafeERC20 for IERC20; 
+
+    error DepositFailed();  
 
     modifier whenNotPaused() {
         require(!paused, "Pausable: paused");
@@ -62,16 +64,35 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
     function depositAndGetWSTON(
         uint256 _amount
     ) external whenNotPaused nonReentrant {
-        require(_depositAndGetWSTONTo(msg.sender, _amount), "failed to deposit and get WSTON");
+        if(!_depositAndGetWSTONTo(msg.sender, _amount)) {
+            revert DepositFailed();
+        }
     }
 
     function depositAndGetWSTONTo(
         address _to,
         uint256 _amount
     ) external whenNotPaused nonReentrant {
-        require(_depositAndGetWSTONTo(_to, _amount), "failed to deposit and get WSTON");
+        if(!_depositAndGetWSTONTo(_to, _amount)) {
+            revert DepositFailed();
+        }
     }
 
+    /**
+     * @dev Internal function to deposit WTON and mint WSTON for a specified address.
+     * Transfers `_amount` of WTON to this contract, updates seigniorage, 
+     * stakes the amount in the DepositManager, and mints WSTON.
+     * @param _to The address that will receive the minted WSTON.
+     * @param _amount The amount of WTON to be deposited and staked.
+     * @return bool Returns true if the operation is successful.
+     * Requirements:
+     * - `_amount` must not be zero.
+     * - `_to` must have allowed the contract to spend at least `_amount` of WTON.
+     * - WTON transfer to this contract must succeed.
+     * - Seigniorage update must succeed if necessary.
+     * - Approval for depositManager to spend on behalf of this contract must succeed.
+     * - Staking the amount in DepositManager must succeed.
+     */
     function _depositAndGetWSTONTo(
         address _to,
         uint256 _amount
