@@ -1,5 +1,5 @@
-name: gem-nft-contract - Contract Bugs
-description: Report CodeReview by October 8, 2024. Report contract bugs for gem-nft-contract service.
+name: Contract Bugs
+description: Code review until October 8, 2024. Report contract bugs for gem-nft-contract.
 title: "[Gem-nft-contact - Contract Bugs]: "
 labels: ["codeReivew: gem-nft"]
 assignees:
@@ -36,3 +36,4 @@ body:
     id: Demo
     attributes:
       label: Demo
+
