@@ -6,6 +6,10 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import {AuthRole} from "./AuthRole.sol";
 
 contract AuthControl is AuthRole, ERC165, AccessControl {
+
+    error ZeroAddress();
+    error SameAdmin();
+
     modifier onlyAdmin() {
         require(isAdmin(msg.sender), "AuthControl: Caller is not an admin");
         _;
@@ -55,8 +59,13 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
     /// @dev transfer admin
     /// @param newAdmin new admin address
     function transferAdmin(address newAdmin) public virtual onlyOwner {
-        require(newAdmin != address(0), "Accessible: zero address");
-        require(msg.sender != newAdmin, "Accessible: same admin");
+        if (newAdmin == address(0)) {
+            revert ZeroAddress();
+        }
+        
+        if (msg.sender == newAdmin) {
+            revert SameAdmin();
+        }
 
         grantRole(ADMIN_ROLE, newAdmin);
         renounceRole(ADMIN_ROLE, msg.sender);
