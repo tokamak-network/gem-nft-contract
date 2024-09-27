@@ -27,6 +27,13 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
         treasury = _treasury;
         gemFactory = _gemFactory;
     }
+
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
+    //---------------------------------------------------------------------------------------
+
+
     /**
      * @notice this function must be called by the owner or an admin to assign a list of tokens to a particular user. 
      * This user will then be able to call claimAirdrop. The owner or the admins can call assignGemForAirdrop multiple times
@@ -64,6 +71,8 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
             require(IGemFactory(gemFactory).ownerOf(tokenId) == treasury, "Token not owned by the treasury");
             require(IGemFactory(gemFactory).isTokenLocked(tokenId) == false, "Token is not available");
 
+            // we lock the token so that it cannot be sent to another user through the mining or random pack process
+            IGemFactory(gemFactory).setIsLocked(tokenId, true);
             uniqueTokenIds[uniqueCount] = tokenId;
             uniqueCount++;
         }
@@ -93,6 +102,7 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
 
         userClaimed[msg.sender] = true;
         for (uint256 i = 0; i < _tokenIds.length; i++) {
+            IGemFactory(gemFactory).setIsLocked(_tokenIds[i], false);
             ITreasury(treasury).transferTreasuryGEMto(msg.sender, _tokenIds[i]);
         }
 
@@ -101,5 +111,14 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
 
         emit TokensClaimed(_tokenIds, msg.sender);
     }
+
+    //---------------------------------------------------------------------------------------
+    //------------------------------VIEW FUNCTIONS-------------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    function getTokensEligible(address _address) public view returns (uint256[] memory) {
+        return tokensEligible[_address];
+    }
+
 
 }

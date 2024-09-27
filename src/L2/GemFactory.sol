@@ -57,10 +57,11 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _;
     }
 
-    modifier onlyMarketPlace() {
+    modifier onlyMarketPlaceOrAirdrop() {
         require(
+            msg.sender == airdrop ||
             msg.sender == marketplace, 
-            "function callable from treasury contract only"
+            "function callable from the marketplace or airdrop contracts only"
         );
         _;
     }
@@ -226,6 +227,10 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
 
     function setMarketPlaceAddress(address _marketplace) external onlyOwnerOrAdmin {
         marketplace = _marketplace;
+    }
+
+    function setAirdrop(address _airdrop) external onlyOwnerOrAdmin {
+        airdrop = _airdrop;
     }
 
     //---------------------------------------------------------------------------------------
@@ -551,7 +556,7 @@ contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthCo
         _checkOnERC721(from, to, tokenId, data);
     }
 
-    function setIsLocked(uint256 _tokenId, bool _isLocked) external onlyMarketPlace {
+    function setIsLocked(uint256 _tokenId, bool _isLocked) external onlyMarketPlaceOrAirdrop {
         Gems[_tokenId].isLocked = _isLocked;
     }
 

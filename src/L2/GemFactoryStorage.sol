@@ -100,6 +100,7 @@ contract GemFactoryStorage {
     address public marketplace;
     address public drbcoordinator;
     address public randomPack;
+    address public airdrop;
 
     // constants
     uint32 public constant CALLBACK_GAS_LIMIT = 210000;
