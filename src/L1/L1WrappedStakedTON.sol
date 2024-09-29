@@ -233,9 +233,8 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         return true;
     }
 
-    function updateSeigniorage() external returns(bool) {
-        require(ISeigManager(seigManager).updateSeigniorage());
-        return true;
+    function updateSeigniorage() external returns(bool) { 
+        return ISeigManager(seigManager).updateSeigniorageLayer(layer2Address);
     }
 
     function updateStakingIndex() internal returns (uint256) {
