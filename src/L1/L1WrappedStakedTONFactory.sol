@@ -8,6 +8,11 @@ contract L1WrappedStakedTONFactory is Ownable {
 
     address public l1wton;
 
+    modifier nonZeroAddress(address _address) {
+        require(_address != address(0), "zeroAddress");
+        _;
+    }
+
     event WSTONTokenCreated(address token, address layer2Address);
 
     constructor(address _l1wton) Ownable(msg.sender) {
@@ -20,10 +25,11 @@ contract L1WrappedStakedTONFactory is Ownable {
         address _seigManager,
         string memory _name,
         string memory _symbol
-    ) external onlyOwner returns(address) {
-        require(_layer2Address != address(0), "Must provide a layer2 candidate");
-        require(_depositManager != address(0), "Must provide the deposit manager address");
-        require(_seigManager != address(0), "Must provide the seig manager address");
+    ) external onlyOwner 
+    nonZeroAddress(_layer2Address) 
+    nonZeroAddress(_depositManager) 
+    nonZeroAddress(_seigManager) 
+    returns(address)  {
 
         L1WrappedStakedTON wston = new L1WrappedStakedTON(
             _layer2Address,

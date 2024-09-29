@@ -59,6 +59,31 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         emit Unpaused(msg.sender);
     }
 
+    function onApprove(
+        address _to,
+        uint256 _amount,
+        bytes calldata data
+    ) external returns (bool) {
+        require(msg.sender == wton, "only accept WTON approve callback");
+
+        (address to, uint256 amount) = _decodeDepositAndGetWSTONOnApproveData(data);
+        require(to == _to && amount == _amount);
+        require(_depositAndGetWSTONTo(to, amount));
+
+        return true;
+    }
+
+    function _decodeDepositAndGetWSTONOnApproveData(bytes calldata data) internal pure returns(address to, uint256 amount) {
+        require(data.length == 52, "Invalid onApprove data for L1WrappedStakedTON");
+        assembly {
+            // The layout of a "bytes calldata" is:
+            // The first 20 bytes: to
+            // The next 32 bytes: amount
+            to := shr(96, calldataload(data.offset))
+            amount := calldataload(add(data.offset, 20))
+        }
+    }
+
     function depositAndGetWSTON(
         uint256 _amount
     ) external whenNotPaused nonReentrant {
