@@ -8,7 +8,7 @@ import "../proxy/ProxyStorage.sol";
 
 import { WstonSwapPoolStorage } from "./WstonSwapPoolStorage.sol";
 
-contract WstonSwapPool is Ownable, ReentrancyGuard, WstonSwapPoolStorage, ProxyStorage {
+contract WstonSwapPool is ProxyStorage, Ownable, ReentrancyGuard, WstonSwapPoolStorage {
 
     modifier onlyTreasury() {
         require(

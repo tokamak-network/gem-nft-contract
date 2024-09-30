@@ -24,7 +24,7 @@ interface ITreasury {
 }
 
 
-contract MarketPlace is MarketPlaceStorage, ReentrancyGuard, Ownable, ProxyStorage {
+contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {

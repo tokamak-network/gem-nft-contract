@@ -22,7 +22,7 @@ interface IWTON {
 }
 
 
-contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONStorage, ReentrancyGuard {
+contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTONStorage, ReentrancyGuard {
     using SafeERC20 for IERC20; 
 
     modifier whenNotPaused() {

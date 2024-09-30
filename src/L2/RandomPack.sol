@@ -26,7 +26,7 @@ interface ITreasury {
     ) external returns (uint256);
 }
 
-contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase, RandomPackStorage, ProxyStorage {
+contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase, RandomPackStorage {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {

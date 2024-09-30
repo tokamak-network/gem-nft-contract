@@ -30,7 +30,7 @@ interface ITreasury {
  * @dev GemFactory handles the creation of GEMs. It allows for admin to premine GEMs for the treasury contract.
  * it also allows for users to mine forge and melt GEMs.
  */
-contract GemFactory is ERC721URIStorage, GemFactoryStorage, ProxyStorage, AuthControl, DRBConsumerBase, ReentrancyGuard {
+contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthControl, DRBConsumerBase, ReentrancyGuard {
 
     using SafeERC20 for IERC20;
     using GemLibrary for GemFactoryStorage.Gem[];

@@ -8,6 +8,8 @@ import { IGemFactory } from "../interfaces/IGemFactory.sol";
 import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import {AuthControl} from "../common/AuthControl.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { TreasuryStorage } from "./TreasuryStorage.sol"; 
+import "../proxy/ProxyStorage.sol";
 
 
 interface IMarketPlace {
@@ -22,25 +24,8 @@ interface IWstonSwapPool {
 }
 
 
-contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
+contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl, TreasuryStorage {
     using SafeERC20 for IERC20;
-
-    address internal gemFactory;
-    address internal _marketplace;
-    address internal randomPack;
-    address internal airdrop;
-    address internal wston;
-    address internal ton;
-    address internal wstonSwapPool;
-
-    bool paused = false;
-
-    error InvalidAddress();
-    error WstonAddressIsNotSet();
-    error TonAddressIsNotSet();
-    error UnsuffiscientWstonBalance();
-    error UnsuffiscientTonBalance();
-    error NotEnoughWstonAvailableInTreasury();
 
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
