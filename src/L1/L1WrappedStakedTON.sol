@@ -16,6 +16,11 @@ interface ICandidate {
     function updateSeigniorage() external returns(bool);
 }
 
+interface IWTON {
+    function approveAndCall(address spender, uint256 amount, bytes memory data) external returns (bool);
+    function swapFromTON(uint256 tonAmount) external returns (bool);
+}
+
 
 contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONStorage, ReentrancyGuard {
     using SafeERC20 for IERC20; 
@@ -100,10 +105,11 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         (address to, uint256 amount) = _decodeDepositAndGetWSTONOnApproveData(data);
         if(msg.sender == ton) {
             require(_to == to && _amount == amount * 1e9);
+            require(_depositAndGetWSTONTo(to, amount, true));
         } else {
             require(_to == to && _amount == amount);
+            require(_depositAndGetWSTONTo(to, amount, false));
         }
-        require(_depositAndGetWSTONTo(to, amount));
 
         return true;
     }
@@ -130,9 +136,10 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
      * @param _amount The amount of WTON to deposit.
      */
     function depositWTONAndGetWSTON(
-        uint256 _amount
+        uint256 _amount,
+        bool _token
     ) external whenNotPaused nonReentrant {
-        if(!_depositAndGetWSTONTo(msg.sender, _amount)) {
+        if(!_depositAndGetWSTONTo(msg.sender, _amount, _token)) {
             revert DepositFailed();
         }
     }
@@ -144,9 +151,10 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
      */
     function depositWTONAndGetWSTONTo(
         address _to,
-        uint256 _amount
+        uint256 _amount,
+        bool _token
     ) external whenNotPaused nonReentrant {
-        if(!_depositAndGetWSTONTo(_to, _amount)) {
+        if(!_depositAndGetWSTONTo(_to, _amount, _token)) {
             revert DepositFailed();
         }
     }
@@ -157,6 +165,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
      * stakes the amount in the DepositManager, and mints WSTON.
      * @param _to The address that will receive the minted WSTON.
      * @param _amount The amount of WTON to be deposited and staked.
+     * @param _token true = TON / false = WTON
      * @return bool Returns true if the operation is successful.
      * Requirements:
      * - `_amount` must not be zero.
@@ -168,7 +177,8 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
      */
     function _depositAndGetWSTONTo(
         address _to,
-        uint256 _amount
+        uint256 _amount,
+        bool _token
     ) internal returns (bool) {
 
         // adding the user to the list => keeping track of withdrawals that are claimable
@@ -178,12 +188,6 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         if(_amount == 0) {
             revert WrontAmount();
         }
-
-        // user transfers wton to this contract
-        require(
-            IERC20(wton).transferFrom(_to, address(this), _amount),
-            "failed to transfer wton to this contract"
-        );
 
         //we update seigniorage to get the latest sWTON balance
         if(lastSeigBlock != 0 && ISeigManager(seigManager).lastSeigBlock() < block.number) {
@@ -195,25 +199,45 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         stakingIndex = updateStakingIndex();
         emit StakingIndexUpdated(stakingIndex);
 
-        // approve depositManager to spend on behalf of the WrappedStakedTON contract 
-        IERC20(wton).approve(depositManager, _amount);
+        if(!_token) {
+            // user transfers wton to this contract
+            require(
+                IERC20(wton).transferFrom(_to, address(this), _amount),
+                "failed to transfer wton to this contract"
+            );
+            // approve depositManager to spend on behalf of the WrappedStakedTON contract 
+            IERC20(wton).approve(depositManager, _amount);
 
-        // deposit _amount to DepositManager
-        require(
-            IDepositManager(depositManager).deposit(
-                layer2Address,
-                _amount
-            ),
-            "failed to stake"
-        );
+            // deposit _amount to DepositManager
+            bytes memory data = abi.encode(layer2Address);    
+            require(
+                IWTON(wton).approveAndCall(depositManager, _amount, data),
+                "approveAndCall failed"
+            );
+        } else {    
+            // user transfers ton to this contract
+            require(
+                IERC20(ton).transferFrom(_to, address(this), _amount),
+                "failed to transfer wton to this contract"
+            );
+            if (IERC20(ton).allowance(address(this), wton) < _amount) IERC20(ton).approve(wton, type(uint256).max);
+            if (!IWTON(wton).swapFromTON(_amount)) revert FailedToSwapFromTONToWTON(_amount);
+
+            // Encode the layer2 address into bytes
+            bytes memory data = abi.encode(layer2Address);           
+            require(
+                IWTON(wton).approveAndCall(depositManager, _amount * 10 ** 9, data),
+                "approveAndCall failed"
+            );
+        }
         
         // calculates the amount of WSTON to mint
         uint256 wstonAmount = getDepositWstonAmount(_amount);
         totalStakedAmount += _amount;
+        totalWstonMinted += wstonAmount;
 
         // we mint WSTON
         _mint(_to, wstonAmount);
-        totalWstonMinted += wstonAmount;
 
         emit Deposited(_to, _amount, wstonAmount, block.timestamp, block.number);
 

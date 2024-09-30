@@ -54,6 +54,7 @@ contract L1WrappedStakedTONStorage {
     error RequestAlreadyProcessed();
     error WithdrawalDelayNotElapsed();
     error NoClaimableAmount(address requestor);
+    error FailedToSwapFromTONToWTON(uint256 amount);
       
 
 }

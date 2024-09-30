@@ -15,7 +15,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         IERC20(wton).approve(l1wrappedstakedton, depositAmount);
 
         // Call the depositAndGetWSTON function
-        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount, false);
 
         //check if user's Titan WSTON balance = 200 WSTON
         assert(L1WrappedStakedTON(l1wrappedstakedton).balanceOf(user1) == depositAmount);
@@ -31,7 +31,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         IERC20(wton).approve(l1wrappedstakedton, depositAmount);
 
         // Call the depositAndGetWSTON function
-        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount, false);
 
         //check if user's Titan WSTON balance = 200 WSTON
         assert(L1WrappedStakedTON(l1wrappedstakedton).balanceOf(user1) == depositAmount);
@@ -52,7 +52,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         //console.log("total WSTON supply before = ", L1WrappedStakedTON(l1wrappedstakedton).totalSupply());
 
         IERC20(wton).approve(l1wrappedstakedton, depositAmount);
-        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount, false);
 
         uint256 stakingIndex = L1WrappedStakedTON(l1wrappedstakedton).stakingIndex();
         uint256 wstonTotalSupply = L1WrappedStakedTON(l1wrappedstakedton).getTotalWSTONSupply();
@@ -76,7 +76,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         vm.startPrank(user1);
         uint256 depositAmount = 200 * 10**27;
         IERC20(wton).approve(l1wrappedstakedton, depositAmount);
-        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount, false);
         vm.stopPrank();
 
         // move to the next 100000 block
@@ -85,7 +85,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         // user2 deposits
         vm.startPrank(user2);
         IERC20(wton).approve(l1wrappedstakedton, depositAmount);
-        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount, false);
         vm.stopPrank();
 
         // move to the next 100000 block
@@ -97,6 +97,8 @@ contract WrappedStakedTONTest is L1BaseTest {
         L1WrappedStakedTON(l1wrappedstakedton).requestWithdrawal(depositAmount);
         uint256 stakingIndex = L1WrappedStakedTON(l1wrappedstakedton).stakingIndex();
         uint256 expectedWTONAmount = (depositAmount * stakingIndex) / DECIMALS;
+
+
         L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedton).getLastWithdrawalRequest(user1);
 
         //console.log("staking index: ", stakingIndex);
@@ -113,7 +115,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         vm.startPrank(user1);
         uint256 depositAmount = 200 * 10**27;
         IERC20(wton).approve(l1wrappedstakedton, depositAmount);
-        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount, false);
         vm.stopPrank();
 
         // move to the next 100000 block
@@ -122,7 +124,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         // user2 deposits
         vm.startPrank(user2);
         IERC20(wton).approve(l1wrappedstakedton, depositAmount);
-        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount);
+        L1WrappedStakedTON(l1wrappedstakedton).depositWTONAndGetWSTON(depositAmount, false);
         vm.stopPrank();
 
         // move to the next 100000 block
