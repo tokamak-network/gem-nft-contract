@@ -120,7 +120,11 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         address _to,
         uint256 _amount
     ) internal returns (bool) {
-        
+
+        // adding the user to the list => keeping track of withdrawals that are claimable
+        addUser(_to);
+
+        // check for wrong amounts
         if(_amount == 0) {
             revert WrontAmount();
         }
@@ -253,6 +257,13 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         return _stakingIndex;
     }
 
+    function addUser(address user) internal {
+        if (!userExists[user]) {
+            users.push(user);
+            userExists[user] = true;
+        }
+    }
+
     function getDepositWstonAmount(uint256 _amount) internal view returns(uint256) {
         uint256 _wstonAmount = (_amount * DECIMALS) / stakingIndex;
         return _wstonAmount;
@@ -287,5 +298,58 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         WithdrawalRequest memory request = withdrawalRequests[requester][index];
         return request;
     }
+
+    /**
+     * @notice Calculates the total claimable amount across all users.
+     * @dev Iterates over all users and their withdrawal requests to sum up the amounts that are eligible for claiming.
+     * @return totalClaimableAmount The total amount that can be claimed by all users.
+     */
+    function getTotalClaimableAmount() external view returns (uint256) {
+        uint256 totalClaimableAmount = 0;
+        uint256 currentBlock = block.number;
+
+        // Iterate over all users who have made withdrawal requests
+        for (uint256 i = 0; i < users.length; ++i) {
+            address user = users[i];
+            uint256 userIndex = withdrawalRequestIndex[user];
+
+            // Iterate over each withdrawal request for the user
+            for (uint256 j = userIndex; j < withdrawalRequests[user].length; ++j) {
+                WithdrawalRequest memory request = withdrawalRequests[user][j];
+
+                // Check if the request is eligible for claiming
+                if (!request.processed && request.withdrawableBlockNumber <= currentBlock) {
+                    totalClaimableAmount += request.amount;
+                }
+            }
+        }
+
+        return totalClaimableAmount;
+    }
+
+    /**
+     * @notice Calculates the total claimable amount for a specific user.
+     * @dev Iterates over the user's withdrawal requests to sum up the amounts that are eligible for claiming.
+     * @param user The address of the user for whom the claimable amount is calculated.
+     * @return totalClaimableAmount The total amount that can be claimed by the specified user.
+     */
+    function getTotalClaimableAmountByUser(address user) external view returns (uint256) {
+        uint256 totalClaimableAmount = 0;
+        uint256 currentBlock = block.number;
+        uint256 userIndex = withdrawalRequestIndex[user];
+
+        // Iterate over each withdrawal request for the user
+        for (uint256 j = userIndex; j < withdrawalRequests[user].length; ++j) {
+            WithdrawalRequest memory request = withdrawalRequests[user][j];
+
+            // Check if the request is eligible for claiming
+            if (!request.processed && request.withdrawableBlockNumber <= currentBlock) {
+                totalClaimableAmount += request.amount;
+            }
+        }
+
+        return totalClaimableAmount;
+    }
+
 
 }

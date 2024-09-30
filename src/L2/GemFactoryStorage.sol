@@ -13,27 +13,27 @@ contract GemFactoryStorage {
     }
 
     struct Gem {
-        uint256 tokenId;
-        Rarity rarity;
-        uint8[4] quadrants; // 4 quadrants
-        uint8[2] color; // id of the color
+        uint256 tokenId;  
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
         uint256 miningPeriod; // Mining delay before claiming
-        uint256 miningTry;
-        bool isLocked; // Locked if gem is listed on the marketplace
-        uint256 value; // 27 decimals
-        string tokenURI; // IPFS address of the metadata file
+        uint256 miningTry; 
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
+        uint256 value; // 27 decimals
+        Rarity rarity; 
+        bool isLocked; // Locked if gem is listed on the marketplace
+        uint8[4] quadrants; // 4 quadrants
+        uint8[2] color; // id of the color
+        string tokenURI; // IPFS address of the metadata file 
     }
 
     struct RequestStatus {
         uint256 tokenId;
-        bool requested; // whether the request has been made
-        bool fulfilled; // whether the request has been successfully fulfilled
         uint256 randomWord;
         uint256 chosenTokenId;
+        bool requested; // whether the request has been made
+        bool fulfilled; // whether the request has been successfully fulfilled
         address requester;
-    }
+    } 
 
     //---------------------------------------------------------------------------------------
     //-------------------------------------STORAGE-------------------------------------------

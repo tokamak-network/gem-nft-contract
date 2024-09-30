@@ -25,6 +25,10 @@ contract L1WrappedStakedTONStorage {
     mapping(address => WithdrawalRequest[]) public withdrawalRequests;
     mapping (address => uint256) internal withdrawalRequestIndex;
 
+    // Array to keep track of users who have made withdrawal requests
+    address[] internal users;
+    mapping(address => bool) internal userExists;
+
     //deposit even
     event Deposited(address to, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
 
