@@ -87,66 +87,48 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
 
 
     function setGemFactory(address _gemFactory) external onlyOwner {
-        if(gemFactory == address(0)) {
-            revert InvalidAddress();
-        }
+        _checkNonAddress(gemFactory);
         gemFactory = _gemFactory;
     }
 
     function setRandomPack(address _randomPack) external onlyOwner {
-        if(_randomPack == address(0)) {
-            revert InvalidAddress();
-        }
+        _checkNonAddress(_randomPack);
         randomPack = _randomPack;
     }
 
     function setMarketPlace(address marketplace) external onlyOwner {
-        if(marketplace == address(0)) {
-            revert InvalidAddress();
-        }
+        _checkNonAddress(marketplace);
         _marketplace = marketplace;
     }
 
     function setAirdrop(address _airdrop) external onlyOwner {
-        if(_airdrop == address(0)) {
-            revert InvalidAddress();
-        }
+        _checkNonAddress(_airdrop);
         airdrop = _airdrop;
     }
 
     function setWstonSwapPool(address _wstonSwapPool) external onlyOwner {
-        if(_wstonSwapPool == address(0)) {
-            revert InvalidAddress();
-        }
+        _checkNonAddress(_wstonSwapPool);
         wstonSwapPool = _wstonSwapPool;
     }
 
     function approveGemFactory() external onlyOwner {
-        if(wston == address(0)) {
-            revert WstonAddressIsNotSet();
-        }
+        _checkNonAddress(wston);
         require(wston != address(0), "wston address not set");
         IERC20(wston).approve(gemFactory, type(uint256).max);
     }
 
     function wstonApproveMarketPlace() external onlyOwner {
-        if(wston == address(0)) {
-            revert WstonAddressIsNotSet();
-        }
+        _checkNonAddress(wston);
         IERC20(wston).approve(_marketplace, type(uint256).max);
     }
 
     function tonApproveMarketPlace() external onlyOwner {
-        if(wston == address(0)) {
-            revert WstonAddressIsNotSet();
-        }
+        _checkNonAddress(wston);
         IERC20(ton).approve(_marketplace, type(uint256).max);
     }
 
     function tonApproveWstonSwapPool() external onlyOwner {
-        if(ton == address(0)) {
-            revert TonAddressIsNotSet();
-        }
+        _checkNonAddress(ton);
         IERC20(ton).approve(wstonSwapPool, type(uint256).max);
     }
 
@@ -159,9 +141,9 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     }
 
     function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrRandomPackOrAirdropOrOwner nonReentrant returns(bool) {
-        if(_to == address(0)) {
-            revert InvalidAddress();
-        }
+        
+        _checkNonAddress(_to);
+
         uint256 contractWSTONBalance = getWSTONBalance();
         if(contractWSTONBalance < _amount) {
             revert UnsuffiscientWstonBalance();
@@ -172,9 +154,7 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
     }
 
     function transferTON(address _to, uint256 _amount) external onlyOwner returns(bool) {
-        if(_to == address(0)) {
-            revert InvalidAddress();
-        }        
+        _checkNonAddress(_to);   
         uint256 contractTONBalance = getTONBalance();
         if(contractTONBalance < _amount) {
             revert UnsuffiscientTonBalance();
@@ -258,6 +238,10 @@ contract Treasury is IERC721Receiver, ReentrancyGuard, AuthControl {
         bytes calldata /*data*/
     ) external pure override returns (bytes4) {
         return this.onERC721Received.selector;
+    }
+
+    function _checkNonAddress(address account) internal pure {
+        if(account == address(0))   revert InvalidAddress();
     }
 
     //---------------------------------------------------------------------------------------
