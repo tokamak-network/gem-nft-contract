@@ -7,6 +7,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 contract L1WrappedStakedTONFactory is Ownable {
 
     address public l1wton;
+    address public l1ton;
 
     modifier nonZeroAddress(address _address) {
         require(_address != address(0), "zeroAddress");
@@ -15,8 +16,9 @@ contract L1WrappedStakedTONFactory is Ownable {
 
     event WSTONTokenCreated(address token, address layer2Address);
 
-    constructor(address _l1wton) Ownable(msg.sender) {
+    constructor(address _l1wton, address _l1ton) Ownable(msg.sender) {
         l1wton = _l1wton;
+        l1ton = _l1ton;
     }
     
     function createWSTONToken(
@@ -34,6 +36,7 @@ contract L1WrappedStakedTONFactory is Ownable {
         L1WrappedStakedTON wston = new L1WrappedStakedTON(
             _layer2Address,
             l1wton,
+            l1ton,
             _depositManager,
             _seigManager,
             _name,

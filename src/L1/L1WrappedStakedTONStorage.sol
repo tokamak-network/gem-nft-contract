@@ -14,6 +14,7 @@ contract L1WrappedStakedTONStorage {
 
     address public layer2Address;
     address public wton;
+    address public ton;
     address public depositManager;
     address public seigManager;
 
@@ -52,6 +53,7 @@ contract L1WrappedStakedTONStorage {
     error NoRequestToProcess();
     error RequestAlreadyProcessed();
     error WithdrawalDelayNotElapsed();
+    error NoClaimableAmount(address requestor);
       
 
 }

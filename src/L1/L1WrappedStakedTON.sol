@@ -30,9 +30,20 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         _;
     }
 
+    /**
+     * @dev Constructor for initializing the contract.
+     * @param _layer2Address The address of the Layer 2 contract.
+     * @param _wton The address of the WTON token contract.
+     * @param _ton The address of the TON token contract.
+     * @param _depositManager The address of the DepositManager contract.
+     * @param _seigManager The address of the SeigManager contract.
+     * @param _name The name of the ERC20 token.
+     * @param _symbol The symbol of the ERC20 token.
+     */
     constructor(
         address _layer2Address,
         address _wton,
+        address _ton,
         address _depositManager,
         address _seigManager,
         string memory _name,
@@ -42,37 +53,67 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         seigManager = _seigManager;
         layer2Address = _layer2Address;
         wton = _wton;
+        ton = _ton;
         stakingIndex = DECIMALS;
     }
 
+    /**
+     * @dev Returns the number of decimals used to get its user representation.
+     * @return The number of decimals.
+     */
     function decimals() public view virtual override returns (uint8) {
         return 27;
     }
 
+    /**
+     * @dev Pauses the contract, preventing certain functions from being called.
+     * Can only be called by the owner.
+     */
     function pause() public onlyOwner whenNotPaused {
         paused = true;
         emit Paused(msg.sender);
     }
 
+    /**
+     * @dev Unpauses the contract, allowing certain functions to be called.
+     * Can only be called by the owner.
+     */
     function unpause() public onlyOwner whenPaused {
         paused = false;
         emit Unpaused(msg.sender);
     }
 
+    /**
+     * @dev Handles the deposits callback for TON or WTON tokens.
+     * @param _to The address to which the tokens are approved.
+     * @param _amount The amount of tokens approved.
+     * @param data Additional data for the approval.
+     * @return Returns true if the operation is successful.
+     */
     function onApprove(
         address _to,
         uint256 _amount,
         bytes calldata data
     ) external returns (bool) {
-        require(msg.sender == wton, "only accept WTON approve callback");
+        require(msg.sender == ton || msg.sender == wton, "only accept TON or WTON approve callback");
 
         (address to, uint256 amount) = _decodeDepositAndGetWSTONOnApproveData(data);
-        require(to == _to && amount == _amount);
+        if(msg.sender == ton) {
+            require(_to == to && _amount == amount * 1e9);
+        } else {
+            require(_to == to && _amount == amount);
+        }
         require(_depositAndGetWSTONTo(to, amount));
 
         return true;
     }
 
+    /**
+     * @dev Decodes the data for deposit and WSTON approval.
+     * @param data The calldata containing the encoded data.
+     * @return to The address to which the tokens are approved.
+     * @return amount The amount of tokens approved.
+     */
     function _decodeDepositAndGetWSTONOnApproveData(bytes calldata data) internal pure returns(address to, uint256 amount) {
         require(data.length == 52, "Invalid onApprove data for L1WrappedStakedTON");
         assembly {
@@ -84,7 +125,11 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         }
     }
 
-    function depositAndGetWSTON(
+    /**
+     * @dev Deposits WTON and mints WSTON for the sender.
+     * @param _amount The amount of WTON to deposit.
+     */
+    function depositWTONAndGetWSTON(
         uint256 _amount
     ) external whenNotPaused nonReentrant {
         if(!_depositAndGetWSTONTo(msg.sender, _amount)) {
@@ -92,7 +137,12 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         }
     }
 
-    function depositAndGetWSTONTo(
+    /**
+     * @dev Deposits WTON and mints WSTON for a specified address.
+     * @param _to The address that will receive the minted WSTON.
+     * @param _amount The amount of WTON to deposit.
+     */
+    function depositWTONAndGetWSTONTo(
         address _to,
         uint256 _amount
     ) external whenNotPaused nonReentrant {
@@ -128,6 +178,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         if(_amount == 0) {
             revert WrontAmount();
         }
+
         // user transfers wton to this contract
         require(
             IERC20(wton).transferFrom(_to, address(this), _amount),
@@ -169,11 +220,21 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         return true;
     }
 
+    /**
+     * @dev Requests a withdrawal of WSTON.
+     * @param _wstonAmount The amount of WSTON to withdraw.
+     */
     function requestWithdrawal(uint256 _wstonAmount) external whenNotPaused {
         uint256 delay = IDepositManager(depositManager).getDelayBlocks(layer2Address);
         require(_requestWithdrawal(_wstonAmount, delay), "failed to request withdrawal");
     }
 
+    /**
+     * @dev Internal function to handle withdrawal requests.
+     * @param _wstonAmount The amount of WSTON to withdraw.
+     * @param delay The delay in blocks before the withdrawal can be processed.
+     * @return bool Returns true if the operation is successful.
+     */
     function _requestWithdrawal(uint256 _wstonAmount, uint256 delay) internal returns (bool) {
         if(balanceOf(msg.sender) < _wstonAmount) {
             revert NotEnoughFunds();
@@ -197,6 +258,10 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
             processed: false
         }));
 
+        unchecked {
+            withdrawalRequestIndex[msg.sender] += 1;
+        }
+
         // Burn wstonAmount
         _burn(msg.sender, _wstonAmount);
 
@@ -204,17 +269,54 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
         return true;
     }
 
-    function claimWithdrawal() external whenNotPaused {
-        require(_claimWithdrawal(), "failed to claim");
+    function claimWithdrawalTotal(bool _token) external whenNotPaused {
+        require(_claimWithdrawalTotal(_token), "failed to claim");
     }
 
-    function _claimWithdrawal() internal returns(bool){
-        uint256 index = withdrawalRequestIndex[msg.sender];
-        if(withdrawalRequests[msg.sender].length <= index) {
+    function _claimWithdrawalTotal(bool _token) internal returns(bool){
+        uint256 totalClaimableAmount = 0;
+        uint256 currentBlock = block.number;
+
+        // Iterate over each withdrawal request for the user
+        for (uint256 j = 0; j < withdrawalRequests[msg.sender].length; ++j) {
+            WithdrawalRequest memory request = withdrawalRequests[msg.sender][j];
+
+            // Check if the request is eligible for claiming
+            if (!request.processed && request.withdrawableBlockNumber <= currentBlock) {
+                withdrawalRequests[msg.sender][j].processed = true;
+                totalClaimableAmount += request.amount;
+            }
+        }
+        
+        // revert if no request is eligible
+        if(totalClaimableAmount == 0) {
+            revert NoClaimableAmount(msg.sender);
+        }
+
+        // process reuest in TON or WTON
+        if(_token) {
+            require(IDepositManager(depositManager).processRequest(layer2Address, true));
+            totalClaimableAmount = totalClaimableAmount / 10 ** 9;
+            IERC20(wton).safeTransfer(msg.sender, totalClaimableAmount);
+        } else {
+            require(IDepositManager(depositManager).processRequest(layer2Address, false));
+            IERC20(wton).safeTransfer(msg.sender, totalClaimableAmount);
+        }
+
+        emit WithdrawalProcessed(msg.sender, totalClaimableAmount);
+        return true;
+    }
+
+    function claimWithdrawalIndex(uint256 _index, bool _token) external whenNotPaused {
+        require(_claimWithdrawalIndex(_index, _token), "failed to claim");       
+    }
+
+    function _claimWithdrawalIndex(uint256 _index, bool _token) internal whenNotPaused returns(bool) {
+        if(_index >= withdrawalRequests[msg.sender].length) {
             revert NoRequestToProcess();
         }
 
-        WithdrawalRequest storage request = withdrawalRequests[msg.sender][index];
+        WithdrawalRequest storage request = withdrawalRequests[msg.sender][_index];
         if(request.processed == true) {
             revert RequestAlreadyProcessed();
         }
@@ -222,20 +324,23 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
             revert WithdrawalDelayNotElapsed();
         }
 
-        request.processed = true;
-        unchecked {
-            withdrawalRequestIndex[msg.sender] += 1;
+        withdrawalRequests[msg.sender][_index].processed = true;
+
+        uint256 amount;
+
+        if(_token) {
+            amount = (request.amount) / 10 ** 9;
+            require(IDepositManager(depositManager).processRequest(layer2Address, true));
+            IERC20(ton).safeTransfer(msg.sender, amount);
+        } else {
+            amount = request.amount;
+            require(IDepositManager(depositManager).processRequest(layer2Address, false));
+            IERC20(wton).safeTransfer(msg.sender, amount);
         }
-
-        uint256 amount = request.amount;
-
-        require(IDepositManager(depositManager).processRequest(layer2Address, false));
-
-        IERC20(wton).safeTransfer(msg.sender, amount);
 
         emit WithdrawalProcessed(msg.sender, amount);
         return true;
-    }
+    } 
 
     function updateSeigniorage() external returns(bool) { 
         return ISeigManager(seigManager).updateSeigniorageLayer(layer2Address);
@@ -289,7 +394,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
     function getTotalWSTONSupply() external view returns(uint256) {return totalSupply();} 
 
     function getLastWithdrawalRequest(address requester) external view returns(WithdrawalRequest memory) {
-        uint256 index = withdrawalRequestIndex[requester];
+        uint256 index = withdrawalRequestIndex[requester] - 1;
         WithdrawalRequest memory request = withdrawalRequests[requester][index];
         return request;
     }
@@ -333,7 +438,7 @@ contract L1WrappedStakedTON is Ownable, ERC20, ProxyStorage, L1WrappedStakedTONS
      * @param user The address of the user for whom the claimable amount is calculated.
      * @return totalClaimableAmount The total amount that can be claimed by the specified user.
      */
-    function getTotalClaimableAmountByUser(address user) external view returns (uint256) {
+    function getTotalClaimableAmountByUser(address user) public view returns (uint256) {
         uint256 totalClaimableAmount = 0;
         uint256 currentBlock = block.number;
         uint256 userIndex = withdrawalRequestIndex[user];

@@ -101,7 +101,7 @@ contract L1BaseTest is Test {
 
         require(Layer2Registry(layer2Registry).registerAndDeployCoinage(candidate, seigManager));
 
-        l1wrappedstakedtonFactory = address(new L1WrappedStakedTONFactory(wton));
+        l1wrappedstakedtonFactory = address(new L1WrappedStakedTONFactory(wton, ton));
         
         DepositManager(depositManager).setSeigManager(seigManager);
 
