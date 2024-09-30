@@ -4,6 +4,7 @@ pragma solidity ^0.8.25;
 import "forge-std/Test.sol";
 import { L1WrappedStakedTONFactory } from "../../src/L1/L1WrappedStakedTONFactory.sol";
 import { L1WrappedStakedTON } from "../../src/L1/L1WrappedStakedTON.sol";
+import { L1WrappedStakedTONProxy } from "../../src/L1/L1WrappedStakedTONProxy.sol";
 import { L1WrappedStakedTONStorage } from "../../src/L1/L1WrappedStakedTONStorage.sol";
 
 
@@ -106,13 +107,7 @@ contract L1BaseTest is Test {
         DepositManager(depositManager).setSeigManager(seigManager);
 
         // deploy and initialize Wrapped Staked TON
-        l1wrappedstakedton = L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).createWSTONToken(
-            candidate,
-            depositManager,
-            seigManager,
-            "Titan Wrapped Staked TON",
-            "Titan WSTON"
-        );
+        l1wrappedstakedton = address(new L1WrappedStakedTONProxy());
 
         vm.stopPrank();
     }
