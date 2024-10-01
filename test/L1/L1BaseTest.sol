@@ -27,7 +27,7 @@ contract L1BaseTest is Test {
     address payable user2;
     address payable committee;
 
-    address l1wrappedstakedton;
+    address l1wrappedstakedtonProxy;
     address l1wrappedstakedtonFactory;
     address wton;
     address ton;
@@ -115,28 +115,29 @@ contract L1BaseTest is Test {
 
         require(Layer2Registry(layer2Registry).registerAndDeployCoinage(candidate, seigManager));
 
-        l1wrappedstakedtonFactory = address(new L1WrappedStakedTONFactory(wton, ton));
+        l1wrappedstakedtonFactory = address(new L1WrappedStakedTONFactory());
+        L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).initialize(wton, ton);
         
         DepositManager(depositManager).setSeigManager(seigManager);
 
         // deploy and initialize Wrapped Staked TON
-        l1wrappedstakedton = L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).createWSTONToken(
+        l1wrappedstakedtonProxy = address(L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).createWSTONToken(
             candidate,
             depositManager,
             seigManager,
             "Titan Wrapped Staked TON",
             "Titan WSTON"
-        );
+        ));
 
         vm.stopPrank();
     }
 
 
     function testSetup() public view {
-        address l1wtonCheck = L1WrappedStakedTON(l1wrappedstakedton).depositManager();
+        address l1wtonCheck = L1WrappedStakedTON(l1wrappedstakedtonProxy).depositManager();
         assert(l1wtonCheck == depositManager);
 
-        address seigManagerCheck =  L1WrappedStakedTON(l1wrappedstakedton).seigManager();
+        address seigManagerCheck =  L1WrappedStakedTON(l1wrappedstakedtonProxy).seigManager();
         assert(seigManagerCheck == seigManager);
 
     }

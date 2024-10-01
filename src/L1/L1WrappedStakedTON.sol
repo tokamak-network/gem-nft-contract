@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
 import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
-import "../proxy/ProxyStorage.sol";
 
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 interface ICandidate {
     function updateSeigniorage() external returns(bool);
@@ -22,7 +25,7 @@ interface ITON {
 }
 
 
-contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTONStorage, ReentrancyGuard {
+contract L1WrappedStakedTON is OwnableUpgradeable, ERC20Upgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable, L1WrappedStakedTONStorage { 
     using SafeERC20 for IERC20; 
 
     modifier whenNotPaused() {
@@ -35,8 +38,12 @@ contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTON
         _;
     }
 
+    constructor() {
+        _disableInitializers();
+    }
+
     /**
-     * @dev Constructor for initializing the contract.
+     * @dev initializing the contract.
      * @param _layer2Address The address of the Layer 2 contract.
      * @param _wton The address of the WTON token contract.
      * @param _ton The address of the TON token contract.
@@ -45,7 +52,8 @@ contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTON
      * @param _name The name of the ERC20 token.
      * @param _symbol The symbol of the ERC20 token.
      */
-    constructor(
+
+    function initialize(
         address _layer2Address,
         address _wton,
         address _ton,
@@ -53,13 +61,21 @@ contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTON
         address _seigManager,
         string memory _name,
         string memory _symbol
-    ) ERC20(_name, _symbol) Ownable(msg.sender) {
+    ) public initializer {
+        __Ownable_init(msg.sender);
+        __ERC20_init(_name, _symbol);
+        __ReentrancyGuard_init();
+        __UUPSUpgradeable_init();
         depositManager = _depositManager;
         seigManager = _seigManager;
         layer2Address = _layer2Address;
         wton = _wton;
         ton = _ton;
         stakingIndex = DECIMALS;
+    }
+
+        function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
+        // Ensure only the owner can authorize upgrades
     }
 
     /**
