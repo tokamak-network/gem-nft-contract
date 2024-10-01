@@ -104,7 +104,7 @@ contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTON
 
         (address to, uint256 amount) = _decodeDepositAndGetWSTONOnApproveData(data);
         if(msg.sender == ton) {
-            require(_to == to && _amount == amount * 1e9);
+            require(_to == to && _amount == amount);
             require(_depositAndGetWSTONTo(to, amount, true));
         } else {
             require(_to == to && _amount == amount);
