@@ -4,7 +4,6 @@ pragma solidity ^0.8.25;
 import "forge-std/Test.sol";
 import { L1WrappedStakedTONFactory } from "../../src/L1/L1WrappedStakedTONFactory.sol";
 import { L1WrappedStakedTON } from "../../src/L1/L1WrappedStakedTON.sol";
-import { L1WrappedStakedTONProxy } from "../../src/L1/L1WrappedStakedTONProxy.sol";
 import { L1WrappedStakedTONStorage } from "../../src/L1/L1WrappedStakedTONStorage.sol";
 
 
@@ -15,7 +14,8 @@ import { CoinageFactory } from "../../src/L1/Mock/CoinageFactory.sol";
 import { Layer2Registry } from "../../src/L1/Mock/Layer2Registry.sol";
 import { Candidate } from "../../src/L1/Mock/Candidate.sol";
 import { RefactorCoinageSnapshot } from "../../src/L1/Mock/proxy/RefactorCoinageSnapshot.sol";
-
+import { TON } from "../../src/L1/Mock/token/TON.sol";
+import { WTON } from "../../src/L1/Mock/token/WTON.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -56,15 +56,28 @@ contract L1BaseTest is Test {
         vm.startPrank(owner);
         vm.warp(1632934800);
 
-        wton = address(new MockToken("Wrapped Ton", "WTON", 27)); // 27 decimals
-        ton = address(new MockToken("Ton", "TON", 18)); // 18 decimals
+        ton = address(new TON()); // 18 decimals
+        wton = address(new WTON(TON(ton))); // 27 decimals
+        
+        // we mint 1,000,000 TON to the owner
+        TON(ton).mint(owner, 1000000 * 10 ** 18);
 
-        // Transfer some tokens to User1
-        IERC20(wton).transfer(user1, 10000 * 10 ** 27); // 10000 WTON
-        IERC20(wton).transfer(user2, 10000 * 10 ** 27); // 10000 WTON
-        IERC20(ton).transfer(user1, 10000 * 10 ** 18); // 10000 TON
-        IERC20(ton).transfer(user2, 10000 * 10 ** 18); // 10000 TON
+        // Transfer 20,000 TON to user 1 and user 2
+        TON(ton).transfer(user1, 20000 * 10 ** 18); 
+        TON(ton).transfer(user2, 20000 * 10 ** 18); 
 
+        // we swap 10,000 TON to WTON
+        vm.startPrank(user1);
+        TON(ton).approve(wton, 10000 * 10 ** 18);
+        WTON(wton).swapFromTON(10000 * 10 ** 18);
+        vm.stopPrank();
+
+        vm.startPrank(user2); 
+        TON(ton).approve(wton, 10000 * 10 ** 18);
+        WTON(wton).swapFromTON(10000 * 10 ** 18); 
+        vm.stopPrank();
+
+        vm.startPrank(owner);
         // give ETH to User1 to cover gasFees associated with using VRF functions
         vm.deal(user1, 100 ether);
         vm.deal(user2, 100 ether);
@@ -107,7 +120,13 @@ contract L1BaseTest is Test {
         DepositManager(depositManager).setSeigManager(seigManager);
 
         // deploy and initialize Wrapped Staked TON
-        l1wrappedstakedton = address(new L1WrappedStakedTONProxy());
+        l1wrappedstakedton = L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).createWSTONToken(
+            candidate,
+            depositManager,
+            seigManager,
+            "Titan Wrapped Staked TON",
+            "Titan WSTON"
+        );
 
         vm.stopPrank();
     }

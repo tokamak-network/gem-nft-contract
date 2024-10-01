@@ -192,12 +192,15 @@ contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTON
         //we update seigniorage to get the latest sWTON balance
         if(lastSeigBlock != 0 && ISeigManager(seigManager).lastSeigBlock() < block.number) {
             require(ICandidate(layer2Address).updateSeigniorage(), "failed to update seigniorage");
+            emit SeigniorageUpdated();
         }
         lastSeigBlock = block.number;
 
         // updating the staking index
         stakingIndex = updateStakingIndex();
         emit StakingIndexUpdated(stakingIndex);
+
+        uint256 wstonAmount;
 
         if(!_token) {
             // user transfers wton to this contract
@@ -213,21 +216,25 @@ contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTON
                 IDepositManager(depositManager).deposit(layer2Address, _amount), 
                 "deposit failed"
             );
+            wstonAmount = getDepositWstonAmount(_amount);
+            totalStakedAmount += _amount;
+
+
         } else {    
             // user transfers ton to this contract
             IERC20(ton).safeTransferFrom(_to, address(this), _amount);
             
             // Encode the layer2 address into bytes
             bytes memory data = abi.encode(depositManager, layer2Address);
+            IERC20(ton).approve(wton, _amount);
             require(
                 ITON(ton).approveAndCall(wton, _amount, data),
                 "approveAndCall failed"
             ); 
+            wstonAmount = getDepositWstonAmount(_amount * 1e9);
+            totalStakedAmount += _amount * 1e9;
         }
         
-        // calculates the amount of WSTON to mint
-        uint256 wstonAmount = getDepositWstonAmount(_amount);
-        totalStakedAmount += _amount;
         totalWstonMinted += wstonAmount;
 
         // we mint WSTON
@@ -360,7 +367,7 @@ contract L1WrappedStakedTON is ProxyStorage,  Ownable, ERC20, L1WrappedStakedTON
         return true;
     } 
 
-    function updateSeigniorage() external returns(bool) { 
+    function updateSeigniorage() public returns(bool) { 
         return ISeigManager(seigManager).updateSeigniorageLayer(layer2Address);
     }
 
