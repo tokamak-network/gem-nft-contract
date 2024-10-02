@@ -242,7 +242,6 @@ contract L1WrappedStakedTON is OwnableUpgradeable, ERC20Upgradeable, ReentrancyG
             
             // Encode the layer2 address into bytes
             bytes memory data = abi.encode(depositManager, layer2Address);
-            IERC20(ton).approve(wton, _amount);
             require(
                 ITON(ton).approveAndCall(wton, _amount, data),
                 "approveAndCall failed"
@@ -256,7 +255,7 @@ contract L1WrappedStakedTON is OwnableUpgradeable, ERC20Upgradeable, ReentrancyG
         // we mint WSTON
         _mint(_to, wstonAmount);
 
-        emit Deposited(_to, _amount, wstonAmount, block.timestamp, block.number);
+        emit Deposited(_to, _token, _amount, wstonAmount, block.timestamp, block.number);
 
         return true;
     }

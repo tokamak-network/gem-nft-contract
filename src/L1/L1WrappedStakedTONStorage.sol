@@ -31,7 +31,7 @@ contract L1WrappedStakedTONStorage {
     mapping(address => bool) internal userExists;
 
     //deposit even
-    event Deposited(address to, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
+    event Deposited(address to, bool token, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
     event SeigniorageUpdated();
 
     // withdrawal events

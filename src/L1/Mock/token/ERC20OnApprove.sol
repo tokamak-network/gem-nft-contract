@@ -10,8 +10,9 @@ import { OnApprove } from "./OnApprove.sol";
 
 contract ERC20OnApprove {
 
+  address tonTest = 0x6E1734aC57e76fcD7fD66266Ae0C2547dB3A713a;
   function approveAndCall(address spender, uint256 amount, bytes memory data) public returns (bool) {
-    //require(approve(spender, amount));
+    require(IERC20(tonTest).approve(spender, amount));
     _callOnApprove(msg.sender, spender, amount, data);
     return true;
   }

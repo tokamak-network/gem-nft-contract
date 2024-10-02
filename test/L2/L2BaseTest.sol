@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
+import { TreasuryProxy } from "../../src/L2/TreasuryProxy.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
 import { RandomPack } from "../../src/L2/RandomPack.sol";
 import { L2StandardERC20 } from "../../src/L2/L2StandardERC20.sol";

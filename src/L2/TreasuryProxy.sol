@@ -8,6 +8,6 @@ import "./TreasuryStorage.sol";
  * @title
  * @dev
  */
-contract RandomPackProxy is ProxyTreasury, TreasuryStorage {
+contract TreasuryProxy is ProxyTreasury, TreasuryStorage {
 
 }

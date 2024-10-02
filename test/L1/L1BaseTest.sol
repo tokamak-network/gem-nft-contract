@@ -57,6 +57,7 @@ contract L1BaseTest is Test {
         vm.warp(1632934800);
 
         ton = address(new TON()); // 18 decimals
+        console.log("ton address:", ton);
         wton = address(new WTON(TON(ton))); // 27 decimals
         
         // we mint 1,000,000 TON to the owner
