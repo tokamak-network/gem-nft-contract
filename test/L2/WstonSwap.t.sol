@@ -16,8 +16,8 @@ contract WstonSwap is L2BaseTest {
 
         vm.startPrank(owner);
 
-        wstonSwapPool = address(new WstonSwapPool(ton, wston, INITIAL_STAKING_INDEX, treasury, feeRate));
-        Treasury(treasury).setWstonSwapPool(wstonSwapPool);
+        wstonSwapPool = address(new WstonSwapPool(ton, wston, INITIAL_STAKING_INDEX, address(treasury), feeRate));
+        treasury.setWstonSwapPool(wstonSwapPool);
 
         vm.stopPrank();
 
@@ -78,9 +78,9 @@ contract WstonSwap is L2BaseTest {
     function testSwapTONforWSTON() public {
         // user 1 deposit 100 TON and 100 WSTON
         testAddLiquidity();
-        uint256 treasurywstonBalanceBefore = IERC20(wston).balanceOf(treasury);
+        uint256 treasurywstonBalanceBefore = IERC20(wston).balanceOf(address(treasury));
 
-        vm.startPrank(treasury);
+        vm.startPrank(address(treasury));
         //treasury wants to swap 50 TON for WSTON
         uint256 tonAmount = 50*10**18;
         IERC20(ton).approve(wstonSwapPool, tonAmount);
@@ -90,7 +90,7 @@ contract WstonSwap is L2BaseTest {
         uint256 wstonFees = (wstonAmountSwapped * 3) / 1000;
         
         //ensuring treasury received the WSTON swapped
-        uint256 treasurywstonBalanceAfter = IERC20(wston).balanceOf(treasury);
+        uint256 treasurywstonBalanceAfter = IERC20(wston).balanceOf(address(treasury));
 
         assert(treasurywstonBalanceAfter == treasurywstonBalanceBefore + wstonAmountSwapped - wstonFees);
 
@@ -202,17 +202,17 @@ contract WstonSwap is L2BaseTest {
     function testSwapTONforWSTONFromTreasury() public {
         testAddLiquidity();
         vm.startPrank(owner);
-        uint256 treasurywstonBalanceBefore = IERC20(wston).balanceOf(treasury);
+        uint256 treasurywstonBalanceBefore = IERC20(wston).balanceOf(address(treasury));
         uint256 tonAmount = 50*10**18;
-        Treasury(treasury).tonApproveWstonSwapPool();
+        treasury.tonApproveWstonSwapPool();
 
-        Treasury(treasury).swapTONforWSTON(tonAmount);
+        treasury.swapTONforWSTON(tonAmount);
 
         uint256 wstonAmountSwapped = tonAmount * (10**9);
         uint256 wstonFees = (wstonAmountSwapped * 3) / 1000;
         
         //ensuring treasury received the WSTON swapped
-        uint256 treasurywstonBalanceAfter = IERC20(wston).balanceOf(treasury);
+        uint256 treasurywstonBalanceAfter = IERC20(wston).balanceOf(address(treasury));
 
         assert(treasurywstonBalanceAfter == treasurywstonBalanceBefore + wstonAmountSwapped - wstonFees);
 

@@ -59,10 +59,11 @@ contract L1WrappedStakedTON is OwnableUpgradeable, ERC20Upgradeable, ReentrancyG
         address _ton,
         address _depositManager,
         address _seigManager,
+        address owner,
         string memory _name,
         string memory _symbol
     ) public initializer {
-        __Ownable_init(msg.sender);
+        __Ownable_init(owner);
         __ERC20_init(_name, _symbol);
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
@@ -74,7 +75,7 @@ contract L1WrappedStakedTON is OwnableUpgradeable, ERC20Upgradeable, ReentrancyG
         stakingIndex = DECIMALS;
     }
 
-        function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
         // Ensure only the owner can authorize upgrades
     }
 

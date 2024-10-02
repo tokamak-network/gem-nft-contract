@@ -8,6 +8,8 @@ import { L1WrappedStakedTON } from "./L1WrappedStakedTON.sol";
 contract L1WrappedStakedTONFactory is OwnableUpgradeable {
     address public l1wton;
     address public l1ton;
+    address public wstonImplementation; 
+
 
     event WSTONTokenCreated(address indexed wston, address indexed layer2Address);
 
@@ -34,9 +36,8 @@ contract L1WrappedStakedTONFactory is OwnableUpgradeable {
     nonZeroAddress(_seigManager) 
     returns(address)  {
 
-        L1WrappedStakedTON wstonImplementation = new L1WrappedStakedTON();
         ERC1967Proxy proxy = new ERC1967Proxy(
-            address(wstonImplementation),
+            wstonImplementation,
             abi.encodeWithSelector(
                 L1WrappedStakedTON.initialize.selector,
                 _layer2Address,
@@ -44,6 +45,7 @@ contract L1WrappedStakedTONFactory is OwnableUpgradeable {
                 l1ton,
                 _depositManager,
                 _seigManager,
+                msg.sender,
                 _name,
                 _symbol
             )
@@ -52,5 +54,9 @@ contract L1WrappedStakedTONFactory is OwnableUpgradeable {
         emit WSTONTokenCreated(address(proxy), _layer2Address);
 
         return address(proxy);
+    }
+
+    function setWstonImplementation(address _imp) external onlyOwner { 
+       wstonImplementation = _imp;  
     }
 }

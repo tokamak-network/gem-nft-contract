@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
@@ -10,6 +9,8 @@ import {AuthControl} from "../common/AuthControl.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { TreasuryStorage } from "./TreasuryStorage.sol"; 
 import "../proxy/ProxyStorage.sol";
+
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 
 interface IMarketPlace {
@@ -63,61 +64,63 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         _;
     }
 
-    constructor(address _wston, address _ton, address _gemFactory) {
+    function initialize(address _wston, address _ton, address _gemFactory) external {
+        require(!initialized, "already initialized");   
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         gemFactory = _gemFactory;
         wston = _wston;
         ton = _ton;
+        initialized = true;
     }
 
 
-    function setGemFactory(address _gemFactory) external onlyOwner {
+    function setGemFactory(address _gemFactory) external onlyOwnerOrAdmin {
         _checkNonAddress(gemFactory);
         gemFactory = _gemFactory;
     }
 
-    function setRandomPack(address _randomPack) external onlyOwner {
+    function setRandomPack(address _randomPack) external onlyOwnerOrAdmin {
         _checkNonAddress(_randomPack);
         randomPack = _randomPack;
     }
 
-    function setMarketPlace(address marketplace) external onlyOwner {
+    function setMarketPlace(address marketplace) external onlyOwnerOrAdmin {
         _checkNonAddress(marketplace);
         _marketplace = marketplace;
     }
 
-    function setAirdrop(address _airdrop) external onlyOwner {
+    function setAirdrop(address _airdrop) external onlyOwnerOrAdmin {
         _checkNonAddress(_airdrop);
         airdrop = _airdrop;
     }
 
-    function setWstonSwapPool(address _wstonSwapPool) external onlyOwner {
+    function setWstonSwapPool(address _wstonSwapPool) external onlyOwnerOrAdmin {
         _checkNonAddress(_wstonSwapPool);
         wstonSwapPool = _wstonSwapPool;
     }
 
-    function approveGemFactory() external onlyOwner {
+    function approveGemFactory() external onlyOwnerOrAdmin {
         _checkNonAddress(wston);
         require(wston != address(0), "wston address not set");
         IERC20(wston).approve(gemFactory, type(uint256).max);
     }
 
-    function wstonApproveMarketPlace() external onlyOwner {
+    function wstonApproveMarketPlace() external onlyOwnerOrAdmin {
         _checkNonAddress(wston);
         IERC20(wston).approve(_marketplace, type(uint256).max);
     }
 
-    function tonApproveMarketPlace() external onlyOwner {
+    function tonApproveMarketPlace() external onlyOwnerOrAdmin {
         _checkNonAddress(wston);
         IERC20(ton).approve(_marketplace, type(uint256).max);
     }
 
-    function tonApproveWstonSwapPool() external onlyOwner {
+    function tonApproveWstonSwapPool() external onlyOwnerOrAdmin {
         _checkNonAddress(ton);
         IERC20(ton).approve(wstonSwapPool, type(uint256).max);
     }
 
-    function approveGem(address operator, uint256 _tokenId) external onlyOwner {
+    function approveGem(address operator, uint256 _tokenId) external onlyOwnerOrAdmin {
         IGemFactory(gemFactory).approve(operator, _tokenId);
     }
 
@@ -138,7 +141,7 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         return true;
     }
 
-    function transferTON(address _to, uint256 _amount) external onlyOwner returns(bool) {
+    function transferTON(address _to, uint256 _amount) external onlyOwnerOrAdmin returns(bool) {
         _checkNonAddress(_to);   
         uint256 contractTONBalance = getTONBalance();
         if(contractTONBalance < _amount) {

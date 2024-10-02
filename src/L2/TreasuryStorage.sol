@@ -11,6 +11,7 @@ contract TreasuryStorage {
     address internal wstonSwapPool;
 
     bool paused = false;
+    bool internal initialized;
 
     error InvalidAddress();
     error WstonAddressIsNotSet();
