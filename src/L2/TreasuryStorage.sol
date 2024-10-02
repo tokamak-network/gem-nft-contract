@@ -2,16 +2,16 @@
 pragma solidity ^0.8.25;
 
 contract TreasuryStorage {
-    address internal gemFactory;
-    address internal _marketplace;
-    address internal randomPack;
-    address internal airdrop;
-    address internal wston;
-    address internal ton;
-    address internal wstonSwapPool;
+    address public gemFactory;
+    address public _marketplace;
+    address public randomPack;
+    address public airdrop;
+    address public wston;
+    address public ton;
+    address public wstonSwapPool;
 
     bool paused = false;
-    bool internal initialized;
+    bool public initialized;
 
     error InvalidAddress();
     error WstonAddressIsNotSet();

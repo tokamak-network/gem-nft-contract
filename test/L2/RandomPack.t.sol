@@ -32,7 +32,7 @@ contract MarketPlaceTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasury).createPreminedGEMPool(
+        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
             rarities,
             colors,
             quadrants,
@@ -41,8 +41,8 @@ contract MarketPlaceTest is L2BaseTest {
 
         // Verify GEM creation
         assert(newGemIds.length == 2);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == address(treasury));
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
         assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
         assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
 

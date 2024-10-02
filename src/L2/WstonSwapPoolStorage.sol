@@ -19,7 +19,10 @@ contract WstonSwapPoolStorage {
     address[] public lpAddresses;
     uint256 public totalShares;
 
-    event Swap(address indexed user, uint256 tonAmount, uint256 wstonAmount);
+    bool internal initialized;
+
+    event SwappedWstonForTon(address indexed user, uint256 tonAmount, uint256 wstonAmount);
+    event SwappedTonForWston(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event StakingIndexUpdated(uint256 newIndex);
     event LiquidityAdded(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event LiquidityRemoved(address indexed user, uint256 tonAmount, uint256 wstonAmount);

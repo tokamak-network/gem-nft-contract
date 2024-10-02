@@ -6,6 +6,7 @@ contract AirdropStorage {
     address public gemFactory;
     
     bool public paused;
+    bool internal initialized;
 
     mapping(address => bool) public userClaimed;
     mapping(address => uint256[]) public tokensEligible;

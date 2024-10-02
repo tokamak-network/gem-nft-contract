@@ -101,7 +101,6 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
 
     function approveGemFactory() external onlyOwnerOrAdmin {
         _checkNonAddress(wston);
-        require(wston != address(0), "wston address not set");
         IERC20(wston).approve(gemFactory, type(uint256).max);
     }
 
@@ -111,7 +110,7 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     }
 
     function tonApproveMarketPlace() external onlyOwnerOrAdmin {
-        _checkNonAddress(wston);
+        _checkNonAddress(ton);
         IERC20(ton).approve(_marketplace, type(uint256).max);
     }
 
@@ -198,11 +197,16 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     }
 
     function putGemForSale(uint256 _tokenId, uint256 _price) external onlyOwnerOrAdmin {
-        IGemFactory(gemFactory).approve(_marketplace, _tokenId);
+        if (!IGemFactory(gemFactory).isApprovedForAll(address(this), _marketplace)) {
+            IGemFactory(gemFactory).setApprovalForAll(_marketplace, true);
+        }
         IMarketPlace(_marketplace).putGemForSale(_tokenId, _price);
     }
 
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external onlyOwnerOrAdmin {
+        if (!IGemFactory(gemFactory).isApprovedForAll(address(this), _marketplace)) {
+            IGemFactory(gemFactory).setApprovalForAll(_marketplace, true);
+        }
         IMarketPlace(_marketplace).putGemListForSale(tokenIds, prices);
     }
 

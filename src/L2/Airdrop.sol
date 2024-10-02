@@ -11,7 +11,7 @@ interface ITreasury {
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external;
 }
 
-contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
+contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
       _;
@@ -22,10 +22,12 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
         _;
     }
 
-    constructor(address _treasury, address _gemFactory) {
+    function initialize(address _treasury, address _gemFactory) external {
+        require(!initialized, "already initialized"); 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         treasury = _treasury;
         gemFactory = _gemFactory;
+        initialized = true;  
     }
 
 

@@ -8,6 +8,6 @@ import "./AirdropStorage.sol";
  * @title
  * @dev
  */
-contract GemFactoryProxy is ProxyAirdrop, AirdropStorage {
+contract AirdropProxy is ProxyAirdrop, AirdropStorage {
 
 }

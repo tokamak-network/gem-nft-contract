@@ -29,16 +29,16 @@ contract AirdropTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = treasury.createPreminedGEMPool(
+        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
             rarities,
             colors,
             quadrants,
             tokenURIs
         );
 
-        Airdrop(airdrop).assignGemForAirdrop(newGemIds, user1);
+        Airdrop(airdropProxyAddress).assignGemForAirdrop(newGemIds, user1);
         
-        uint256[] memory _tokenIds = Airdrop(airdrop).getTokensEligible(user1);
+        uint256[] memory _tokenIds = Airdrop(airdropProxyAddress).getTokensEligible(user1);
         assert(newGemIds[0] == _tokenIds[0]);
         assert(newGemIds[1] == _tokenIds[1]);
 
@@ -48,11 +48,11 @@ contract AirdropTest is L2BaseTest {
     function testClaimAirdrop() public {
         testAssignGemForAirdrop();
 
-        assert(GemFactory(gemfactory).ownerOf(0) == address(treasury));
-        assert(GemFactory(gemfactory).ownerOf(1) == address(treasury));
+        assert(GemFactory(gemfactory).ownerOf(0) == treasuryProxyAddress);
+        assert(GemFactory(gemfactory).ownerOf(1) == treasuryProxyAddress);
 
         vm.startPrank(user1);
-        Airdrop(airdrop).claimAirdrop();
+        Airdrop(airdropProxyAddress).claimAirdrop();
         vm.stopPrank();
         
         assert(GemFactory(gemfactory).ownerOf(0) == user1);

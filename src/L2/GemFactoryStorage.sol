@@ -48,8 +48,6 @@ contract GemFactoryStorage {
     uint8 public customBackgroundColorsCount;
     string[] public backgroundColors;
 
-    mapping(uint256 => string) private _tokenURIs;
-
     mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) public ownershipTokenCount;
 
@@ -134,6 +132,7 @@ contract GemFactoryStorage {
     event RandomGemRequested(uint256 tokenId, uint256 requestNumber);
     event NoGemAvailable(uint256 tokenId);
     event CountGemsByQuadrant(uint256 gemCount, uint256[] tokenIds);
+    event MiningCancelled(uint256 _tokenId, address owner, uint256 timestamp);
 
     // Forging Event
     event GemForged(

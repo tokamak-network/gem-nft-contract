@@ -350,6 +350,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         }
         
         Gems.cancelMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
+        emit MiningCancelled(_tokenId, msg.sender, block.timestamp);
         return true;
     }
 
@@ -559,9 +560,6 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
     }
         
     function transferFrom(address from, address to, uint256 tokenId) public override(ERC721, IERC721) whenNotPaused {
-        if(to == address(0)) {
-            revert AddressZero();
-        }
         if(to == from) {
             revert SameSenderAndRecipient();
         }
@@ -576,8 +574,6 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public override(ERC721, IERC721) whenNotPaused {
-        // Check if the caller is authorized to transfer the token
-        _checkAuthorized(from, _msgSender(), tokenId);
 
         this.transferFrom(from, to, tokenId);
 
@@ -815,10 +811,10 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         return (count, result);
     }
 
-    /// @notice Returns a list of all tkGEM IDs assigned to an address.
-    /// @param _owner The owner whose tkGEMs we are interested in.
+    /// @notice Returns a list of all GEM IDs assigned to an address.
+    /// @param _owner The owner whose GEMs we are interested in.
     /// @dev This method MUST NEVER be called by smart contract code. First, it's fairly
-    ///  expensive (it walks the entire tkGEM)
+    ///  expensive (it walks the entire GEM)
 
     function tokensOfOwner(address _owner) public view returns (uint256[] memory ownerTokens) {
         uint256 tokenCount = balanceOf(_owner);

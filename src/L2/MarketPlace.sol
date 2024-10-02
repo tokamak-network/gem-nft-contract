@@ -8,7 +8,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import { MarketPlaceStorage } from "./MarketPlaceStorage.sol";
 import { GemFactory } from "./GemFactory.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {AuthControl} from "../common/AuthControl.sol";
 import "../proxy/ProxyStorage.sol";
 
 interface ITreasury {
@@ -24,7 +24,7 @@ interface ITreasury {
 }
 
 
-contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, Ownable {
+contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthControl {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {
@@ -38,22 +38,27 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, Ownab
         _;
     }
 
-    constructor() Ownable(msg.sender) {}
-
     function initialize(
         address _treasury, 
         address _gemfactory,
         uint256 _tonFeesRate,
         address _wston,
         address _ton
-    ) external onlyOwner {
+    ) external {
+        require(!initialized, "already initialized"); 
         require(_tonFeesRate < 100, "discount rate must be less than 100%");
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         tonFeesRate = _tonFeesRate;
         gemFactory = _gemfactory;
         treasury = _treasury;
         wston = _wston;
         ton = _ton;
         commonGemTokenUri = "";
+        initialized = true;
+    }
+
+    function setTonFeesRate(uint256 _tonFeesRate) external onlyOwner {
+        tonFeesRate = _tonFeesRate;
     }
 
     function setCommonGemTokenUri(string memory _tokenURI) external onlyOwner {
@@ -130,7 +135,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, Ownab
     }
 
     function setStakingIndex(uint256 _stakingIndex) external onlyOwner {
-        if(stakingIndex < 1) {
+        if(_stakingIndex < 1e27) {
             revert WrongStakingIndex();
         }
         stakingIndex = _stakingIndex;
@@ -180,6 +185,10 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, Ownab
         address seller = gemsForSale[_tokenId].seller;
         if(seller == address(0)) {
             revert WrongSeller();
+        }
+
+        if(msg.sender == seller && msg.sender == _payer) {
+            revert BuyerIsSeller("Use RemoveGemFromList instead");
         }
         
         //  transfer TON or WSTON to the treasury contract 

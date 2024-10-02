@@ -2,13 +2,13 @@
 pragma solidity ^0.8.25;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {AuthControl} from "../common/AuthControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "../proxy/ProxyStorage.sol";
 
 import { WstonSwapPoolStorage } from "./WstonSwapPoolStorage.sol";
 
-contract WstonSwapPool is ProxyStorage, Ownable, ReentrancyGuard, WstonSwapPoolStorage {
+contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapPoolStorage {
 
     modifier onlyTreasury() {
         require(
@@ -18,12 +18,21 @@ contract WstonSwapPool is ProxyStorage, Ownable, ReentrancyGuard, WstonSwapPoolS
         _;
     }
 
-    constructor(address _ton, address _wston, uint256 _initialStakingIndex, address _treasury, uint256 _feeRate) Ownable(msg.sender) {
+    function initialize(
+        address _ton, 
+        address _wston,
+        uint256 _initialStakingIndex, 
+        address _treasury, 
+        uint256 _feeRate
+    ) external {
+        require(!initialized, "already initialized");   
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         ton = _ton;
         wston = _wston;
         treasury = _treasury;
         stakingIndex = _initialStakingIndex;
         feeRate = _feeRate;
+        initialized = true;
     }
 
     function addLiquidity(uint256 tonAmount, uint256 wstonAmount) external nonReentrant {
@@ -103,7 +112,7 @@ contract WstonSwapPool is ProxyStorage, Ownable, ReentrancyGuard, WstonSwapPoolS
 
         _distributeFees(fee, 0);
 
-        emit Swap(msg.sender, tonAmount, wstonAmount);
+        emit SwappedWstonForTon(msg.sender, tonAmount, wstonAmount);
     }
 
     function swapTONforWSTON(uint256 tonAmount) external onlyTreasury {
@@ -131,7 +140,7 @@ contract WstonSwapPool is ProxyStorage, Ownable, ReentrancyGuard, WstonSwapPoolS
 
         _distributeFees(0, fee);
 
-        emit Swap(msg.sender, tonAmount, wstonAmount);
+        emit SwappedTonForWston(msg.sender, tonAmount, wstonAmount);
     }
 
     function updateStakingIndex(uint256 newIndex) external onlyOwner {
@@ -181,6 +190,22 @@ contract WstonSwapPool is ProxyStorage, Ownable, ReentrancyGuard, WstonSwapPoolS
 
     function getLpShares(address lp) external view returns (uint256) {
         return lpShares[lp];
+    }
+
+    function getWstonReserve() external view returns(uint256) {
+        return wstonReserve;
+    }
+
+    function getTonReserve() external view returns(uint256) {
+        return tonReserve;
+    }
+
+    function getTotalShares() external view returns(uint256) {
+        return totalShares;
+    }
+
+    function getStakingIndex() external view returns(uint256) {
+        return stakingIndex;
     }
 
 }

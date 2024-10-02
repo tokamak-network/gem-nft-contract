@@ -7,6 +7,7 @@ import { GemFactory } from "../../src/L2/GemFactory.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { TreasuryProxy } from "../../src/L2/TreasuryProxy.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
+import { MarketPlaceProxy } from "../../src/L2/MarketPlaceProxy.sol";
 import { RandomPack } from "../../src/L2/RandomPack.sol";
 import { L2StandardERC20 } from "../../src/L2/L2StandardERC20.sol";
 import { MockTON } from "../../src/L2/Mock/MockTON.sol";
@@ -18,6 +19,8 @@ import { DRBCoordinatorMock } from "../../src/L2/Mock/DRBCoordinatorMock.sol";
 import { DRBConsumerBase } from "../../src/L2/Randomness/DRBConsumerBase.sol";
 
 import { Airdrop } from "../../src/L2/Airdrop.sol";
+import { AirdropProxy } from "../../src/L2/AirdropProxy.sol";
+
 
 contract L2BaseTest is Test {
 
@@ -61,15 +64,21 @@ contract L2BaseTest is Test {
     address gemfactory;
     Treasury treasury;
     TreasuryProxy treasuryProxy;
-    address marketplace;
+    address treasuryProxyAddress;
+    MarketPlace marketplace;
+    MarketPlaceProxy marketplaceProxy;
+    address marketplaceProxyAddress;
     DRBCoordinatorMock drbCoordinatorMock;
+    Airdrop airdrop;
+    AirdropProxy airdropProxy;
+    address airdropProxyAddress;
     address randomPack;
     address wston;
     address ton;
     address l1wston;
     address l1ton;
     address l2bridge;
-    address airdrop;
+    
 
     //DRB storage
     uint256 public avgL2GasUsed = 2100000;
@@ -125,28 +134,33 @@ contract L2BaseTest is Test {
 
         // deploy treasury and marketplace
         treasury = new Treasury();
-        treasury.initialize(
+        treasuryProxy = new TreasuryProxy();
+        treasuryProxy.upgradeTo(address(treasury));
+        treasuryProxyAddress = address(treasuryProxy);
+        Treasury(treasuryProxyAddress).initialize(
             wston,
             ton,
             gemfactory
         );
-        treasuryProxy = new TreasuryProxy();
-        treasuryProxy.upgradeTo(address(treasury));
-        address treasuryProxyAddress = address(treasuryProxy);
 
-        (bool s, ) = treasuryProxyAddress.call(
-            abi.encodeWithSignature("initialize(address, address, address)", wston, ton, gemfactory)
+        marketplace = new MarketPlace();
+        marketplaceProxy = new MarketPlaceProxy();
+        marketplaceProxy.upgradeTo(address(marketplace));
+        marketplaceProxyAddress = address(marketplaceProxy);
+        MarketPlace(marketplaceProxyAddress).initialize(
+            treasuryProxyAddress,
+            gemfactory,
+            tonFeesRate,
+            wston,
+            ton
         );
-        require(s, "initialize call failed");
-
-        marketplace = address(new MarketPlace()); 
 
         vm.stopPrank();
         // mint some TON & TITAN WSTON to treasury
 
         vm.startPrank(l2bridge);
-        L2StandardERC20(wston).mint(address(treasury), 100000 * 10 ** 27);
-        MockTON(ton).mint(address(treasury), 100000 * 10 ** 18);
+        L2StandardERC20(wston).mint(treasuryProxyAddress, 100000 * 10 ** 27);
+        MockTON(ton).mint(treasuryProxyAddress, 100000 * 10 ** 18);
 
         vm.stopPrank();
 
@@ -156,7 +170,7 @@ contract L2BaseTest is Test {
         GemFactory(gemfactory).initialize(
             wston,
             ton,
-            address(treasury),
+            treasuryProxyAddress,
             CommonGemsValue,
             RareGemsValue,
             UniqueGemsValue,
@@ -192,51 +206,23 @@ contract L2BaseTest is Test {
             MythicminingTry
         );
 
-        MarketPlace(marketplace).initialize(
-            address(treasury),
-            gemfactory,
-            tonFeesRate,
-            wston,
-            ton
-        );
-
-        GemFactory(gemfactory).setMarketPlaceAddress(marketplace);
-        (bool success, ) = treasuryProxyAddress.call(
-            abi.encodeWithSignature("setMarketPlace(address)", marketplace)
-        );
-        require(success, "setMarketPlace call failed");
+        GemFactory(gemfactory).setMarketPlaceAddress(marketplaceProxyAddress);
+        Treasury(treasuryProxyAddress).setMarketPlace(marketplaceProxyAddress);
+        Treasury(treasuryProxyAddress).approveGemFactory();
+        Treasury(treasuryProxyAddress).wstonApproveMarketPlace();
+        Treasury(treasuryProxyAddress).tonApproveMarketPlace();
     
-        
-        // approve GemFactory to spend treasury wston
-        (success, ) = treasuryProxyAddress.call(
-            abi.encodeWithSignature("approveGemFactory()")
-        );
-        require(success, "approveGemFactory call failed");
-        
-        (success, ) = treasuryProxyAddress.call(
-            abi.encodeWithSignature("wstonApproveMarketPlace()")
-        );
-        require(success, "wstonApproveMarketPlace call failed");
-
-        (success, ) = treasuryProxyAddress.call(
-            abi.encodeWithSignature("tonApproveMarketPlace()")
-        );
-        require(success, "tonApproveMarketPlace call failed");
 
         // We deploy the RandomPack contract
         randomPack = address(new RandomPack(
             address(drbCoordinatorMock),
             ton,
             gemfactory,
-            address(treasury),
+            treasuryProxyAddress,
             randomPackFees
         ));
 
-        (success, ) = treasuryProxyAddress.call(
-            abi.encodeWithSignature("setRandomPack(address)", randomPack)
-        );
-        require(success, "setRandomPack call failed");
-        GemFactory(gemfactory).setRandomPack(randomPack);
+        Treasury(treasuryProxyAddress).setRandomPack(randomPack);
 
         // we set up the list of colors available for the GEM
         GemFactory(gemfactory).addColor("Ruby",0,0);
@@ -254,16 +240,16 @@ contract L2BaseTest is Test {
         GemFactory(gemfactory).addColor("Garnet",7,7);
 
         //deploying the airdrop contract
-        airdrop = address(new Airdrop(
-            address(treasury),
-            gemfactory
-        ));
+        airdrop = new Airdrop();
+        airdropProxy = new AirdropProxy();
+        airdropProxy.upgradeTo(address(airdrop));
+        airdropProxyAddress = address(airdropProxy);
 
-        (success, ) = treasuryProxyAddress.call(
-            abi.encodeWithSignature("setAirdrop(address)", airdrop)
-        );
-        require(success, "setAirdrop call failed");
-        GemFactory(gemfactory).setAirdrop(airdrop);
+        Airdrop(airdropProxyAddress).initialize(treasuryProxyAddress, gemfactory);
+
+        Treasury(treasuryProxyAddress).setAirdrop(airdropProxyAddress);
+
+        GemFactory(gemfactory).setAirdrop(airdropProxyAddress);
 
         vm.stopPrank();
     }
@@ -277,10 +263,10 @@ contract L2BaseTest is Test {
         assert(tonAddress == address(ton));
 
         address treasuryAddress = GemFactory(gemfactory).treasury();
-        assert(treasuryAddress == address(treasury));
+        assert(treasuryAddress == treasuryProxyAddress);
 
         // Check that the Treasury has approved the GemFactory to spend WSTON
-        uint256 allowance = IERC20(wston).allowance(address(treasury), address(gemfactory));
+        uint256 allowance = IERC20(wston).allowance(treasuryProxyAddress, address(gemfactory));
         assert(allowance == type(uint256).max);
     }
 }
