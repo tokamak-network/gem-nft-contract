@@ -8,6 +8,7 @@ import {AuthControl} from "../common/AuthControl.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
 import "../proxy/ProxyStorage.sol";
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -812,9 +813,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
     }
 
     /// @notice Returns a list of all GEM IDs assigned to an address.
-    /// @param _owner The owner whose GEMs we are interested in.
-    /// @dev This method MUST NEVER be called by smart contract code. First, it's fairly
-    ///  expensive (it walks the entire GEM)
+    /// @param _owner The owner of GEMs.
 
     function tokensOfOwner(address _owner) public view returns (uint256[] memory ownerTokens) {
         uint256 tokenCount = balanceOf(_owner);

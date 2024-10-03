@@ -99,6 +99,8 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         uint256 fee = (tonAmount * feeRate) / FEE_RATE_DIVIDER;
         uint256 tonAmountToTransfer = tonAmount - fee;
 
+        tonFeeBalance += fee;
+
         if(IERC20(ton).balanceOf(address(this)) < tonAmount) {
             revert ContractTonBalanceTooLow();
         }
@@ -109,8 +111,6 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         // Update reserves
         wstonReserve += wstonAmount;
         tonReserve -= tonAmount;
-
-        _distributeFees(fee, 0);
 
         emit SwappedWstonForTon(msg.sender, tonAmount, wstonAmount);
     }
@@ -127,6 +127,8 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         uint256 fee = (wstonAmount * feeRate) / FEE_RATE_DIVIDER;
         uint256 wstonAmountToTransfer = wstonAmount - fee;
 
+        wstonFeeBalance += fee;
+
         if(IERC20(wston).balanceOf(address(this)) < wstonAmount) {
             revert ContractWstonBalanceTooLow();
         }
@@ -138,9 +140,45 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         tonReserve += tonAmount;
         wstonReserve -= wstonAmount;
 
-        _distributeFees(0, fee);
-
         emit SwappedTonForWston(msg.sender, tonAmount, wstonAmount);
+    }
+
+    /**
+     * @notice Distributes accumulated TON and WSTON fees to liquidity providers based on their share.
+     * @dev This function iterates over all liquidity providers and distributes fees proportionally.
+     *      It resets the fee balances before distribution to prevent reentrancy attacks.
+     *      Ensure that the function is called when there are fees to distribute to avoid unnecessary gas costs.
+     * @dev Emits a {FeesDistributed} event.
+     * @dev Uses the nonReentrant modifier to prevent reentrancy attacks.
+     */
+    function distributeFees() external nonReentrant {
+        uint256 tonFees = tonFeeBalance;
+        uint256 wstonFees = wstonFeeBalance;
+        require(tonFees > 0 || wstonFees > 0, "No fees to claim");
+
+        // reset storage variables before transferring
+        tonFeeBalance = 0;
+        wstonFeeBalance = 0;
+
+        if (totalShares == 0) return;
+
+        for (uint256 i = 0; i < lpAddresses.length; ++i) {
+            address lp = lpAddresses[i];
+            uint256 share = lpShares[lp];
+            if (share > 0) {
+                uint256 tonReward = (tonFees * share) / totalShares;
+                uint256 wstonReward = (wstonFees * share) / totalShares;
+
+                if (tonReward > 0) {
+                    _safeTransfer(IERC20(ton), lp, tonReward);
+                }
+                if (wstonReward > 0) {
+                    _safeTransfer(IERC20(wston), lp, wstonReward);
+                }
+            }
+        }
+
+        emit FeesDistributed(tonFees, wstonFees);
     }
 
     function updateStakingIndex(uint256 newIndex) external onlyOwner {
@@ -163,28 +201,6 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
     function _safeTransfer(IERC20 token, address recipient, uint256 amount) private {
         bool sent = token.transfer(recipient, amount);
         require(sent, "Token transfer failed");
-    }
-
-   function _distributeFees(uint256 tonFees, uint256 wstonFees) private {
-        if (totalShares == 0) return;
-
-        for (uint256 i = 0; i < lpAddresses.length; ++i) {
-            address lp = lpAddresses[i];
-            uint256 share = lpShares[lp];
-            if (share > 0) {
-                uint256 tonReward = (tonFees * share) / totalShares;
-                uint256 wstonReward = (wstonFees * share) / totalShares;
-
-                if (tonReward > 0) {
-                    _safeTransfer(IERC20(ton), lp, tonReward);
-                }
-                if (wstonReward > 0) {
-                    _safeTransfer(IERC20(wston), lp, wstonReward);
-                }
-            }
-        }
-
-        emit FeesCollected(tonFees, wstonFees);
     }
 
 

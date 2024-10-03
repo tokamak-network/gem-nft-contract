@@ -16,6 +16,9 @@ contract WstonSwapPoolStorage {
     uint256 public feeRate; // in bps => 100 = 1%
 
     mapping(address => uint256) public lpShares;
+    uint256 public tonFeeBalance;
+    uint256 public wstonFeeBalance;
+
     address[] public lpAddresses;
     uint256 public totalShares;
 
@@ -26,7 +29,7 @@ contract WstonSwapPoolStorage {
     event StakingIndexUpdated(uint256 newIndex);
     event LiquidityAdded(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event LiquidityRemoved(address indexed user, uint256 tonAmount, uint256 wstonAmount);
-    event FeesCollected(uint256 tonFees, uint256 wstonFees);
+    event FeesDistributed(uint256 tonFees, uint256 wstonFees);
 
     error TonAllowanceTooLow();
     error WstonAllowanceTooLow();

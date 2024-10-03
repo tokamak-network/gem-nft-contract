@@ -73,6 +73,7 @@ contract WstonSwap is L2BaseTest {
         uint256 wstonAmount = 50*10**27;
         IERC20(wston).approve(wstonSwapPoolProxyAddress, wstonAmount);
         WstonSwapPool(wstonSwapPoolProxyAddress).swapWSTONforTON(wstonAmount);
+        WstonSwapPool(wstonSwapPoolProxyAddress).distributeFees();
         vm.stopPrank();
 
         uint256 user1tonBalanceAfter = IERC20(ton).balanceOf(user1);
@@ -99,6 +100,7 @@ contract WstonSwap is L2BaseTest {
         uint256 tonAmount = 50*10**18;
         IERC20(ton).approve(wstonSwapPoolProxyAddress, tonAmount);
         WstonSwapPool(wstonSwapPoolProxyAddress).swapTONforWSTON(tonAmount);
+        WstonSwapPool(wstonSwapPoolProxyAddress).distributeFees();
 
         uint256 wstonAmountSwapped = tonAmount * (10**9);
         uint256 wstonFees = (wstonAmountSwapped * 3) / 1000;
@@ -162,6 +164,7 @@ contract WstonSwap is L2BaseTest {
         uint256 wstonAmount = 20*10**27;
         IERC20(wston).approve(wstonSwapPoolProxyAddress, wstonAmount);
         WstonSwapPool(wstonSwapPoolProxyAddress).swapWSTONforTON(wstonAmount);
+        WstonSwapPool(wstonSwapPoolProxyAddress).distributeFees();
         vm.stopPrank();
 
         uint256 user3tonBalanceAfter = IERC20(ton).balanceOf(user3);
@@ -218,9 +221,10 @@ contract WstonSwap is L2BaseTest {
         vm.startPrank(owner);
         uint256 treasurywstonBalanceBefore = IERC20(wston).balanceOf(treasuryProxyAddress);
         uint256 tonAmount = 50*10**18;
-         Treasury(treasuryProxyAddress).tonApproveWstonSwapPool();
+        Treasury(treasuryProxyAddress).tonApproveWstonSwapPool();
 
-         Treasury(treasuryProxyAddress).swapTONforWSTON(tonAmount);
+        Treasury(treasuryProxyAddress).swapTONforWSTON(tonAmount);
+        WstonSwapPool(wstonSwapPoolProxyAddress).distributeFees();
 
         uint256 wstonAmountSwapped = tonAmount * (10**9);
         uint256 wstonFees = (wstonAmountSwapped * 3) / 1000;
@@ -249,6 +253,7 @@ contract WstonSwap is L2BaseTest {
         uint256 wstonAmount = 50*10**27;
         IERC20(wston).approve(wstonSwapPoolProxyAddress, wstonAmount);
         WstonSwapPool(wstonSwapPoolProxyAddress).swapWSTONforTON(wstonAmount);
+        WstonSwapPool(wstonSwapPoolProxyAddress).distributeFees();
         vm.stopPrank();
 
         uint256 user1tonBalanceAfter = IERC20(ton).balanceOf(user1);
@@ -279,6 +284,7 @@ contract WstonSwap is L2BaseTest {
         uint256 wstonAmount = 100*10**27;
         IERC20(wston).approve(wstonSwapPoolProxyAddress, wstonAmount);
         WstonSwapPool(wstonSwapPoolProxyAddress).swapWSTONforTON(wstonAmount);
+        WstonSwapPool(wstonSwapPoolProxyAddress).distributeFees();
         vm.stopPrank();
 
         // TON reserve = 0
