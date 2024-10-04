@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 contract L1WrappedStakedTONStorage {
     struct WithdrawalRequest {
@@ -15,12 +15,12 @@ contract L1WrappedStakedTONStorage {
     address public layer2Address;
     address public wton;
     address public ton;
-    address public depositManager;
-    address public seigManager;
+    address internal depositManager;
+    address internal seigManager;
 
     uint256 public totalStakedAmount;
     uint256 public totalWstonMinted;
-    uint256 public stakingIndex;
+    uint256 internal stakingIndex;
     uint256 public lastSeigBlock;
 
     mapping(address => WithdrawalRequest[]) public withdrawalRequests;

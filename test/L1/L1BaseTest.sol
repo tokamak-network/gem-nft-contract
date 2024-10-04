@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 import "forge-std/Test.sol";
 import { L1WrappedStakedTONFactory } from "../../src/L1/L1WrappedStakedTONFactory.sol";
 import { L1WrappedStakedTON } from "../../src/L1/L1WrappedStakedTON.sol";
+import { L1WrappedStakedTONProxy } from "../../src/L1/L1WrappedStakedTONProxy.sol";
 import { L1WrappedStakedTONStorage } from "../../src/L1/L1WrappedStakedTONStorage.sol";
 
 
@@ -28,7 +29,7 @@ contract L1BaseTest is Test {
     address payable committee;
 
     address l1WrappedStakedTon;
-    address l1wrappedstakedtonProxy;
+    L1WrappedStakedTONProxy l1wrappedstakedtonProxy;
     address l1wrappedstakedtonFactory;
     address wton;
     address ton;
@@ -125,17 +126,19 @@ contract L1BaseTest is Test {
         DepositManager(depositManager).setSeigManager(seigManager);
 
         // deploy and initialize Wrapped Staked TON
-        l1wrappedstakedtonProxy = address(L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).createWSTONToken(
+        l1wrappedstakedtonProxy = L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).createWSTONToken(
             candidate,
             depositManager,
             seigManager,
             "Titan Wrapped Staked TON",
             "Titan WSTON"
-        ));
+        );
 
         vm.stopPrank();
 
-        vm.startPrank(l1wrappedstakedtonProxy);
+
+        // ton approve to bypass the ERC20OnApprove misconfiguration due to solc version update
+        vm.startPrank(address(l1wrappedstakedtonProxy));
         IERC20(ton).approve(wton, type(uint256).max);
         vm.stopPrank();
         //end of setup
@@ -143,10 +146,10 @@ contract L1BaseTest is Test {
 
 
     function testSetup() public view {
-        address l1wtonCheck = L1WrappedStakedTON(l1wrappedstakedtonProxy).depositManager();
+        address l1wtonCheck = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getDepositManager();
         assert(l1wtonCheck == depositManager);
 
-        address seigManagerCheck =  L1WrappedStakedTON(l1wrappedstakedtonProxy).seigManager();
+        address seigManagerCheck =  L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getSeigManager();
         assert(seigManagerCheck == seigManager);
 
     }

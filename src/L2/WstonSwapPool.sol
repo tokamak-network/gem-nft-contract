@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AuthControl} from "../common/AuthControl.sol";
@@ -18,6 +18,15 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         _;
     }
 
+    /**
+     * @notice Initializes the WstonSwapPool contract with the given parameters.
+     * @param _ton The address of the TON token contract.
+     * @param _wston The address of the WSTON token contract.
+     * @param _initialStakingIndex The initial staking index value.
+     * @param _treasury The address of the treasury contract.
+     * @param _feeRate The fee rate for swaps.
+     * @dev Can only be called once. Grants the caller the default admin role.
+     */
     function initialize(
         address _ton, 
         address _wston,
@@ -35,6 +44,13 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         initialized = true;
     }
 
+    /**
+     * @notice Adds liquidity to the pool by depositing TON and/or WSTON tokens.
+     * @param tonAmount The amount of TON tokens to deposit.
+     * @param wstonAmount The amount of WSTON tokens to deposit.
+     * @dev Requires the caller to have approved the contract to spend the specified amounts.
+     *      Emits a {LiquidityAdded} event.
+     */
     function addLiquidity(uint256 tonAmount, uint256 wstonAmount) external nonReentrant {
         if(IERC20(ton).allowance(msg.sender, address(this)) < tonAmount) {
             revert TonAllowanceTooLow();
@@ -48,14 +64,24 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         if(IERC20(wston).balanceOf(msg.sender) < wstonAmount) {
             revert WstonBalanceTooLow();
         }
+        if(tonAmount == 0 && wstonAmount == 0) {
+            revert WrongAmounts();
+        }
 
-        _safeTransferFrom(IERC20(ton), msg.sender, address(this), tonAmount);
-        _safeTransferFrom(IERC20(wston), msg.sender, address(this), wstonAmount);
+        // transfer the funds to the contract
+        if(tonAmount > 0) {
+            _safeTransferFrom(IERC20(ton), msg.sender, address(this), tonAmount);
+        }
+        if( wstonAmount > 0) {
+            _safeTransferFrom(IERC20(wston), msg.sender, address(this), wstonAmount);
+        }
 
+        // storing the LP address if it does not exist. The condition prevent from DoS the lpAddresses array
         if (lpShares[msg.sender] == 0) {
             lpAddresses.push(msg.sender);
         }
 
+        // shares storage update 
         uint256 shares = tonAmount + (wstonAmount / (10**9));
         lpShares[msg.sender] += shares;
         totalShares += shares;
@@ -222,6 +248,14 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
 
     function getStakingIndex() external view returns(uint256) {
         return stakingIndex;
+    }
+
+    function getTonFeesBalance() external view returns (uint256) {
+        return tonFeeBalance;
+    }
+
+    function getWstonFeesBalance() external view returns (uint256) {
+        return wstonFeeBalance;
     }
 
 }

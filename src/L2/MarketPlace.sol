@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -226,5 +226,9 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      */
     function _toWAD(uint256 v) internal pure returns (uint256) {
         return v / 10 ** 9;
+    }
+
+    function getStakingIndex() external view returns(uint256) {
+        return stakingIndex;
     }
 }

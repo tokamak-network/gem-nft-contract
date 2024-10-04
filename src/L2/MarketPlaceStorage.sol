@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 contract MarketPlaceStorage {
 
@@ -24,7 +24,7 @@ contract MarketPlaceStorage {
     uint256 constant public TON_FEES_RATE_DIVIDER = 100;
     uint256 constant public DECIMALS = 10**27;
 
-    uint256 public stakingIndex = 1e27;
+    uint256 public stakingIndex = 10**27;
 
     bool public paused = false;
     bool internal initialized = false;
