@@ -48,14 +48,14 @@ contract AirdropTest is L2BaseTest {
     function testClaimAirdrop() public {
         testAssignGemForAirdrop();
 
-        assert(GemFactory(gemfactory).ownerOf(0) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(1) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(0) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(1) == treasuryProxyAddress);
 
         vm.startPrank(user1);
         Airdrop(airdropProxyAddress).claimAirdrop();
         vm.stopPrank();
         
-        assert(GemFactory(gemfactory).ownerOf(0) == user1);
-        assert(GemFactory(gemfactory).ownerOf(1) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(0) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(1) == user1);
     }
 }

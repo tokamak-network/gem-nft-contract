@@ -28,8 +28,8 @@ contract GemFactoryTest is L2BaseTest {
 
         // Verify GEM creation
         assert(newGemId == 0);
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == treasuryProxyAddress);
-        assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemId))) == keccak256(abi.encodePacked(tokenURI)));
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
+        assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemId))) == keccak256(abi.encodePacked(tokenURI)));
 
         vm.stopPrank();
     }
@@ -64,10 +64,10 @@ contract GemFactoryTest is L2BaseTest {
 
         // Verify GEM creation
         assert(newGemIds.length == 2);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
-        assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
+        assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
 
         vm.stopPrank();
     }
@@ -93,10 +93,10 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEM to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemId);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
 
         // Verify GEM transfer
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
 
         vm.stopPrank();
 
@@ -104,9 +104,9 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(user1);
         uint256 balanceBefore = IERC20(wston).balanceOf(user1);
         // Call meltGEM function
-        GemFactory(gemfactory).meltGEM(newGemId);
+        GemFactory(gemfactoryProxyAddress).meltGEM(newGemId);
         uint256 balanceAfter = IERC20(wston).balanceOf(user1);
-        uint256 gemValue = GemFactory(gemfactory).CommonGemsValue();
+        uint256 gemValue = GemFactory(gemfactoryProxyAddress).getCommonGemsValue();
         // Verify GEM melting
         assert(balanceAfter == balanceBefore + gemValue); // User1 should receive the WSTON (we now has 1000 + 10 WSWTON)
 
@@ -142,24 +142,24 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEM to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == user1);
 
         uint256[] memory tokenIds = new uint256[](2);
         tokenIds[0] = newGemIds[0];
@@ -167,10 +167,10 @@ contract GemFactoryTest is L2BaseTest {
 
         uint8[2] memory color = [0, 1];
 
-        uint256 newGemId = GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        uint256 newGemId = GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         // Verify the new gem properties
-        GemFactoryStorage.Gem memory newGem = GemFactory(gemfactory).getGem(newGemId);
+        GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
         assert(newGem.rarity == GemFactoryStorage.Rarity.RARE);
         assert(newGem.color[0] == color[0] && newGem.color[1] == color[1]);
         assert(newGem.miningPeriod == RareGemsMiningPeriod);
@@ -222,30 +222,30 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[2]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[3]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[2]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[3]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[2]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[3]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[2]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[3]) == user1);
 
         uint256[] memory tokenIds = new uint256[](4);
         tokenIds[0] = newGemIds[0];
@@ -255,10 +255,10 @@ contract GemFactoryTest is L2BaseTest {
 
         uint8[2] memory color = [1, 3];
 
-        uint256 newGemId = GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
+        uint256 newGemId = GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
 
         // Verify the new gem properties
-        GemFactoryStorage.Gem memory newGem = GemFactory(gemfactory).getGem(newGemId);
+        GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
         assert(newGem.rarity == GemFactoryStorage.Rarity.EPIC);
         assert(newGem.color[0] == color[0] && newGem.color[1] == color[1]);
         assert(newGem.miningPeriod == EpicGemsMiningPeriod);
@@ -302,24 +302,24 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == user1);
 
         uint256[] memory tokenIds = new uint256[](2);
         tokenIds[0] = newGemIds[0];
@@ -329,7 +329,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to revert with the error message "wrong rarity Gems"
         vm.expectRevert("wrong rarity Gems");
-        GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
     }
@@ -363,24 +363,24 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == user1);
 
         uint256[] memory tokenIds = new uint256[](2);
         tokenIds[0] = newGemIds[0];
@@ -391,7 +391,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to revert with the error message "this color can't be obtained"
         vm.expectRevert("this color can't be obtained");
-        GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, invalidColor);
+        GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, invalidColor);
 
         vm.stopPrank();
     }
@@ -433,30 +433,30 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM creation
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[2]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[3]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[2]);
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[3]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[1]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[2]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[3]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == user1);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[2]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[3]) == user1);
 
         uint256[] memory tokenIds = new uint256[](4);
         tokenIds[0] = newGemIds[0];
@@ -468,7 +468,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to revert with the error message "wrong number of Gems to be forged"
         vm.expectRevert("wrong number of Gems to be forged");
-        GemFactory(gemfactory).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
     }
@@ -491,21 +491,21 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemId);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before starting mining
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
         uint256 twoWeeks = 14 * 24 * 60 * 60; // 7 days in seconds
@@ -515,7 +515,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to succeed
         vm.prank(user1);
-        bool result = GemFactory(gemfactory).startMiningGEM(newGemId);
+        bool result = GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
         assert(result == true);
     }
 
@@ -537,25 +537,25 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
         
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemId);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before starting mining
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
 
         // Expect the transaction to revert with the error message "Gem cooldown period has not elapsed"
         vm.expectRevert(abi.encodeWithSignature("CooldownPeriodNotElapsed()"));
-        GemFactory(gemfactory).startMiningGEM(newGemId);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
 
         vm.stopPrank();
     }
@@ -578,21 +578,21 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemId);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before starting mining
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
         uint256 twoWeeks = 14 * 24 * 60 * 60; // 7 days in seconds
@@ -600,7 +600,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // putGemFor sale before calling startMining to ensure Gem is locked
         uint256 gemPrice = 1500 * 10 ** 27;
-        GemFactory(gemfactory).approve(marketplaceProxyAddress, newGemId);
+        GemFactory(gemfactoryProxyAddress).approve(marketplaceProxyAddress, newGemId);
         MarketPlace(marketplaceProxyAddress).putGemForSale(newGemId, gemPrice);
 
         vm.stopPrank();
@@ -609,7 +609,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to revert with the error message "Gem is listed for sale or already mining"
         vm.expectRevert(abi.encodeWithSignature("GemIsLocked()"));
-        GemFactory(gemfactory).startMiningGEM(newGemId);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
 
         vm.stopPrank();
     }
@@ -632,14 +632,14 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemId);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
         vm.stopPrank();
 
         vm.startPrank(user2); // Different user
@@ -649,7 +649,7 @@ contract GemFactoryTest is L2BaseTest {
         vm.warp(block.timestamp + twoWeeks + 1);
 
         // Verify token existence before starting mining
-        assert(GemFactory(gemfactory).ownerOf(newGemId) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
 
         vm.stopPrank();
 
@@ -657,7 +657,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to revert with the error message "GEMIndexToOwner[_tokenId] == msg.sender"
         vm.expectRevert(abi.encodeWithSignature("NotGemOwner()"));
-        GemFactory(gemfactory).startMiningGEM(newGemId);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
 
         vm.stopPrank();
     }
@@ -703,34 +703,34 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[2]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[3]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[4]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
-        GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
-        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
+        GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(0);
 
         assert(randomRequest.fulfilled == false);
         assert(randomRequest.requested == true);
@@ -781,40 +781,40 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[2]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[3]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[4]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
 
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
 
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
 
         // call the pick function to get a random tokenid
-        uint256 requestId = GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 requestId = GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         drbCoordinatorMock.fulfillRandomness(requestId);
 
-        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
-        assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(0);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(randomRequest.chosenTokenId) == user1);
         vm.stopPrank();
     }
 
@@ -859,40 +859,40 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[2]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[3]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[4]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
 
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
 
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
-        uint256 requestId = GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 requestId = GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         drbCoordinatorMock.fulfillRandomness(requestId);
 
-        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
-        assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(0);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(randomRequest.chosenTokenId) == user1);
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
         vm.expectRevert(abi.encodeWithSignature("NoMiningTryLeft()"));
-        GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
         
         vm.stopPrank();
 
@@ -939,50 +939,50 @@ contract GemFactoryTest is L2BaseTest {
         );
 
         // Verify GEM minting
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[2]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[3]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[4]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[2]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[3]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[4]) == treasuryProxyAddress);
 
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
-        GemFactory(gemfactory).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemIds[0]);
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
         // Verify token existence before putting it for sale
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1);
 
         // move on until the cooldown elapses
         vm.warp(block.timestamp + EpicGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
 
         vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
-        uint256 firstRequestId = GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 firstRequestId = GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         drbCoordinatorMock.fulfillRandomness(firstRequestId);
 
-        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactory).getRandomRequest(0);
-        assert(GemFactory(gemfactory).ownerOf(randomRequest.chosenTokenId) == user1);
+        GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(0);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(randomRequest.chosenTokenId) == user1);
 
         // move on until the cooldown elapses
         vm.warp(block.timestamp + EpicGemsCooldownPeriod + 1);
 
-        GemFactory(gemfactory).startMiningGEM(newGemIds[0]);
+        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
 
         // move on until the mining period elapses
         vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
-        uint256 secondRequestId = GemFactory(gemfactory).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 secondRequestId = GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         drbCoordinatorMock.fulfillRandomness(secondRequestId);
-        GemFactoryStorage.RequestStatus memory secondRandomRequest = GemFactory(gemfactory).getRandomRequest(1);
-        assert(GemFactory(gemfactory).ownerOf(secondRandomRequest.chosenTokenId) == user1);
+        GemFactoryStorage.RequestStatus memory secondRandomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(secondRandomRequest.chosenTokenId) == user1);
         vm.stopPrank();
 
     }

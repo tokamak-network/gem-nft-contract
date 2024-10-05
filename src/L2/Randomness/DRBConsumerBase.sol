@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
-import {IDRBCoordinator} from "../../interfaces/IDRBCoordinator.sol";
+
+import { IDRBCoordinator } from "../../interfaces/IDRBCoordinator.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @notice Interface for contracts using VRF randomness
@@ -13,12 +15,12 @@ abstract contract DRBConsumerBase {
     error OnlyCoordinatorCanFulfill(address have, address want);
 
     /// @dev The RNGCoordinator contract
-    IDRBCoordinator internal immutable i_drbCoordinator;
+    IDRBCoordinator internal i_drbCoordinator;
 
     /**
      * @param rngCoordinator The address of the RNGCoordinator contract
      */
-    constructor(address rngCoordinator) {
+    function __DRBConsumerBase_init(address rngCoordinator) internal {
         i_drbCoordinator = IDRBCoordinator(rngCoordinator);
     }
 

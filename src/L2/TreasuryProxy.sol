@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import "../proxy/ProxyTreasury.sol";
+import "../proxy/Proxy.sol";
 import "./TreasuryStorage.sol";
 
 /**
  * @title
  * @dev
  */
-contract TreasuryProxy is ProxyTreasury, TreasuryStorage {
+contract TreasuryProxy is Proxy, TreasuryStorage {
 
 }

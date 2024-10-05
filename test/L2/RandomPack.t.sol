@@ -41,21 +41,21 @@ contract MarketPlaceTest is L2BaseTest {
 
         // Verify GEM creation
         assert(newGemIds.length == 2);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == treasuryProxyAddress);
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
-        assert(keccak256(abi.encodePacked(GemFactory(gemfactory).tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
+        assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
+        assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
 
         vm.stopPrank();
 
         vm.startPrank(user1);
 
-        MockTON(ton).approve(randomPack, randomPackFees);
-        uint256 requestId = RandomPack(randomPack).requestRandomGem{value: randomBeaconFees}();
+        MockTON(ton).approve(randomPackProxyAddress, randomPackFees);
+        uint256 requestId = RandomPack(randomPackProxyAddress).requestRandomGem{value: randomBeaconFees}();
 
         drbCoordinatorMock.fulfillRandomness(requestId);
 
-        assert(GemFactory(gemfactory).ownerOf(newGemIds[0]) == user1 || GemFactory(gemfactory).ownerOf(newGemIds[1]) == user1);
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1 || GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == user1);
 
         vm.stopPrank();
     }
@@ -63,9 +63,9 @@ contract MarketPlaceTest is L2BaseTest {
     function testGetRandomGemIfNoGemAvailable() public {
         vm.startPrank(user1);
 
-        MockTON(ton).approve(randomPack, randomPackFees);
+        MockTON(ton).approve(randomPackProxyAddress, randomPackFees);
 
-        uint256 requestId = RandomPack(randomPack).requestRandomGem{value: randomBeaconFees}();
+        uint256 requestId = RandomPack(randomPackProxyAddress).requestRandomGem{value: randomBeaconFees}();
 
         // Expect the CommonGemMinted event to be emitted
         vm.expectEmit(false, false, false, true);

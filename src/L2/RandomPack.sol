@@ -39,23 +39,22 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         _;
     }
 
-    constructor(
-        address coordinator,  
+    function initialize(
+        address _coordinator,  
         address _ton, 
         address _gemFactory, 
         address _treasury, 
         uint256 _randomPackFees
-    ) DRBConsumerBase(coordinator) {
+    ) external {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        __DRBConsumerBase_init(_coordinator);
         gemFactory = _gemFactory;
         treasury = _treasury;
         ton = _ton;
-        drbcoordinator = coordinator;
         randomPackFees = _randomPackFees;
         callbackGasLimit = 600000;
         perfectCommonGemURI = "";
     }
-
 
     function setGemFactory(address _gemFactory) external onlyOwner {
         if(gemFactory == address(0)) {

@@ -18,7 +18,6 @@ contract RandomPackStorage {
     address public gemFactory;
     address public treasury;
     address public ton;
-    address public drbcoordinator;
 
     bool paused = false;
 

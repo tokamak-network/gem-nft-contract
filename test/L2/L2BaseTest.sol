@@ -4,11 +4,13 @@ pragma solidity 0.8.25;
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
+import { GemFactoryProxy } from "../../src/L2/GemFactoryProxy.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { TreasuryProxy } from "../../src/L2/TreasuryProxy.sol";
 import { MarketPlace } from "../../src/L2/MarketPlace.sol";
 import { MarketPlaceProxy } from "../../src/L2/MarketPlaceProxy.sol";
 import { RandomPack } from "../../src/L2/RandomPack.sol";
+import { RandomPackProxy } from "../../src/L2/RandomPackProxy.sol";
 import { L2StandardERC20 } from "../../src/L2/L2StandardERC20.sol";
 import { MockTON } from "../../src/L2/Mock/MockTON.sol";
 import { GemFactoryStorage } from "../../src/L2/GemFactoryStorage.sol";
@@ -61,7 +63,9 @@ contract L2BaseTest is Test {
     address payable user2;
     address payable user3;
 
-    address gemfactory;
+    GemFactory gemfactory;
+    GemFactoryProxy gemfactoryProxy;
+    address gemfactoryProxyAddress;
     Treasury treasury;
     TreasuryProxy treasuryProxy;
     address treasuryProxyAddress;
@@ -72,7 +76,9 @@ contract L2BaseTest is Test {
     Airdrop airdrop;
     AirdropProxy airdropProxy;
     address airdropProxyAddress;
-    address randomPack;
+    RandomPack randomPack;
+    RandomPackProxy randomPackProxy;
+    address randomPackProxyAddress;
     address wston;
     address ton;
     address l1wston;
@@ -130,7 +136,10 @@ contract L2BaseTest is Test {
         );
 
         // deploy and initialize GemFactory
-        gemfactory = address(new GemFactory(address(drbCoordinatorMock)));
+        gemfactory = new GemFactory();
+        gemfactoryProxy = new GemFactoryProxy();
+        gemfactoryProxy.upgradeTo(address(gemfactory));
+        gemfactoryProxyAddress = address(gemfactoryProxy);
 
         // deploy treasury and marketplace
         treasury = new Treasury();
@@ -140,7 +149,7 @@ contract L2BaseTest is Test {
         Treasury(treasuryProxyAddress).initialize(
             wston,
             ton,
-            gemfactory
+            gemfactoryProxyAddress
         );
 
         marketplace = new MarketPlace();
@@ -149,7 +158,7 @@ contract L2BaseTest is Test {
         marketplaceProxyAddress = address(marketplaceProxy);
         MarketPlace(marketplaceProxyAddress).initialize(
             treasuryProxyAddress,
-            gemfactory,
+            gemfactoryProxyAddress,
             tonFeesRate,
             wston,
             ton
@@ -167,7 +176,9 @@ contract L2BaseTest is Test {
 
         vm.startPrank(owner);
 
-        GemFactory(gemfactory).initialize(
+        GemFactory(gemfactoryProxyAddress).initialize(
+            address(drbCoordinatorMock),
+            owner,
             wston,
             ton,
             treasuryProxyAddress,
@@ -179,7 +190,7 @@ contract L2BaseTest is Test {
             MythicGemsValue
         );
 
-        GemFactory(gemfactory).setGemsMiningPeriods(
+        GemFactory(gemfactoryProxyAddress).setGemsMiningPeriods(
             CommonGemsMiningPeriod,
             RareGemsMiningPeriod,
             UniqueGemsMiningPeriod,
@@ -188,7 +199,7 @@ contract L2BaseTest is Test {
             MythicGemsMiningPeriod
         );
 
-        GemFactory(gemfactory).setGemsCooldownPeriods(
+        GemFactory(gemfactoryProxyAddress).setGemsCooldownPeriods(
             CommonGemsCooldownPeriod,
             RareGemsCooldownPeriod,
             UniqueGemsCooldownPeriod,
@@ -197,7 +208,7 @@ contract L2BaseTest is Test {
             MythicGemsCooldownPeriod
         );
 
-        GemFactory(gemfactory).setMiningTrys(
+        GemFactory(gemfactoryProxyAddress).setMiningTrys(
             commonminingTry,
             rareminingTry,
             uniqueminingTry,
@@ -206,7 +217,7 @@ contract L2BaseTest is Test {
             MythicminingTry
         );
 
-        GemFactory(gemfactory).setMarketPlaceAddress(marketplaceProxyAddress);
+        GemFactory(gemfactoryProxyAddress).setMarketPlaceAddress(marketplaceProxyAddress);
         Treasury(treasuryProxyAddress).setMarketPlace(marketplaceProxyAddress);
         Treasury(treasuryProxyAddress).approveGemFactory();
         Treasury(treasuryProxyAddress).wstonApproveMarketPlace();
@@ -214,30 +225,34 @@ contract L2BaseTest is Test {
     
 
         // We deploy the RandomPack contract
-        randomPack = address(new RandomPack(
+        randomPack = new RandomPack();
+        randomPackProxy = new RandomPackProxy();
+        randomPackProxy.upgradeTo(address(randomPack));
+        randomPackProxyAddress = address(randomPackProxy);
+        RandomPack(randomPackProxyAddress).initialize(
             address(drbCoordinatorMock),
             ton,
-            gemfactory,
+            gemfactoryProxyAddress,
             treasuryProxyAddress,
             randomPackFees
-        ));
+        );
 
-        Treasury(treasuryProxyAddress).setRandomPack(randomPack);
+        Treasury(treasuryProxyAddress).setRandomPack(randomPackProxyAddress);
 
         // we set up the list of colors available for the GEM
-        GemFactory(gemfactory).addColor("Ruby",0,0);
-        GemFactory(gemfactory).addColor("Ruby/Amber",0,1);
-        GemFactory(gemfactory).addColor("Amber",1,1);
-        GemFactory(gemfactory).addColor("Topaz",2,2);
-        GemFactory(gemfactory).addColor("Topaz/Emerald",2,3);
-        GemFactory(gemfactory).addColor("Emerald/Topaz",3,2);
-        GemFactory(gemfactory).addColor("Emerald",3,3);
-        GemFactory(gemfactory).addColor("Emerald/Amber",3,1);
-        GemFactory(gemfactory).addColor("Turquoise",4,4);
-        GemFactory(gemfactory).addColor("Sapphire",5,5);
-        GemFactory(gemfactory).addColor("Amethyst",6,6);
-        GemFactory(gemfactory).addColor("Amethyst/Amber",6,1);
-        GemFactory(gemfactory).addColor("Garnet",7,7);
+        GemFactory(gemfactoryProxyAddress).addColor("Ruby",0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Ruby/Amber",0,1);
+        GemFactory(gemfactoryProxyAddress).addColor("Amber",1,1);
+        GemFactory(gemfactoryProxyAddress).addColor("Topaz",2,2);
+        GemFactory(gemfactoryProxyAddress).addColor("Topaz/Emerald",2,3);
+        GemFactory(gemfactoryProxyAddress).addColor("Emerald/Topaz",3,2);
+        GemFactory(gemfactoryProxyAddress).addColor("Emerald",3,3);
+        GemFactory(gemfactoryProxyAddress).addColor("Emerald/Amber",3,1);
+        GemFactory(gemfactoryProxyAddress).addColor("Turquoise",4,4);
+        GemFactory(gemfactoryProxyAddress).addColor("Sapphire",5,5);
+        GemFactory(gemfactoryProxyAddress).addColor("Amethyst",6,6);
+        GemFactory(gemfactoryProxyAddress).addColor("Amethyst/Amber",6,1);
+        GemFactory(gemfactoryProxyAddress).addColor("Garnet",7,7);
 
         //deploying the airdrop contract
         airdrop = new Airdrop();
@@ -245,28 +260,28 @@ contract L2BaseTest is Test {
         airdropProxy.upgradeTo(address(airdrop));
         airdropProxyAddress = address(airdropProxy);
 
-        Airdrop(airdropProxyAddress).initialize(treasuryProxyAddress, gemfactory);
+        Airdrop(airdropProxyAddress).initialize(treasuryProxyAddress, gemfactoryProxyAddress);
 
         Treasury(treasuryProxyAddress).setAirdrop(airdropProxyAddress);
 
-        GemFactory(gemfactory).setAirdrop(airdropProxyAddress);
+        GemFactory(gemfactoryProxyAddress).setAirdrop(airdropProxyAddress);
 
         vm.stopPrank();
     }
 
 
     function testSetup() public view {
-        address wstonAddress = GemFactory(gemfactory).wston();
+        address wstonAddress = GemFactory(gemfactoryProxyAddress).getWstonAddress();
         assert(wstonAddress == address(wston));
 
-        address tonAddress = GemFactory(gemfactory).ton();
+        address tonAddress = GemFactory(gemfactoryProxyAddress).getTonAddress();
         assert(tonAddress == address(ton));
 
-        address treasuryAddress = GemFactory(gemfactory).treasury();
+        address treasuryAddress = GemFactory(gemfactoryProxyAddress).getTreasuryAddress();
         assert(treasuryAddress == treasuryProxyAddress);
 
         // Check that the Treasury has approved the GemFactory to spend WSTON
-        uint256 allowance = IERC20(wston).allowance(treasuryProxyAddress, address(gemfactory));
+        uint256 allowance = IERC20(wston).allowance(treasuryProxyAddress, address(gemfactoryProxyAddress));
         assert(allowance == type(uint256).max);
     }
 }

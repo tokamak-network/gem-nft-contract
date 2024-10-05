@@ -70,12 +70,12 @@ contract GemFactoryStorage {
     uint256 public LegendaryminingTry;
     uint256 public MythicminingTry;
 
-    uint256 public CommonGemsValue;
-    uint256 public RareGemsValue;
-    uint256 public UniqueGemsValue;
-    uint256 public EpicGemsValue;
-    uint256 public LegendaryGemsValue;
-    uint256 public MythicGemsValue;
+    uint256 internal CommonGemsValue;
+    uint256 internal RareGemsValue;
+    uint256 internal UniqueGemsValue;
+    uint256 internal EpicGemsValue;
+    uint256 internal LegendaryGemsValue;
+    uint256 internal MythicGemsValue;
 
     uint256 public CommonGemsMiningPeriod;
     uint256 public RareGemsMiningPeriod;
@@ -96,13 +96,12 @@ contract GemFactoryStorage {
     uint256 public requestCount;
 
     // contract addresses
-    address public wston;
-    address public ton;
-    address public treasury;
-    address public marketplace;
-    address public drbcoordinator;
-    address public randomPack;
-    address public airdrop;
+    address internal wston;
+    address internal ton;
+    address internal treasury;
+    address internal marketplace;
+    address internal randomPack;
+    address internal airdrop;
 
     // constants
     uint32 public constant CALLBACK_GAS_LIMIT = 210000;
@@ -111,6 +110,10 @@ contract GemFactoryStorage {
     //-------------------------------------EVENTS--------------------------------------------
     //---------------------------------------------------------------------------------------
 
+    //Initialization 
+    event ERC721Initialized();
+    event DRBConsumerBaseInitialized();
+    event OwnableInitialized();
     // Premining events
     event Created(
         uint256 indexed tokenId, 
@@ -208,7 +211,6 @@ contract GemFactoryStorage {
     error NoMiningTryLeft();
     error NotMining();
     error GemAlreadyPicked();
-    error NeitherGemOwnerNorAdmin();
     error MiningPeriodNotElapsed();
 
     // Transfer error

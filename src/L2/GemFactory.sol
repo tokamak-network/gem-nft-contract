@@ -4,9 +4,10 @@ pragma solidity 0.8.25;
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {GemFactoryStorage} from "./GemFactoryStorage.sol";
-import {AuthControl} from "../common/AuthControl.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 import "../proxy/ProxyStorage.sol";
@@ -31,7 +32,7 @@ interface ITreasury {
  * @dev GemFactory handles the creation of GEMs. It allows for admin to premine GEMs for the treasury contract.
  * it also allows for users to mine forge and melt GEMs.
  */
-contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthControl, DRBConsumerBase, ReentrancyGuard {
+contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable, GemFactoryStorage, OwnableUpgradeable, DRBConsumerBase, ReentrancyGuard {
 
     using SafeERC20 for IERC20;
     using GemLibrary for GemFactoryStorage.Gem[];
@@ -67,26 +68,14 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         _;
     }
 
-    constructor(address coordinator) ERC721("GemSTON", "GEM") DRBConsumerBase(coordinator) {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        drbcoordinator = coordinator;
-    }
-
-
-    function pause() public onlyPauser whenNotPaused {
+    function pause() public onlyOwner whenNotPaused {
         paused = true;
         emit Paused(msg.sender);
     }
 
-    function unpause() public onlyPauser whenNotPaused {
+    function unpause() public onlyOwner whenNotPaused {
         paused = false;
         emit Unpaused(msg.sender);
-    }
-
-    // Override supportsInterface to delegate to AuthControl's implementation
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721URIStorage, AuthControl) returns (bool) {
-        // Delegates to AuthControlGemFactory's supportsInterface which aggregates checks across ERC165 and AccessControl
-        return super.supportsInterface(interfaceId);
     }
 
     //---------------------------------------------------------------------------------------
@@ -94,6 +83,8 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
     //---------------------------------------------------------------------------------------
 
     function initialize(
+        address _coordinator,
+        address _owner,
         address _wston, 
         address _ton,
         address _treasury,  
@@ -103,10 +94,13 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         uint256 _EpicGemsValue,
         uint256 _LegendaryGemsValue,
         uint256 _MythicGemsValue
-    )
-    external onlyOwner {
-        require(wston == address(0), "titanwston already initialized");
-        require(ton == address(0), "ton already initialized");
+    ) external initializer {
+        __ERC721_init("GemSTON", "GEM");
+        emit ERC721Initialized();
+        __DRBConsumerBase_init(_coordinator);
+        emit DRBConsumerBaseInitialized();
+        __Ownable_init(_owner);
+        emit OwnableInitialized();
         wston = _wston;
         ton = _ton;
         treasury = _treasury;
@@ -125,7 +119,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         uint256 _EpicGemsMiningPeriod,
         uint256 _LegendaryGemsMiningPeriod,
         uint256 _MythicGemsMiningPeriod
-    ) external onlyOwnerOrAdmin {
+    ) external onlyOwner {
         CommonGemsMiningPeriod = _CommonGemsMiningPeriod;
         RareGemsMiningPeriod = _RareGemsMiningPeriod;
         UniqueGemsMiningPeriod = _UniqueGemsMiningPeriod;
@@ -150,7 +144,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         uint256 _EpicGemsCooldownPeriod,
         uint256 _LegendaryGemsCooldownPeriod,
         uint256 _MythicGemsCooldownPeriod
-    ) external onlyOwnerOrAdmin {
+    ) external onlyOwner {
         CommonGemsCooldownPeriod = _CommonGemsCooldownPeriod;
         RareGemsCooldownPeriod = _RareGemsCooldownPeriod;
         UniqueGemsCooldownPeriod = _UniqueGemsCooldownPeriod;
@@ -175,7 +169,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         uint256 _EpicminingTry,
         uint256 _LegendaryminingTry,
         uint256 _MythicminingTry
-    ) external onlyOwnerOrAdmin {
+    ) external onlyOwner {
         CommonminingTry = _CommonminingTry;
         RareminingTry = _RareminingTry;
         UniqueminingTry = _UniqueminingTry;
@@ -200,7 +194,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         uint256 _EpicGemsValue,
         uint256 _LegendaryGemsValue,
         uint256 _MythicGemsValue
-    ) external onlyOwnerOrAdmin {
+    ) external onlyOwner {
         CommonGemsValue = _CommonGemsValue;
         RareGemsValue = _RareGemsValue;
         UniqueGemsValue = _UniqueGemsValue;
@@ -218,19 +212,19 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         );
     }
 
-    function setRandomPack(address _randomPack) external onlyOwnerOrAdmin {
+    function setRandomPack(address _randomPack) external onlyOwner {
         randomPack = _randomPack;
     }
 
-    function setTreasury(address _treasury) external onlyOwnerOrAdmin {
+    function setTreasury(address _treasury) external onlyOwner {
         treasury = _treasury;
     }
 
-    function setMarketPlaceAddress(address _marketplace) external onlyOwnerOrAdmin {
+    function setMarketPlaceAddress(address _marketplace) external onlyOwner {
         marketplace = _marketplace;
     }
 
-    function setAirdrop(address _airdrop) external onlyOwnerOrAdmin {
+    function setAirdrop(address _airdrop) external onlyOwner {
         airdrop = _airdrop;
     }
 
@@ -356,8 +350,8 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
     }
 
     function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (uint256) {
-        if(ownerOf(_tokenId) != msg.sender && isAdmin(msg.sender) != true) {
-            revert NeitherGemOwnerNorAdmin();
+        if(ownerOf(_tokenId) != msg.sender) {
+            revert NotGemOwner();
         }
         if(block.timestamp < userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod) {
             revert MiningPeriodNotElapsed();
@@ -560,7 +554,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         return newGemIds;
     }
         
-    function transferFrom(address from, address to, uint256 tokenId) public override(ERC721, IERC721) whenNotPaused {
+    function transferFrom(address from, address to, uint256 tokenId) public override(ERC721Upgradeable, IERC721) whenNotPaused {
         if(to == from) {
             revert SameSenderAndRecipient();
         }
@@ -574,7 +568,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         emit TransferGEM(from, to, tokenId);
     }
 
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public override(ERC721, IERC721) whenNotPaused {
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public override(ERC721Upgradeable, IERC721) whenNotPaused {
 
         this.transferFrom(from, to, tokenId);
 
@@ -586,7 +580,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         Gems[_tokenId].isLocked = _isLocked;
     }
 
-    function addColor(string memory _colorName, uint8 _index1, uint8 _index2) external onlyOwnerOrAdmin {
+    function addColor(string memory _colorName, uint8 _index1, uint8 _index2) external onlyOwner {
         colorName[_index1][_index2] = _colorName;
         colors.push([_index1, _index2]);
         colorsCount++;
@@ -595,7 +589,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
 
     }
 
-    function addBackgroundColor(string memory _backgroundColor) external onlyOwnerOrAdmin {
+    function addBackgroundColor(string memory _backgroundColor) external onlyOwner {
         customBackgroundColors[customBackgroundColorsCount] = _backgroundColor;
         backgroundColors.push(_backgroundColor);
         customBackgroundColorsCount++;
@@ -661,8 +655,8 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
     }
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal override {
-        if(msg.sender != ownerOf(tokenId) && isAdmin(msg.sender) != true) {
-            revert NeitherGemOwnerNorAdmin();
+        if(msg.sender != ownerOf(tokenId)) {
+            revert NotGemOwner();
         }
         super._setTokenURI(tokenId, _tokenURI);
     }
@@ -705,7 +699,7 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         revert("Invalid rarity");
     }
 
-    function balanceOf(address _owner) public view override(ERC721, IERC721) returns (uint256 count) {
+    function balanceOf(address _owner) public view override(ERC721Upgradeable, IERC721) returns (uint256 count) {
         return ownershipTokenCount[_owner];
     }
 
@@ -851,4 +845,55 @@ contract GemFactory is ProxyStorage, ERC721URIStorage, GemFactoryStorage, AuthCo
         }
     }
 
+    //---------------------------------------------------------------------------------------
+    //-------------------------------STORAGE GETTERS-----------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    function getTreasuryAddress() external view returns(address) {
+        return treasury;
+    }
+
+    function getTonAddress() external view returns(address) {
+        return ton;
+    }
+
+    function getWstonAddress() external view returns(address) {
+        return wston;
+    }
+
+    function getRandomPackAddress() external view returns(address) {
+        return randomPack;
+    }
+
+    function getMarketPlaceAddress() external view returns(address) {
+        return marketplace;
+    }
+
+    function getAirdropAddress() external view returns(address) {
+        return airdrop;
+    }
+
+    function getCommonGemsValue() external view returns(uint256) {
+        return CommonGemsValue;
+    }
+
+    function getRareGemsValue() external view returns(uint256) {
+        return RareGemsValue;
+    }
+
+    function getUniqueGemsValue() external view returns(uint256) {
+        return UniqueGemsValue;
+    }
+
+    function getEpicGemsValue() external view returns(uint256) {
+        return EpicGemsValue;
+    }
+
+    function getLegendaryGemsValue() external view returns(uint256) {
+        return LegendaryGemsValue;
+    }
+
+    function getMythicGemsValue() external view returns(uint256) {
+        return MythicGemsValue;
+    }
 }

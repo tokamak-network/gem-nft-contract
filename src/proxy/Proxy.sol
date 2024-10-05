@@ -8,7 +8,7 @@ import "../interfaces/IProxyAction.sol";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-contract ProxyWstonSwapPool is
+contract Proxy is
     ProxyStorage,
     AuthControl,
     IProxyEvent,
