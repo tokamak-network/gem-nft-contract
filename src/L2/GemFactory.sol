@@ -96,11 +96,8 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         uint256 _MythicGemsValue
     ) external initializer {
         __ERC721_init("GemSTON", "GEM");
-        emit ERC721Initialized();
         __DRBConsumerBase_init(_coordinator);
-        emit DRBConsumerBaseInitialized();
         __Ownable_init(_owner);
-        emit OwnableInitialized();
         wston = _wston;
         ton = _ton;
         treasury = _treasury;
@@ -210,10 +207,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             _LegendaryGemsValue,
             _MythicGemsValue
         );
-    }
-
-    function setRandomPack(address _randomPack) external onlyOwner {
-        randomPack = _randomPack;
     }
 
     function setTreasury(address _treasury) external onlyOwner {
@@ -849,51 +842,35 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     //-------------------------------STORAGE GETTERS-----------------------------------------
     //---------------------------------------------------------------------------------------
 
-    function getTreasuryAddress() external view returns(address) {
-        return treasury;
-    }
-
-    function getTonAddress() external view returns(address) {
-        return ton;
-    }
-
-    function getWstonAddress() external view returns(address) {
-        return wston;
-    }
-
-    function getRandomPackAddress() external view returns(address) {
-        return randomPack;
-    }
-
-    function getMarketPlaceAddress() external view returns(address) {
-        return marketplace;
-    }
-
-    function getAirdropAddress() external view returns(address) {
-        return airdrop;
-    }
-
-    function getCommonGemsValue() external view returns(uint256) {
-        return CommonGemsValue;
-    }
-
-    function getRareGemsValue() external view returns(uint256) {
-        return RareGemsValue;
-    }
-
-    function getUniqueGemsValue() external view returns(uint256) {
-        return UniqueGemsValue;
-    }
-
-    function getEpicGemsValue() external view returns(uint256) {
-        return EpicGemsValue;
-    }
-
-    function getLegendaryGemsValue() external view returns(uint256) {
-        return LegendaryGemsValue;
-    }
-
-    function getMythicGemsValue() external view returns(uint256) {
-        return MythicGemsValue;
-    }
+    function getTreasuryAddress() external view returns(address) {return treasury;}
+    function getTonAddress() external view returns(address) {return ton;}
+    function getWstonAddress() external view returns(address) {return wston;}
+    function getMarketPlaceAddress() external view returns(address) {return marketplace;}
+    function getAirdropAddress() external view returns(address) {return airdrop;}
+    function getCommonGemsValue() external view returns(uint256) { return CommonGemsValue;}
+    function getRareGemsValue() external view returns(uint256) {return RareGemsValue;}
+    function getUniqueGemsValue() external view returns(uint256) {return UniqueGemsValue;}
+    function getEpicGemsValue() external view returns(uint256) {return EpicGemsValue;}
+    function getLegendaryGemsValue() external view returns(uint256) {return LegendaryGemsValue;}
+    function getMythicGemsValue() external view returns(uint256) {return MythicGemsValue;}
+    function getCommonminingTry() external view returns(uint256) { return CommonminingTry;}
+    function getRareminingTry() external view returns(uint256) { return RareminingTry;}
+    function getUniqueminingTry() external view returns(uint256) { return UniqueminingTry;}
+    function getEpicminingTry() external view returns(uint256) { return EpicminingTry;}
+    function getLegendaryminingTry() external view returns(uint256) { return LegendaryminingTry;}
+    function getMythicminingTry() external view returns(uint256) { return MythicminingTry;}
+    function getCommonGemsMiningPeriod() external view returns(uint256) { return CommonGemsMiningPeriod;}
+    function getRareGemsMiningPeriod() external view returns(uint256) { return RareGemsMiningPeriod;}
+    function getUniqueGemsMiningPeriod() external view returns(uint256) { return UniqueGemsMiningPeriod;}
+    function getEpicGemsMiningPeriod() external view returns(uint256) { return EpicGemsMiningPeriod;}
+    function getLegendaryGemsMiningPeriod() external view returns(uint256) { return LegendaryGemsMiningPeriod;}
+    function getMythicGemsMiningPeriod() external view returns(uint256) { return MythicGemsMiningPeriod;}
+    function getCommonGemsCooldownPeriod() external view returns(uint256) { return CommonGemsCooldownPeriod;}
+    function getRareGemsCooldownPeriod() external view returns(uint256) { return RareGemsCooldownPeriod;}
+    function getUniqueGemsCooldownPeriod() external view returns(uint256) { return UniqueGemsCooldownPeriod;}
+    function getEpicGemsCooldownPeriod() external view returns(uint256) { return EpicGemsCooldownPeriod;}
+    function getLegendaryGemsCooldownPeriod() external view returns(uint256) { return LegendaryGemsCooldownPeriod;}
+    function getMythicGemsCooldownPeriod() external view returns(uint256) { return MythicGemsCooldownPeriod;}
+    function getRequestIds() external view returns(uint256[] memory) { return requestIds;}
+    function getRequestCount() external view returns(uint256) { return requestCount;}
 }

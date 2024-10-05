@@ -15,18 +15,18 @@ contract RandomPackStorage {
     mapping(uint256 => GemPackRequestStatus) public s_requests; /* requestId --> requestStatus */
 
 
-    address public gemFactory;
-    address public treasury;
-    address public ton;
+    address internal gemFactory;
+    address internal treasury;
+    address internal ton;
 
     bool paused = false;
 
     // constants
-    uint32 public callbackGasLimit;
+    uint32 internal callbackGasLimit;
 
-    uint256 public requestCount;
-    uint256 public randomPackFees; // in TON (18 decimals)
-    string public perfectCommonGemURI;
+    uint256 internal requestCount;
+    uint256 internal randomPackFees; // in TON (18 decimals)
+    string internal perfectCommonGemURI;
 
     event RandomGemToBeTransferred(uint256 tokenId, address newOwner);
     event RandomGemTransferred(uint256 tokenId, address newOwner);

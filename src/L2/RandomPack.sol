@@ -142,4 +142,15 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         return this.onERC721Received.selector;
     }
 
+    //---------------------------------------------------------------------------------------
+    //-------------------------------STORAGE GETTERS-----------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    function getTreasuryAddress() external view returns(address) {return treasury;}
+    function getGemFactoryAddress() external view returns(address) {return gemFactory;}
+    function getTonAddress() external view returns(address) {return ton;}
+    function getCallbackGasLimit() external view returns(uint32) {return callbackGasLimit;}
+    function getRequestCount() external view returns(uint256) {return requestCount;}
+    function getRandomPackFees() external view returns(uint256) {return randomPackFees;}
+    function getPerfectCommonGemURI() external view returns(string memory) {return perfectCommonGemURI;}
 }

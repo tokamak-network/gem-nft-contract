@@ -216,7 +216,7 @@ contract MockMarketPlaceUpgraded is ProxyStorage, MarketPlaceStorage, Reentrancy
 
     function buyCommonGem() external whenNotPaused returns(bool) {
         // we fetch the value of a common gem
-        uint256 commonGemValue = IGemFactory(gemFactory).CommonGemsValue();
+        uint256 commonGemValue = IGemFactory(gemFactory).getCommonGemsValue();
         // the function caller pays a WSTON amount equal to the value of the GEM.
         IERC20(wston).safeTransferFrom(msg.sender, treasury, commonGemValue);
         // we mint from scratch a perfect common GEM 

@@ -6,6 +6,11 @@ import {MockSwapPoolUpgraded} from "./mock/MockSwapPoolUpgraded.sol";
 import {MockTreasuryUpgraded} from "./mock/MockTreasuryUpgraded.sol";
 import {MockMarketPlaceUpgraded} from "./mock/MockMarketPlaceUpgraded.sol";
 import {MockAirdropUpgraded} from "./mock/MockAirdropUpgraded.sol";
+import {MockGemFactoryUpgraded} from "./mock/MockGemFactoryUpgraded.sol";
+import {MockRandomPackUpgraded} from "./mock/MockRandomPackUpgraded.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 
 contract L2ProxyTest is WstonSwap {
 
@@ -13,6 +18,8 @@ contract L2ProxyTest is WstonSwap {
     MockTreasuryUpgraded mockTreasuryUpgraded;
     MockMarketPlaceUpgraded mockMarketPlaceUpgraded;
     MockAirdropUpgraded mockAirdropUpgraded;
+    MockGemFactoryUpgraded mockGemFactoryUpgraded;
+    MockRandomPackUpgraded mockRandomPackUpgraded;
     
     /**
      * @dev We created a MockSwapPoolUpgraded and added a function called resetFees() which can only be called by the owner
@@ -175,5 +182,69 @@ contract L2ProxyTest is WstonSwap {
         MockAirdropUpgraded(airdropProxyAddress).incrementCounter();
         uint256 counter = MockAirdropUpgraded(airdropProxyAddress).getCounter();
         assert(counter == 1);
+    }
+
+    function testRandomPackProxy() public {
+        vm.startPrank(owner);
+        mockRandomPackUpgraded = new MockRandomPackUpgraded();
+        randomPackProxy.upgradeTo(address(mockRandomPackUpgraded));
+        
+        // assert storage variable are correctly kept after the upgrade
+        assert(MockRandomPackUpgraded(randomPackProxyAddress).getTreasuryAddress() != address(0));
+        assert(MockRandomPackUpgraded(randomPackProxyAddress).getGemFactoryAddress() != address(0));
+        assert(MockRandomPackUpgraded(randomPackProxyAddress).getTonAddress() != address(0));
+        assert(MockRandomPackUpgraded(randomPackProxyAddress).getCallbackGasLimit() != 0);
+        assert(MockRandomPackUpgraded(randomPackProxyAddress).getRandomPackFees() != 0);
+
+        // check that the new counter storage and incrementCounter functions are deployed
+        MockRandomPackUpgraded(randomPackProxyAddress).incrementCounter();
+        uint256 counter = MockRandomPackUpgraded(randomPackProxyAddress).getCounter();
+        assert(counter == 1);
+    }
+
+    function testGemFactoryProxy() public {
+        vm.startPrank(owner);
+        mockGemFactoryUpgraded = new MockGemFactoryUpgraded();
+        gemfactoryProxy.upgradeTo(address(mockGemFactoryUpgraded));
+
+        // assert storage variable are correctly kept after the upgrade
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getTreasuryAddress() != address(0));
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getTonAddress() != address(0));
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getWstonAddress() != address(0));
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getMarketPlaceAddress() != address(0));
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getAirdropAddress() != address(0));
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsValue() != 0);
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonminingTry() != 0);
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsMiningPeriod() != 0);
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsCooldownPeriod() != 0);
+        
+        // check that the new counter storage and incrementCounter functions are deployed
+        MockGemFactoryUpgraded(gemfactoryProxyAddress).incrementCounter();
+        uint256 counter = MockGemFactoryUpgraded(gemfactoryProxyAddress).getCounter();
+        assert(counter == 1);
+
+    }
+
+    function testGemFactoryProxyRevertsIfInitializedTwice() public {
+        testGemFactoryProxy();
+
+        vm.startPrank(owner);
+        
+        // We expect the initialize function to revert with the selector for "InvalidInitialization()"
+        vm.expectRevert(Initializable.InvalidInitialization.selector);
+        MockGemFactoryUpgraded(gemfactoryProxyAddress).initialize(
+            address(drbCoordinatorMock),
+            owner,
+            wston,
+            ton,
+            treasuryProxyAddress,
+            CommonGemsValue,
+            RareGemsValue,
+            UniqueGemsValue,
+            EpicGemsValue,
+            LegendaryGemsValue,
+            MythicGemsValue
+        );
+        vm.stopPrank();
     }
 }

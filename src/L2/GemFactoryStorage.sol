@@ -63,12 +63,12 @@ contract GemFactoryStorage {
     bool public paused;
 
     // Mining storage
-    uint256 public CommonminingTry;
-    uint256 public RareminingTry;
-    uint256 public UniqueminingTry;
-    uint256 public EpicminingTry;
-    uint256 public LegendaryminingTry;
-    uint256 public MythicminingTry;
+    uint256 internal CommonminingTry;
+    uint256 internal RareminingTry;
+    uint256 internal UniqueminingTry;
+    uint256 internal EpicminingTry;
+    uint256 internal LegendaryminingTry;
+    uint256 internal MythicminingTry;
 
     uint256 internal CommonGemsValue;
     uint256 internal RareGemsValue;
@@ -77,30 +77,29 @@ contract GemFactoryStorage {
     uint256 internal LegendaryGemsValue;
     uint256 internal MythicGemsValue;
 
-    uint256 public CommonGemsMiningPeriod;
-    uint256 public RareGemsMiningPeriod;
-    uint256 public UniqueGemsMiningPeriod;
-    uint256 public EpicGemsMiningPeriod;
-    uint256 public LegendaryGemsMiningPeriod;
-    uint256 public MythicGemsMiningPeriod;
+    uint256 internal CommonGemsMiningPeriod;
+    uint256 internal RareGemsMiningPeriod;
+    uint256 internal UniqueGemsMiningPeriod;
+    uint256 internal EpicGemsMiningPeriod;
+    uint256 internal LegendaryGemsMiningPeriod;
+    uint256 internal MythicGemsMiningPeriod;
 
-    uint256 public CommonGemsCooldownPeriod;
-    uint256 public RareGemsCooldownPeriod;
-    uint256 public UniqueGemsCooldownPeriod;
-    uint256 public EpicGemsCooldownPeriod;
-    uint256 public LegendaryGemsCooldownPeriod;
-    uint256 public MythicGemsCooldownPeriod;
+    uint256 internal CommonGemsCooldownPeriod;
+    uint256 internal RareGemsCooldownPeriod;
+    uint256 internal UniqueGemsCooldownPeriod;
+    uint256 internal EpicGemsCooldownPeriod;
+    uint256 internal LegendaryGemsCooldownPeriod;
+    uint256 internal MythicGemsCooldownPeriod;
 
     // past random requests Id.
-    uint256[] public requestIds;
-    uint256 public requestCount;
+    uint256[] internal requestIds;
+    uint256 internal requestCount;
 
     // contract addresses
     address internal wston;
     address internal ton;
     address internal treasury;
     address internal marketplace;
-    address internal randomPack;
     address internal airdrop;
 
     // constants
@@ -110,10 +109,6 @@ contract GemFactoryStorage {
     //-------------------------------------EVENTS--------------------------------------------
     //---------------------------------------------------------------------------------------
 
-    //Initialization 
-    event ERC721Initialized();
-    event DRBConsumerBaseInitialized();
-    event OwnableInitialized();
     // Premining events
     event Created(
         uint256 indexed tokenId, 
