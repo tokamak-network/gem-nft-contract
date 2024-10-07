@@ -10,12 +10,30 @@ import { WstonSwapPoolStorage } from "./WstonSwapPoolStorage.sol";
 
 contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapPoolStorage {
 
+    modifier whenNotPaused() {
+      require(!paused, "Pausable: paused");
+      _;
+    }
+
+    modifier whenPaused() {
+        require(paused, "Pausable: not paused");
+        _;
+    }
+    
     modifier onlyTreasury() {
         require(
             msg.sender == treasury, 
             "function callable from treasury contract only"
         );
         _;
+    }
+
+    function pause() public onlyOwner whenNotPaused {
+        paused = true;
+    }
+
+    function unpause() public onlyOwner whenNotPaused {
+        paused = false;
     }
 
     /**
@@ -43,6 +61,10 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         feeRate = _feeRate;
         initialized = true;
     }
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
 
     /**
      * @notice Adds liquidity to the pool by depositing TON and/or WSTON tokens.
@@ -219,6 +241,10 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         feeRate = _feeRate;
     }
 
+    //---------------------------------------------------------------------------------------
+    //-----------------------------INTERNAL/PRIVATE FUNCTIONS--------------------------------
+    //---------------------------------------------------------------------------------------
+
     function _safeTransferFrom(IERC20 token, address sender, address recipient, uint256 amount) private {
         bool sent = token.transferFrom(sender, recipient, amount);
         require(sent, "Token transfer failed");
@@ -229,33 +255,16 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         require(sent, "Token transfer failed");
     }
 
+    //---------------------------------------------------------------------------------------
+    //------------------------STORAGE GETTER / VIEW FUNCTIONS--------------------------------
+    //---------------------------------------------------------------------------------------
 
-    function getLpShares(address lp) external view returns (uint256) {
-        return lpShares[lp];
-    }
-
-    function getWstonReserve() external view returns(uint256) {
-        return wstonReserve;
-    }
-
-    function getTonReserve() external view returns(uint256) {
-        return tonReserve;
-    }
-
-    function getTotalShares() external view returns(uint256) {
-        return totalShares;
-    }
-
-    function getStakingIndex() external view returns(uint256) {
-        return stakingIndex;
-    }
-
-    function getTonFeesBalance() external view returns (uint256) {
-        return tonFeeBalance;
-    }
-
-    function getWstonFeesBalance() external view returns (uint256) {
-        return wstonFeeBalance;
-    }
+    function getLpShares(address lp) external view returns (uint256) {return lpShares[lp];}
+    function getWstonReserve() external view returns(uint256) { return wstonReserve;}
+    function getTonReserve() external view returns(uint256) {return tonReserve;}
+    function getTotalShares() external view returns(uint256) {return totalShares;}
+    function getStakingIndex() external view returns(uint256) {return stakingIndex;}
+    function getTonFeesBalance() external view returns (uint256) {return tonFeeBalance;}
+    function getWstonFeesBalance() external view returns (uint256) {return wstonFeeBalance;}
 
 }

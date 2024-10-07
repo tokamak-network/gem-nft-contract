@@ -79,6 +79,7 @@ contract L2BaseTest is Test {
     RandomPack randomPack;
     RandomPackProxy randomPackProxy;
     address randomPackProxyAddress;
+    
     address wston;
     address ton;
     address l1wston;
@@ -110,8 +111,8 @@ contract L2BaseTest is Test {
         ton = address(new MockTON(l2bridge, l1ton, "Ton", "TON")); // 18 decimals
 
         vm.stopPrank();
-        // mint some tokens to User1 and user2
 
+        // mint some tokens to User1, user2 and user3
         vm.startPrank(l2bridge);
         L2StandardERC20(wston).mint(owner, 1000000 * 10 ** 27);
         L2StandardERC20(wston).mint(user1, 100000 * 10 ** 27);
@@ -135,13 +136,13 @@ contract L2BaseTest is Test {
             calldataSizeBytes
         );
 
-        // deploy and initialize GemFactory
+        // deploy GemFactory
         gemfactory = new GemFactory();
         gemfactoryProxy = new GemFactoryProxy();
         gemfactoryProxy.upgradeTo(address(gemfactory));
         gemfactoryProxyAddress = address(gemfactoryProxy);
 
-        // deploy treasury and marketplace
+        // deploy and initialize treasury
         treasury = new Treasury();
         treasuryProxy = new TreasuryProxy();
         treasuryProxy.upgradeTo(address(treasury));
@@ -152,6 +153,7 @@ contract L2BaseTest is Test {
             gemfactoryProxyAddress
         );
 
+        // deploy and initialize marketplace
         marketplace = new MarketPlace();
         marketplaceProxy = new MarketPlaceProxy();
         marketplaceProxy.upgradeTo(address(marketplace));
@@ -165,8 +167,8 @@ contract L2BaseTest is Test {
         );
 
         vm.stopPrank();
-        // mint some TON & TITAN WSTON to treasury
 
+        // mint some TON & WSTON to treasury
         vm.startPrank(l2bridge);
         L2StandardERC20(wston).mint(treasuryProxyAddress, 100000 * 10 ** 27);
         MockTON(ton).mint(treasuryProxyAddress, 100000 * 10 ** 18);
@@ -175,7 +177,7 @@ contract L2BaseTest is Test {
 
 
         vm.startPrank(owner);
-
+        // initialize gemfactory with newly created contract addreses
         GemFactory(gemfactoryProxyAddress).initialize(
             address(drbCoordinatorMock),
             owner,
@@ -254,16 +256,15 @@ contract L2BaseTest is Test {
         GemFactory(gemfactoryProxyAddress).addColor("Amethyst/Amber",6,1);
         GemFactory(gemfactoryProxyAddress).addColor("Garnet",7,7);
 
-        //deploying the airdrop contract
+        //deploying and initializing the airdrop contract
         airdrop = new Airdrop();
         airdropProxy = new AirdropProxy();
         airdropProxy.upgradeTo(address(airdrop));
         airdropProxyAddress = address(airdropProxy);
-
         Airdrop(airdropProxyAddress).initialize(treasuryProxyAddress, gemfactoryProxyAddress);
 
+        // set the airdrop address in treasury and gemfactory
         Treasury(treasuryProxyAddress).setAirdrop(airdropProxyAddress);
-
         GemFactory(gemfactoryProxyAddress).setAirdrop(airdropProxyAddress);
 
         vm.stopPrank();

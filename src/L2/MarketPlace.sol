@@ -38,6 +38,22 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         _;
     }
 
+    function pause() public onlyOwner whenNotPaused {
+        paused = true;
+    }
+
+    function unpause() public onlyOwner whenNotPaused {
+        paused = false;
+    }
+
+    /**
+     * @notice Initializes the marketplace contract with the given parameters.
+     * @param _treasury Address of the treasury contract.
+     * @param _gemfactory Address of the gem factory contract.
+     * @param _tonFeesRate Fee rate for TON transactions.
+     * @param _wston Address of the WSTON token.
+     * @param _ton Address of the TON token.
+     */
     function initialize(
         address _treasury, 
         address _gemfactory,
@@ -57,10 +73,18 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         initialized = true;
     }
 
+    /**
+     * @notice Sets the TON fees rate.
+     * @param _tonFeesRate New fee rate for TON transactions.
+     */
     function setTonFeesRate(uint256 _tonFeesRate) external onlyOwner {
         tonFeesRate = _tonFeesRate;
     }
 
+    /**
+     * @notice Sets the common GEM token URI.
+     * @param _tokenURI New token URI for common GEMs.
+     */
     function setCommonGemTokenUri(string memory _tokenURI) external onlyOwner {
         commonGemTokenUri = _tokenURI;
     }
@@ -126,6 +150,10 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
 
     }
 
+    /**
+     * @notice Sets the discount rate for TON fees.
+     * @param _tonFeesRate New discount rate for TON fees.
+     */
     function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {
         if(_tonFeesRate >= 100) {
             revert WrongDiscountRate();
@@ -134,6 +162,10 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         emit SetDiscountRate(_tonFeesRate);
     }
 
+    /**
+     * @notice Sets the staking index. note that this function is mainly used by the oracle each time a deposit is made on L1WSTON contract.
+     * @param _stakingIndex New staking index.
+     */
     function setStakingIndex(uint256 _stakingIndex) external onlyOwner {
         if(_stakingIndex < 1e27) {
             revert WrongStakingIndex();
@@ -145,7 +177,12 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
     //--------------------------INTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
 
-    
+    /**
+     * @notice Internal function to put a GEM for sale.
+     * @param _tokenId The ID of the token to be transferred.
+     * @param _price Price asked for the transaction.
+     * @return bool Returns true if the operation is successful.
+     */
     function _putGemForSale(uint256 _tokenId, uint256 _price) internal returns (bool) {
         if(IGemFactory(gemFactory).ownerOf(_tokenId) != msg.sender) {
             revert NotGemOwner();
@@ -169,6 +206,13 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         return true;
     }
     
+    /**
+     * @notice Internal function to buy a GEM.
+     * @param _tokenId The ID of the token to be transferred.
+     * @param _payer Address of the payer.
+     * @param _paymentMethod The payment method used.
+     * @return bool Returns true if the operation is successful.
+     */
     function _buyGem(uint256 _tokenId, address _payer, bool _paymentMethod) internal nonReentrant returns(bool) {
         if(_payer == address(0)) {
             revert AddressZero();

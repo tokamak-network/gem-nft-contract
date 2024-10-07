@@ -38,7 +38,7 @@ library ForgeLibrary {
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color,
         ForgeParams memory params
-    ) external returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint256 forgedGemsMiningPeriod, uint256 forgedGemsCooldownPeriod, uint256 forgedGemsminingTry) {
+    ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint256 forgedGemsMiningPeriod, uint256 forgedGemsCooldownPeriod, uint256 forgedGemsminingTry) {
         require(msgSender != address(0), "zero address");
 
         if (_rarity == GemFactoryStorage.Rarity.COMMON) {

@@ -65,6 +65,10 @@ This contract is responsible for staking users' WTON and minting WSTON for the s
 - Staking Index: The value of WSTON increases as the pool receives more seigniorage, rewarding long-term depositors in line with the Layer 2 candidate reward distribution. The staking index is updated before each deposit or requestWithdrawal transaction.
 - Note: An instance of L1WrappedStakedTON must be created for each Layer 2 candidate (e.g., Titan, Thanos). This is done through the L1WrappedStakingTONFactory contract.
 
+### L1WrappedStakedTONFactory (L1)
+
+The factory allows the creation of new L1WrappedStakedTON contract. The owner/admins of the factory become the owner of L1WrappedStakedTON created through the `createWSTON` function. Note that L1WrappedStakedTON owners must use the upgradeWSTONTo function to upgrade the implementation of the contract.
+
 
 ## Installation
 
@@ -108,6 +112,9 @@ Below is the list of contracts to be reviewed
 | L1/L1WrappedStakedTONStorage.sol      | 28              |
 | L2/GemFactory.sol                     | 604             |
 | L2/GemFactoryProxy.sol                | 5               |
+| L2/Airdrop.sol                        | 83              |
+| L2/AirdropStorage.sol                 | 15              |
+| L2/AirdropProxy.sol                   | 5               |
 | L2/GemFactoryStorage.sol              | 113             |
 | L2/L2StandardERC20.sol                | 38              |
 | L2/MarketPlace.sol                    | 116             |
@@ -125,12 +132,8 @@ Below is the list of contracts to be reviewed
 | library/GemLibrary.sol                | 35              |
 | library/MiningLibrary.sol             | 15              |
 | library/TransferLibrary.sol           | 19              |
-| proxy/ProxyGemFactory.sol             | 97              |
-| proxy/ProxyL1WrappedStakedTON.sol     | 97              |
-| proxy/ProxyMarketPlace.sol            | 97              |
-| proxy/ProxyRandomPack.sol             | 97              |
 | proxy/ProxyStorage.sol                | 7               |
-| proxy/ProxyWstonSwapPool.sol          | 97              |
+| proxy/Proxy.sol                       | 97              |
 | **Total**                             | **2379**        |
 
 ## Contract addresses

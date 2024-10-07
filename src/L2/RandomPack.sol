@@ -39,6 +39,22 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         _;
     }
 
+    function pause() public onlyOwner whenNotPaused {
+        paused = true;
+    }
+
+    function unpause() public onlyOwner whenNotPaused {
+        paused = false;
+    }
+
+    /**
+     * @notice Initializes the RandomPack contract with the given parameters.
+     * @param _coordinator Address of the  DRBCoordinator contract.
+     * @param _ton Address of the TON token.
+     * @param _gemFactory Address of the gem factory contract.
+     * @param _treasury Address of the treasury contract.
+     * @param _randomPackFees Fees for requesting a random pack.
+     */
     function initialize(
         address _coordinator,  
         address _ton, 
@@ -56,6 +72,14 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         perfectCommonGemURI = "";
     }
 
+    //---------------------------------------------------------------------------------------
+    //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    /** 
+     * @notice Sets the address of the gem factory.
+     * @param _gemFactory New address of the gem factory contract.
+     */
     function setGemFactory(address _gemFactory) external onlyOwner {
         if(gemFactory == address(0)) {
             revert InvalidAddress();
@@ -63,6 +87,10 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         gemFactory = _gemFactory;
     }
 
+    /**
+     * @notice Sets the fees for requesting a random pack.
+     * @param _randomPackFees New fees for random pack requests.
+     */
     function setRandomPackFees(uint256 _randomPackFees) external onlyOwner {
         if(randomPackFees == 0) {
             revert RandomPackFeesEqualToZero();
@@ -70,6 +98,10 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         randomPackFees = _randomPackFees;
     }
 
+    /**
+     * @notice Sets the address of the treasury.
+     * @param _treasury New address of the treasury contract.
+     */
     function setTreasury(address _treasury) external onlyOwner {
         if(_treasury == address(0)) {
             revert InvalidAddress();
@@ -77,14 +109,26 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         treasury = _treasury;
     }
 
+    /**
+     * @notice Sets the URI for the perfect common GEM.
+     * @param _tokenURI New URI for the perfect common GEM.
+     */
     function setPerfectCommonGemURI(string memory _tokenURI) external onlyOwner {
         perfectCommonGemURI = _tokenURI;
     }
 
+    /**
+     * @notice Sets the gas limit for the callback function.
+     * @param _callbackGasLimit New gas limit for the callback function.
+     */
     function setCallbackGasLimit(uint32 _callbackGasLimit) external onlyOwner {
         callbackGasLimit = _callbackGasLimit;
     }
 
+    /**
+     * @notice Requests a random GEM and pays the required fees.
+     * @return uint256 Returns the request ID for the randomness request.
+     */
     function requestRandomGem() external payable whenNotPaused nonReentrant returns(uint256) {
         if(msg.sender == address(0)) {
             revert InvalidAddress();
@@ -102,12 +146,33 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             requestCount++;
         }
 
-        //IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
-
         return requestId;
     }
 
-    // Implement the abstract function from DRBConsumerBase
+    /**
+     * @notice Handles the receipt of an ERC721 token.
+     * @return bytes4 Returns the selector of the onERC721Received function.
+     */
+    function onERC721Received(
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*tokenId*/,
+        bytes calldata /*data*/
+    ) external pure override returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------------INTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    /**
+     * @notice Fulfills the randomness request with the given random number and transfers a random GEM to the appropriate user
+     * @dev the function lists down the Gems available in the treasury (not locked) through the getGemListAvailableForRandomPack function 
+     * @dev if there is no gem available, the function creates a new common gem with specific attributes
+     * @param requestId The ID of the randomness request.
+     * @param randomNumber The random number generated.
+     */
     function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
         if(!s_requests[requestId].requested) {
             revert RequestNotMade();
@@ -132,15 +197,6 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         }
     }
 
-    // onERC721Received function to accept ERC721 tokens
-    function onERC721Received(
-        address /*operator*/,
-        address /*from*/,
-        uint256 /*tokenId*/,
-        bytes calldata /*data*/
-    ) external pure override returns (bytes4) {
-        return this.onERC721Received.selector;
-    }
 
     //---------------------------------------------------------------------------------------
     //-------------------------------STORAGE GETTERS-----------------------------------------

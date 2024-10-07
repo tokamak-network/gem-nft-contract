@@ -23,6 +23,7 @@ contract WstonSwapPoolStorage {
     uint256 public totalShares;
 
     bool internal initialized;
+    bool public paused;
 
     event SwappedWstonForTon(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event SwappedTonForWston(address indexed user, uint256 tonAmount, uint256 wstonAmount);

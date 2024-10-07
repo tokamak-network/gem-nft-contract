@@ -226,8 +226,8 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     //---------------------------------------------------------------------------------------
 
     /**
-     * @notice function that allow users to forge their gems. Gems must have the same rarity and
-     * same stakingIndex. Users can choose the color the forged gem will have if it respects certain conditions. 
+     * @notice function that allow users to forge their gems. Gems must have the same rarity. 
+     * Users can choose the color the forged gem will have if it respects specific conditions. 
      * old gems are burnt while the new forged gem is minted.
      * @param _tokenIds array of tokens to be forged. Must respect some length depending on the rarity chosen
      * @param _rarity to check if the rarity of each token selected is the same
@@ -296,6 +296,10 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @notice triggers the mining process of a gem by the function caller
      * @param _tokenId Id of the token to be mined.
      * @return true if the gem user started mining the gem
+     * @dev the Gem must be Rare or above
+     * @dev the cooldown period must have elapsed
+     * @dev the Gem must not be locked. Therefore, it must not be listed on the marketplace 
+     * @dev There must be more than 1 mining try left
      */
     function startMiningGEM(uint256 _tokenId) external whenNotPaused returns (bool) {
         if(msg.sender == address(0)) {
@@ -316,13 +320,19 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         if(Gems[_tokenId].miningTry == 0) {
             revert NoMiningTryLeft();
         }
-
+        // modifying storage variables associated with the mining process
         Gems.startMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
-
         emit GemMiningStarted(_tokenId, msg.sender, block.timestamp, Gems[_tokenId].miningTry);
         return true;
     }
 
+    /**
+     * @notice function that cancels the mining process. note that the mining attempt spent is not recovered
+     * @param _tokenId the id of the token that is mining
+     * @dev the user must be the owner of the token
+     * @dev the user must be mining this token.
+     * @dev the user must not have already called pickMinedGem function
+     */
     function cancelMining(uint256 _tokenId) external whenNotPaused returns (bool) {
         if(GEMIndexToOwner[_tokenId] != msg.sender) {
             revert NotGemOwner();
@@ -336,7 +346,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         if(Gems[_tokenId].randomRequestId != 0) {
             revert GemAlreadyPicked();
         }
-        
+        // modifying storage variable associated with the mining process
         Gems.cancelMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
         emit MiningCancelled(_tokenId, msg.sender, block.timestamp);
         return true;

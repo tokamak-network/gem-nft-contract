@@ -3,6 +3,7 @@ pragma solidity 0.8.25;
 
 import "forge-std/Test.sol";
 import { L1WrappedStakedTONFactory } from "../../src/L1/L1WrappedStakedTONFactory.sol";
+import { L1WrappedStakedTONFactoryProxy } from "../../src/L1/L1WrappedStakedTONFactoryProxy.sol";
 import { L1WrappedStakedTON } from "../../src/L1/L1WrappedStakedTON.sol";
 import { L1WrappedStakedTONProxy } from "../../src/L1/L1WrappedStakedTONProxy.sol";
 import { L1WrappedStakedTONStorage } from "../../src/L1/L1WrappedStakedTONStorage.sol";
@@ -30,7 +31,9 @@ contract L1BaseTest is Test {
 
     address l1WrappedStakedTon;
     L1WrappedStakedTONProxy l1wrappedstakedtonProxy;
-    address l1wrappedstakedtonFactory;
+    L1WrappedStakedTONFactory l1WrappedStakedtonFactory;
+    L1WrappedStakedTONFactoryProxy l1WrappedStakedtonFactoryProxy;
+    address l1WrappedStakedtonFactoryProxyAddress;
     address wton;
     address ton;
 
@@ -117,16 +120,19 @@ contract L1BaseTest is Test {
 
         require(Layer2Registry(layer2Registry).registerAndDeployCoinage(candidate, seigManager));
 
-        l1wrappedstakedtonFactory = address(new L1WrappedStakedTONFactory());
+        l1WrappedStakedtonFactory = new L1WrappedStakedTONFactory();
+        l1WrappedStakedtonFactoryProxy = new L1WrappedStakedTONFactoryProxy();
+        l1WrappedStakedtonFactoryProxy.upgradeTo(address(l1WrappedStakedtonFactory));
+        l1WrappedStakedtonFactoryProxyAddress = address(l1WrappedStakedtonFactoryProxy);
         l1WrappedStakedTon = address(new L1WrappedStakedTON());
-        L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).initialize(wton, ton);
-        L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).setWstonImplementation(l1WrappedStakedTon);
+        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).initialize(wton, ton);
+        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).setWstonImplementation(l1WrappedStakedTon);
 
         
         DepositManager(depositManager).setSeigManager(seigManager);
 
         // deploy and initialize Wrapped Staked TON
-        l1wrappedstakedtonProxy = L1WrappedStakedTONFactory(l1wrappedstakedtonFactory).createWSTONToken(
+        l1wrappedstakedtonProxy = L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(
             candidate,
             depositManager,
             seigManager,

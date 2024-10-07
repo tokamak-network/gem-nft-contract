@@ -64,6 +64,20 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         _;
     }
 
+    function pause() public onlyOwner whenNotPaused {
+        paused = true;
+    }
+
+    function unpause() public onlyOwner whenNotPaused {
+        paused = false;
+    }
+
+    /**
+     * @notice Initializes the Treasury contract with the given parameters.
+     * @param _wston Address of the WSTON token.
+     * @param _ton Address of the TON token.
+     * @param _gemFactory Address of the gem factory contract.
+     */
     function initialize(address _wston, address _ton, address _gemFactory) external {
         require(!initialized, "already initialized");   
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -73,83 +87,157 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         initialized = true;
     }
 
+    //---------------------------------------------------------------------------------------
+    //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
 
+    /**
+     * @notice Sets the address of the gem factory.
+     * @param _gemFactory New address of the gem factory contract.
+     */
     function setGemFactory(address _gemFactory) external onlyOwnerOrAdmin {
         _checkNonAddress(gemFactory);
         gemFactory = _gemFactory;
     }
 
+    /**
+     * @notice Sets the address of the random pack contract.
+     * @param _randomPack New address of the random pack contract.
+     */
     function setRandomPack(address _randomPack) external onlyOwnerOrAdmin {
         _checkNonAddress(_randomPack);
         randomPack = _randomPack;
     }
 
+    /**
+     * @notice Sets the address of the marketplace contract.
+     * @param marketplace New address of the marketplace contract.
+     */
     function setMarketPlace(address marketplace) external onlyOwnerOrAdmin {
         _checkNonAddress(marketplace);
         _marketplace = marketplace;
     }
 
+    /**
+     * @notice Sets the address of the airdrop contract.
+     * @param _airdrop New address of the airdrop contract.
+     */
     function setAirdrop(address _airdrop) external onlyOwnerOrAdmin {
         _checkNonAddress(_airdrop);
         airdrop = _airdrop;
     }
 
+    /**
+     * @notice Sets the address of the WSTON swap pool.
+     * @param _wstonSwapPool New address of the WSTON swap pool.
+     */
     function setWstonSwapPool(address _wstonSwapPool) external onlyOwnerOrAdmin {
         _checkNonAddress(_wstonSwapPool);
         wstonSwapPool = _wstonSwapPool;
     }
 
+    /**
+     * @notice Approves the gem factory to spend WSTON tokens.
+     */
     function approveGemFactory() external onlyOwnerOrAdmin {
         _checkNonAddress(wston);
         IERC20(wston).approve(gemFactory, type(uint256).max);
     }
 
+    /**
+     * @notice Approves the marketplace to spend WSTON tokens.
+     */
     function wstonApproveMarketPlace() external onlyOwnerOrAdmin {
         _checkNonAddress(wston);
         IERC20(wston).approve(_marketplace, type(uint256).max);
     }
 
+    /**
+     * @notice Approves the marketplace to spend TON tokens.
+     */
     function tonApproveMarketPlace() external onlyOwnerOrAdmin {
         _checkNonAddress(ton);
         IERC20(ton).approve(_marketplace, type(uint256).max);
     }
 
+    /**
+     * @notice Approves the WSTON swap pool to spend TON tokens.
+     */
     function tonApproveWstonSwapPool() external onlyOwnerOrAdmin {
         _checkNonAddress(ton);
         IERC20(ton).approve(wstonSwapPool, type(uint256).max);
     }
 
+    /**
+     * @notice Approves a specific operator to manage a GEM token.
+     * @param operator Address of the operator.
+     * @param _tokenId ID of the token to approve.
+     */
     function approveGem(address operator, uint256 _tokenId) external onlyOwnerOrAdmin {
         IGemFactory(gemFactory).approve(operator, _tokenId);
     }
 
+    /**
+     * @notice Approves the marketplace to spend a specific amount of WSTON tokens.
+     * @param amount Amount of WSTON tokens to approve.
+     */
     function approveWstonForMarketplace(uint256 amount) external onlyMarketPlace {
         IERC20(wston).approve(_marketplace, amount);
     }
 
+    /**
+     * @notice Transfers WSTON tokens to a specified address.
+     * @param _to Address to transfer WSTON tokens to.
+     * @param _amount Amount of WSTON tokens to transfer.
+     * @dev only the gemFactory, MarketPlace, RandomPack, Airdrop or the Owner are authorized to transfer the funds
+     * @return bool Returns true if the transfer is successful.
+     */
     function transferWSTON(address _to, uint256 _amount) external onlyGemFactoryOrMarketPlaceOrRandomPackOrAirdropOrOwner nonReentrant returns(bool) {
-        
+        // check _to diffrent from address(0)
         _checkNonAddress(_to);
 
+        // check the balance of the treasury
         uint256 contractWSTONBalance = getWSTONBalance();
         if(contractWSTONBalance < _amount) {
             revert UnsuffiscientWstonBalance();
         }
 
+        // transfer to the recipient
         IERC20(wston).safeTransfer(_to, _amount);
         return true;
     }
 
+    /**
+     * @notice Transfers TON tokens to a specified address.
+     * @param _to Address to transfer TON tokens to.
+     * @param _amount Amount of TON tokens to transfer.
+     * @dev only the owner or the admins are authorized to call the function
+     * @return bool Returns true if the transfer is successful.
+     */
     function transferTON(address _to, uint256 _amount) external onlyOwnerOrAdmin returns(bool) {
-        _checkNonAddress(_to);   
+        // check _to diffrent from address(0)
+        _checkNonAddress(_to);
+
+        // check the balance of the treasury 
         uint256 contractTONBalance = getTONBalance();
         if(contractTONBalance < _amount) {
             revert UnsuffiscientTonBalance();
         }
+
+        // transfer to the recipient
         IERC20(ton).safeTransfer(_to, _amount);
         return true;
     }
 
+    /**
+     * @notice Creates a premined GEM with specified attributes.
+     * @param _rarity Rarity of the GEM.
+     * @param _color Color attributes of the GEM.
+     * @param _quadrants Quadrant attributes of the GEM.
+     * @param _tokenURI URI of the GEM token.
+     * @dev the contract must hold enough WSTON to cover the entire supply of GEMs across all owners
+     * @return uint256 Returns the ID of the created GEM.
+     */
     function createPreminedGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
@@ -161,6 +249,7 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
             revert NotEnoughWstonAvailableInTreasury();
         }
 
+        // we create the Gem from the GemFactory
         return IGemFactory(gemFactory).createGEM(
             _rarity,
             _color,
@@ -169,20 +258,33 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         );
     }
 
+    /**
+     * @notice Creates a pool of premined GEMs with specified attributes.
+     * @param _rarities Array of rarities for each GEM.
+     * @param _colors Array of color attributes for each GEM.
+     * @param _quadrants Array of quadrant attributes for each GEM.
+     * @param _tokenURIs Array of URIs for each GEM token.
+     * @dev the contract must hold enough WSTON to cover the entire supply of GEMs across all owners
+     * @return uint256[] Returns an array of IDs for the created GEMs.
+     */
     function createPreminedGEMPool(
         GemFactoryStorage.Rarity[] memory _rarities,
         uint8[2][] memory _colors,
         uint8[4][] memory _quadrants, 
         string[] memory _tokenURIs
     ) public onlyOwnerOrRandomPackOrMarketplace returns (uint256[] memory) {
+        //calculate the value of the pool of Gems to be created
         uint256 sumOfNewPoolValues;
         for (uint256 i = 0; i < _rarities.length; ++i) {
             sumOfNewPoolValues += IGemFactory(gemFactory).getValueBasedOnRarity(_rarities[i]);
         }
+
+        // add the value calculated to the total supply value and check that the treasury balance holds enough WSTON
         if(getWSTONBalance() < IGemFactory(gemFactory).getGemsSupplyTotalValue() + sumOfNewPoolValues) {
             revert NotEnoughWstonAvailableInTreasury();
         }
 
+        // we create the pool from the GemFactory
         return IGemFactory(gemFactory).createGEMPool(
             _rarities,
             _colors,
@@ -191,11 +293,24 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         );
     }
 
+    /**
+     * @notice Transfers a GEM from the treasury to a specified address.
+     * @param _to Address to transfer the GEM to.
+     * @param _tokenId ID of the GEM token to transfer.
+     * @dev only the GemFactory, MarketPlace, RandomPack, Airdrop or the Owner are able to transfer Gems from the treasury
+     * @return bool Returns true if the transfer is successful.
+     */
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external onlyGemFactoryOrMarketPlaceOrRandomPackOrAirdropOrOwner returns(bool) {
         IGemFactory(gemFactory).transferFrom(address(this), _to, _tokenId);
         return true;
     }
 
+    /**
+     * @notice Puts a GEM for sale on the marketplace.
+     * @param _tokenId ID of the GEM token to put for sale.
+     * @param _price Price at which the GEM is to be sold.
+     * @dev we set approval for all for gas optimization (not approving for each gem one by one)
+     */
     function putGemForSale(uint256 _tokenId, uint256 _price) external onlyOwnerOrAdmin {
         if (!IGemFactory(gemFactory).isApprovedForAll(address(this), _marketplace)) {
             IGemFactory(gemFactory).setApprovalForAll(_marketplace, true);
@@ -203,6 +318,12 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         IMarketPlace(_marketplace).putGemForSale(_tokenId, _price);
     }
 
+    /**
+     * @notice Puts a list of GEMs for sale on the marketplace.
+     * @param tokenIds Array of GEM token IDs to put for sale.
+     * @param prices Array of prices at which each GEM is to be sold.
+     * @dev we set approval for all for gas optimization (not approving for each gem one by one)
+     */
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external onlyOwnerOrAdmin {
         if (!IGemFactory(gemFactory).isApprovedForAll(address(this), _marketplace)) {
             IGemFactory(gemFactory).setApprovalForAll(_marketplace, true);
@@ -210,19 +331,35 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         IMarketPlace(_marketplace).putGemListForSale(tokenIds, prices);
     }
 
+    /**
+     * @notice Removes a GEM from sale on the marketplace.
+     * @param _tokenId ID of the GEM token to remove from sale.
+     */
     function removeGemFromSale(uint256 _tokenId) external onlyOwnerOrAdmin {
         IMarketPlace(_marketplace).removeGemForSale(_tokenId);
     }
 
+    /**
+     * @notice Buys a GEM from the marketplace.
+     * @param _tokenId ID of the GEM token to buy.
+     * @param _paymentMethod Payment method to use for the purchase.
+     */
     function buyGem(uint256 _tokenId, bool _paymentMethod) external onlyOwnerOrAdmin {
         IMarketPlace(_marketplace).buyGem(_tokenId, _paymentMethod);
     }
 
+    /**
+     * @notice Swaps TON for WSTON using the swap pool.
+     * @param tonAmount Amount of TON to swap for WSTON.
+     */
     function swapTONforWSTON(uint256 tonAmount) external onlyOwnerOrAdmin {
         IWstonSwapPool(wstonSwapPool).swapTONforWSTON(tonAmount);
     }
 
-    // onERC721Received function to accept ERC721 tokens
+    /**
+     * @notice Handles the receipt of an ERC721 token.
+     * @return bytes4 Returns the selector of the onERC721Received function.
+     */
     function onERC721Received(
         address /*operator*/,
         address /*from*/,
@@ -232,12 +369,20 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         return this.onERC721Received.selector;
     }
 
+    //---------------------------------------------------------------------------------------
+    //--------------------------------INTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    /**
+     * @notice Checks if the provided address is a non-zero address.
+     * @param account Address to check.
+     */
     function _checkNonAddress(address account) internal pure {
         if(account == address(0))   revert InvalidAddress();
     }
 
     //---------------------------------------------------------------------------------------
-    //-----------------------------VIEW FUNCTIONS--------------------------------------------
+    //------------------------STORAGE GETTER / VIEW FUNCTIONS--------------------------------
     //---------------------------------------------------------------------------------------
 
     // Function to check the balance of TON token within the contract
@@ -250,12 +395,12 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         return IERC20(wston).balanceOf(address(this));
     }
 
-    function getGemFactoryAddress() public view returns (address) {
-        return gemFactory;
-    }
+    function getGemFactoryAddress() external view returns (address) {return gemFactory;}
+    function getMarketPlaceAddress() external view returns(address) {return _marketplace;}
+    function getRandomPackAddress() external view returns(address) {return randomPack;}
+    function getAirdropAddress() external view returns(address) {return airdrop;}
+    function getTonAddress() external view returns(address) {return ton;}
+    function getWstonAddress() external view returns(address) {return wston;}
+    function getSwapPoolAddress() external view returns(address) {return wstonSwapPool;}
 
-    function getRandomPackAddress() public view returns(address) {
-        return randomPack;
-    }
-    
 }
