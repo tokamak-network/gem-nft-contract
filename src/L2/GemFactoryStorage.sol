@@ -213,4 +213,5 @@ contract GemFactoryStorage {
 
     // Random fullfil error
     error RequestNotMade();
+    error FailedToSendEthBack();
 }

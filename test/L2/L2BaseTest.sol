@@ -22,6 +22,7 @@ import { DRBConsumerBase } from "../../src/L2/Randomness/DRBConsumerBase.sol";
 
 import { Airdrop } from "../../src/L2/Airdrop.sol";
 import { AirdropProxy } from "../../src/L2/AirdropProxy.sol";
+import {IDRBCoordinator} from "../../src/interfaces/IDRBCoordinator.sol";
 
 
 contract L2BaseTest is Test {

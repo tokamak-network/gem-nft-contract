@@ -85,6 +85,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             revert InvalidAddress();
         }
         gemFactory = _gemFactory;
+        emit GemFactoryAddressUpdated(_gemFactory);
     }
 
     /**
@@ -96,6 +97,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             revert RandomPackFeesEqualToZero();
         }
         randomPackFees = _randomPackFees;
+        emit RandomPackFeesUpdated(_randomPackFees);
     }
 
     /**
@@ -107,6 +109,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             revert InvalidAddress();
         }
         treasury = _treasury;
+        emit TreasuryAddressUpdated(_treasury);
     }
 
     /**
@@ -115,6 +118,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      */
     function setPerfectCommonGemURI(string memory _tokenURI) external onlyOwner {
         perfectCommonGemURI = _tokenURI;
+        emit PerfectCommonGemURIUpdated(_tokenURI);
     }
 
     /**
@@ -123,11 +127,13 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      */
     function setCallbackGasLimit(uint32 _callbackGasLimit) external onlyOwner {
         callbackGasLimit = _callbackGasLimit;
+        emit CallBackGasLimitUpdated(_callbackGasLimit);
     }
 
     /**
      * @notice Requests a random GEM and pays the required fees.
      * @return uint256 Returns the request ID for the randomness request.
+     * @dev function has nonReentrant modifier and follows CEI
      */
     function requestRandomGem() external payable whenNotPaused nonReentrant returns(uint256) {
         if(msg.sender == address(0)) {
@@ -138,7 +144,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         IERC20(ton).safeTransferFrom(msg.sender, address(this), randomPackFees);
         
         // defining the random value
-        uint256 requestId = requestRandomness(0,0,callbackGasLimit);        
+        (uint256 directFundingCost, uint256 requestId) = requestRandomness(0,0,callbackGasLimit);        
 
         s_requests[requestId].requested = true;
         s_requests[requestId].requester = msg.sender;
@@ -146,6 +152,15 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             requestCount++;
         }
 
+        if(msg.value > directFundingCost) { // if there is ETH to refund
+            (bool success, ) = msg.sender.call{value:  msg.value - directFundingCost}("");
+            if(!success) {
+                revert FailedToSendEthBack();
+            }
+            emit EthSentBack(msg.value - directFundingCost);
+        }
+
+        emit RandomGemRequested(msg.sender);
         return requestId;
     }
 

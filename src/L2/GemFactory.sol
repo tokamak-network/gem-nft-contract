@@ -366,7 +366,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             revert NotMining();
         }
 
-        uint256 requestId = requestRandomness(0, 0, CALLBACK_GAS_LIMIT);
+        (uint256 directFundingCost, uint256 requestId) = requestRandomness(0, 0, CALLBACK_GAS_LIMIT);
         Gems[_tokenId].randomRequestId = requestId;
 
         s_requests[requestId].tokenId = _tokenId;
@@ -374,6 +374,13 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         s_requests[requestId].requester = msg.sender;
         unchecked {
             requestCount++;
+        }
+
+        if(msg.value > directFundingCost) { // if there is ETH to refund
+            (bool success, ) = msg.sender.call{value:  msg.value - directFundingCost}("");
+            if(!success) {
+                revert FailedToSendEthBack();
+            }
         }
 
         emit RandomGemRequested(_tokenId, Gems[_tokenId].randomRequestId);

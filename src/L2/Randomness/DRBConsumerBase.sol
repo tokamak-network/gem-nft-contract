@@ -25,24 +25,17 @@ abstract contract DRBConsumerBase {
     }
 
     /**
+     * @return directFundingCost cost of funding
      * @return requestId The ID of the request
      * @dev Request Randomness to the Coordinator
      */
-    function requestRandomness(
-        uint16 security,
-        uint16 mode,
-        uint32 callbackGasLimit
-    ) internal returns (uint256) {
-        uint256 requestId = i_drbCoordinator.requestRandomWordDirectFunding{
-            value: msg.value
-        }(
-            IDRBCoordinator.RandomWordsRequest({
-                security: security,
-                mode: mode,
-                callbackGasLimit: callbackGasLimit
-            })
+    function requestRandomness(uint16 security, uint16 mode, uint32 callbackGasLimit) internal returns (uint256 directFundingCost, uint256 requestId) {
+       directFundingCost = i_drbCoordinator.calculateDirectFundingPrice(
+            IDRBCoordinator.RandomWordsRequest({security: security, mode: mode, callbackGasLimit: callbackGasLimit})
         );
-        return requestId;
+       requestId = i_drbCoordinator.requestRandomWordDirectFunding{value: directFundingCost}(
+            IDRBCoordinator.RandomWordsRequest({security: security, mode: mode, callbackGasLimit: callbackGasLimit})
+        );
     }
 
     /**

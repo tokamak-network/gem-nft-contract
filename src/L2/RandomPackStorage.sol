@@ -28,13 +28,21 @@ contract RandomPackStorage {
     uint256 internal randomPackFees; // in TON (18 decimals)
     string internal perfectCommonGemURI;
 
+    event RandomGemRequested(address requestor);
     event RandomGemToBeTransferred(uint256 tokenId, address newOwner);
     event RandomGemTransferred(uint256 tokenId, address newOwner);
     event CommonGemToBeMinted();
     event CommonGemMinted();
+    event RandomPackFeesUpdated(uint256 randomPackFees);
+    event TreasuryAddressUpdated(address treasury);
+    event GemFactoryAddressUpdated(address gemFactory);
+    event PerfectCommonGemURIUpdated(string _tokenURI);
+    event CallBackGasLimitUpdated(uint256 _callbackGasLimit);
+    event EthSentBack(uint256 amount);
 
     error InvalidAddress();
     error RandomPackFeesEqualToZero();
     error RequestNotMade();
+    error FailedToSendEthBack();
     
 }
