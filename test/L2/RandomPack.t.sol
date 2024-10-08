@@ -16,6 +16,7 @@ contract MarketPlaceTest is L2BaseTest {
      * @notice testing the getRandomGem function 
      * @dev we created 2 gems (one RARE and one UNIQUE) that are eligible for being picked by the node
      * @dev called requestRandomGem with msg.value = 0.005 ETH (price of requesting is equal to 0.001 ETH)
+     * @dev expected the EthSentBack event is triggered with the appropriate amount
      * @dev simulated the node calling fulfillRandomness and ensured the GEM is appropriately picked and transferred
      */
     function testGetRandomGem() public {
@@ -78,9 +79,6 @@ contract MarketPlaceTest is L2BaseTest {
         drbCoordinatorMock.fulfillRandomness(requestId);
         // ensuring the either one of the minted GEM is transferred to user 1
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == user1 || GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == user1);
-
-        // ensuring the appropriate amount of ETH is sent back.abi
-
 
         vm.stopPrank();
     }
