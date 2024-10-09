@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 
 contract WstonSwapPoolStorage {
@@ -16,12 +16,30 @@ contract WstonSwapPoolStorage {
     uint256 public feeRate; // in bps => 100 = 1%
 
     mapping(address => uint256) public lpShares;
+    uint256 public tonFeeBalance;
+    uint256 public wstonFeeBalance;
+
     address[] public lpAddresses;
     uint256 public totalShares;
 
-    event Swap(address indexed user, uint256 tonAmount, uint256 wstonAmount);
+    bool internal initialized;
+    bool public paused;
+
+    event SwappedWstonForTon(address indexed user, uint256 tonAmount, uint256 wstonAmount);
+    event SwappedTonForWston(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event StakingIndexUpdated(uint256 newIndex);
     event LiquidityAdded(address indexed user, uint256 tonAmount, uint256 wstonAmount);
     event LiquidityRemoved(address indexed user, uint256 tonAmount, uint256 wstonAmount);
-    event FeesCollected(uint256 tonFees, uint256 wstonFees);
+    event FeesDistributed(uint256 tonFees, uint256 wstonFees);
+
+    error TonAllowanceTooLow();
+    error WstonAllowanceTooLow();
+    error TonBalanceTooLow();
+    error WstonBalanceTooLow();
+    error InsufficientLpShares();
+    error ContractTonBalanceTooLow();
+    error ContractWstonBalanceTooLow();
+    error WrongStakingIndex();
+    error WrongAmounts();
+
 }

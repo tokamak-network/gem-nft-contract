@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 import "../proxy/ProxyStorage.sol";
 import {AirdropStorage} from "./AirdropStorage.sol";
@@ -11,21 +11,60 @@ interface ITreasury {
     function transferTreasuryGEMto(address _to, uint256 _tokenId) external;
 }
 
-contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
+/**
+ * @title Airdrop Contract
+ * @notice This contract manages the airdrop of GEM tokens to users. 
+ * @dev Inherits from ProxyStorage, AirdropStorage, AuthControl, and ReentrancyGuard.
+ * @dev only admins are allowed to assign GEMs to users
+ * @dev user claim gems by their own
+ */
+contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
+    /**
+     * @notice Modifier to ensure the contract is not paused.
+     */
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
       _;
     }
-
+    
+    /**
+     * @notice Modifier to ensure the contract is paused.
+     */
     modifier whenPaused() {
         require(paused, "Pausable: not paused");
         _;
     }
 
-    constructor(address _treasury, address _gemFactory) {
+    /**
+     * @notice Pauses the contract, preventing certain actions.
+     * @dev Can only be called by the owner when the contract is not paused.
+     */
+    function pause() public onlyOwner whenNotPaused {
+        paused = true;
+    }
+
+    /**
+     * @notice Unpauses the contract, allowing actions to be performed.
+     * @dev Can only be called by the owner when the contract is paused.
+     */
+    function unpause() public onlyOwner whenNotPaused {
+        paused = false;
+    }
+
+    /**
+     * @notice Initializes the contract with the treasury and gem factory addresses.
+     * @param _treasury The address of the treasury contract.
+     * @param _gemFactory The address of the gem factory contract.
+     * @dev Can only be called once. Grants the default admin role to the caller.
+     */
+    function initialize(address _treasury, address _gemFactory) external {
+        if(initialized) {
+            revert AlreadyInitialized();
+        }
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         treasury = _treasury;
         gemFactory = _gemFactory;
+        initialized = true;  
     }
 
 
@@ -34,91 +73,177 @@ contract Airdrop is AirdropStorage, ProxyStorage, AuthControl, ReentrancyGuard {
     //---------------------------------------------------------------------------------------
 
 
-    /**
-     * @notice this function must be called by the owner or an admin to assign a list of tokens to a particular user. 
-     * This user will then be able to call claimAirdrop. The owner or the admins can call assignGemForAirdrop multiple times
-     * without clearing the previous list of tokens.
-     * @param _tokenIds list of tokens
-     * @param _to  user that must benefit from the airdrop
+        /**
+     * @notice Assigns a list of GEM tokens to a user for airdrop.
+     * @param _tokenIds The list of GEM token IDs to assign.
+     * @param _to The address of the user to receive the airdrop.
+     * @return A boolean indicating success.
+     * @dev Can only be called by the owner or an admin. Ensures tokens are unique and owned by the treasury.
      */
-    function assignGemForAirdrop(uint256[] memory _tokenIds, address _to) external onlyOwnerOrAdmin returns(bool) {
+    function assignGemForAirdrop(uint256[] memory _tokenIds, address _to) external onlyOwnerOrAdmin returns (bool) {
         uint256[] storage existingTokens = tokensEligible[_to];
-        uint256[] memory uniqueTokenIds = new uint256[](_tokenIds.length);
-        uint256 uniqueCount = 0;
 
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
-            bool isDuplicate = false;
 
-            // Check for duplicates within _tokenIds
-            for (uint256 j = 0; j < uniqueCount; j++) {
-                if (uniqueTokenIds[j] == tokenId) {
-                    isDuplicate = true;
-                    break;
+            for (uint256 k = 0; k < existingTokens.length; ++k) {
+                if (existingTokens[k] == tokenId) {
+                    continue;
                 }
             }
-
-            // Check for duplicates in existing tokensEligible
-            if (!isDuplicate) {
-                for (uint256 k = 0; k < existingTokens.length; k++) {
-                    if (existingTokens[k] == tokenId) {
-                        isDuplicate = true;
-                        break;
-                    }
-                }
+            // safety checks to ensure the gem is owned by the treasury and it is not locked
+            if (IGemFactory(gemFactory).ownerOf(tokenId) != treasury) {
+                revert TokenNotOwnedByTreasury();
+            }
+            if (IGemFactory(gemFactory).isTokenLocked(tokenId)) {
+                revert TokenNotAvailable();
             }
 
-            require(IGemFactory(gemFactory).ownerOf(tokenId) == treasury, "Token not owned by the treasury");
-            require(IGemFactory(gemFactory).isTokenLocked(tokenId) == false, "Token is not available");
-
-            // we lock the token so that it cannot be sent to another user through the mining or random pack process
+            // Lock the token so that it cannot be sent to another user through the mining or random pack process
             IGemFactory(gemFactory).setIsLocked(tokenId, true);
-            uniqueTokenIds[uniqueCount] = tokenId;
-            uniqueCount++;
+            existingTokens.push(tokenId);
         }
 
-        // Resize the array to fit the number of unique tokens
-        uint256[] memory finalTokenIds = new uint256[](uniqueCount);
-        for (uint256 j = 0; j < uniqueCount; j++) {
-            finalTokenIds[j] = uniqueTokenIds[j];
-        }
-
-        // Assign unique tokens to the user
-        tokensEligible[_to] = finalTokenIds;
         userClaimed[_to] = false;
 
-        emit TokensAssigned(finalTokenIds, _to);
+        // Add user to the mapping of users with eligible tokens if not already present
+        if (!userHasEligibleTokens[_to]) {
+            userHasEligibleTokens[_to] = true;
+            usersWithEligibleTokens.push(_to);
+        }
+
+        emit TokensAssigned(existingTokens, _to);
         return true;
     }
 
-
     /**
-     * @notice claimAirdrop function transfers ownership of each GEM assigned to msg.sender.
+     * @notice Claims the airdrop of GEM tokens assigned to the caller.
+     * @dev Transfers ownership of each GEM token to the caller. Can only be called when not paused.
      */
     function claimAirdrop() external whenNotPaused nonReentrant {
-        require(userClaimed[msg.sender] == false, "user already claimed");
+        if(userClaimed[msg.sender] == true) {
+            revert UserAlreadyClaimedCurrentAirdrop();
+        }
         uint256[] memory _tokenIds = tokensEligible[msg.sender];
-        require(_tokenIds.length > 0, "user is not eligible for any token");
-
-        userClaimed[msg.sender] = true;
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
-            IGemFactory(gemFactory).setIsLocked(_tokenIds[i], false);
-            ITreasury(treasury).transferTreasuryGEMto(msg.sender, _tokenIds[i]);
+        if(_tokenIds.length == 0) {
+            revert UserNotEligible();
         }
 
-        // Clear the array after claiming
+        // mappings reset
+        userClaimed[msg.sender] = true;
         delete tokensEligible[msg.sender];
+        userHasEligibleTokens[msg.sender] = false;
+
+        for (uint256 i = 0; i < _tokenIds.length; ++i) {
+            // This condition is made in case there was duplicates in the list so it does not revert
+            if (IGemFactory(gemFactory).ownerOf(_tokenIds[i]) == treasury) {
+                IGemFactory(gemFactory).setIsLocked(_tokenIds[i], false);
+                ITreasury(treasury).transferTreasuryGEMto(msg.sender, _tokenIds[i]);
+            }
+        }
 
         emit TokensClaimed(_tokenIds, msg.sender);
     }
 
+    /**
+     * @notice Clears all tokens eligible for airdrop for all users.
+     * @dev Can only be called by the owner or an admin.
+     * @return A boolean indicating success.
+     */
+    function clearEligibleTokensList() external onlyOwnerOrAdmin returns(bool) {
+        // make the function revert if there is no eligible tokens
+        if(usersWithEligibleTokens.length == 0) {
+            revert NoEligibleUsers();
+        }
+        
+        // deleting tokenEligible Mapping for each userthat was assigned with airdrop tokens
+        for (uint256 i = 0; i < usersWithEligibleTokens.length; ++i) {
+            address user = usersWithEligibleTokens[i];
+            delete tokensEligible[user];
+            userClaimed[user] = false;
+            userHasEligibleTokens[user] = false;
+        }
+
+        // Clear the list of users with eligible tokens
+        delete usersWithEligibleTokens;
+
+        emit EligibleTokenListCleared();
+        return true;
+    }
+
     //---------------------------------------------------------------------------------------
-    //------------------------------VIEW FUNCTIONS-------------------------------------------
+    //------------------------------VIEW FUNCTIONS/STORAGE GETTERS---------------------------
     //---------------------------------------------------------------------------------------
 
+    //---------------------------------------------------------------------------------------
+    //------------------------------VIEW FUNCTIONS/STORAGE GETTERS---------------------------
+    //---------------------------------------------------------------------------------------
+
+    /**
+     * @notice Returns the list of GEM tokens eligible for airdrop for a given address.
+     * @param _address The address to query for eligible tokens.
+     * @return An array of token IDs eligible for airdrop.
+     */
     function getTokensEligible(address _address) public view returns (uint256[] memory) {
         return tokensEligible[_address];
     }
 
+    /**
+     * @notice Returns whether a user has claimed their airdrop.
+     * @param _user The address of the user.
+     * @return A boolean indicating if the user has claimed their airdrop.
+     */
+    function getUserClaimed(address _user) external view returns (bool) {
+        return userClaimed[_user];
+    }
+
+    /**
+     * @notice Returns the address of the treasury.
+     * @return The address of the treasury.
+     */
+    function getTreasury() external view returns (address) {
+        return treasury;
+    }
+
+    /**
+     * @notice Returns the address of the gem factory.
+     * @return The address of the gem factory.
+     */
+    function getGemFactory() external view returns (address) {
+        return gemFactory;
+    }
+
+    /**
+     * @notice Returns the list of users with eligible tokens.
+     * @return An array of addresses of users with eligible tokens.
+     */
+    function getUsersWithEligibleTokens() external view returns (address[] memory) {
+        return usersWithEligibleTokens;
+    }
+
+    /**
+     * @notice Returns whether the contract is paused.
+     * @return A boolean indicating if the contract is paused.
+     */
+    function isPaused() external view returns (bool) {
+        return paused;
+    }
+
+    /**
+     * @notice Returns whether the contract has been initialized.
+     * @return A boolean indicating if the contract has been initialized.
+     */
+    function isInitialized() external view returns (bool) {
+        return initialized;
+    }
+
+    /**
+     * @notice Returns whether a user has eligible tokens.
+     * @param _user The address of the user.
+     * @return A boolean indicating if the user has eligible tokens.
+     */
+    function hasEligibleTokens(address _user) external view returns (bool) {
+        return userHasEligibleTokens[_user];
+    }
 
 }

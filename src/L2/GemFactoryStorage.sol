@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 contract GemFactoryStorage {
 
@@ -13,38 +13,36 @@ contract GemFactoryStorage {
     }
 
     struct Gem {
-        uint256 tokenId;
-        Rarity rarity;
+        uint256 tokenId;  
+        uint256 gemCooldownPeriod; // gem cooldown before user can start mining
+        uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
+        uint256 value; // 27 decimals
+        Rarity rarity; 
+        uint32 miningPeriod; // Mining delay before claiming
+        uint8 miningTry; 
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
-        uint256 gemCooldownPeriod; // gem cooldown before user can start mining
-        uint256 miningPeriod; // Mining delay before claiming
-        uint256 miningTry;
         bool isLocked; // Locked if gem is listed on the marketplace
-        uint256 value; // 27 decimals
-        string tokenURI; // IPFS address of the metadata file
-        uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
+        string tokenURI; // IPFS address of the metadata file 
     }
 
     struct RequestStatus {
         uint256 tokenId;
-        bool requested; // whether the request has been made
-        bool fulfilled; // whether the request has been successfully fulfilled
         uint256 randomWord;
         uint256 chosenTokenId;
+        bool requested; // whether the request has been made
+        bool fulfilled; // whether the request has been successfully fulfilled
         address requester;
-    }
+    } 
+
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------STORAGE-------------------------------------------
+    //---------------------------------------------------------------------------------------
 
     Gem[] public Gems;
     mapping(uint8 => mapping(uint8 => string)) public colorName;
     uint8 public colorsCount;
     uint8[2][] public colors;
-
-    mapping(uint8 => string) public customBackgroundColors;
-    uint8 public customBackgroundColorsCount;
-    string[] public backgroundColors;
-
-    mapping(uint256 => string) private _tokenURIs;
 
     mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) public ownershipTokenCount;
@@ -61,53 +59,51 @@ contract GemFactoryStorage {
     bool public paused;
 
     // Mining storage
-    uint256 public CommonminingTry;
-    uint256 public RareminingTry;
-    uint256 public UniqueminingTry;
-    uint256 public EpicminingTry;
-    uint256 public LegendaryminingTry;
-    uint256 public MythicminingTry;
+    // mining try is uint8 (will be always less than type(uint8).max = 255)
+    uint8 internal RareminingTry;
+    uint8 internal UniqueminingTry;
+    uint8 internal EpicminingTry;
+    uint8 internal LegendaryminingTry;
+    uint8 internal MythicminingTry;
 
-    uint256 public CommonGemsValue;
-    uint256 public RareGemsValue;
-    uint256 public UniqueGemsValue;
-    uint256 public EpicGemsValue;
-    uint256 public LegendaryGemsValue;
-    uint256 public MythicGemsValue;
+    uint32 internal CommonGemsMiningPeriod;
+    uint32 internal RareGemsMiningPeriod;
+    uint32 internal UniqueGemsMiningPeriod;
+    uint32 internal EpicGemsMiningPeriod;
+    uint32 internal LegendaryGemsMiningPeriod;
+    uint32 internal MythicGemsMiningPeriod;
 
-    uint256 public CommonGemsMiningPeriod;
-    uint256 public RareGemsMiningPeriod;
-    uint256 public UniqueGemsMiningPeriod;
-    uint256 public EpicGemsMiningPeriod;
-    uint256 public LegendaryGemsMiningPeriod;
-    uint256 public MythicGemsMiningPeriod;
+    uint32 internal CommonGemsCooldownPeriod;
+    uint32 internal RareGemsCooldownPeriod;
+    uint32 internal UniqueGemsCooldownPeriod;
+    uint32 internal EpicGemsCooldownPeriod;
+    uint32 internal LegendaryGemsCooldownPeriod;
+    uint32 internal MythicGemsCooldownPeriod;
 
-    uint256 public CommonGemsCooldownPeriod;
-    uint256 public RareGemsCooldownPeriod;
-    uint256 public UniqueGemsCooldownPeriod;
-    uint256 public EpicGemsCooldownPeriod;
-    uint256 public LegendaryGemsCooldownPeriod;
-    uint256 public MythicGemsCooldownPeriod;
+    uint256 internal CommonGemsValue;
+    uint256 internal RareGemsValue;
+    uint256 internal UniqueGemsValue;
+    uint256 internal EpicGemsValue;
+    uint256 internal LegendaryGemsValue;
+    uint256 internal MythicGemsValue;
 
     // past random requests Id.
-    uint256[] public requestIds;
-    uint256 public requestCount;
+    uint256[] internal requestIds;
+    uint256 internal requestCount;
 
     // contract addresses
-    address public wston;
-    address public ton;
-    address public treasury;
-    address public marketplace;
-    address public drbcoordinator;
-    address public randomPack;
-    address public airdrop;
+    address internal wston;
+    address internal ton;
+    address internal treasury;
+    address internal marketplace;
+    address internal airdrop;
 
     // constants
     uint32 public constant CALLBACK_GAS_LIMIT = 210000;
 
-    /**
-     * EVENTS **
-     */
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------EVENTS--------------------------------------------
+    //---------------------------------------------------------------------------------------
 
     // Premining events
     event Created(
@@ -116,7 +112,7 @@ contract GemFactoryStorage {
         uint8[2] color, 
         uint256 value,
         uint8[4] quadrants, 
-        uint256 miningPeriod,
+        uint32 miningPeriod,
         uint256 cooldownDueDate,
         string tokenURI, 
         address owner
@@ -130,6 +126,8 @@ contract GemFactoryStorage {
     event RandomGemRequested(uint256 tokenId, uint256 requestNumber);
     event NoGemAvailable(uint256 tokenId);
     event CountGemsByQuadrant(uint256 gemCount, uint256[] tokenIds);
+    event MiningCancelled(uint256 _tokenId, address owner, uint256 timestamp);
+    event EthSentBack(uint256 amount);
 
     // Forging Event
     event GemForged(
@@ -153,28 +151,27 @@ contract GemFactoryStorage {
 
     //storage modification events
     event GemsCoolDownPeriodModified(
-        uint256 CommonGemsCooldownPeriod,
-        uint256 RareGemsCooldownPeriod,
-        uint256 UniqueGemsCooldownPeriod,
-        uint256 EpicGemsCooldownPeriod,
-        uint256 LegendaryGemsCooldownPeriod,
-        uint256 MythicGemsCooldownPeriod
+        uint32 CommonGemsCooldownPeriod,
+        uint32 RareGemsCooldownPeriod,
+        uint32 UniqueGemsCooldownPeriod,
+        uint32 EpicGemsCooldownPeriod,
+        uint32 LegendaryGemsCooldownPeriod,
+        uint32 MythicGemsCooldownPeriod
     );
     event GemsMiningPeriodModified(
-        uint256 CommonGemsMiningPeriod,
-        uint256 RareGemsMiningPeriod,
-        uint256 UniqueGemsMiningPeriod,
-        uint256 EpicGemsMiningPeriod,
-        uint256 LegendaryGemsMiningPeriod,
-        uint256 MythicGemsMiningPeriod
+        uint32 CommonGemsMiningPeriod,
+        uint32 RareGemsMiningPeriod,
+        uint32 UniqueGemsMiningPeriod,
+        uint32 EpicGemsMiningPeriod,
+        uint32 LegendaryGemsMiningPeriod,
+        uint32 MythicGemsMiningPeriod
     );
     event GemsMiningTryModified(
-        uint256 CommonGemsMiningTry,
-        uint256 RareGemsMiningTry,
-        uint256 UniqueGemsMiningTry,
-        uint256 EpicGemsMiningTry,
-        uint256 LegendaryGemsMiningTry,
-        uint256 MythicGemsMiningTry
+        uint8 RareGemsMiningTry,
+        uint8 UniqueGemsMiningTry,
+        uint8 EpicGemsMiningTry,
+        uint8 LegendaryGemsMiningTry,
+        uint8 MythicGemsMiningTry
     );
     event GemsValueModified(
         uint256 CommonGemsValue,
@@ -184,4 +181,33 @@ contract GemFactoryStorage {
         uint256 LegendaryValue,
         uint256 MythicValue
     );
+
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------ERRORS--------------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    // Forging errors
+    error InvalidQuadrant(uint8 quadrant, uint8 value);
+    error InvalidSumOfQuadrants();
+    error ColorNotExist();
+
+    // Mining errors
+    error MismatchedArrayLengths();
+    error AddressZero();
+    error NotGemOwner();
+    error CooldownPeriodNotElapsed();
+    error GemIsLocked();
+    error GemIsNotLocked();
+    error WrongRarity();
+    error NoMiningTryLeft();
+    error NotMining();
+    error GemAlreadyPicked();
+    error MiningPeriodNotElapsed();
+
+    // Transfer error
+    error SameSenderAndRecipient();
+
+    // Random fullfil error
+    error RequestNotMade();
+    error FailedToSendEthBack();
 }

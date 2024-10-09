@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 contract L1WrappedStakedTONStorage {
     struct WithdrawalRequest {
@@ -14,19 +14,25 @@ contract L1WrappedStakedTONStorage {
 
     address public layer2Address;
     address public wton;
-    address public depositManager;
-    address public seigManager;
+    address public ton;
+    address internal depositManager;
+    address internal seigManager;
 
     uint256 public totalStakedAmount;
     uint256 public totalWstonMinted;
-    uint256 public stakingIndex;
+    uint256 internal stakingIndex;
     uint256 public lastSeigBlock;
 
     mapping(address => WithdrawalRequest[]) public withdrawalRequests;
     mapping (address => uint256) internal withdrawalRequestIndex;
 
+    // Array to keep track of users who have made withdrawal requests
+    address[] internal users;
+    mapping(address => bool) internal userExists;
+
     //deposit even
-    event Deposited(address to, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
+    event Deposited(address to, bool token, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
+    event SeigniorageUpdated();
 
     // withdrawal events
     event WithdrawalRequested(address indexed _to, uint256 amount);
@@ -40,4 +46,16 @@ contract L1WrappedStakedTONStorage {
     // Pause Events
     event Paused(address account);
     event Unpaused(address account);
+
+    // errors
+    error DepositFailed();
+    error NotEnoughFunds();
+    error WrontAmount();
+    error NoRequestToProcess();
+    error RequestAlreadyProcessed();
+    error WithdrawalDelayNotElapsed();
+    error NoClaimableAmount(address requestor);
+    error FailedToSwapFromTONToWTON(uint256 amount);
+      
+
 }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
-import {IDRBCoordinator} from "../../interfaces/IDRBCoordinator.sol";
+pragma solidity 0.8.25;
+
+import { IDRBCoordinator } from "../../interfaces/IDRBCoordinator.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @notice Interface for contracts using VRF randomness
@@ -13,34 +15,27 @@ abstract contract DRBConsumerBase {
     error OnlyCoordinatorCanFulfill(address have, address want);
 
     /// @dev The RNGCoordinator contract
-    IDRBCoordinator internal immutable i_drbCoordinator;
+    IDRBCoordinator internal i_drbCoordinator;
 
     /**
      * @param rngCoordinator The address of the RNGCoordinator contract
      */
-    constructor(address rngCoordinator) {
+    function __DRBConsumerBase_init(address rngCoordinator) internal {
         i_drbCoordinator = IDRBCoordinator(rngCoordinator);
     }
 
     /**
+     * @return directFundingCost cost of funding
      * @return requestId The ID of the request
      * @dev Request Randomness to the Coordinator
      */
-    function requestRandomness(
-        uint16 security,
-        uint16 mode,
-        uint32 callbackGasLimit
-    ) internal returns (uint256) {
-        uint256 requestId = i_drbCoordinator.requestRandomWordDirectFunding{
-            value: msg.value
-        }(
-            IDRBCoordinator.RandomWordsRequest({
-                security: security,
-                mode: mode,
-                callbackGasLimit: callbackGasLimit
-            })
+    function requestRandomness(uint16 security, uint16 mode, uint32 callbackGasLimit) internal returns (uint256 directFundingCost, uint256 requestId) {
+       directFundingCost = i_drbCoordinator.calculateDirectFundingPrice(
+            IDRBCoordinator.RandomWordsRequest({security: security, mode: mode, callbackGasLimit: callbackGasLimit})
         );
-        return requestId;
+       requestId = i_drbCoordinator.requestRandomWordDirectFunding{value: directFundingCost}(
+            IDRBCoordinator.RandomWordsRequest({security: security, mode: mode, callbackGasLimit: callbackGasLimit})
+        );
     }
 
     /**

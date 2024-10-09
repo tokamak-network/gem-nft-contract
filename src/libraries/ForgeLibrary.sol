@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 import "../L2/GemFactoryStorage.sol";
 
@@ -10,25 +10,53 @@ library ForgeLibrary {
         uint256 EpicGemsValue;
         uint256 LegendaryGemsValue;
         uint256 MythicGemsValue;
-        uint256 RareGemsMiningPeriod;
-        uint256 UniqueGemsMiningPeriod;
-        uint256 EpicGemsMiningPeriod;
-        uint256 LegendaryGemsMiningPeriod;
-        uint256 MythicGemsMiningPeriod;
-        uint256 RareminingTry;
-        uint256 UniqueminingTry;
-        uint256 EpicminingTry;
-        uint256 LegendaryminingTry;
-        uint256 MythicminingTry;
-        uint256 RareGemsCooldownPeriod;
-        uint256 UniqueGemsCooldownPeriod;
-        uint256 EpicGemsCooldownPeriod;
-        uint256 LegendaryGemsCooldownPeriod;
-        uint256 MythicGemsCooldownPeriod;
+        uint32 RareGemsMiningPeriod;
+        uint32 UniqueGemsMiningPeriod;
+        uint32 EpicGemsMiningPeriod;
+        uint32 LegendaryGemsMiningPeriod;
+        uint32 MythicGemsMiningPeriod;
+        uint8 RareminingTry;
+        uint8 UniqueminingTry;
+        uint8 EpicminingTry;
+        uint8 LegendaryminingTry;
+        uint8 MythicminingTry;
+        uint32 RareGemsCooldownPeriod;
+        uint32 UniqueGemsCooldownPeriod;
+        uint32 EpicGemsCooldownPeriod;
+        uint32 LegendaryGemsCooldownPeriod;
+        uint32 MythicGemsCooldownPeriod;
     }
 
+    // EVENTS
     event ColorValidated(uint8 color0, uint8 color1);
 
+    // ERRORS
+    error NotValidColor();
+    error WrongNumberOfGemToBeForged();
+    error AddressZero();
+    error NotGemOwner();
+    error GemIsLocked();
+    error WrongRarity();
+
+    /**
+     * @notice Forges new tokens from existing gems.
+     * @dev This function combines multiple gems into a new gem of higher rarity.
+     * @param Gems The storage array of gems.
+     * @param GEMIndexToOwner Mapping from gem index to owner address.
+     * @param ownershipTokenCount Mapping from owner address to the number of gems owned.
+     * @param msgSender The address of the sender initiating the forge.
+     * @param _tokenIds An array of token IDs to be forged.
+     * @param _rarity The rarity of the gems to be forged.
+     * @param _color The color attributes for the new gem.
+     * @param params The parameters for forging, including values and periods.
+     * @return newGemId The ID of the newly forged gem.
+     * @return forgedQuadrants The quadrant attributes of the forged gem.
+     * @return newRarity The new rarity of the forged gem.
+     * @return forgedGemsValue The value of the forged gem.
+     * @return forgedGemsMiningPeriod The mining period of the forged gem.
+     * @return forgedGemsCooldownPeriod The cooldown period of the forged gem.
+     * @return forgedGemsminingTry The number of mining attempts for the forged gem.
+     */
     function forgeTokens(
         GemFactoryStorage.Gem[] storage Gems,
         mapping(uint256 => address) storage GEMIndexToOwner,
@@ -38,35 +66,47 @@ library ForgeLibrary {
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color,
         ForgeParams memory params
-    ) external returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint256 forgedGemsMiningPeriod, uint256 forgedGemsCooldownPeriod, uint256 forgedGemsminingTry) {
-        require(msgSender != address(0), "zero address");
+    ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint32 forgedGemsMiningPeriod, uint32 forgedGemsCooldownPeriod, uint8 forgedGemsminingTry) {
+        if(msgSender == address(0)) {
+            revert AddressZero();
+        }
 
         if (_rarity == GemFactoryStorage.Rarity.COMMON) {
-            require(_tokenIds.length == 2, "wrong number of Gems to be forged");
+            if(_tokenIds.length != 2) {
+                revert WrongNumberOfGemToBeForged();
+            }
             forgedGemsValue = params.RareGemsValue;
             forgedGemsMiningPeriod = params.RareGemsMiningPeriod;
             forgedGemsminingTry = params.RareminingTry;
             forgedGemsCooldownPeriod = params.RareGemsCooldownPeriod;
         } else if (_rarity == GemFactoryStorage.Rarity.RARE) {
-            require(_tokenIds.length == 3, "wrong number of Gems to be forged");
+            if(_tokenIds.length != 3) {
+                revert WrongNumberOfGemToBeForged();
+            }
             forgedGemsValue = params.UniqueGemsValue;
             forgedGemsMiningPeriod = params.UniqueGemsMiningPeriod;
             forgedGemsminingTry = params.UniqueminingTry;
             forgedGemsCooldownPeriod = params.UniqueGemsCooldownPeriod;
         } else if (_rarity == GemFactoryStorage.Rarity.UNIQUE) {
-            require(_tokenIds.length == 4, "wrong number of Gems to be forged");
+            if(_tokenIds.length != 4) {
+                revert WrongNumberOfGemToBeForged();
+            }
             forgedGemsValue = params.EpicGemsValue;
             forgedGemsMiningPeriod = params.EpicGemsMiningPeriod;
             forgedGemsminingTry = params.EpicminingTry;
             forgedGemsCooldownPeriod = params.EpicGemsCooldownPeriod;
         } else if (_rarity == GemFactoryStorage.Rarity.EPIC) {
-            require(_tokenIds.length == 5, "wrong number of Gems to be forged");
+            if(_tokenIds.length != 5) {
+                revert WrongNumberOfGemToBeForged();
+            }
             forgedGemsValue = params.LegendaryGemsValue;
             forgedGemsMiningPeriod = params.LegendaryGemsMiningPeriod;
             forgedGemsminingTry = params.LegendaryminingTry;
             forgedGemsCooldownPeriod = params.LegendaryGemsCooldownPeriod;
         } else if (_rarity == GemFactoryStorage.Rarity.LEGENDARY) {
-            require(_tokenIds.length == 6, "wrong number of Gems to be forged");
+            if(_tokenIds.length != 6) {
+                revert WrongNumberOfGemToBeForged();
+            }
             forgedGemsValue = params.MythicGemsValue;
             forgedGemsMiningPeriod = params.MythicGemsMiningPeriod;
             forgedGemsminingTry = params.MythicminingTry;
@@ -79,9 +119,15 @@ library ForgeLibrary {
         bool colorValidated = false;
 
         for (uint256 i = 0; i < _tokenIds.length; i++) {
-            require(GEMIndexToOwner[_tokenIds[i]] == msgSender, "not owner");
-            require(!isTokenLocked(Gems, _tokenIds[i]), "Gem is for sale or is mining");
-            require(Gems[_tokenIds[i]].rarity == _rarity, "wrong rarity Gems");
+            if(GEMIndexToOwner[_tokenIds[i]] != msgSender) {
+                revert NotGemOwner();
+            }
+            if(isTokenLocked(Gems, _tokenIds[i])) {
+                revert GemIsLocked();
+            }
+            if(Gems[_tokenIds[i]].rarity != _rarity) {
+                revert WrongRarity();
+            }
 
             sumOfQuadrants[0] += Gems[_tokenIds[i]].quadrants[0];
             sumOfQuadrants[1] += Gems[_tokenIds[i]].quadrants[1];
@@ -97,7 +143,9 @@ library ForgeLibrary {
                 }
             }
         }
-        require(colorValidated, "this color can't be obtained");
+        if(!colorValidated) {
+            revert NotValidColor();
+        }
 
         sumOfQuadrants[0] %= 2;
         sumOfQuadrants[1] %= 2;
@@ -153,6 +201,22 @@ library ForgeLibrary {
         return (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry);
     }
 
+    /**
+     * @notice Checks if two gems can produce the specified color.
+     * two same solids (ex: [1,1] + [1,1]): the new token color can only be [1,1].
+     * two different solids (ex: [1,1] + [2,2]): the new token color can be either [1,2] or [2,1].
+     * one solid and one gradient & one gradient color is the same as the solid color (ex: [1,1] + [2,1]): the new token color can be [2,1].
+     * one solid and one gradient & solid different from both gradients (ex: [1,1] + [3,2]): the new token color can be either [3,1] or [2,1] or [1,3] or [1,2].
+     * two same gradients (ex: [1,2] + [1+2]): the new color can be either [1,2] or [2,1].
+     * two different gradients (ex: [1,2] + [3,4]): the new color can be either [1,3] or [1,4] or [2,3] or [2,4] or [3,1] or [4,1] or [3,2] or [4,2].
+     * @dev This function compares the colors of two gems to determine if they can produce the desired color.
+     * @param Gems The storage array of gems.
+     * @param tokenA The ID of the first gem.
+     * @param tokenB The ID of the second gem.
+     * @param _color_0 The first component of the desired color.
+     * @param _color_1 The second component of the desired color.
+     * @return colorValidated A boolean indicating if the color can be obtained.
+     */
     function _checkColor(
         GemFactoryStorage.Gem[] storage Gems,
         uint256 tokenA,
@@ -169,7 +233,7 @@ library ForgeLibrary {
             uint8 _color2_0 = _color2[0];
             uint8 _color2_1 = _color2[1];
 
-                        if (_color1_0 == _color1_1 && _color2_0 == _color2_1 && _color1_0 == _color2_0) {
+            if (_color1_0 == _color1_1 && _color2_0 == _color2_1 && _color1_0 == _color2_0) {
                 colorValidated = (_color_0 == _color1_0 && _color_1 == _color1_1);
                 return colorValidated;
             }
@@ -223,6 +287,13 @@ library ForgeLibrary {
         }
     }
 
+    /**
+     * @notice Checks if a gem token is locked.
+     * @dev This function checks the `isLocked` status of a gem.
+     * @param Gems The storage array of gems.
+     * @param tokenId The ID of the gem to check.
+     * @return A boolean indicating if the gem is locked.
+     */
     function isTokenLocked(GemFactoryStorage.Gem[] storage Gems, uint256 tokenId) internal view returns (bool) {
         return Gems[tokenId].isLocked;
     }

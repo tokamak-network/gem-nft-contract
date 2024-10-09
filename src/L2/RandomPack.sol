@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -26,7 +26,7 @@ interface ITreasury {
     ) external returns (uint256);
 }
 
-contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase, RandomPackStorage, ProxyStorage {
+contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase, RandomPackStorage {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {
@@ -39,55 +39,112 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
         _;
     }
 
-    constructor(
-        address coordinator,  
+    function pause() public onlyOwner whenNotPaused {
+        paused = true;
+    }
+
+    function unpause() public onlyOwner whenNotPaused {
+        paused = false;
+    }
+
+    /**
+     * @notice Initializes the RandomPack contract with the given parameters.
+     * @param _coordinator Address of the  DRBCoordinator contract.
+     * @param _ton Address of the TON token.
+     * @param _gemFactory Address of the gem factory contract.
+     * @param _treasury Address of the treasury contract.
+     * @param _randomPackFees Fees for requesting a random pack.
+     */
+    function initialize(
+        address _coordinator,  
         address _ton, 
         address _gemFactory, 
         address _treasury, 
         uint256 _randomPackFees
-    ) DRBConsumerBase(coordinator) {
+    ) external {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        __DRBConsumerBase_init(_coordinator);
         gemFactory = _gemFactory;
         treasury = _treasury;
         ton = _ton;
-        drbcoordinator = coordinator;
         randomPackFees = _randomPackFees;
         callbackGasLimit = 600000;
         perfectCommonGemURI = "";
     }
 
+    //---------------------------------------------------------------------------------------
+    //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
 
+    /** 
+     * @notice Sets the address of the gem factory.
+     * @param _gemFactory New address of the gem factory contract.
+     */
     function setGemFactory(address _gemFactory) external onlyOwner {
-        require(gemFactory != address(0), "Invalid address");
+        if(gemFactory == address(0)) {
+            revert InvalidAddress();
+        }
         gemFactory = _gemFactory;
+        emit GemFactoryAddressUpdated(_gemFactory);
     }
 
+    /**
+     * @notice Sets the fees for requesting a random pack.
+     * @param _randomPackFees New fees for random pack requests.
+     */
     function setRandomPackFees(uint256 _randomPackFees) external onlyOwner {
-        require(randomPackFees != 0, "fees must be greater than 0");
+        if(randomPackFees == 0) {
+            revert RandomPackFeesEqualToZero();
+        }
         randomPackFees = _randomPackFees;
+        emit RandomPackFeesUpdated(_randomPackFees);
     }
 
+    /**
+     * @notice Sets the address of the treasury.
+     * @param _treasury New address of the treasury contract.
+     */
     function setTreasury(address _treasury) external onlyOwner {
-        require(_treasury != address(0), "Invalid address");
+        if(_treasury == address(0)) {
+            revert InvalidAddress();
+        }
         treasury = _treasury;
+        emit TreasuryAddressUpdated(_treasury);
     }
 
+    /**
+     * @notice Sets the URI for the perfect common GEM.
+     * @param _tokenURI New URI for the perfect common GEM.
+     */
     function setPerfectCommonGemURI(string memory _tokenURI) external onlyOwner {
         perfectCommonGemURI = _tokenURI;
+        emit PerfectCommonGemURIUpdated(_tokenURI);
     }
 
+    /**
+     * @notice Sets the gas limit for the callback function.
+     * @param _callbackGasLimit New gas limit for the callback function.
+     */
     function setCallbackGasLimit(uint32 _callbackGasLimit) external onlyOwner {
         callbackGasLimit = _callbackGasLimit;
+        emit CallBackGasLimitUpdated(_callbackGasLimit);
     }
 
+    /**
+     * @notice Requests a random GEM and pays the required fees.
+     * @return uint256 Returns the request ID for the randomness request.
+     * @dev function has nonReentrant modifier and follows CEI
+     */
     function requestRandomGem() external payable whenNotPaused nonReentrant returns(uint256) {
-        require(msg.sender != address(0), "address 0 not allowed");
+        if(msg.sender == address(0)) {
+            revert InvalidAddress();
+        }
         //users pays upfront fees
         //user must approve the contract for the fees amount before calling the function
         IERC20(ton).safeTransferFrom(msg.sender, address(this), randomPackFees);
         
         // defining the random value
-        uint256 requestId = requestRandomness(0,0,callbackGasLimit);        
+        (uint256 directFundingCost, uint256 requestId) = requestRandomness(0,0,callbackGasLimit);        
 
         s_requests[requestId].requested = true;
         s_requests[requestId].requester = msg.sender;
@@ -95,14 +152,46 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
             requestCount++;
         }
 
-        //IDRBCoordinator(drbcoordinator).fulfillRandomness(requestId);
+        if(msg.value > directFundingCost) { // if there is ETH to refund
+            (bool success, ) = msg.sender.call{value:  msg.value - directFundingCost}("");
+            if(!success) {
+                revert FailedToSendEthBack();
+            }
+            emit EthSentBack(msg.value - directFundingCost);
+        }
 
+        emit RandomGemRequested(msg.sender);
         return requestId;
     }
 
-    // Implement the abstract function from DRBConsumerBase
+    /**
+     * @notice Handles the receipt of an ERC721 token.
+     * @return bytes4 Returns the selector of the onERC721Received function.
+     */
+    function onERC721Received(
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*tokenId*/,
+        bytes calldata /*data*/
+    ) external pure override returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------------INTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    /**
+     * @notice Fulfills the randomness request with the given random number and transfers a random GEM to the appropriate user
+     * @dev the function lists down the Gems available in the treasury (not locked) through the getGemListAvailableForRandomPack function 
+     * @dev if there is no gem available, the function creates a new common gem with specific attributes
+     * @param requestId The ID of the randomness request.
+     * @param randomNumber The random number generated.
+     */
     function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
-        require(s_requests[requestId].requested, "Request not made");
+        if(!s_requests[requestId].requested) {
+            revert RequestNotMade();
+        }
         s_requests[requestId].fulfilled = true;
         s_requests[requestId].randomWord = randomNumber;
 
@@ -123,14 +212,16 @@ contract RandomPack is ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsume
         }
     }
 
-    // onERC721Received function to accept ERC721 tokens
-    function onERC721Received(
-        address /*operator*/,
-        address /*from*/,
-        uint256 /*tokenId*/,
-        bytes calldata /*data*/
-    ) external pure override returns (bytes4) {
-        return this.onERC721Received.selector;
-    }
 
+    //---------------------------------------------------------------------------------------
+    //-------------------------------STORAGE GETTERS-----------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    function getTreasuryAddress() external view returns(address) {return treasury;}
+    function getGemFactoryAddress() external view returns(address) {return gemFactory;}
+    function getTonAddress() external view returns(address) {return ton;}
+    function getCallbackGasLimit() external view returns(uint32) {return callbackGasLimit;}
+    function getRequestCount() external view returns(uint256) {return requestCount;}
+    function getRandomPackFees() external view returns(uint256) {return randomPackFees;}
+    function getPerfectCommonGemURI() external view returns(string memory) {return perfectCommonGemURI;}
 }

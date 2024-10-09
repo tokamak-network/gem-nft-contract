@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 import "./ProxyStorage.sol";
 import {AuthControl} from "../common/AuthControl.sol";
@@ -8,7 +8,7 @@ import "../interfaces/IProxyAction.sol";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-contract ProxyAirdrop is
+contract Proxy is
     ProxyStorage,
     AuthControl,
     IProxyEvent,
@@ -61,7 +61,7 @@ contract ProxyAirdrop is
         require(_selectors.length > 0, "Proxy: _selectors's size is zero");
         require(aliveImplementation[_imp], "Proxy: _imp is not alive");
 
-        for (uint256 i = 0; i < _selectors.length; i++) {
+        for (uint256 i = 0; i < _selectors.length; ++i) {
             require(
                 selectorImplementation[_selectors[i]] != _imp,
                 "LiquidityVaultProxy: same imp"

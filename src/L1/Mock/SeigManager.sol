@@ -467,7 +467,7 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
         }
     }
 
-    MockToken(_wton).mint(address(_depositManager), seigs);
+    require(IWTON(_wton).mint(address(_depositManager), seigs));
     emit Transferred(address(_depositManager), seigs);
 
     emit Comitted(msg.sender);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.25;
 
 import { GemFactoryStorage } from "../L2/GemFactoryStorage.sol";
 
@@ -44,10 +44,14 @@ interface IGemFactory {
 
     function getValueBasedOnRarity(GemFactoryStorage.Rarity _rarity) external view returns(uint256 value);
 
-    function CommonGemsValue() external view returns (uint256);
+    function getCommonGemsValue() external view returns (uint256);
 
     function getApproved(uint256 tokenId) external view returns (address);
 
     function approve(address to, uint256 tokenId) external;
+
+    function setApprovalForAll(address operator, bool approved) external;
+
+    function isApprovedForAll(address owner, address operator) external view returns (bool);
 
 }
