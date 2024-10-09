@@ -214,7 +214,6 @@ contract L2ProxyTest is WstonSwap {
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getMarketPlaceAddress() != address(0));
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getAirdropAddress() != address(0));
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsValue() != 0);
-        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonminingTry() != 0);
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsMiningPeriod() != 0);
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsCooldownPeriod() != 0);
         

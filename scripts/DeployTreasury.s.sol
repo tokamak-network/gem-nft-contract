@@ -26,7 +26,6 @@ contract DeployL2Contracts is Script {
     uint256 public legendaryGemsValue = 605 * 10 ** 27;
     uint256 public mythicGemsValue = 4000 * 10 ** 27;
 
-    uint256 public commonminingTry = 1;
     uint256 public rareminingTry = 2;
     uint256 public uniqueminingTry = 1;
     uint256 public epicminingTry = 10;
@@ -99,7 +98,7 @@ contract DeployL2Contracts is Script {
         );
 
         GemFactory(gemfactory).setMiningTrys(
-            commonminingTry,
+
             rareminingTry,
             uniqueminingTry,
             epicminingTry,

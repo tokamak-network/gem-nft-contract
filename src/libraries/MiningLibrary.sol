@@ -20,7 +20,6 @@ library MiningLibrary {
         address owner,
         uint256 tokenId
     ) internal {
-        //
         userMiningToken[owner][tokenId] = true;
         userMiningStartTime[owner][tokenId] = block.timestamp;
         Gems[tokenId].isLocked = true;

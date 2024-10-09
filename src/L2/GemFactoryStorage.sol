@@ -15,14 +15,14 @@ contract GemFactoryStorage {
     struct Gem {
         uint256 tokenId;  
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
-        uint256 miningPeriod; // Mining delay before claiming
-        uint256 miningTry; 
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
         uint256 value; // 27 decimals
         Rarity rarity; 
-        bool isLocked; // Locked if gem is listed on the marketplace
+        uint32 miningPeriod; // Mining delay before claiming
+        uint8 miningTry; 
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
+        bool isLocked; // Locked if gem is listed on the marketplace
         string tokenURI; // IPFS address of the metadata file 
     }
 
@@ -44,10 +44,6 @@ contract GemFactoryStorage {
     uint8 public colorsCount;
     uint8[2][] public colors;
 
-    mapping(uint8 => string) public customBackgroundColors;
-    uint8 public customBackgroundColorsCount;
-    string[] public backgroundColors;
-
     mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) public ownershipTokenCount;
 
@@ -63,12 +59,26 @@ contract GemFactoryStorage {
     bool public paused;
 
     // Mining storage
-    uint256 internal CommonminingTry;
-    uint256 internal RareminingTry;
-    uint256 internal UniqueminingTry;
-    uint256 internal EpicminingTry;
-    uint256 internal LegendaryminingTry;
-    uint256 internal MythicminingTry;
+    // mining try is uint8 (will be always less than type(uint8).max = 255)
+    uint8 internal RareminingTry;
+    uint8 internal UniqueminingTry;
+    uint8 internal EpicminingTry;
+    uint8 internal LegendaryminingTry;
+    uint8 internal MythicminingTry;
+
+    uint32 internal CommonGemsMiningPeriod;
+    uint32 internal RareGemsMiningPeriod;
+    uint32 internal UniqueGemsMiningPeriod;
+    uint32 internal EpicGemsMiningPeriod;
+    uint32 internal LegendaryGemsMiningPeriod;
+    uint32 internal MythicGemsMiningPeriod;
+
+    uint32 internal CommonGemsCooldownPeriod;
+    uint32 internal RareGemsCooldownPeriod;
+    uint32 internal UniqueGemsCooldownPeriod;
+    uint32 internal EpicGemsCooldownPeriod;
+    uint32 internal LegendaryGemsCooldownPeriod;
+    uint32 internal MythicGemsCooldownPeriod;
 
     uint256 internal CommonGemsValue;
     uint256 internal RareGemsValue;
@@ -76,20 +86,6 @@ contract GemFactoryStorage {
     uint256 internal EpicGemsValue;
     uint256 internal LegendaryGemsValue;
     uint256 internal MythicGemsValue;
-
-    uint256 internal CommonGemsMiningPeriod;
-    uint256 internal RareGemsMiningPeriod;
-    uint256 internal UniqueGemsMiningPeriod;
-    uint256 internal EpicGemsMiningPeriod;
-    uint256 internal LegendaryGemsMiningPeriod;
-    uint256 internal MythicGemsMiningPeriod;
-
-    uint256 internal CommonGemsCooldownPeriod;
-    uint256 internal RareGemsCooldownPeriod;
-    uint256 internal UniqueGemsCooldownPeriod;
-    uint256 internal EpicGemsCooldownPeriod;
-    uint256 internal LegendaryGemsCooldownPeriod;
-    uint256 internal MythicGemsCooldownPeriod;
 
     // past random requests Id.
     uint256[] internal requestIds;
@@ -116,7 +112,7 @@ contract GemFactoryStorage {
         uint8[2] color, 
         uint256 value,
         uint8[4] quadrants, 
-        uint256 miningPeriod,
+        uint32 miningPeriod,
         uint256 cooldownDueDate,
         string tokenURI, 
         address owner
@@ -131,6 +127,7 @@ contract GemFactoryStorage {
     event NoGemAvailable(uint256 tokenId);
     event CountGemsByQuadrant(uint256 gemCount, uint256[] tokenIds);
     event MiningCancelled(uint256 _tokenId, address owner, uint256 timestamp);
+    event EthSentBack(uint256 amount);
 
     // Forging Event
     event GemForged(
@@ -154,28 +151,27 @@ contract GemFactoryStorage {
 
     //storage modification events
     event GemsCoolDownPeriodModified(
-        uint256 CommonGemsCooldownPeriod,
-        uint256 RareGemsCooldownPeriod,
-        uint256 UniqueGemsCooldownPeriod,
-        uint256 EpicGemsCooldownPeriod,
-        uint256 LegendaryGemsCooldownPeriod,
-        uint256 MythicGemsCooldownPeriod
+        uint32 CommonGemsCooldownPeriod,
+        uint32 RareGemsCooldownPeriod,
+        uint32 UniqueGemsCooldownPeriod,
+        uint32 EpicGemsCooldownPeriod,
+        uint32 LegendaryGemsCooldownPeriod,
+        uint32 MythicGemsCooldownPeriod
     );
     event GemsMiningPeriodModified(
-        uint256 CommonGemsMiningPeriod,
-        uint256 RareGemsMiningPeriod,
-        uint256 UniqueGemsMiningPeriod,
-        uint256 EpicGemsMiningPeriod,
-        uint256 LegendaryGemsMiningPeriod,
-        uint256 MythicGemsMiningPeriod
+        uint32 CommonGemsMiningPeriod,
+        uint32 RareGemsMiningPeriod,
+        uint32 UniqueGemsMiningPeriod,
+        uint32 EpicGemsMiningPeriod,
+        uint32 LegendaryGemsMiningPeriod,
+        uint32 MythicGemsMiningPeriod
     );
     event GemsMiningTryModified(
-        uint256 CommonGemsMiningTry,
-        uint256 RareGemsMiningTry,
-        uint256 UniqueGemsMiningTry,
-        uint256 EpicGemsMiningTry,
-        uint256 LegendaryGemsMiningTry,
-        uint256 MythicGemsMiningTry
+        uint8 RareGemsMiningTry,
+        uint8 UniqueGemsMiningTry,
+        uint8 EpicGemsMiningTry,
+        uint8 LegendaryGemsMiningTry,
+        uint8 MythicGemsMiningTry
     );
     event GemsValueModified(
         uint256 CommonGemsValue,

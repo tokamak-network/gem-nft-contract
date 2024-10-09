@@ -19,7 +19,6 @@ import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
 
 import { GemLibrary } from "../libraries/GemLibrary.sol";
 import { MiningLibrary } from "../libraries/MiningLibrary.sol";
-import { TransferLibrary } from "../libraries/TransferLibrary.sol";
 import { ForgeLibrary } from "../libraries/ForgeLibrary.sol";
 
 interface ITreasury {
@@ -37,7 +36,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     using SafeERC20 for IERC20;
     using GemLibrary for GemFactoryStorage.Gem[];
     using MiningLibrary for GemFactoryStorage.Gem[];
-    using TransferLibrary for GemFactoryStorage.Gem[];
     using ForgeLibrary for GemFactoryStorage.Gem[];
 
     modifier whenNotPaused() {
@@ -68,11 +66,19 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         _;
     }
 
+    /**
+     * @notice Pauses the contract, preventing certain actions.
+     * @dev Only callable by the owner when the contract is not paused.
+     */
     function pause() public onlyOwner whenNotPaused {
         paused = true;
         emit Paused(msg.sender);
     }
 
+    /**
+     * @notice Unpauses the contract, allowing actions to be performed.
+     * @dev Only callable by the owner when the contract is paused.
+     */
     function unpause() public onlyOwner whenNotPaused {
         paused = false;
         emit Unpaused(msg.sender);
@@ -82,6 +88,20 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     //--------------------------INITIALIZATION FUNCTIONS-------------------------------------
     //---------------------------------------------------------------------------------------
 
+    /**
+     * @notice Initializes the contract with the given parameters.
+     * @param _coordinator Address of the randomness coordinator.
+     * @param _owner Address of the contract owner.
+     * @param _wston Address of the WSTON token.
+     * @param _ton Address of the TON token.
+     * @param _treasury Address of the treasury contract.
+     * @param _CommonGemsValue Value of common gems.
+     * @param _RareGemsValue Value of rare gems.
+     * @param _UniqueGemsValue Value of unique gems.
+     * @param _EpicGemsValue Value of epic gems.
+     * @param _LegendaryGemsValue Value of legendary gems.
+     * @param _MythicGemsValue Value of mythic gems.
+     */
     function initialize(
         address _coordinator,
         address _owner,
@@ -109,13 +129,22 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         MythicGemsValue = _MythicGemsValue;
     }
 
+    /**
+     * @notice Sets the mining periods for different gem rarities.
+     * @param _CommonGemsMiningPeriod Mining period for common gems.
+     * @param _RareGemsMiningPeriod Mining period for rare gems.
+     * @param _UniqueGemsMiningPeriod Mining period for unique gems.
+     * @param _EpicGemsMiningPeriod Mining period for epic gems.
+     * @param _LegendaryGemsMiningPeriod Mining period for legendary gems.
+     * @param _MythicGemsMiningPeriod Mining period for mythic gems.
+     */
     function setGemsMiningPeriods(
-        uint256 _CommonGemsMiningPeriod,
-        uint256 _RareGemsMiningPeriod,
-        uint256 _UniqueGemsMiningPeriod,
-        uint256 _EpicGemsMiningPeriod,
-        uint256 _LegendaryGemsMiningPeriod,
-        uint256 _MythicGemsMiningPeriod
+        uint32 _CommonGemsMiningPeriod,
+        uint32 _RareGemsMiningPeriod,
+        uint32 _UniqueGemsMiningPeriod,
+        uint32 _EpicGemsMiningPeriod,
+        uint32 _LegendaryGemsMiningPeriod,
+        uint32 _MythicGemsMiningPeriod
     ) external onlyOwner {
         CommonGemsMiningPeriod = _CommonGemsMiningPeriod;
         RareGemsMiningPeriod = _RareGemsMiningPeriod;
@@ -134,13 +163,22 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         );
     }
 
+    /**
+     * @notice Sets the cooldown periods for different gem rarities.
+     * @param _CommonGemsCooldownPeriod Cooldown period for common gems.
+     * @param _RareGemsCooldownPeriod Cooldown period for rare gems.
+     * @param _UniqueGemsCooldownPeriod Cooldown period for unique gems.
+     * @param _EpicGemsCooldownPeriod Cooldown period for epic gems.
+     * @param _LegendaryGemsCooldownPeriod Cooldown period for legendary gems.
+     * @param _MythicGemsCooldownPeriod Cooldown period for mythic gems.
+     */
     function setGemsCooldownPeriods(
-        uint256 _CommonGemsCooldownPeriod, 
-        uint256 _RareGemsCooldownPeriod,
-        uint256 _UniqueGemsCooldownPeriod,
-        uint256 _EpicGemsCooldownPeriod,
-        uint256 _LegendaryGemsCooldownPeriod,
-        uint256 _MythicGemsCooldownPeriod
+        uint32 _CommonGemsCooldownPeriod, 
+        uint32 _RareGemsCooldownPeriod,
+        uint32 _UniqueGemsCooldownPeriod,
+        uint32 _EpicGemsCooldownPeriod,
+        uint32 _LegendaryGemsCooldownPeriod,
+        uint32 _MythicGemsCooldownPeriod
     ) external onlyOwner {
         CommonGemsCooldownPeriod = _CommonGemsCooldownPeriod;
         RareGemsCooldownPeriod = _RareGemsCooldownPeriod;
@@ -159,15 +197,21 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         );
     }
 
+    /**
+     * @notice Sets the number of mining attempts for different gem rarities.
+     * @param _RareminingTry Number of mining attempts for rare gems.
+     * @param _UniqueminingTry Number of mining attempts for unique gems.
+     * @param _EpicminingTry Number of mining attempts for epic gems.
+     * @param _LegendaryminingTry Number of mining attempts for legendary gems.
+     * @param _MythicminingTry Number of mining attempts for mythic gems.
+     */
     function setMiningTrys(
-        uint256 _CommonminingTry, 
-        uint256 _RareminingTry,
-        uint256 _UniqueminingTry,
-        uint256 _EpicminingTry,
-        uint256 _LegendaryminingTry,
-        uint256 _MythicminingTry
+        uint8 _RareminingTry,
+        uint8 _UniqueminingTry,
+        uint8 _EpicminingTry,
+        uint8 _LegendaryminingTry,
+        uint8 _MythicminingTry
     ) external onlyOwner {
-        CommonminingTry = _CommonminingTry;
         RareminingTry = _RareminingTry;
         UniqueminingTry = _UniqueminingTry;
         EpicminingTry = _EpicminingTry;
@@ -175,7 +219,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         MythicminingTry = _MythicminingTry;
 
         emit GemsMiningTryModified(
-            _CommonminingTry,
             _RareminingTry,
             _UniqueminingTry,
             _EpicminingTry,
@@ -184,6 +227,15 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         );
     }
 
+    /**
+     * @notice Sets the value of different gem rarities.
+     * @param _CommonGemsValue Value of common gems.
+     * @param _RareGemsValue Value of rare gems.
+     * @param _UniqueGemsValue Value of unique gems.
+     * @param _EpicGemsValue Value of epic gems.
+     * @param _LegendaryGemsValue Value of legendary gems.
+     * @param _MythicGemsValue Value of mythic gems.
+     */
     function setGemsValue(
         uint256 _CommonGemsValue,
         uint256 _RareGemsValue,
@@ -209,14 +261,26 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         );
     }
 
+    /**
+     * @notice Sets the treasury address.
+     * @param _treasury The new treasury address.
+     */
     function setTreasury(address _treasury) external onlyOwner {
         treasury = _treasury;
     }
 
+    /**
+     * @notice Sets the marketplace address.
+     * @param _marketplace The new marketplace address.
+     */
     function setMarketPlaceAddress(address _marketplace) external onlyOwner {
         marketplace = _marketplace;
     }
 
+    /**
+     * @notice Sets the airdrop address.
+     * @param _airdrop The new airdrop address.
+     */
     function setAirdrop(address _airdrop) external onlyOwner {
         airdrop = _airdrop;
     }
@@ -263,10 +327,10 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
 
         uint8[4] memory forgedQuadrants;
         Rarity newRarity;
+        uint32 forgedGemsMiningPeriod;
+        uint32 forgedGemsCooldownPeriod;
+        uint8 forgedGemsminingTry;
         uint256 forgedGemsValue;
-        uint256 forgedGemsMiningPeriod;
-        uint256 forgedGemsCooldownPeriod;
-        uint256 forgedGemsminingTry;
 
         (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry) = Gems.forgeTokens(
             GEMIndexToOwner,
@@ -352,6 +416,12 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         return true;
     }
 
+    /**
+     * @notice Picks a mined gem after the mining period has elapsed.
+     * @param _tokenId ID of the token to pick.
+     * @return requestId The request ID for randomness.
+     * @dev user pays msg.value and get back the excess ETH that is not spent on gas by the node
+     */
     function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (uint256) {
         if(ownerOf(_tokenId) != msg.sender) {
             revert NotGemOwner();
@@ -366,9 +436,11 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             revert NotMining();
         }
 
+        // calling the requestRandomness function from the consumer with the default parameters
         (uint256 directFundingCost, uint256 requestId) = requestRandomness(0, 0, CALLBACK_GAS_LIMIT);
         Gems[_tokenId].randomRequestId = requestId;
 
+        // updating the mapping related to the request generated by the coordinator
         s_requests[requestId].tokenId = _tokenId;
         s_requests[requestId].requested = true;
         s_requests[requestId].requester = msg.sender;
@@ -381,12 +453,20 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             if(!success) {
                 revert FailedToSendEthBack();
             }
+            emit EthSentBack(msg.value - directFundingCost);
         }
 
         emit RandomGemRequested(_tokenId, Gems[_tokenId].randomRequestId);
         return requestId;
     }
 
+    /**
+     * @notice Melts a gem, converting it back to its value.
+     * @param _tokenId ID of the token to melt.
+     * @dev the caller get the WSTON amount inherited by the GEM. 
+     * @dev the ERC721 Token is burnt 
+     * @dev caller must be the token owner
+     */
     function meltGEM(uint256 _tokenId) external whenNotPaused {
         if(msg.sender == address(0)) {
             revert AddressZero();
@@ -402,17 +482,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         require(ITreasury(treasury).transferWSTON(msg.sender, amount), "transfer failed");
 
         emit GemMelted(_tokenId, msg.sender);
-    }
-
-    function burnTokens(address _from, uint256[] memory _tokenIds) internal {
-        for(uint256 i = 0; i < _tokenIds.length; ++i) {
-            // delete GEM from the Gems array and every other ownership/approve storage
-            delete Gems[_tokenIds[i]];
-            ownershipTokenCount[_from]--;
-            delete GEMIndexToOwner[_tokenIds[i]];
-            // ERC721 burn function
-            _burn(_tokenIds[i]);
-        }
     }
 
     /**
@@ -434,10 +503,10 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             revert ColorNotExist();
         }        
         
-        uint256 _gemCooldownPeriod;
-        uint256 _miningPeriod;
+        uint32 _gemCooldownPeriod;
+        uint32 _miningPeriod;
         uint256 _value;
-        uint256 _miningTry;
+        uint8 _miningTry;
 
         uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
 
@@ -451,7 +520,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             _gemCooldownPeriod = CommonGemsCooldownPeriod;
             _miningPeriod = CommonGemsMiningPeriod;
             _value = CommonGemsValue;
-            _miningTry = CommonminingTry;
+            _miningTry = 0;
         } else if (_rarity == Rarity.RARE) {
             require(_quadrants[0] == 2 || _quadrants[0] == 3, "Quadrant 0 must be 2 or 3 for RARE rarity");
             require(_quadrants[1] == 2 || _quadrants[1] == 3, "Quadrant 1 must be 2 or 3 for RARE rarity");
@@ -563,7 +632,15 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
 
         return newGemIds;
     }
-        
+    
+    /**
+     * @notice Transfers a GEM token from one address to another.
+     * @dev Overrides the ERC721 transferFrom function. The transfer is only allowed when the contract is not paused.
+     *      The GEM must not be locked, and the sender and recipient must be different.
+     * @param from The address to transfer the token from.
+     * @param to The address to transfer the token to.
+     * @param tokenId The ID of the token to transfer.
+     */
     function transferFrom(address from, address to, uint256 tokenId) public override(ERC721Upgradeable, IERC721) whenNotPaused {
         if(to == from) {
             revert SameSenderAndRecipient();
@@ -572,24 +649,54 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             revert GemIsLocked();
         }
 
-        Gems.transferGem(GEMIndexToOwner, ownershipTokenCount, from, to, tokenId);
+        _transferGEM(from, to, tokenId);
         super.transferFrom(from, to, tokenId);
 
         emit TransferGEM(from, to, tokenId);
     }
 
+    /**
+     * @notice Safely transfers a GEM token from one address to another.
+     * @dev Overrides the ERC721 safeTransferFrom function. The transfer is only allowed when the contract is not paused.
+     *      Checks if the recipient is a contract and if it can handle ERC721 tokens.
+     * @param from The address to transfer the token from.
+     * @param to The address to transfer the token to.
+     * @param tokenId The ID of the token to transfer.
+     * @param data Additional data with no specified format, sent in call to `to`.
+     */
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public override(ERC721Upgradeable, IERC721) whenNotPaused {
+        if(to == from) {
+            revert SameSenderAndRecipient();
+        }
+        if(Gems[tokenId].isLocked) {
+            revert GemIsLocked();
+        }
 
-        this.transferFrom(from, to, tokenId);
+        _transferGEM(from, to, tokenId);
+        super.transferFrom(from, to, tokenId);
 
         // Check if the recipient is a contract and if it can handle ERC721 tokens
         _checkOnERC721(from, to, tokenId, data);
+        emit TransferGEM(from, to, tokenId);
     }
 
+    /**
+     * @notice Sets the lock status of a GEM token.
+     * @dev Only callable by the marketplace or airdrop contracts.
+     * @param _tokenId The ID of the token to set the lock status for.
+     * @param _isLocked The lock status to set for the token.
+     */
     function setIsLocked(uint256 _tokenId, bool _isLocked) external onlyMarketPlaceOrAirdrop {
         Gems[_tokenId].isLocked = _isLocked;
     }
 
+    /**
+     * @notice Adds a new color to the list of available colors.
+     * @dev Only callable by the owner of the contract.
+     * @param _colorName The name of the color to add.
+     * @param _index1 The first index of the color.
+     * @param _index2 The second index of the color.
+     */
     function addColor(string memory _colorName, uint8 _index1, uint8 _index2) external onlyOwner {
         colorName[_index1][_index2] = _colorName;
         colors.push([_index1, _index2]);
@@ -599,15 +706,11 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
 
     }
 
-    function addBackgroundColor(string memory _backgroundColor) external onlyOwner {
-        customBackgroundColors[customBackgroundColorsCount] = _backgroundColor;
-        backgroundColors.push(_backgroundColor);
-        customBackgroundColorsCount++;
-
-        emit BackgroundColorAdded(customBackgroundColorsCount, _backgroundColor);
-
-    }
-
+    /**
+     * @notice Sets the token URI for a specific GEM token.
+     * @param tokenId The ID of the token to set the URI for.
+     * @param _tokenURI The URI to set for the token.
+     */
     function setTokenURI(uint256 tokenId, string memory _tokenURI) external {
         _setTokenURI(tokenId, _tokenURI);
     }
@@ -616,6 +719,22 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     //--------------------------PRIVATE/INERNAL FUNCTIONS------------------------------------
     //---------------------------------------------------------------------------------------
 
+    /**
+     * @notice Burns tokens internally.
+     * @param _from Address from which tokens are burned.
+     * @param _tokenIds Array of token IDs to burn.
+     */
+    function burnTokens(address _from, uint256[] memory _tokenIds) internal {
+        for(uint256 i = 0; i < _tokenIds.length; ++i) {
+            // delete GEM from the Gems array and every other ownership/approve storage
+            delete Gems[_tokenIds[i]];
+            ownershipTokenCount[_from]--;
+            delete GEMIndexToOwner[_tokenIds[i]];
+            // ERC721 burn function
+            _burn(_tokenIds[i]);
+        }
+    }
+
     // View function to check if a color exists
     function colorExists(uint8 _index1, uint8 _index2) internal view returns (bool) {
         // Check if the color name is not an empty string
@@ -623,7 +742,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     }
 
     function _transferGEM(address _from, address _to, uint256 _tokenId) private {
-        Gems[_tokenId].gemCooldownPeriod = block.timestamp + getCooldownPeriod(Gems[_tokenId].rarity);
+        Gems[_tokenId].gemCooldownPeriod = block.timestamp + _getCooldownPeriod(Gems[_tokenId].rarity);
         ownershipTokenCount[_to]++;
         GEMIndexToOwner[_tokenId] = _to;
         ownershipTokenCount[_from]--;
@@ -650,7 +769,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             // reset storage variable of the initial GEM
             Gems[_tokenId].isLocked = false;
             Gems[_tokenId].randomRequestId = 0;
-            Gems[_tokenId].gemCooldownPeriod = block.timestamp + TransferLibrary.getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
+            Gems[_tokenId].gemCooldownPeriod = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
 
             delete userMiningToken[ownerOf(_tokenId)][_tokenId];
             delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
@@ -690,6 +809,15 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             }
         }
     }
+    function _getCooldownPeriod(Rarity rarity) internal view returns (uint256) {
+        if (rarity == Rarity.COMMON) return CommonGemsCooldownPeriod;
+        if (rarity == Rarity.RARE) return RareGemsCooldownPeriod;
+        if (rarity == Rarity.UNIQUE) return UniqueGemsCooldownPeriod;
+        if (rarity == Rarity.EPIC) return EpicGemsCooldownPeriod;
+        if (rarity == Rarity.LEGENDARY) return LegendaryGemsCooldownPeriod;
+        if (rarity == Rarity.MYTHIC) return MythicGemsCooldownPeriod;
+        revert("Invalid rarity");
+    }
 
     //---------------------------------------------------------------------------------------
     //-----------------------------VIEW FUNCTIONS--------------------------------------------
@@ -699,15 +827,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         return tokensOfOwner(treasury);
     }
 
-    function getCooldownPeriod(Rarity rarity) internal view returns (uint256) {
-        if (rarity == Rarity.COMMON) return CommonGemsCooldownPeriod;
-        if (rarity == Rarity.RARE) return RareGemsCooldownPeriod;
-        if (rarity == Rarity.UNIQUE) return UniqueGemsCooldownPeriod;
-        if (rarity == Rarity.EPIC) return EpicGemsCooldownPeriod;
-        if (rarity == Rarity.LEGENDARY) return LegendaryGemsCooldownPeriod;
-        if (rarity == Rarity.MYTHIC) return MythicGemsCooldownPeriod;
-        revert("Invalid rarity");
-    }
 
     function balanceOf(address _owner) public view override(ERC721Upgradeable, IERC721) returns (uint256 count) {
         return ownershipTokenCount[_owner];
@@ -870,24 +989,24 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     function getEpicGemsValue() external view returns(uint256) {return EpicGemsValue;}
     function getLegendaryGemsValue() external view returns(uint256) {return LegendaryGemsValue;}
     function getMythicGemsValue() external view returns(uint256) {return MythicGemsValue;}
-    function getCommonminingTry() external view returns(uint256) { return CommonminingTry;}
-    function getRareminingTry() external view returns(uint256) { return RareminingTry;}
-    function getUniqueminingTry() external view returns(uint256) { return UniqueminingTry;}
-    function getEpicminingTry() external view returns(uint256) { return EpicminingTry;}
-    function getLegendaryminingTry() external view returns(uint256) { return LegendaryminingTry;}
-    function getMythicminingTry() external view returns(uint256) { return MythicminingTry;}
-    function getCommonGemsMiningPeriod() external view returns(uint256) { return CommonGemsMiningPeriod;}
-    function getRareGemsMiningPeriod() external view returns(uint256) { return RareGemsMiningPeriod;}
-    function getUniqueGemsMiningPeriod() external view returns(uint256) { return UniqueGemsMiningPeriod;}
-    function getEpicGemsMiningPeriod() external view returns(uint256) { return EpicGemsMiningPeriod;}
-    function getLegendaryGemsMiningPeriod() external view returns(uint256) { return LegendaryGemsMiningPeriod;}
-    function getMythicGemsMiningPeriod() external view returns(uint256) { return MythicGemsMiningPeriod;}
-    function getCommonGemsCooldownPeriod() external view returns(uint256) { return CommonGemsCooldownPeriod;}
-    function getRareGemsCooldownPeriod() external view returns(uint256) { return RareGemsCooldownPeriod;}
-    function getUniqueGemsCooldownPeriod() external view returns(uint256) { return UniqueGemsCooldownPeriod;}
-    function getEpicGemsCooldownPeriod() external view returns(uint256) { return EpicGemsCooldownPeriod;}
-    function getLegendaryGemsCooldownPeriod() external view returns(uint256) { return LegendaryGemsCooldownPeriod;}
-    function getMythicGemsCooldownPeriod() external view returns(uint256) { return MythicGemsCooldownPeriod;}
+    function getRareminingTry() external view returns(uint8) { return RareminingTry;}
+    function getUniqueminingTry() external view returns(uint8) { return UniqueminingTry;}
+    function getEpicminingTry() external view returns(uint8) { return EpicminingTry;}
+    function getLegendaryminingTry() external view returns(uint8) { return LegendaryminingTry;}
+    function getMythicminingTry() external view returns(uint8) { return MythicminingTry;}
+    function getCommonGemsMiningPeriod() external view returns(uint32) { return CommonGemsMiningPeriod;}
+    function getRareGemsMiningPeriod() external view returns(uint32) { return RareGemsMiningPeriod;}
+    function getUniqueGemsMiningPeriod() external view returns(uint32) { return UniqueGemsMiningPeriod;}
+    function getEpicGemsMiningPeriod() external view returns(uint32) { return EpicGemsMiningPeriod;}
+    function getLegendaryGemsMiningPeriod() external view returns(uint32) { return LegendaryGemsMiningPeriod;}
+    function getMythicGemsMiningPeriod() external view returns(uint32) { return MythicGemsMiningPeriod;}
+    function getCommonGemsCooldownPeriod() external view returns(uint32) { return CommonGemsCooldownPeriod;}
+    function getRareGemsCooldownPeriod() external view returns(uint32) { return RareGemsCooldownPeriod;}
+    function getUniqueGemsCooldownPeriod() external view returns(uint32) { return UniqueGemsCooldownPeriod;}
+    function getEpicGemsCooldownPeriod() external view returns(uint32) { return EpicGemsCooldownPeriod;}
+    function getLegendaryGemsCooldownPeriod() external view returns(uint32) { return LegendaryGemsCooldownPeriod;}
+    function getMythicGemsCooldownPeriod() external view returns(uint32) { return MythicGemsCooldownPeriod;}
     function getRequestIds() external view returns(uint256[] memory) { return requestIds;}
     function getRequestCount() external view returns(uint256) { return requestCount;}
+    function getOwnershipTokenCount(address _user) external view returns(uint256) { return ownershipTokenCount[_user];}
 }

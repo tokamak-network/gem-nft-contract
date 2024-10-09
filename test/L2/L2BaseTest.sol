@@ -29,12 +29,12 @@ contract L2BaseTest is Test {
 
     using SafeERC20 for IERC20;
 
-    uint256 public commonminingTry = 1;
-    uint256 public rareminingTry = 2;
-    uint256 public uniqueminingTry = 1; // for testing purpose
-    uint256 public epicminingTry = 10;
-    uint256 public LegendaryminingTry = 15;
-    uint256 public MythicminingTry = 20;
+    uint8 public rareminingTry = 2;
+    uint8 public uniqueminingTry = 1; // for testing purpose
+    uint8 public epicminingTry = 10;
+    uint8 public LegendaryminingTry = 15;
+    uint8 public MythicminingTry = 20;
+
     uint256 public tonFeesRate = 10; // 10%
     uint256 public miningFees = 0.01 ether;
 
@@ -45,19 +45,19 @@ contract L2BaseTest is Test {
     uint256 public LegendaryGemsValue = 605 * 10 ** 27;
     uint256 public MythicGemsValue = 4000 * 10 ** 27;
 
-    uint256 public CommonGemsMiningPeriod = 1 weeks;
-    uint256 public RareGemsMiningPeriod = 2 weeks;
-    uint256 public UniqueGemsMiningPeriod = 3 weeks;
-    uint256 public EpicGemsMiningPeriod = 4 weeks;
-    uint256 public LegendaryGemsMiningPeriod = 5 weeks;
-    uint256 public MythicGemsMiningPeriod = 6 weeks;
+    uint32 public CommonGemsMiningPeriod = 1 weeks;
+    uint32 public RareGemsMiningPeriod = 2 weeks;
+    uint32 public UniqueGemsMiningPeriod = 3 weeks;
+    uint32 public EpicGemsMiningPeriod = 4 weeks;
+    uint32 public LegendaryGemsMiningPeriod = 5 weeks;
+    uint32 public MythicGemsMiningPeriod = 6 weeks;
 
-    uint256 public CommonGemsCooldownPeriod = 1 weeks;
-    uint256 public RareGemsCooldownPeriod = 2 weeks;
-    uint256 public UniqueGemsCooldownPeriod = 3 weeks;
-    uint256 public EpicGemsCooldownPeriod = 4 weeks;
-    uint256 public LegendaryGemsCooldownPeriod = 5 weeks;
-    uint256 public MythicGemsCooldownPeriod = 6 weeks;
+    uint32 public CommonGemsCooldownPeriod = 1 weeks;
+    uint32 public RareGemsCooldownPeriod = 2 weeks;
+    uint32 public UniqueGemsCooldownPeriod = 3 weeks;
+    uint32 public EpicGemsCooldownPeriod = 4 weeks;
+    uint32 public LegendaryGemsCooldownPeriod = 5 weeks;
+    uint32 public MythicGemsCooldownPeriod = 6 weeks;
 
     address payable owner;
     address payable user1;
@@ -212,7 +212,6 @@ contract L2BaseTest is Test {
         );
 
         GemFactory(gemfactoryProxyAddress).setMiningTrys(
-            commonminingTry,
             rareminingTry,
             uniqueminingTry,
             epicminingTry,

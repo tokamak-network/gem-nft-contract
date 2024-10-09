@@ -2,6 +2,7 @@
 pragma solidity 0.8.25;
 
 import "./L2BaseTest.sol";
+import "../../src/libraries/ForgeLibrary.sol";
 
 contract GemFactoryTest is L2BaseTest {
 
@@ -9,6 +10,9 @@ contract GemFactoryTest is L2BaseTest {
         super.setUp();
     }
 
+    /**
+     * @notice function defining a standard COMMON GEM 
+     */
     function defineDefaultGem() public pure returns(GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) {
         // Define GEM properties
         rarity = GemFactoryStorage.Rarity.COMMON;
@@ -22,7 +26,6 @@ contract GemFactoryTest is L2BaseTest {
     */
     function testCreateGEM() public {
         vm.startPrank(owner);
-        
         // defining a default GEM
         (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
 
@@ -39,6 +42,125 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
         assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemId))) == keccak256(abi.encodePacked(tokenURI)));
 
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing of the transferFrom function
+    * @dev we assert that storage variables are approrpiately updated
+    */
+    function testTransferFrom() public {
+        // creating a single GEM
+        vm.startPrank(owner);
+        // defining a default GEM
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+
+        // Call createGEM function from the Treasury contract
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
+            rarity,
+            color,
+            quadrants,
+            tokenURI
+        );
+
+        //transferring the GEM from the treasury to user1
+        vm.startPrank(treasuryProxyAddress);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
+        // checking the GEM was sent appropriately
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
+        // ensuring the cooldown period was reset
+        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp + GemFactory(gemfactoryProxyAddress).getCommonGemsCooldownPeriod());
+        
+        // ensuring the tokenCount was updated accordingly
+        assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(treasuryProxyAddress) == 0);
+        assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(user1) == 1);
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing of the behavior of transferFrom function if the gem is locked
+    */
+    function testTransferFromShouldRevertIftokenLocked() public {
+        // creating a single GEM
+        vm.startPrank(owner);
+        // defining a default GEM
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+
+        // Call createGEM function from the Treasury contract
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
+            rarity,
+            color,
+            quadrants,
+            tokenURI
+        );
+
+        // listing the gem into the marketplace
+        uint256 gemPrice = 1500 * 10 ** 27;
+        Treasury(treasuryProxyAddress).approveGem(marketplaceProxyAddress, newGemId);
+        Treasury(treasuryProxyAddress).putGemForSale(newGemId, gemPrice);
+        assert(GemFactory(gemfactoryProxyAddress).isTokenLocked(newGemId) == true);
+        vm.stopPrank();
+
+        // trying to transfer the gem => should revert
+        vm.startPrank(treasuryProxyAddress);
+        vm.expectRevert(GemFactoryStorage.GemIsLocked.selector);
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
+    }
+
+    /**
+    * @notice testing of the safeTransferFrom function
+    */
+    function testSafeTransferFrom() public {
+        // creating a single GEM
+        vm.startPrank(owner);
+        // defining a default GEM
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+
+        // Call createGEM function from the Treasury contract
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
+            rarity,
+            color,
+            quadrants,
+            tokenURI
+        );
+
+        vm.startPrank(treasuryProxyAddress);
+        GemFactory(gemfactoryProxyAddress).safeTransferFrom(treasuryProxyAddress, user1, newGemId); 
+        // checking the GEM was sent appropriately
+        assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
+        // ensuring the cooldown period was reset
+        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp + GemFactory(gemfactoryProxyAddress).getCommonGemsCooldownPeriod());
+        
+        // ensuring the tokenCount was updated accordingly
+        assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(treasuryProxyAddress) == 0);
+        assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(user1) == 1); 
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing of the safeTransferFrom function's behavior if the recipient does not implement onERC721Receive function
+    * to avoid tokens being locked inside of contracts
+    * @dev we create a GEM for the treasury and send try to transfer the GEM to the airdrop contract which intendly does not implement onERC721Receive
+    */
+    function testSafeTransferFromShouldRevertIfRecipientNotAppropriate() public {
+        // creating a single GEM
+        vm.startPrank(owner);
+        // defining a default GEM
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+
+        // Call createGEM function from the Treasury contract
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
+            rarity,
+            color,
+            quadrants,
+            tokenURI
+        );
+
+        vm.startPrank(treasuryProxyAddress);
+        // ensure the transfer fails due to the fact airdrop contract does not implement onERC721Receive function
+        vm.expectRevert();
+        GemFactory(gemfactoryProxyAddress).safeTransferFrom(treasuryProxyAddress, airdropProxyAddress, newGemId); 
+       
         vm.stopPrank();
     }
 
@@ -585,7 +707,7 @@ contract GemFactoryTest is L2BaseTest {
         tokenIds[1] = newGemIds[1];
         uint8[2] memory color = [0, 1];
 
-        vm.expectRevert("not owner");
+        vm.expectRevert(ForgeLibrary.NotGemOwner.selector);
         GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
@@ -649,7 +771,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[2] memory color = [0, 1];
 
         // Expect the transaction to revert with the error message "wrong rarity Gems"
-        vm.expectRevert("wrong rarity Gems");
+        vm.expectRevert(ForgeLibrary.WrongRarity.selector);
         GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
@@ -714,7 +836,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[2] memory invalidColor = [2, 3];
 
         // Expect the transaction to revert with the error message "this color can't be obtained"
-        vm.expectRevert("this color can't be obtained");
+        vm.expectRevert(ForgeLibrary.NotValidColor.selector);
         GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, invalidColor);
 
         vm.stopPrank();
@@ -783,7 +905,7 @@ contract GemFactoryTest is L2BaseTest {
         tokenIds[3] = newGemIds[3];
         uint8[2] memory color = [2, 3];
         // Expect the transaction to revert with the error message "wrong number of Gems to be forged"
-        vm.expectRevert("wrong number of Gems to be forged");
+        vm.expectRevert(ForgeLibrary.WrongNumberOfGemToBeForged.selector);
         GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
         vm.stopPrank();
     }
