@@ -2493,7 +2493,7 @@
           "type": "uint8"
         }
       ],
-      "name": "setMiningTrys",
+      "name": "setMiningTries",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

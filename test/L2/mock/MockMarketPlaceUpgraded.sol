@@ -129,9 +129,7 @@ contract MockMarketPlaceUpgraded is ProxyStorage, MarketPlaceStorage, Reentrancy
     }
 
     function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {
-        if(_tonFeesRate >= 100) {
-            revert WrongDiscountRate();
-        }
+        require(_tonFeesRate < 100, "discount rate must be less than 100%");
         tonFeesRate = _tonFeesRate;
         emit SetDiscountRate(_tonFeesRate);
     }

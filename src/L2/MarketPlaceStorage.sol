@@ -12,19 +12,19 @@ contract MarketPlaceStorage {
     mapping(uint256 => Sale) public gemsForSale;
 
     // Fees rate for purchasing using ton (rate in percentage)
-    uint256 public tonFeesRate;
+    uint256 internal tonFeesRate;
 
-    address public gemFactory;
-    address public treasury;
-    address public wston;
-    address public ton;
+    address internal gemFactory;
+    address internal treasury;
+    address internal wston;
+    address internal ton;
 
     uint256 constant public TON_FEES_RATE_DIVIDER = 10000;
     uint256 constant public DECIMALS = 10**27;
 
-    uint256 public stakingIndex = 10**27;
+    uint256 internal stakingIndex = 10**27;
 
-    bool public paused = false;
+    bool internal paused = false;
     bool internal initialized = false;
 
     event GemBought(uint256 tokenId, address payer, address seller, uint256 amount);
@@ -32,13 +32,13 @@ contract MarketPlaceStorage {
     event GemRemovedFromSale(uint256 tokenId);
     event WSTONClaimed(uint256 tokenId, address claimer);
     event SetDiscountRate(uint256 discountRate);
+    event SetStakingIndex(uint256 stakingIndex);
 
 
     error NoTokens();
     error WrongLength();
     error GemIsNotForSale();
     error NotGemOwner();
-    error WrongDiscountRate();
     error WrongStakingIndex();
     error WrongPrice();
     error GemIsAlreadyForSaleOrIsMining();

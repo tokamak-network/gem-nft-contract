@@ -24,6 +24,7 @@ interface ITreasury {
 
 /**
  * @title GemFactory
+ * @author TOKAMAK OPAL TEAM
  * @dev The GemFactory contract is responsible for managing the lifecycle of GEM tokens within the system.
  * This includes the creation, mining, forging, and melting of GEMs. The contract provides functionalities
  * for both administrative and user interactions, ensuring a comprehensive management of GEM tokens.
@@ -209,7 +210,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @param _LegendaryminingTry Number of mining attempts for legendary gems.
      * @param _MythicminingTry Number of mining attempts for mythic gems.
      */
-    function setMiningTrys(
+    function setMiningTries(
         uint8 _RareminingTry,
         uint8 _UniqueminingTry,
         uint8 _EpicminingTry,
@@ -306,6 +307,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         Rarity _rarity,
         uint8[2] memory _color
     ) external whenNotPaused returns (uint256 newGemId) {
+        // Define ForgeParams struct with predefined values for various GEM types
         ForgeLibrary.ForgeParams memory params = ForgeLibrary.ForgeParams({
             RareGemsValue: RareGemsValue,
             UniqueGemsValue: UniqueGemsValue,
@@ -329,6 +331,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             MythicGemsCooldownPeriod: MythicGemsCooldownPeriod
         });
 
+        // Initialize variables for forged GEM properties
         uint8[4] memory forgedQuadrants;
         Rarity newRarity;
         uint32 forgedGemsMiningPeriod;
@@ -336,6 +339,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         uint8 forgedGemsminingTry;
         uint256 forgedGemsValue;
 
+        // Call the forgeTokens function from Gems contract
         (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry) = Gems.forgeTokens(
             GEMIndexToOwner,
             ownershipTokenCount,
@@ -345,16 +349,20 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             _color,
             params
         );
+
+        // Emit an event for the forged GEM
         emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
 
-        // Burn the old tokens 
+        // Burn the old tokens
         burnTokens(msg.sender, _tokenIds);
 
         // Mint the new token
         _safeMint(msg.sender, newGemId);
-        _setTokenURI(newGemId, "");
+        _setTokenURI(newGemId, ""); // Set empty URI for the new token
 
+        // Emit another event for the created GEM
         emit Created(newGemId, newRarity, _color, forgedGemsValue, forgedQuadrants, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, "", msg.sender);
+
         return newGemId;
     }
 
@@ -368,26 +376,35 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @dev There must be more than 1 mining try left
      */
     function startMiningGEM(uint256 _tokenId) external whenNotPaused returns (bool) {
-        if(msg.sender == address(0)) {
+        // Ensure the caller's address is not zero
+        if (msg.sender == address(0)) {
             revert AddressZero();
         }
-        if(ownerOf(_tokenId) != msg.sender) {
+        // Ensure the caller is the owner of the GEM
+        if (ownerOf(_tokenId) != msg.sender) {
             revert NotGemOwner();
         }
-        if(Gems[_tokenId].gemCooldownPeriod > block.timestamp) {
+        // Ensure the cooldown period for the GEM has elapsed
+        if (Gems[_tokenId].gemCooldownPeriod > block.timestamp) {
             revert CooldownPeriodNotElapsed();
         }
-        if(Gems[_tokenId].isLocked) {
+        // Ensure the GEM is not currently locked
+        if (Gems[_tokenId].isLocked) {
             revert GemIsLocked();
         }
-        if(Gems[_tokenId].rarity == Rarity.COMMON) {
+        // Ensure the GEM's rarity is not COMMON, as COMMON gems cannot be mined
+        if (Gems[_tokenId].rarity == Rarity.COMMON) {
             revert WrongRarity();
         }
-        if(Gems[_tokenId].miningTry == 0) {
+        // Ensure there are mining attempts left for the GEM
+        if (Gems[_tokenId].miningTry == 0) {
             revert NoMiningTryLeft();
         }
-        // modifying storage variables associated with the mining process
+
+        // Modify storage variables to start the mining process
         Gems.startMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
+
+        // Emit an event indicating that mining has started
         emit GemMiningStarted(_tokenId, msg.sender, block.timestamp, Gems[_tokenId].miningTry);
         return true;
     }
@@ -400,20 +417,27 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @dev the user must not have already called pickMinedGem function
      */
     function cancelMining(uint256 _tokenId) external whenNotPaused returns (bool) {
-        if(GEMIndexToOwner[_tokenId] != msg.sender) {
+        // Ensure the caller is the owner of the GEM
+        if (GEMIndexToOwner[_tokenId] != msg.sender) {
             revert NotGemOwner();
         }
-        if(Gems[_tokenId].isLocked != true) {
+        // Ensure the GEM is currently locked, indicating it is in the mining process
+        if (Gems[_tokenId].isLocked != true) {
             revert GemIsNotLocked();
         }
-        if(userMiningToken[msg.sender][_tokenId] != true) {
+        // Ensure the GEM is currently being mined by the user
+        if (userMiningToken[msg.sender][_tokenId] != true) {
             revert NotMining();
         }
-        if(Gems[_tokenId].randomRequestId != 0) {
+        // Ensure the GEM has not already been picked (randomness request not initiated)
+        if (Gems[_tokenId].randomRequestId != 0) {
             revert GemAlreadyPicked();
         }
-        // modifying storage variable associated with the mining process
+
+        // Modify the storage variables associated with the mining process to cancel it
         Gems.cancelMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
+
+        // Emit an event indicating that mining has been canceled
         emit MiningCancelled(_tokenId, msg.sender, block.timestamp);
         return true;
     }
@@ -425,39 +449,48 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @dev user pays msg.value and get back the excess ETH that is not spent on gas by the node
      */
     function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (uint256) {
-        if(ownerOf(_tokenId) != msg.sender) {
+        // Ensure the caller is the owner of the GEM
+        if (ownerOf(_tokenId) != msg.sender) {
             revert NotGemOwner();
         }
-        if(block.timestamp < userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod) {
+        // Ensure the mining period has elapsed
+        if (block.timestamp < userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod) {
             revert MiningPeriodNotElapsed();
         }
-        if(Gems[_tokenId].isLocked == false) {
+        // Ensure the GEM is currently locked
+        if (Gems[_tokenId].isLocked == false) {
             revert GemIsNotLocked();
         }
-        if(userMiningToken[ownerOf(_tokenId)][_tokenId] != true) {
+        // Ensure the GEM is currently being mined
+        if (userMiningToken[ownerOf(_tokenId)][_tokenId] != true) {
             revert NotMining();
         }
 
-        // calling the requestRandomness function from the consumer with the default parameters
+        // Request randomness from the consumer with default parameters
         (uint256 directFundingCost, uint256 requestId) = requestRandomness(0, 0, CALLBACK_GAS_LIMIT);
+        // Store the request ID in the GEM's data
         Gems[_tokenId].randomRequestId = requestId;
 
-        // updating the mapping related to the request generated by the coordinator
+        // Update the request mapping with details of the request
         s_requests[requestId].tokenId = _tokenId;
         s_requests[requestId].requested = true;
         s_requests[requestId].requester = msg.sender;
         unchecked {
+            // Increment the request count
             requestCount++;
         }
 
-        if(msg.value > directFundingCost) { // if there is ETH to refund
-            (bool success, ) = msg.sender.call{value:  msg.value - directFundingCost}("");
-            if(!success) {
+        // Refund excess ETH to the user if they overpaid
+        if (msg.value > directFundingCost) {
+            (bool success, ) = msg.sender.call{value: msg.value - directFundingCost}("");
+            if (!success) {
                 revert FailedToSendEthBack();
             }
+            // Emit an event for the ETH refund
             emit EthSentBack(msg.value - directFundingCost);
         }
 
+        // Emit an event for the random GEM request
         emit RandomGemRequested(_tokenId, Gems[_tokenId].randomRequestId);
         return requestId;
     }
@@ -507,86 +540,105 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         string memory _tokenURI
     ) public onlyTreasury whenNotPaused returns (uint256) {
         
+        // Check if the specified color combination exists
         if (!colorExists(_color[0], _color[1])) {
             revert ColorNotExist();
         }        
         
+        // Declare variables for GEM attributes
         uint32 _gemCooldownPeriod;
         uint32 _miningPeriod;
         uint256 _value;
         uint8 _miningTry;
 
+        // Calculate the sum of the quadrant values
         uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
 
+        // Determine GEM attributes based on its rarity
         if (_rarity == Rarity.COMMON) {
+            // Validate quadrant values for COMMON rarity
             if (_quadrants[0] != 1 && _quadrants[0] != 2) revert NewGemInvalidQuadrant(0, 1, 2);
             if (_quadrants[1] != 1 && _quadrants[1] != 2) revert NewGemInvalidQuadrant(1, 1, 2);
             if (_quadrants[2] != 1 && _quadrants[2] != 2) revert NewGemInvalidQuadrant(2, 1, 2);
             if (_quadrants[3] != 1 && _quadrants[3] != 2) revert NewGemInvalidQuadrant(3, 1, 2);
             if (sumOfQuadrants >= 8) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "COMMON");
 
+            // Set attributes for COMMON rarity
             _gemCooldownPeriod = 0;
             _miningPeriod = 0;
             _value = CommonGemsValue;
             _miningTry = 0;
         } else if (_rarity == Rarity.RARE) {
+            // Validate quadrant values for RARE rarity
             if (_quadrants[0] != 2 && _quadrants[0] != 3) revert NewGemInvalidQuadrant(0, 2, 3);
             if (_quadrants[1] != 2 && _quadrants[1] != 3) revert NewGemInvalidQuadrant(1, 2, 3);
             if (_quadrants[2] != 2 && _quadrants[2] != 3) revert NewGemInvalidQuadrant(2, 2, 3);
             if (_quadrants[3] != 2 && _quadrants[3] != 3) revert NewGemInvalidQuadrant(3, 2, 3);
             if (sumOfQuadrants >= 12) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "RARE");
             
+            // Set attributes for RARE rarity
             _gemCooldownPeriod = RareGemsCooldownPeriod;
             _miningPeriod = RareGemsMiningPeriod;
             _value = RareGemsValue;
             _miningTry = RareminingTry;
         } else if (_rarity == Rarity.UNIQUE) {
+            // Validate quadrant values for UNIQUE rarity
             if (_quadrants[0] != 3 && _quadrants[0] != 4) revert NewGemInvalidQuadrant(0, 3, 4);
             if (_quadrants[1] != 3 && _quadrants[1] != 4) revert NewGemInvalidQuadrant(1, 3, 4);
             if (_quadrants[2] != 3 && _quadrants[2] != 4) revert NewGemInvalidQuadrant(2, 3, 4);
             if (_quadrants[3] != 3 && _quadrants[3] != 4) revert NewGemInvalidQuadrant(3, 3, 4);
             if (sumOfQuadrants >= 16) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "UNIQUE");
 
+            // Set attributes for UNIQUE rarity
             _gemCooldownPeriod = UniqueGemsCooldownPeriod;
             _miningPeriod = UniqueGemsMiningPeriod;
             _value = UniqueGemsValue;
             _miningTry = UniqueminingTry;
         } else if (_rarity == Rarity.EPIC) {
+            // Validate quadrant values for EPIC rarity
             if (_quadrants[0] != 4 && _quadrants[0] != 5) revert NewGemInvalidQuadrant(0, 4, 5);
             if (_quadrants[1] != 4 && _quadrants[1] != 5) revert NewGemInvalidQuadrant(1, 4, 5);
             if (_quadrants[2] != 4 && _quadrants[2] != 5) revert NewGemInvalidQuadrant(2, 4, 5);
             if (_quadrants[3] != 4 && _quadrants[3] != 5) revert NewGemInvalidQuadrant(3, 4, 5);
             if (sumOfQuadrants >= 20) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "EPIC");
             
+            // Set attributes for EPIC rarity
             _gemCooldownPeriod = EpicGemsCooldownPeriod;
             _miningPeriod = EpicGemsMiningPeriod;
             _value = EpicGemsValue;
             _miningTry = EpicminingTry;
         } else if (_rarity == Rarity.LEGENDARY) {
+            // Validate quadrant values for LEGENDARY rarity
             if (_quadrants[0] != 5 && _quadrants[0] != 6) revert NewGemInvalidQuadrant(0, 5, 6);
             if (_quadrants[1] != 5 && _quadrants[1] != 6) revert NewGemInvalidQuadrant(1, 5, 6);
             if (_quadrants[2] != 5 && _quadrants[2] != 6) revert NewGemInvalidQuadrant(2, 5, 6);
             if (_quadrants[3] != 5 && _quadrants[3] != 6) revert NewGemInvalidQuadrant(3, 5, 6);
             if (sumOfQuadrants >= 24) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "LEGENDARY");
 
+            // Set attributes for LEGENDARY rarity
             _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
             _miningPeriod = LegendaryGemsMiningPeriod;
             _value = LegendaryGemsValue;
             _miningTry = LegendaryminingTry;
         } else if (_rarity == Rarity.MYTHIC) {
+            // Validate quadrant values for MYTHIC rarity
             if (_quadrants[0] != 6 || _quadrants[1] != 6 || _quadrants[2] != 6 || _quadrants[3] != 6) {
                 revert NewGemInvalidQuadrant(0, 6, 6);
             }
+            // Set attributes for MYTHIC rarity
             _gemCooldownPeriod = MythicGemsCooldownPeriod;
             _miningPeriod = MythicGemsMiningPeriod;
             _value = MythicGemsValue;
             _miningTry = MythicminingTry;
         } else {
+            // Revert if the rarity is not recognized
             revert WrongRarity();
         }
 
+        // Calculate the cooldown due date for the GEM
         uint256 _cooldownDueDate = block.timestamp + _gemCooldownPeriod;
 
+        // Create the new GEM and get its ID
         uint256 newGemId = Gems.createGem(
             GEMIndexToOwner,
             ownershipTokenCount,
@@ -601,9 +653,11 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             _tokenURI
         );
 
+        // Mint the GEM and set its token URI
         _safeMint(msg.sender, newGemId);
         _setTokenURI(newGemId, _tokenURI);
 
+        // Emit an event for the creation of the new GEM
         emit Created(newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _cooldownDueDate, _tokenURI, msg.sender);
         return newGemId;
     }

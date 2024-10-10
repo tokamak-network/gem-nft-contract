@@ -210,7 +210,8 @@ contract L2BaseTest is Test {
             MythicGemsCooldownPeriod
         );
 
-        GemFactory(gemfactoryProxyAddress).setMiningTrys(
+        // Set mining tries
+        GemFactory(gemfactoryProxyAddress).setMiningTries(
             rareminingTry,
             uniqueminingTry,
             epicminingTry,
@@ -218,12 +219,9 @@ contract L2BaseTest is Test {
             MythicminingTry
         );
 
+        // set the MarketPlace contract address into the GemFactory contract
         GemFactory(gemfactoryProxyAddress).setMarketPlaceAddress(marketplaceProxyAddress);
-        Treasury(treasuryProxyAddress).setMarketPlace(marketplaceProxyAddress);
-        Treasury(treasuryProxyAddress).approveGemFactory();
-        Treasury(treasuryProxyAddress).wstonApproveMarketPlace();
-        Treasury(treasuryProxyAddress).tonApproveMarketPlace();
-    
+        Treasury(treasuryProxyAddress).setMarketPlace(marketplaceProxyAddress);    
 
         // We deploy the RandomPack contract
         randomPack = new RandomPack();
@@ -238,6 +236,7 @@ contract L2BaseTest is Test {
             randomPackFees
         );
 
+        // Set randomPack address into the treasury contract
         Treasury(treasuryProxyAddress).setRandomPack(randomPackProxyAddress);
 
         // we set up the list of colors available for the GEM
@@ -279,9 +278,5 @@ contract L2BaseTest is Test {
 
         address treasuryAddress = GemFactory(gemfactoryProxyAddress).getTreasuryAddress();
         assert(treasuryAddress == treasuryProxyAddress);
-
-        // Check that the Treasury has approved the GemFactory to spend WSTON
-        uint256 allowance = IERC20(wston).allowance(treasuryProxyAddress, address(gemfactoryProxyAddress));
-        assert(allowance == type(uint256).max);
     }
 }

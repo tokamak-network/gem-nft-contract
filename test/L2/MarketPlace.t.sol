@@ -222,13 +222,11 @@ contract MarketPlaceTest is L2BaseTest {
 
     function testBuyGem() public {
         vm.startPrank(owner);
-        
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
-
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
@@ -236,55 +234,40 @@ contract MarketPlaceTest is L2BaseTest {
             quadrants,
             tokenURI
         );
-
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
-
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
-
         // Transfer the GEMs to user1
         GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
-
         vm.stopPrank();
 
         vm.startPrank(user1);
-
         uint256 gemPrice = 200 * 10 ** 27;
-
         // Verify token existence before putting it for sale
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
-
         GemFactory(gemfactoryProxyAddress).approve(marketplaceProxyAddress, newGemId);
         MarketPlace(marketplaceProxyAddress).putGemForSale(newGemId, gemPrice);
-
         vm.stopPrank();
 
         vm.startPrank(user2);
-        IERC20(wston).approve(marketplaceProxyAddress, type(uint256).max);
-        IERC20(ton).approve(marketplaceProxyAddress, type(uint256).max);
-
         uint256 balanceBefore = IERC20(wston).balanceOf(user1);
-
         MarketPlace(marketplaceProxyAddress).buyGem(newGemId, false);
         uint256 balanceAfter = IERC20(wston).balanceOf(user1);
-
         assert(balanceAfter == balanceBefore + gemPrice); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
-        
+    
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user2); // GEM was correctly trransferred
         vm.stopPrank();
     }
 
     function testBuyGemInWston() public {
         vm.startPrank(owner);
-        
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
-
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
@@ -292,55 +275,44 @@ contract MarketPlaceTest is L2BaseTest {
             quadrants,
             tokenURI
         );
-
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
-
         vm.stopPrank();
 
+        // treasury transfers the gem to user1
         vm.startPrank(treasuryProxyAddress);
-
         // Transfer the GEMs to user1
         GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
-
         vm.stopPrank();
 
+        // user1 lists the gem for sale
         vm.startPrank(user1);
-
         uint256 gemPrice = 200 * 10 ** 27;
-
         // Verify token existence before putting it for sale
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
-
         GemFactory(gemfactoryProxyAddress).approve(marketplaceProxyAddress, newGemId);
         MarketPlace(marketplaceProxyAddress).putGemForSale(newGemId, gemPrice);
-
         vm.stopPrank();
-
+        
+        // user2 buys the gem   
         vm.startPrank(user2);
-        IERC20(wston).approve(marketplaceProxyAddress, type(uint256).max);
-        IERC20(ton).approve(marketplaceProxyAddress, type(uint256).max);
-
         uint256 balanceBefore = IERC20(wston).balanceOf(user1);
-
+        IERC20(wston).approve(marketplaceProxyAddress, gemPrice);
         MarketPlace(marketplaceProxyAddress).buyGem(newGemId, true);
         uint256 balanceAfter = IERC20(wston).balanceOf(user1);
-
         assert(balanceAfter == balanceBefore + gemPrice); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
-        
+    
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user2); // GEM was correctly trransferred
         vm.stopPrank();
     }
 
     function testBuyGemFromTreasury() public {
         vm.startPrank(owner);
-        
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
-
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
@@ -348,51 +320,39 @@ contract MarketPlaceTest is L2BaseTest {
             quadrants,
             tokenURI
         );
-
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
-
         vm.stopPrank();
-
-        vm.startPrank(treasuryProxyAddress);
 
         // Transfer the GEMs to user1
+        vm.startPrank(treasuryProxyAddress);
         GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
-
         vm.stopPrank();
 
+        // put gem for sale
         vm.startPrank(user1);
-
         uint256 gemPrice = 200 * 10 ** 27;
         GemFactory(gemfactoryProxyAddress).approve(marketplaceProxyAddress, newGemId);
         MarketPlace(marketplaceProxyAddress).putGemForSale(newGemId, gemPrice);
-
         vm.stopPrank();
 
+        // buy from treasury
         vm.startPrank(owner);
-        Treasury(treasuryProxyAddress).wstonApproveMarketPlace();
-        Treasury(treasuryProxyAddress).tonApproveMarketPlace();
-
         uint256 balanceBefore = IERC20(wston).balanceOf(user1);
-
         Treasury(treasuryProxyAddress).buyGem(newGemId, false);
         uint256 balanceAfter = IERC20(wston).balanceOf(user1);
-
         assert(balanceAfter == balanceBefore + gemPrice); // User1 should receive the WSTON (we now has 1000 + 200 WSTON)
-        
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress); // GEM was correctly trransferred to the treasury
         vm.stopPrank();
     }
 
     function testBuyGemFromTreasuryRevertsIfNotOwner() public {
         vm.startPrank(owner);
-        
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
-
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
@@ -400,37 +360,24 @@ contract MarketPlaceTest is L2BaseTest {
             quadrants,
             tokenURI
         );
-
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
-
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
-
         // Transfer the GEMs to user1
         GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
-
         vm.stopPrank();
 
         vm.startPrank(user1);
-
         uint256 gemPrice = 200 * 10 ** 27;
         GemFactory(gemfactoryProxyAddress).approve(marketplaceProxyAddress, newGemId);
         MarketPlace(marketplaceProxyAddress).putGemForSale(newGemId, gemPrice);
-
         vm.stopPrank();
 
-        vm.startPrank(owner);
-        Treasury(treasuryProxyAddress).wstonApproveMarketPlace();
-        Treasury(treasuryProxyAddress).tonApproveMarketPlace();
-
-        vm.stopPrank();
         vm.startPrank(user2);
-        
         vm.expectRevert("not Owner or Admin");
         Treasury(treasuryProxyAddress).buyGem(newGemId, false);
-
         vm.stopPrank();
     }
 
