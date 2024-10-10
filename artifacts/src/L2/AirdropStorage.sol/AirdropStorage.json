@@ -1,0 +1,167 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "AirdropStorage",
+  "sourceName": "src/L2/AirdropStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "AlreadyInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoEligibleUsers",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TokenNotAvailable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TokenNotOwnedByTreasury",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UserAlreadyClaimedCurrentAirdrop",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UserNotEligible",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "EligibleTokenListCleared",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "TokensAssigned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "TokensClaimed",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "gemFactory",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokensEligible",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "treasury",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userClaimed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608080604052346015576101ad908161001b8239f35b600080fdfe60806040818152600436101561001457600080fd5b600091823560e01c9081633b7fcdca1461011d575080635c975abb146100fa57806361d027b3146100d3578063a53225c0146100ab5763e7da0eed1461005957600080fd5b346100a757806003193601126100a75761007161015c565b6001600160a01b031682526005602052808220805460243591908210156100a357835260209283902001549051908152f35b8380fd5b5080fd5b50346100a757816003193601126100a75760015490516001600160a01b039091168152602090f35b50346100a757816003193601126100a757905490516001600160a01b039091168152602090f35b50346100a757816003193601126100a75760209060ff6003541690519015158152f35b919050346101585760203660031901126101585760209260ff91906001600160a01b0361014861015c565b1681526004855220541615158152f35b8280fd5b600435906001600160a01b038216820361017257565b600080fdfea2646970667358221220db97e1318570c675bd3a5be7c56127e7e597cf5353861460a6cc091720bf62e664736f6c63430008190033",
+  "deployedBytecode": "0x60806040818152600436101561001457600080fd5b600091823560e01c9081633b7fcdca1461011d575080635c975abb146100fa57806361d027b3146100d3578063a53225c0146100ab5763e7da0eed1461005957600080fd5b346100a757806003193601126100a75761007161015c565b6001600160a01b031682526005602052808220805460243591908210156100a357835260209283902001549051908152f35b8380fd5b5080fd5b50346100a757816003193601126100a75760015490516001600160a01b039091168152602090f35b50346100a757816003193601126100a757905490516001600160a01b039091168152602090f35b50346100a757816003193601126100a75760209060ff6003541690519015158152f35b919050346101585760203660031901126101585760209260ff91906001600160a01b0361014861015c565b1681526004855220541615158152f35b8280fd5b600435906001600160a01b038216820361017257565b600080fdfea2646970667358221220db97e1318570c675bd3a5be7c56127e7e597cf5353861460a6cc091720bf62e664736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

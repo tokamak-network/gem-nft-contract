@@ -1,0 +1,60 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ForgeLibrary",
+  "sourceName": "src/libraries/ForgeLibrary.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "AddressZero",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GemIsLocked",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotGemOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotValidColor",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongNumberOfGemToBeForged",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongRarity",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "color0",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "color1",
+          "type": "uint8"
+        }
+      ],
+      "name": "ColorValidated",
+      "type": "event"
+    }
+  ],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea2646970667358221220701c852fbb8d110bb1b5efff8e8ae6800dadb98abc0691c84c69e169fe98daf964736f6c63430008190033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220701c852fbb8d110bb1b5efff8e8ae6800dadb98abc0691c84c69e169fe98daf964736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

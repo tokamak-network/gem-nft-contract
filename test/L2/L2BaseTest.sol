@@ -45,14 +45,12 @@ contract L2BaseTest is Test {
     uint256 public LegendaryGemsValue = 605 * 10 ** 27;
     uint256 public MythicGemsValue = 4000 * 10 ** 27;
 
-    uint32 public CommonGemsMiningPeriod = 1 weeks;
     uint32 public RareGemsMiningPeriod = 2 weeks;
     uint32 public UniqueGemsMiningPeriod = 3 weeks;
     uint32 public EpicGemsMiningPeriod = 4 weeks;
     uint32 public LegendaryGemsMiningPeriod = 5 weeks;
     uint32 public MythicGemsMiningPeriod = 6 weeks;
 
-    uint32 public CommonGemsCooldownPeriod = 1 weeks;
     uint32 public RareGemsCooldownPeriod = 2 weeks;
     uint32 public UniqueGemsCooldownPeriod = 3 weeks;
     uint32 public EpicGemsCooldownPeriod = 4 weeks;
@@ -184,7 +182,10 @@ contract L2BaseTest is Test {
             owner,
             wston,
             ton,
-            treasuryProxyAddress,
+            treasuryProxyAddress
+        );
+
+        GemFactory(gemfactoryProxyAddress).setGemsValue(
             CommonGemsValue,
             RareGemsValue,
             UniqueGemsValue,
@@ -194,7 +195,6 @@ contract L2BaseTest is Test {
         );
 
         GemFactory(gemfactoryProxyAddress).setGemsMiningPeriods(
-            CommonGemsMiningPeriod,
             RareGemsMiningPeriod,
             UniqueGemsMiningPeriod,
             EpicGemsMiningPeriod,
@@ -203,7 +203,6 @@ contract L2BaseTest is Test {
         );
 
         GemFactory(gemfactoryProxyAddress).setGemsCooldownPeriods(
-            CommonGemsCooldownPeriod,
             RareGemsCooldownPeriod,
             UniqueGemsCooldownPeriod,
             EpicGemsCooldownPeriod,

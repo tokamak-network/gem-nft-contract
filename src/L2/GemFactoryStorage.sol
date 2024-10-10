@@ -66,14 +66,12 @@ contract GemFactoryStorage {
     uint8 internal LegendaryminingTry;
     uint8 internal MythicminingTry;
 
-    uint32 internal CommonGemsMiningPeriod;
     uint32 internal RareGemsMiningPeriod;
     uint32 internal UniqueGemsMiningPeriod;
     uint32 internal EpicGemsMiningPeriod;
     uint32 internal LegendaryGemsMiningPeriod;
     uint32 internal MythicGemsMiningPeriod;
 
-    uint32 internal CommonGemsCooldownPeriod;
     uint32 internal RareGemsCooldownPeriod;
     uint32 internal UniqueGemsCooldownPeriod;
     uint32 internal EpicGemsCooldownPeriod;
@@ -151,7 +149,6 @@ contract GemFactoryStorage {
 
     //storage modification events
     event GemsCoolDownPeriodModified(
-        uint32 CommonGemsCooldownPeriod,
         uint32 RareGemsCooldownPeriod,
         uint32 UniqueGemsCooldownPeriod,
         uint32 EpicGemsCooldownPeriod,
@@ -159,7 +156,6 @@ contract GemFactoryStorage {
         uint32 MythicGemsCooldownPeriod
     );
     event GemsMiningPeriodModified(
-        uint32 CommonGemsMiningPeriod,
         uint32 RareGemsMiningPeriod,
         uint32 UniqueGemsMiningPeriod,
         uint32 EpicGemsMiningPeriod,

@@ -1,0 +1,211 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "RandomPackStorage",
+  "sourceName": "src/L2/RandomPackStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "FailedToSendEthBack",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RandomPackFeesEqualToZero",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RequestNotMade",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_callbackGasLimit",
+          "type": "uint256"
+        }
+      ],
+      "name": "CallBackGasLimitUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "CommonGemMinted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "CommonGemToBeMinted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "EthSentBack",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "gemFactory",
+          "type": "address"
+        }
+      ],
+      "name": "GemFactoryAddressUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "_tokenURI",
+          "type": "string"
+        }
+      ],
+      "name": "PerfectCommonGemURIUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "requestor",
+          "type": "address"
+        }
+      ],
+      "name": "RandomGemRequested",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "RandomGemToBeTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "RandomGemTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "randomPackFees",
+          "type": "uint256"
+        }
+      ],
+      "name": "RandomPackFeesUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "treasury",
+          "type": "address"
+        }
+      ],
+      "name": "TreasuryAddressUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "s_requests",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "requested",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "fulfilled",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "randomWord",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "chosenTokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "requester",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608080604052346020576003805460ff60a01b1916905560c0908160268239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c63a168fa8914602857600080fd5b346086576020366003190112608657604060a09260043581528060205220805490600181015460ff6002830154926003600180891b0391015416938181161515865260081c1615156020850152604084015260608301526080820152f35b5080fdfea2646970667358221220624e846a76f3d1635b9e6e814829d78588868437f6849a765bf0d78ad67a0a7b64736f6c63430008190033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c63a168fa8914602857600080fd5b346086576020366003190112608657604060a09260043581528060205220805490600181015460ff6002830154926003600180891b0391015416938181161515865260081c1615156020850152604084015260608301526080820152f35b5080fdfea2646970667358221220624e846a76f3d1635b9e6e814829d78588868437f6849a765bf0d78ad67a0a7b64736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -214,8 +214,6 @@ contract L2ProxyTest is WstonSwap {
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getMarketPlaceAddress() != address(0));
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getAirdropAddress() != address(0));
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsValue() != 0);
-        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsMiningPeriod() != 0);
-        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsCooldownPeriod() != 0);
         
         // check that the new counter storage and incrementCounter functions are deployed
         MockGemFactoryUpgraded(gemfactoryProxyAddress).incrementCounter();
@@ -236,13 +234,7 @@ contract L2ProxyTest is WstonSwap {
             owner,
             wston,
             ton,
-            treasuryProxyAddress,
-            CommonGemsValue,
-            RareGemsValue,
-            UniqueGemsValue,
-            EpicGemsValue,
-            LegendaryGemsValue,
-            MythicGemsValue
+            treasuryProxyAddress
         );
         vm.stopPrank();
     }

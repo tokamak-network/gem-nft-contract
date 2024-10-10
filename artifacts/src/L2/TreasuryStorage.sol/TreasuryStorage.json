@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "TreasuryStorage",
+  "sourceName": "src/L2/TreasuryStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "InvalidAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotEnoughWstonAvailableInTreasury",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TonAddressIsNotSet",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnsuffiscientTonBalance",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnsuffiscientWstonBalance",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WstonAddressIsNotSet",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x608080604052346020576006805460ff60a01b19169055603a908160268239f35b600080fdfe600080fdfea264697066735822122016a40ec54d8942ce874aa0755515e7aa7dd6e5eece0eebc73042201ba3abe75664736f6c63430008190033",
+  "deployedBytecode": "0x600080fdfea264697066735822122016a40ec54d8942ce874aa0755515e7aa7dd6e5eece0eebc73042201ba3abe75664736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

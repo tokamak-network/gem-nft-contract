@@ -95,25 +95,13 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @param _wston Address of the WSTON token.
      * @param _ton Address of the TON token.
      * @param _treasury Address of the treasury contract.
-     * @param _CommonGemsValue Value of common gems.
-     * @param _RareGemsValue Value of rare gems.
-     * @param _UniqueGemsValue Value of unique gems.
-     * @param _EpicGemsValue Value of epic gems.
-     * @param _LegendaryGemsValue Value of legendary gems.
-     * @param _MythicGemsValue Value of mythic gems.
      */
     function initialize(
         address _coordinator,
         address _owner,
         address _wston, 
         address _ton,
-        address _treasury,  
-        uint256 _CommonGemsValue,
-        uint256 _RareGemsValue,
-        uint256 _UniqueGemsValue,
-        uint256 _EpicGemsValue,
-        uint256 _LegendaryGemsValue,
-        uint256 _MythicGemsValue
+        address _treasury  
     ) external initializer {
         __ERC721_init("GemSTON", "GEM");
         __DRBConsumerBase_init(_coordinator);
@@ -121,17 +109,10 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         wston = _wston;
         ton = _ton;
         treasury = _treasury;
-        CommonGemsValue = _CommonGemsValue;
-        RareGemsValue = _RareGemsValue;
-        UniqueGemsValue = _UniqueGemsValue;
-        EpicGemsValue = _EpicGemsValue;
-        LegendaryGemsValue = _LegendaryGemsValue;
-        MythicGemsValue = _MythicGemsValue;
     }
 
     /**
      * @notice Sets the mining periods for different gem rarities.
-     * @param _CommonGemsMiningPeriod Mining period for common gems.
      * @param _RareGemsMiningPeriod Mining period for rare gems.
      * @param _UniqueGemsMiningPeriod Mining period for unique gems.
      * @param _EpicGemsMiningPeriod Mining period for epic gems.
@@ -139,14 +120,12 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @param _MythicGemsMiningPeriod Mining period for mythic gems.
      */
     function setGemsMiningPeriods(
-        uint32 _CommonGemsMiningPeriod,
         uint32 _RareGemsMiningPeriod,
         uint32 _UniqueGemsMiningPeriod,
         uint32 _EpicGemsMiningPeriod,
         uint32 _LegendaryGemsMiningPeriod,
         uint32 _MythicGemsMiningPeriod
     ) external onlyOwner {
-        CommonGemsMiningPeriod = _CommonGemsMiningPeriod;
         RareGemsMiningPeriod = _RareGemsMiningPeriod;
         UniqueGemsMiningPeriod = _UniqueGemsMiningPeriod;
         EpicGemsMiningPeriod = _EpicGemsMiningPeriod;
@@ -154,7 +133,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         MythicGemsMiningPeriod = _MythicGemsMiningPeriod;
 
         emit GemsMiningPeriodModified(
-            _CommonGemsMiningPeriod,
             _RareGemsMiningPeriod,
             _UniqueGemsMiningPeriod,
             _EpicGemsMiningPeriod,
@@ -165,7 +143,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
 
     /**
      * @notice Sets the cooldown periods for different gem rarities.
-     * @param _CommonGemsCooldownPeriod Cooldown period for common gems.
      * @param _RareGemsCooldownPeriod Cooldown period for rare gems.
      * @param _UniqueGemsCooldownPeriod Cooldown period for unique gems.
      * @param _EpicGemsCooldownPeriod Cooldown period for epic gems.
@@ -173,22 +150,19 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @param _MythicGemsCooldownPeriod Cooldown period for mythic gems.
      */
     function setGemsCooldownPeriods(
-        uint32 _CommonGemsCooldownPeriod, 
         uint32 _RareGemsCooldownPeriod,
         uint32 _UniqueGemsCooldownPeriod,
         uint32 _EpicGemsCooldownPeriod,
         uint32 _LegendaryGemsCooldownPeriod,
         uint32 _MythicGemsCooldownPeriod
     ) external onlyOwner {
-        CommonGemsCooldownPeriod = _CommonGemsCooldownPeriod;
         RareGemsCooldownPeriod = _RareGemsCooldownPeriod;
         UniqueGemsCooldownPeriod = _UniqueGemsCooldownPeriod;
         EpicGemsCooldownPeriod = _EpicGemsCooldownPeriod;
         LegendaryGemsCooldownPeriod = _LegendaryGemsCooldownPeriod;
         MythicGemsCooldownPeriod = _MythicGemsCooldownPeriod;
         
-        emit GemsCoolDownPeriodModified(
-            _CommonGemsCooldownPeriod, 
+        emit GemsCoolDownPeriodModified( 
             RareGemsCooldownPeriod, 
             UniqueGemsCooldownPeriod, 
             EpicGemsCooldownPeriod, 
@@ -343,10 +317,8 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         );
         emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
 
-
-        // Burn the old tokens{ 
+        // Burn the old tokens 
         burnTokens(msg.sender, _tokenIds);
-        
 
         // Mint the new token
         _safeMint(msg.sender, newGemId);
@@ -517,8 +489,8 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             require(_quadrants[3] == 1 || _quadrants[3] == 2, "Quadrant 3 must be 1 or 2 for COMMON rarity");
             require(sumOfQuadrants < 8, "2222 is RARE not COMMON");
 
-            _gemCooldownPeriod = CommonGemsCooldownPeriod;
-            _miningPeriod = CommonGemsMiningPeriod;
+            _gemCooldownPeriod = 0;
+            _miningPeriod = 0;
             _value = CommonGemsValue;
             _miningTry = 0;
         } else if (_rarity == Rarity.RARE) {
@@ -774,6 +746,10 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             delete userMiningToken[ownerOf(_tokenId)][_tokenId];
             delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
 
+            // we set mining try of the mined gem to 0 => mined gems can't mine other gems
+            Gems[s_requests[requestId].chosenTokenId].miningTry = 0;
+
+            // transferring the Gem to the requestor
             require(ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId), "failed to transfer token");
 
             emit GemMiningClaimed(_tokenId, msg.sender);
@@ -810,7 +786,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         }
     }
     function _getCooldownPeriod(Rarity rarity) internal view returns (uint256) {
-        if (rarity == Rarity.COMMON) return CommonGemsCooldownPeriod;
+        if (rarity == Rarity.COMMON) return 0;
         if (rarity == Rarity.RARE) return RareGemsCooldownPeriod;
         if (rarity == Rarity.UNIQUE) return UniqueGemsCooldownPeriod;
         if (rarity == Rarity.EPIC) return EpicGemsCooldownPeriod;
@@ -994,13 +970,11 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     function getEpicminingTry() external view returns(uint8) { return EpicminingTry;}
     function getLegendaryminingTry() external view returns(uint8) { return LegendaryminingTry;}
     function getMythicminingTry() external view returns(uint8) { return MythicminingTry;}
-    function getCommonGemsMiningPeriod() external view returns(uint32) { return CommonGemsMiningPeriod;}
     function getRareGemsMiningPeriod() external view returns(uint32) { return RareGemsMiningPeriod;}
     function getUniqueGemsMiningPeriod() external view returns(uint32) { return UniqueGemsMiningPeriod;}
     function getEpicGemsMiningPeriod() external view returns(uint32) { return EpicGemsMiningPeriod;}
     function getLegendaryGemsMiningPeriod() external view returns(uint32) { return LegendaryGemsMiningPeriod;}
     function getMythicGemsMiningPeriod() external view returns(uint32) { return MythicGemsMiningPeriod;}
-    function getCommonGemsCooldownPeriod() external view returns(uint32) { return CommonGemsCooldownPeriod;}
     function getRareGemsCooldownPeriod() external view returns(uint32) { return RareGemsCooldownPeriod;}
     function getUniqueGemsCooldownPeriod() external view returns(uint32) { return UniqueGemsCooldownPeriod;}
     function getEpicGemsCooldownPeriod() external view returns(uint32) { return EpicGemsCooldownPeriod;}

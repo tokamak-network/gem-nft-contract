@@ -1,0 +1,92 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "L1WrappedStakedTONFactoryStorage",
+  "sourceName": "src/L1/L1WrappedStakedTONFactoryStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "AlreadyInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotContractOwner",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newImplementation",
+          "type": "address"
+        }
+      ],
+      "name": "L1WrappedStakedTONContractUgraded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "wston",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "layer2Address",
+          "type": "address"
+        }
+      ],
+      "name": "WSTONTokenCreated",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "l1ton",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "l1wton",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "wstonImplementation",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460145760e9908161001a8239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c90816315a327d314608c575080631d03a0091460655763d21bae6614603e57600080fd5b3460625780600319360112606257546040516001600160a01b039091168152602090f35b80fd5b5034606257806003193601126062576002546040516001600160a01b039091168152602090f35b90503460af578160031936011260af576001546001600160a01b03168152602090f35b5080fdfea2646970667358221220673d2bd892664c8905ee393690b988d99b8b5c59dfdf24a613cc49aff9c3692a64736f6c63430008190033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c90816315a327d314608c575080631d03a0091460655763d21bae6614603e57600080fd5b3460625780600319360112606257546040516001600160a01b039091168152602090f35b80fd5b5034606257806003193601126062576002546040516001600160a01b039091168152602090f35b90503460af578160031936011260af576001546001600160a01b03168152602090f35b5080fdfea2646970667358221220673d2bd892664c8905ee393690b988d99b8b5c59dfdf24a613cc49aff9c3692a64736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Layer2RegistryStorage",
+  "sourceName": "src/L1/Mock/Layer2RegistryStorage.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601357603a908160198239f35b600080fdfe600080fdfea2646970667358221220031c04e417e4e53862c57d753510992209927d0a9cd4b61142dae80eb52ad38a64736f6c63430008190033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220031c04e417e4e53862c57d753510992209927d0a9cd4b61142dae80eb52ad38a64736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
