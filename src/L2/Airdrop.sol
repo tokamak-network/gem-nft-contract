@@ -175,10 +175,6 @@ contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
     //------------------------------VIEW FUNCTIONS/STORAGE GETTERS---------------------------
     //---------------------------------------------------------------------------------------
 
-    //---------------------------------------------------------------------------------------
-    //------------------------------VIEW FUNCTIONS/STORAGE GETTERS---------------------------
-    //---------------------------------------------------------------------------------------
-
     /**
      * @notice Returns the list of GEM tokens eligible for airdrop for a given address.
      * @param _address The address to query for eligible tokens.

@@ -23,25 +23,46 @@ interface ITreasury {
     function approveWstonForMarketplace(uint256 amount) external;
 }
 
-
+/**
+ * @title MarketPlace
+ * @dev The MarketPlace contract facilitates the buying and selling of GEM tokens within the ecosystem.
+ * It provides a platform for users to list their GEMs for sale, purchase GEMs using different payment methods,
+ * and manage the sale status of their GEMs. The contract integrates with the GemFactory and Treasury contracts
+ * to ensure transactions and handling of GEM tokens and payments.
+ * - TON: Users can pay with TON tokens, with a fee applied based on the configured fee rate.
+ * - WSTON: Users can also pay with WSTON tokens, which are transferred directly to the seller.
+ **/
 contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthControl {
     using SafeERC20 for IERC20;
 
+    /**
+     * @notice Modifier to ensure the contract is not paused.
+     */
     modifier whenNotPaused() {
-      require(!paused, "Pausable: paused");
-      _;
-    }
-
-
-    modifier whenPaused() {
-        require(paused, "Pausable: not paused");
+        if (paused) revert Paused();
         _;
     }
 
+    /**
+     * @notice Modifier to ensure the contract is paused.
+     */
+    modifier whenPaused() {
+        if (!paused) revert NotPaused();
+        _;
+    }
+
+    /**
+     * @notice Pauses the contract, preventing certain actions.
+     * @dev Can only be called by the owner when the contract is not paused.
+     */
     function pause() public onlyOwner whenNotPaused {
         paused = true;
     }
 
+    /**
+     * @notice Unpauses the contract, allowing actions to be performed.
+     * @dev Can only be called by the owner when the contract is paused.
+     */
     function unpause() public onlyOwner whenNotPaused {
         paused = false;
     }
@@ -61,93 +82,15 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         address _wston,
         address _ton
     ) external {
-        require(!initialized, "already initialized"); 
-        require(_tonFeesRate < 100, "discount rate must be less than 100%");
+        if (initialized) revert AlreadyInitialized();
+        if (_tonFeesRate >= 10000) revert WrongDiscountRate(); // less than 100%
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        tonFeesRate = _tonFeesRate;
+        tonFeesRate = _tonFeesRate; // in bps (1% = 100bps)
         gemFactory = _gemfactory;
         treasury = _treasury;
         wston = _wston;
         ton = _ton;
-        commonGemTokenUri = "";
         initialized = true;
-    }
-
-    /**
-     * @notice Sets the TON fees rate.
-     * @param _tonFeesRate New fee rate for TON transactions.
-     */
-    function setTonFeesRate(uint256 _tonFeesRate) external onlyOwner {
-        tonFeesRate = _tonFeesRate;
-    }
-
-    /**
-     * @notice Sets the common GEM token URI.
-     * @param _tokenURI New token URI for common GEMs.
-     */
-    function setCommonGemTokenUri(string memory _tokenURI) external onlyOwner {
-        commonGemTokenUri = _tokenURI;
-    }
-
-    //---------------------------------------------------------------------------------------
-    //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
-    //---------------------------------------------------------------------------------------
-
-    /**
-     * @notice to buy a GEM listed onto the marketplace
-     * @param _tokenId the ID of the token to be transferred
-     * @param _paymentMethod The paymentMethod used. if true, user purchases using L2 WSTON if false, user purchases using TON
-     */
-    function buyGem(uint256 _tokenId, bool _paymentMethod) external whenNotPaused {
-        require(_buyGem(_tokenId, msg.sender, _paymentMethod));
-    }
-
-    /**
-     * @notice put a GEM for sale
-     * @param _tokenId the ID of the token to be transferred
-     * @param _price price asked for the transaction
-     */
-    function putGemForSale(uint256 _tokenId, uint256 _price) external whenNotPaused {
-        require(IGemFactory(gemFactory).getApproved(_tokenId) == address(this), "the NFT is not approved");
-        require(_putGemForSale(_tokenId, _price), "failed to put gem for sale");
-    }
-
-    /**
-     * @notice put multiple GEMs for sale
-     * @param tokenIds the ID of the token to be transferred
-     * @param prices price asked for the transaction
-     */
-    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused {
-        if(tokenIds.length == 0) {
-            revert NoTokens();
-        }
-        if(tokenIds.length != prices.length) {
-            revert WrongLength();
-        }
-
-        for (uint256 i = 0; i < tokenIds.length; ++i){
-            require(IGemFactory(gemFactory).getApproved(tokenIds[i]) == address(this), "the NFT is not approved");
-            require(_putGemForSale(tokenIds[i], prices[i]), "failed to put gem for sale");
-        }
-    }
-
-    /**
-     * @notice Remove a gem that was put for sale
-     * @param _tokenId the ID of the token to be removed from the list
-     */
-    function removeGemForSale(uint256 _tokenId) external whenNotPaused {
-        if(gemsForSale[_tokenId].isActive != true) {
-            revert GemIsNotForSale();
-        }
-        if(IGemFactory(gemFactory).ownerOf(_tokenId) != msg.sender) {
-            revert NotGemOwner();
-        }
-
-        GemFactory(gemFactory).setIsLocked(_tokenId, false);
-
-        delete gemsForSale[_tokenId];
-        emit GemRemovedFromSale(_tokenId);
-
     }
 
     /**
@@ -171,6 +114,68 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
             revert WrongStakingIndex();
         }
         stakingIndex = _stakingIndex;
+    }
+
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
+    //---------------------------------------------------------------------------------------
+
+    /**
+     * @notice to buy a GEM listed onto the marketplace
+     * @param _tokenId the ID of the token to be transferred
+     * @param _paymentMethod The paymentMethod used. if true, user purchases using L2 WSTON if false, user purchases using TON
+     */
+    function buyGem(uint256 _tokenId, bool _paymentMethod) external whenNotPaused {
+        if (!_buyGem(_tokenId, msg.sender, _paymentMethod)) revert PurchaseFailed();
+    }
+
+    /**
+     * @notice put a GEM for sale
+     * @param _tokenId the ID of the token to be transferred
+     * @param _price price asked for the transaction
+     */
+    function putGemForSale(uint256 _tokenId, uint256 _price) external whenNotPaused {
+        if (IGemFactory(gemFactory).getApproved(_tokenId) != address(this)) revert GemNotApproved();
+        if (!_putGemForSale(_tokenId, _price)) revert ListingGemFailed();
+    }
+
+    /**
+     * @notice put multiple GEMs for sale
+     * @param tokenIds the ID of the token to be transferred
+     * @param prices price asked for the transaction
+     */
+    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused {
+        if(tokenIds.length == 0) {
+            revert NoTokens();
+        }
+        if(tokenIds.length != prices.length) {
+            revert WrongLength();
+        }
+
+        for (uint256 i = 0; i < tokenIds.length; ++i){
+            if (IGemFactory(gemFactory).getApproved(tokenIds[i]) != address(this)) revert GemNotApproved();
+            if (!_putGemForSale(tokenIds[i], prices[i])) revert ListingGemFailed();
+        }
+    }
+
+    /**
+     * @notice Remove a gem that was put for sale
+     * @param _tokenId the ID of the token to be removed from the list
+     */
+    function removeGemForSale(uint256 _tokenId) external whenNotPaused {
+        if(gemsForSale[_tokenId].isActive != true) {
+            revert GemIsNotForSale();
+        }
+        if(IGemFactory(gemFactory).ownerOf(_tokenId) != msg.sender) {
+            revert NotGemOwner();
+        }
+
+        GemFactory(gemFactory).setIsLocked(_tokenId, false);
+
+        delete gemsForSale[_tokenId];
+        emit GemRemovedFromSale(_tokenId);
+
     }
 
     //---------------------------------------------------------------------------------------

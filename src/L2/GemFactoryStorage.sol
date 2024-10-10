@@ -20,9 +20,9 @@ contract GemFactoryStorage {
         Rarity rarity; 
         uint32 miningPeriod; // Mining delay before claiming
         uint8 miningTry; 
+        bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
-        bool isLocked; // Locked if gem is listed on the marketplace
         string tokenURI; // IPFS address of the metadata file 
     }
 
@@ -30,9 +30,9 @@ contract GemFactoryStorage {
         uint256 tokenId;
         uint256 randomWord;
         uint256 chosenTokenId;
+        address requester;
         bool requested; // whether the request has been made
         bool fulfilled; // whether the request has been successfully fulfilled
-        address requester;
     } 
 
     //---------------------------------------------------------------------------------------
@@ -182,6 +182,10 @@ contract GemFactoryStorage {
     //-------------------------------------ERRORS--------------------------------------------
     //---------------------------------------------------------------------------------------
 
+    // gem creation errors
+    error NewGemInvalidQuadrant(uint8 quadrantIndex, uint8 expectedValue1, uint8 expectedValue2);
+    error SumOfQuadrantsTooHigh(uint8 sum, string rarity);
+    
     // Forging errors
     error InvalidQuadrant(uint8 quadrant, uint8 value);
     error InvalidSumOfQuadrants();
@@ -202,6 +206,7 @@ contract GemFactoryStorage {
 
     // Transfer error
     error SameSenderAndRecipient();
+    error TransferFailed();
 
     // Random fullfil error
     error RequestNotMade();

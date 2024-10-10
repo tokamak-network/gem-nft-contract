@@ -19,9 +19,7 @@ contract MarketPlaceStorage {
     address public wston;
     address public ton;
 
-    string public commonGemTokenUri;
-
-    uint256 constant public TON_FEES_RATE_DIVIDER = 100;
+    uint256 constant public TON_FEES_RATE_DIVIDER = 10000;
     uint256 constant public DECIMALS = 10**27;
 
     uint256 public stakingIndex = 10**27;
@@ -47,4 +45,10 @@ contract MarketPlaceStorage {
     error AddressZero();
     error WrongSeller();
     error BuyerIsSeller(string errorMessage);
+    error Paused();
+    error NotPaused();
+    error AlreadyInitialized();
+    error GemNotApproved();
+    error PurchaseFailed();
+    error ListingGemFailed();
 }

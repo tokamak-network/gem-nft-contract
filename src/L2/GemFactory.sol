@@ -3,23 +3,19 @@ pragma solidity 0.8.25;
 
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {GemFactoryStorage} from "./GemFactoryStorage.sol";
+import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
+import { GemLibrary } from "../libraries/GemLibrary.sol";
+import { MiningLibrary } from "../libraries/MiningLibrary.sol";
+import { ForgeLibrary } from "../libraries/ForgeLibrary.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-
 import "../proxy/ProxyStorage.sol";
-
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-
-import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
-import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
-
-import { GemLibrary } from "../libraries/GemLibrary.sol";
-import { MiningLibrary } from "../libraries/MiningLibrary.sol";
-import { ForgeLibrary } from "../libraries/ForgeLibrary.sol";
 
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
@@ -28,8 +24,31 @@ interface ITreasury {
 
 /**
  * @title GemFactory
- * @dev GemFactory handles the creation of GEMs. It allows for admin to premine GEMs for the treasury contract.
- * it also allows for users to mine forge and melt GEMs.
+ * @dev The GemFactory contract is responsible for managing the lifecycle of GEM tokens within the system.
+ * This includes the creation, mining, forging, and melting of GEMs. The contract provides functionalities
+ * for both administrative and user interactions, ensuring a comprehensive management of GEM tokens.
+ *
+ * Administrative Functions
+ * - Premine GEMs: Allows administrators to create and allocate GEMs directly to the treasury contract.
+ *   This is useful for initializing the system with a predefined set of GEMs that can be distributed or sold later.
+ *
+ * User Functions
+ * - Mine GEMs: Users can engage in mining activities to acquire new GEMs. The mining process is governed
+ *   by specific rules and cooldown periods, ensuring a fair and balanced distribution of GEMs.
+ * - Forge GEMs: Users have the ability to combine multiple GEMs of the same rarity to create a new, potentially
+ *   more valuable GEM. This process involves burning the original GEMs and minting a new one.
+ * - Melt GEMs: Users can convert their GEMs back into their underlying value, effectively "melting" the GEM.
+ *   This process involves burning the GEM token and transferring its value to the user.
+ *
+ * Security and Access Control
+ * - The contract implements access control mechanisms to ensure that only authorized users can perform certain actions.
+ *   For example, only the contract owner or designated administrators can premine GEMs.
+ * - The contract also includes mechanisms to pause and unpause operations, providing an additional layer of security
+ *   in case of emergencies or required maintenance.
+ *
+ * Integration
+ * - The GemFactory contract integrates with other components of the system, such as the treasury and marketplace contracts,
+ *   to facilitate seamless interactions and transactions involving GEMs.
  */
 contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable, GemFactoryStorage, OwnableUpgradeable, DRBConsumerBase, ReentrancyGuard {
 
@@ -38,17 +57,25 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     using MiningLibrary for GemFactoryStorage.Gem[];
     using ForgeLibrary for GemFactoryStorage.Gem[];
 
+    /**
+     * @notice Modifier to ensure the contract is not paused.
+     */
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
       _;
     }
 
-
+    /**
+     * @notice Modifier to ensure the contract is paused.
+     */
     modifier whenPaused() {
         require(paused, "Pausable: not paused");
         _;
     }
 
+    /**
+     * @notice Modifier to ensure the caller is the treasury contract
+     */
     modifier onlyTreasury() {
         require(
             msg.sender == treasury,
@@ -57,6 +84,9 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         _;
     }
 
+    /**
+     * @notice Modifier to ensure the caller is either the airdrop or the marketplace contract
+     */
     modifier onlyMarketPlaceOrAirdrop() {
         require(
             msg.sender == airdrop ||
@@ -435,33 +465,39 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     /**
      * @notice Melts a gem, converting it back to its value.
      * @param _tokenId ID of the token to melt.
-     * @dev the caller get the WSTON amount inherited by the GEM. 
-     * @dev the ERC721 Token is burnt 
-     * @dev caller must be the token owner
+     * @dev The caller receives the WSTON amount associated with the GEM.
+     * @dev The ERC721 token is burned.
+     * @dev The caller must be the token owner.
      */
     function meltGEM(uint256 _tokenId) external whenNotPaused {
-        if(msg.sender == address(0)) {
+        // Check if the caller's address is zero
+        if (msg.sender == address(0)) {
             revert AddressZero();
         }
-        if(GEMIndexToOwner[_tokenId] != msg.sender) {
+        // Ensure the caller is the owner of the GEM
+        if (GEMIndexToOwner[_tokenId] != msg.sender) {
             revert NotGemOwner();
         }
+        // Get the value of the GEM
         uint256 amount = Gems[_tokenId].value;
+        // Burn the GEM and update ownership counts
         Gems.burnGem(GEMIndexToOwner, ownershipTokenCount, msg.sender, _tokenId);
-        // ERC721 burn function
+        // Burn the ERC721 token
         _burn(_tokenId);
-        
-        require(ITreasury(treasury).transferWSTON(msg.sender, amount), "transfer failed");
-
+        // Transfer the WSTON amount to the caller
+        if (!ITreasury(treasury).transferWSTON(msg.sender, amount)) {
+            revert TransferFailed();
+        }
+        // Emit an event indicating the GEM has been melted
         emit GemMelted(_tokenId, msg.sender);
     }
 
     /**
-     * @notice Creates a premined pool of GEM based oon their attribute passed in the parameters and assigns their ownership to the contract.
+     * @notice Creates a premined pool of GEM based on their attributes passed in the parameters and assigns their ownership to the contract.
      * @param _rarity The rarity of the GEM to be created.
      * @param _color The colors of the GEM to be created.
-     * @param _quadrants quadrants of the GEM to be created.
-     * @param _tokenURI TokenURIs of each GEM
+     * @param _quadrants Quadrants of the GEM to be created.
+     * @param _tokenURI TokenURIs of each GEM.
      * @return The IDs of the newly created GEM.
      */
     function createGEM(
@@ -483,74 +519,70 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
 
         if (_rarity == Rarity.COMMON) {
-            require(_quadrants[0] == 1 || _quadrants[0] == 2, "Quadrant 0 must be 1 or 2 for COMMON rarity");
-            require(_quadrants[1] == 1 || _quadrants[1] == 2, "Quadrant 1 must be 1 or 2 for COMMON rarity");
-            require(_quadrants[2] == 1 || _quadrants[2] == 2, "Quadrant 2 must be 1 or 2 for COMMON rarity");
-            require(_quadrants[3] == 1 || _quadrants[3] == 2, "Quadrant 3 must be 1 or 2 for COMMON rarity");
-            require(sumOfQuadrants < 8, "2222 is RARE not COMMON");
+            if (_quadrants[0] != 1 && _quadrants[0] != 2) revert NewGemInvalidQuadrant(0, 1, 2);
+            if (_quadrants[1] != 1 && _quadrants[1] != 2) revert NewGemInvalidQuadrant(1, 1, 2);
+            if (_quadrants[2] != 1 && _quadrants[2] != 2) revert NewGemInvalidQuadrant(2, 1, 2);
+            if (_quadrants[3] != 1 && _quadrants[3] != 2) revert NewGemInvalidQuadrant(3, 1, 2);
+            if (sumOfQuadrants >= 8) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "COMMON");
 
             _gemCooldownPeriod = 0;
             _miningPeriod = 0;
             _value = CommonGemsValue;
             _miningTry = 0;
         } else if (_rarity == Rarity.RARE) {
-            require(_quadrants[0] == 2 || _quadrants[0] == 3, "Quadrant 0 must be 2 or 3 for RARE rarity");
-            require(_quadrants[1] == 2 || _quadrants[1] == 3, "Quadrant 1 must be 2 or 3 for RARE rarity");
-            require(_quadrants[2] == 2 || _quadrants[2] == 3, "Quadrant 2 must be 2 or 3 for RARE rarity");
-            require(_quadrants[3] == 2 || _quadrants[3] == 3, "Quadrant 3 must be 2 or 3 for RARE rarity");
-            require(sumOfQuadrants < 12, "3333 is UNIQUE not RARE");
+            if (_quadrants[0] != 2 && _quadrants[0] != 3) revert NewGemInvalidQuadrant(0, 2, 3);
+            if (_quadrants[1] != 2 && _quadrants[1] != 3) revert NewGemInvalidQuadrant(1, 2, 3);
+            if (_quadrants[2] != 2 && _quadrants[2] != 3) revert NewGemInvalidQuadrant(2, 2, 3);
+            if (_quadrants[3] != 2 && _quadrants[3] != 3) revert NewGemInvalidQuadrant(3, 2, 3);
+            if (sumOfQuadrants >= 12) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "RARE");
             
             _gemCooldownPeriod = RareGemsCooldownPeriod;
             _miningPeriod = RareGemsMiningPeriod;
             _value = RareGemsValue;
             _miningTry = RareminingTry;
         } else if (_rarity == Rarity.UNIQUE) {
-            require(_quadrants[0] == 3 || _quadrants[0] == 4, "Quadrant 0 must be 3 or 4 for UNIQUE rarity");
-            require(_quadrants[1] == 3 || _quadrants[1] == 4, "Quadrant 1 must be 3 or 4 for UNIQUE rarity");
-            require(_quadrants[2] == 3 || _quadrants[2] == 4, "Quadrant 2 must be 3 or 4 for UNIQUE rarity");
-            require(_quadrants[3] == 3 || _quadrants[3] == 4, "Quadrant 3 must be 3 or 4 for UNIQUE rarity");
-            require(sumOfQuadrants < 16, "4444 is EPIC not UNIQUE");
+            if (_quadrants[0] != 3 && _quadrants[0] != 4) revert NewGemInvalidQuadrant(0, 3, 4);
+            if (_quadrants[1] != 3 && _quadrants[1] != 4) revert NewGemInvalidQuadrant(1, 3, 4);
+            if (_quadrants[2] != 3 && _quadrants[2] != 4) revert NewGemInvalidQuadrant(2, 3, 4);
+            if (_quadrants[3] != 3 && _quadrants[3] != 4) revert NewGemInvalidQuadrant(3, 3, 4);
+            if (sumOfQuadrants >= 16) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "UNIQUE");
 
             _gemCooldownPeriod = UniqueGemsCooldownPeriod;
             _miningPeriod = UniqueGemsMiningPeriod;
             _value = UniqueGemsValue;
             _miningTry = UniqueminingTry;
         } else if (_rarity == Rarity.EPIC) {
-            require(_quadrants[0] == 4 || _quadrants[0] == 5, "Quadrant 0 must be 4 or 5 for EPIC rarity");
-            require(_quadrants[1] == 4 || _quadrants[1] == 5, "Quadrant 1 must be 4 or 5 for EPIC rarity");
-            require(_quadrants[2] == 4 || _quadrants[2] == 5, "Quadrant 2 must be 4 or 5 for EPIC rarity");
-            require(_quadrants[3] == 4 || _quadrants[3] == 5, "Quadrant 3 must be 4 or 5 for EPIC rarity");
-            require(sumOfQuadrants < 20, "5555 is LEGENDARY not EPIC");
+            if (_quadrants[0] != 4 && _quadrants[0] != 5) revert NewGemInvalidQuadrant(0, 4, 5);
+            if (_quadrants[1] != 4 && _quadrants[1] != 5) revert NewGemInvalidQuadrant(1, 4, 5);
+            if (_quadrants[2] != 4 && _quadrants[2] != 5) revert NewGemInvalidQuadrant(2, 4, 5);
+            if (_quadrants[3] != 4 && _quadrants[3] != 5) revert NewGemInvalidQuadrant(3, 4, 5);
+            if (sumOfQuadrants >= 20) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "EPIC");
             
             _gemCooldownPeriod = EpicGemsCooldownPeriod;
             _miningPeriod = EpicGemsMiningPeriod;
             _value = EpicGemsValue;
             _miningTry = EpicminingTry;
         } else if (_rarity == Rarity.LEGENDARY) {
-            require(_quadrants[0] == 5 || _quadrants[0] == 6, "Quadrant 0 must be 5 or 6 for LEGENDARY rarity");
-            require(_quadrants[1] == 5 || _quadrants[1] == 6, "Quadrant 1 must be 5 or 6 for LEGENDARY rarity");
-            require(_quadrants[2] == 5 || _quadrants[2] == 6, "Quadrant 2 must be 5 or 6 for LEGENDARY rarity");
-            require(_quadrants[3] == 5 || _quadrants[3] == 6, "Quadrant 3 must be 5 or 6 for LEGENDARY rarity");
-            require(sumOfQuadrants < 24, "6666 is MYTHIC not LEGENDARY");
+            if (_quadrants[0] != 5 && _quadrants[0] != 6) revert NewGemInvalidQuadrant(0, 5, 6);
+            if (_quadrants[1] != 5 && _quadrants[1] != 6) revert NewGemInvalidQuadrant(1, 5, 6);
+            if (_quadrants[2] != 5 && _quadrants[2] != 6) revert NewGemInvalidQuadrant(2, 5, 6);
+            if (_quadrants[3] != 5 && _quadrants[3] != 6) revert NewGemInvalidQuadrant(3, 5, 6);
+            if (sumOfQuadrants >= 24) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "LEGENDARY");
 
             _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
             _miningPeriod = LegendaryGemsMiningPeriod;
             _value = LegendaryGemsValue;
             _miningTry = LegendaryminingTry;
         } else if (_rarity == Rarity.MYTHIC) {
-            require(
-                (_quadrants[0] == 6) &&
-                (_quadrants[1] == 6) &&
-                (_quadrants[2] == 6) &&
-                (_quadrants[3] == 6),
-                "All quadrants must be 6 for MYTHIC rarity"
-            );
+            if (_quadrants[0] != 6 || _quadrants[1] != 6 || _quadrants[2] != 6 || _quadrants[3] != 6) {
+                revert NewGemInvalidQuadrant(0, 6, 6);
+            }
             _gemCooldownPeriod = MythicGemsCooldownPeriod;
             _miningPeriod = MythicGemsMiningPeriod;
             _value = MythicGemsValue;
             _miningTry = MythicminingTry;
         } else {
-            revert("wrong Rarity");
+            revert WrongRarity();
         }
 
         uint256 _cooldownDueDate = block.timestamp + _gemCooldownPeriod;
@@ -576,6 +608,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         return newGemId;
     }
 
+
     /**
      * @notice Creates a premined pool of GEMs based oon their attribute passed in the parameters and assigns their ownership to the contract.
      * @param _rarities rarity of each Gem
@@ -591,17 +624,24 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         string[] memory _tokenURIs
     ) public onlyTreasury whenNotPaused returns (uint256[] memory) {
 
-        uint256 length = _rarities.length;  // Cache the length for gas optimization
+        // Cache the length of the _rarities array for gas optimization
+        uint256 length = _rarities.length;
+
+        // Ensure all input arrays have the same length
         if (length != _colors.length || length != _quadrants.length || length != _tokenURIs.length) {
             revert MismatchedArrayLengths();
         }
 
+        // Initialize an array to store the IDs of the newly created GEMs
         uint256[] memory newGemIds = new uint256[](_rarities.length);
 
+        // Loop through each set of attributes and create a GEM
         for (uint256 i = 0; i < _rarities.length; ++i) {
+            // Create a GEM with the specified attributes and store its ID
             newGemIds[i] = createGEM(_rarities[i], _colors[i], _quadrants[i], _tokenURIs[i]);
         }
-
+        
+        // Return the array of new GEM IDs
         return newGemIds;
     }
     
@@ -614,16 +654,23 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @param tokenId The ID of the token to transfer.
      */
     function transferFrom(address from, address to, uint256 tokenId) public override(ERC721Upgradeable, IERC721) whenNotPaused {
+        // Check if the sender and recipient addresses are the same
         if(to == from) {
-            revert SameSenderAndRecipient();
-        }
-        if(Gems[tokenId].isLocked) {
-            revert GemIsLocked();
+            revert SameSenderAndRecipient(); // Revert if they are the same
         }
 
+        // Check if the GEM is locked
+        if(Gems[tokenId].isLocked) {
+            revert GemIsLocked(); // Revert if the GEM is locked
+        }
+
+        // Perform the GEM transfer logic
         _transferGEM(from, to, tokenId);
+
+        // Call the parent contract's transferFrom function to handle the ERC721 transfer
         super.transferFrom(from, to, tokenId);
 
+        // Emit an event to log the transfer of the GEM
         emit TransferGEM(from, to, tokenId);
     }
 
@@ -637,18 +684,26 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
      * @param data Additional data with no specified format, sent in call to `to`.
      */
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public override(ERC721Upgradeable, IERC721) whenNotPaused {
+        // Check if the sender and recipient addresses are the same
         if(to == from) {
-            revert SameSenderAndRecipient();
+            revert SameSenderAndRecipient(); // Revert if they are the same
         }
+        
+        // Check if the GEM is locked
         if(Gems[tokenId].isLocked) {
-            revert GemIsLocked();
+            revert GemIsLocked(); // Revert if the GEM is locked
         }
 
+        // Perform the GEM transfer logic
         _transferGEM(from, to, tokenId);
+
+        // Call the parent contract's transferFrom function to handle the ERC721 transfer
         super.transferFrom(from, to, tokenId);
 
         // Check if the recipient is a contract and if it can handle ERC721 tokens
         _checkOnERC721(from, to, tokenId, data);
+
+        // Emit an event to log the transfer of the GEM
         emit TransferGEM(from, to, tokenId);
     }
 
@@ -707,34 +762,64 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         }
     }
 
-    // View function to check if a color exists
+    /**
+     * @notice Checks if a color exists based on the given indices.
+     * @param _index1 The first index of the color.
+     * @param _index2 The second index of the color.
+     * @return True if the color exists, false otherwise.
+     */
     function colorExists(uint8 _index1, uint8 _index2) internal view returns (bool) {
         // Check if the color name is not an empty string
         return bytes(colorName[_index1][_index2]).length > 0;
     }
 
+    /**
+     * @notice Transfers a GEM from one address to another.
+     * @dev Updates the GEM's cooldown period and adjusts ownership counts.
+     * @param _from The address to transfer the GEM from.
+     * @param _to The address to transfer the GEM to.
+     * @param _tokenId The ID of the GEM to transfer.
+     */
     function _transferGEM(address _from, address _to, uint256 _tokenId) private {
+        // Update the GEM's cooldown period based on its rarity
         Gems[_tokenId].gemCooldownPeriod = block.timestamp + _getCooldownPeriod(Gems[_tokenId].rarity);
+        // Increment the ownership count for the recipient
         ownershipTokenCount[_to]++;
+        // Update the owner of the GEM
         GEMIndexToOwner[_tokenId] = _to;
+        // Decrement the ownership count for the sender
         ownershipTokenCount[_from]--;
     }
 
-    // Implement the abstract function from DRBConsumerBase
+    /**
+     * @notice Fulfills a random number request and processes GEM mining.
+     * @dev Implements the abstract function from DRBConsumerBase.
+     * @dev Counts the total of eligible gems for mining
+     * @dev Performs randomNumber % gemCount to get a number between 1 and gemCount
+     * @dev Unlocks the initial Gem, reset the cooldown period and the randomRequestId
+     * @dev Transfers the picked Gem from the treasury to the user
+     * @param requestId The ID of the request.
+     * @param randomNumber The random number generated.
+     */
     function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
+        // Check if the request was made
         if(!s_requests[requestId].requested) {
             revert RequestNotMade();
         }
+        // Mark the request as fulfilled and store the random number
         s_requests[requestId].fulfilled = true;
         s_requests[requestId].randomWord = randomNumber;
         uint256 _tokenId = s_requests[requestId].tokenId;
 
+        // Retrieve the quadrants of the GEM
         uint8[4] memory quadrants = Gems[s_requests[requestId].tokenId].quadrants;
         
+        // Count the number of GEMs by quadrant and emit an event
         (uint256 gemCount, uint256[] memory tokenIds) = countGemsByQuadrant(quadrants[0], quadrants[1], quadrants[2], quadrants[3]);
         emit CountGemsByQuadrant(gemCount, tokenIds);
 
         if(gemCount > 0) {
+            // Select a GEM based on the random number
             uint256 modNbGemsAvailable = (randomNumber % gemCount);
             s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
 
@@ -743,37 +828,59 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             Gems[_tokenId].randomRequestId = 0;
             Gems[_tokenId].gemCooldownPeriod = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
 
+            // Delete user mining data
             delete userMiningToken[ownerOf(_tokenId)][_tokenId];
             delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
 
             // we set mining try of the mined gem to 0 => mined gems can't mine other gems
             Gems[s_requests[requestId].chosenTokenId].miningTry = 0;
 
-            // transferring the Gem to the requestor
+            // Transfer the GEM to the requester
             require(ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId), "failed to transfer token");
 
+            // Emit an event for the GEM mining claim
             emit GemMiningClaimed(_tokenId, msg.sender);
         } else {
+            // No GEM available, set chosenTokenId to 0 and emit an event
             s_requests[requestId].chosenTokenId = 0;
             emit NoGemAvailable(_tokenId);
         }
     }
 
+    /**
+     * @notice Sets the token URI for a GEM.
+     * @dev Overrides the internal function to ensure only the owner can set the URI.
+     * @param tokenId The ID of the GEM.
+     * @param _tokenURI The URI to set for the GEM.
+     */
     function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal override {
+        // Ensure the sender is the owner of the GEM
         if(msg.sender != ownerOf(tokenId)) {
             revert NotGemOwner();
         }
+        // Call the parent function to set the token URI
         super._setTokenURI(tokenId, _tokenURI);
     }
 
 
+    /**
+     * @notice Checks if the recipient address can handle ERC721 tokens.
+     * @dev Calls the onERC721Received function on the recipient if it is a contract.
+     * @param from The address sending the token.
+     * @param to The address receiving the token.
+     * @param tokenId The ID of the token being transferred.
+     * @param data Additional data with no specified format.
+     */
     function _checkOnERC721(address from, address to, uint256 tokenId, bytes memory data) private {
+        // Check if the recipient is a contract
         if (to.code.length > 0) {
             try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
+                // Ensure the recipient contract returns the correct value
                 if (retval != IERC721Receiver.onERC721Received.selector) {
                     revert ERC721InvalidReceiver(to);
                 }
             } catch (bytes memory reason) {
+                // Handle the case where the recipient contract does not implement the interface correctly
                 if (reason.length == 0) {
                     revert ERC721InvalidReceiver(to);
                 } else {
@@ -785,13 +892,21 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
             }
         }
     }
+
+    /**
+     * @notice Gets the cooldown period for a GEM based on its rarity.
+     * @param rarity The rarity of the GEM.
+     * @return The cooldown period in seconds.
+     */
     function _getCooldownPeriod(Rarity rarity) internal view returns (uint256) {
+        // Return the cooldown period based on the rarity
         if (rarity == Rarity.COMMON) return 0;
         if (rarity == Rarity.RARE) return RareGemsCooldownPeriod;
         if (rarity == Rarity.UNIQUE) return UniqueGemsCooldownPeriod;
         if (rarity == Rarity.EPIC) return EpicGemsCooldownPeriod;
         if (rarity == Rarity.LEGENDARY) return LegendaryGemsCooldownPeriod;
         if (rarity == Rarity.MYTHIC) return MythicGemsCooldownPeriod;
+        // Revert if the rarity is invalid
         revert("Invalid rarity");
     }
 
@@ -799,34 +914,70 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     //-----------------------------VIEW FUNCTIONS--------------------------------------------
     //---------------------------------------------------------------------------------------
 
+    /**
+     * @notice Retrieves the list of GEM IDs that are pre-mined and available in the treasury.
+     * @return GemsAvailable An array of GEM IDs owned by the treasury.
+     */
     function preMintedGemsAvailable() external view returns (uint256[] memory GemsAvailable) {
+        // Return the list of GEM IDs owned by the treasury
         return tokensOfOwner(treasury);
     }
 
-
+    /**
+     * @notice Gets the number of GEM tokens owned by a specific address.
+     * @param _owner The address to query the balance for.
+     * @return count The number of GEM tokens owned by the specified address.
+     */
     function balanceOf(address _owner) public view override(ERC721Upgradeable, IERC721) returns (uint256 count) {
+         // Return the count of tokens owned by the address
         return ownershipTokenCount[_owner];
     }
 
+    /**
+     * @notice Retrieves the URI associated with a specific GEM token.
+     * @param tokenId The ID of the GEM token to query.
+     * @return The URI string associated with the specified token ID.
+     */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        // Ensure the token exists before querying its URI
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+        // Return the token URI from the parent contract
         return super.tokenURI(tokenId);
     }
 
+    /**
+     * @notice Checks if a GEM token exists.
+     * @param tokenId The ID of the GEM token to check.
+     * @return True if the token exists, false otherwise.
+     */
     function _exists(uint256 tokenId) internal view returns (bool) {
+        // Check if the token ID is associated with an owner
         return GEMIndexToOwner[tokenId] != address(0);
     }
 
+    /**
+     * @notice Retrieves the details of a specific GEM by its token ID.
+     * @param tokenId The ID of the GEM to retrieve.
+     * @return The Gem struct containing details of the specified GEM.
+     */
     function getGem(uint256 tokenId) public view returns (Gem memory) {
+        // Iterate through the list of Gems to find the one with the specified token ID
         for (uint256 i = 0; i < Gems.length; ++i) {
             if (Gems[i].tokenId == tokenId) {
                 return Gems[i];
             }
         }
+        // Revert if the GEM with the specified token ID does not exist
         revert("Gem with the specified tokenId does not exist");
     }
 
+    /**
+     * @notice Retrieves the value of a GEM based on its rarity.
+     * @param _rarity The rarity of the GEM.
+     * @return value The value associated with the specified rarity.
+     */
     function getValueBasedOnRarity(Rarity _rarity) public view returns(uint256 value) {
+        // Determine the value based on the rarity of the GEM
         if(_rarity == Rarity.COMMON) {
             value = CommonGemsValue;
         } else if(_rarity == Rarity.RARE) {
@@ -840,29 +991,57 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         } else if(_rarity == Rarity.MYTHIC) {
             value = MythicGemsValue;
         } else {
+            // Revert if the rarity is not recognized
             revert("wrong rarity");
         }
     }
 
+    /**
+     * @notice Checks if a specific GEM token is locked.
+     * @param _tokenId The ID of the GEM token to check.
+     * @return True if the token is locked, false otherwise.
+     */
     function isTokenLocked(uint256 _tokenId) public view returns(bool) {
+        // Return the lock status of the GEM
         return Gems[_tokenId].isLocked;
     }
 
+    /**
+     * @notice Retrieves the status of a random request by its ID.
+     * @param _requestId The ID of the request to retrieve.
+     * @return The RequestStatus struct containing details of the request.
+     */
     function getRandomRequest(uint256 _requestId) external view returns(RequestStatus memory) {
+        // Return the request status for the specified request ID
         return s_requests[_requestId];
     }
 
+    /**
+     * @notice Retrieves the name of a color based on its indices.
+     * @param _index1 The first index of the color.
+     * @param _index2 The second index of the color.
+     * @return The name of the color as a string.
+     */
     function getColorName(uint8 _index1, uint8 _index2) public view returns (string memory) {
+        // Return the color name associated with the specified indices
         return colorName[_index1][_index2];
     }
 
-    // Function to count the number of Gems from treasury where quadrants < given quadrant and return their tokenIds
+    /**
+     * @notice Counts the number of Gems from the treasury with quadrants less than the specified values.
+     * @param quadrant1 The first quadrant value to compare.
+     * @param quadrant2 The second quadrant value to compare.
+     * @param quadrant3 The third quadrant value to compare.
+     * @param quadrant4 The fourth quadrant value to compare.
+     * @return The count of Gems and an array of their token IDs.
+     */
     function countGemsByQuadrant(uint8 quadrant1, uint8 quadrant2, uint8 quadrant3, uint8 quadrant4) internal view returns (uint256, uint256[] memory) {
         uint256 count = 0;
         uint256[] memory tokenIds = new uint256[](Gems.length);
         uint256 index = 0;
         uint8 sumOfQuadrants = quadrant1 + quadrant2 + quadrant3+ quadrant4;
 
+        // Iterate through the Gems to count those with quadrants less than the specified sum
         for (uint256 i = 0; i < Gems.length; ++i) {
             uint8 GemSumOfQuadrants = Gems[i].quadrants[0] + Gems[i].quadrants[1] + Gems[i].quadrants[2] + Gems[i].quadrants[3];
             if (GemSumOfQuadrants < sumOfQuadrants && 
@@ -885,11 +1064,16 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         return (count, result);
     }
 
+    /**
+     * @notice Retrieves a list of GEM IDs available for random pack selection.
+     * @return The count of available Gems and an array of their token IDs.
+     */
     function getGemListAvailableForRandomPack() external view returns (uint256, uint256[] memory) {
         uint256 count = 0;
         uint256[] memory tokenIds = new uint256[](Gems.length);
         uint256 index = 0;
         
+        // Iterate through the Gems to find those available for random pack selection
         for (uint256 i = 0; i < Gems.length; ++i) {
             if (GEMIndexToOwner[i] == treasury &&
                 !Gems[i].isLocked
@@ -911,22 +1095,23 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         return (count, result);
     }
 
-    /// @notice Returns a list of all GEM IDs assigned to an address.
-    /// @param _owner The owner of GEMs.
-
+    /**
+     * @notice Returns a list of all GEM IDs assigned to a specific owner.
+     * @param _owner The address of the GEM owner.
+     * @return ownerTokens An array of GEM IDs owned by the specified address.
+     */
     function tokensOfOwner(address _owner) public view returns (uint256[] memory ownerTokens) {
         uint256 tokenCount = balanceOf(_owner);
 
         if (tokenCount == 0) {
-            // Return an empty array
+            // Return an empty array if the owner has no tokens
             return new uint256[](0);
         } else {
             uint256[] memory result = new uint256[](tokenCount);
             uint256 totalGems = totalSupply();
             uint256 resultIndex = 0;
 
-            // We count on the fact that all gems have IDs starting at 1 and increasing
-            // sequentially up to the totalCat count.
+            // Iterate through all GEM IDs to find those owned by the specified address
             uint256 gemId;
 
             for (gemId = 1; gemId <= totalGems; ++gemId) {
@@ -940,11 +1125,21 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         }
     }
 
+    /**
+     * @notice Retrieves the total supply of GEM tokens.
+     * @return The total number of GEM tokens in existence.
+     */
     function totalSupply() public view returns (uint256) {
+        // Return the total number of Gems, excluding the zero index
         return Gems.length - 1;
     }
 
+    /**
+     * @notice Calculates the total value of all GEMs in supply.
+     * @return totalValue The cumulative value of all GEMs.
+     */
     function getGemsSupplyTotalValue() external view returns(uint256 totalValue) {
+        // Sum the values of all Gems to get the total supply value
         for (uint256 i = 0; i < Gems.length; ++i) {
             totalValue += Gems[i].value;
         }

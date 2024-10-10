@@ -27,6 +27,8 @@ interface ITreasury {
 contract MockMarketPlaceUpgraded is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthControl {
     using SafeERC20 for IERC20;
 
+    string public commonGemTokenUri;
+
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
       _;
