@@ -14,9 +14,9 @@ contract GemFactoryStorage {
 
     struct Gem {
         uint256 tokenId;  
+        uint256 value; // 27 decimals
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
-        uint256 value; // 27 decimals
         Rarity rarity; 
         uint32 miningPeriod; // Mining delay before claiming
         uint8 miningTry; 

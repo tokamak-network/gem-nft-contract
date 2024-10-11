@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-foundry");
+require('hardhat-contract-sizer');
 require('dotenv').config();
 
 module.exports = {

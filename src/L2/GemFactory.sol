@@ -2,7 +2,6 @@
 pragma solidity 0.8.25;
 
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {GemFactoryStorage} from "./GemFactoryStorage.sol";
@@ -53,7 +52,6 @@ interface ITreasury {
  */
 contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable, GemFactoryStorage, OwnableUpgradeable, DRBConsumerBase, ReentrancyGuard {
 
-    using SafeERC20 for IERC20;
     using GemLibrary for GemFactoryStorage.Gem[];
     using MiningLibrary for GemFactoryStorage.Gem[];
     using ForgeLibrary for GemFactoryStorage.Gem[];

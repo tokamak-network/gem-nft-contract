@@ -27,5 +27,6 @@ contract WstonSwapPoolStorageV2 {
     error WstonBalanceTooLow();
     error ContractTonBalanceOrAllowanceTooLow();
     error WrongStakingIndex();
+    error FailedToApproveTon(uint256 amount);
 
 }

@@ -24,6 +24,7 @@
     "chai": "^4.5.0",
     "dotenv": "^16.4.5",
     "hardhat": "^2.22.9",
+    "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.10",
     "solidity-coverage": "^0.8.13",
     "ts-node": "^10.9.2",

@@ -8,6 +8,10 @@ import "../proxy/ProxyStorage.sol";
 
 import { WstonSwapPoolStorageV2 } from "./WstonSwapPoolStorageV2.sol";
 
+interface ITreasury {
+    function tonApproveWstonSwapPool(uint256 _amount) external returns(bool);
+}
+
 /**
  * @title WstonSwapPoolV2 Contract for Token Swapping
  * @author TOKAMAK OPAL TEAM
@@ -96,18 +100,26 @@ contract WstonSwapPoolV2 is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwa
      * @param wstonAmount The amount of WSTON tokens to swap.
      */
     function swap(uint256 wstonAmount) external nonReentrant {
+        // Checks if the caller approved the Swapper to spend WSTON
         if(IERC20(wston).allowance(msg.sender, address(this)) < wstonAmount) {
             revert WstonAllowanceTooLow();
         }
+
+        // Checks if the caller has enough WSTON
         if(IERC20(wston).balanceOf(msg.sender) < wstonAmount) {
             revert WstonBalanceTooLow();
         }
         
-        // calculate the 
+        // calculate the ton Amount based on the staking index
         uint256 tonAmount = ((wstonAmount * stakingIndex) / DECIMALS) / (10**9);
-        
+
+        // make the treasury approve the swapper to spend TON
+        if(!ITreasury(treasury).tonApproveWstonSwapPool(tonAmount)) {
+            revert FailedToApproveTon(tonAmount);
+        }
+
         // Checks if treasury holds enough TON
-        if(IERC20(ton).balanceOf(treasury) < tonAmount || IERC20(ton).allowance(treasury, address(this)) < tonAmount) {
+        if(IERC20(ton).balanceOf(treasury) < tonAmount) {
             revert ContractTonBalanceOrAllowanceTooLow();
         }
 

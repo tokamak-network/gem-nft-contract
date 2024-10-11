@@ -31,7 +31,7 @@ contract L2ProxyTest is WstonSwap {
         //we add liquidity and perform swap operations to ensure wstonFeesBalance != 0
         vm.startPrank(owner);
         uint256 tonAmount = 100*10**18;
-        Treasury(treasuryProxyAddress).tonApproveWstonSwapPool();
+        Treasury(treasuryProxyAddress).tonApproveWstonSwapPool(tonAmount);
         Treasury(treasuryProxyAddress).swapTONforWSTON(tonAmount);
 
         // we upgrade the swapper

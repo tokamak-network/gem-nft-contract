@@ -48,7 +48,13 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     }
 
     modifier onlyMarketPlace() {
-        require(msg.sender == _marketplace, "caller is  not the marketplace contract");
+        require(msg.sender == _marketplace, "caller is not the marketplace contract");
+        _;
+    }
+
+    modifier onlyWstonSwapPoolOrOwner() {
+        require(msg.sender == wstonSwapPool ||
+        isOwner(), "caller is not the Swapper");
         _;
     }
 
@@ -147,9 +153,10 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     /**
      * @notice Approves the WSTON swap pool to spend TON tokens.
      */
-    function tonApproveWstonSwapPool() external onlyOwnerOrAdmin {
+    function tonApproveWstonSwapPool(uint256 _amount) external onlyWstonSwapPoolOrOwner returns(bool) {
         _checkNonAddress(ton);
-        IERC20(ton).approve(wstonSwapPool, type(uint256).max);
+        IERC20(ton).approve(wstonSwapPool, _amount);
+        return true;
     }
 
     /**

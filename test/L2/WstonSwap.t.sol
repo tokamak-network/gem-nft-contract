@@ -221,7 +221,7 @@ contract WstonSwap is L2BaseTest {
         vm.startPrank(owner);
         uint256 treasurywstonBalanceBefore = IERC20(wston).balanceOf(treasuryProxyAddress);
         uint256 tonAmount = 50*10**18;
-        Treasury(treasuryProxyAddress).tonApproveWstonSwapPool();
+        Treasury(treasuryProxyAddress).tonApproveWstonSwapPool(tonAmount);
 
         Treasury(treasuryProxyAddress).swapTONforWSTON(tonAmount);
         WstonSwapPool(wstonSwapPoolProxyAddress).distributeFees();

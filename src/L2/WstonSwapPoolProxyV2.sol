@@ -8,6 +8,6 @@ import "./WstonSwapPoolStorageV2.sol";
  * @title
  * @dev
  */
-contract WstonSwapPoolProxy is Proxy, WstonSwapPoolStorageV2 {
+contract WstonSwapPoolProxyV2 is Proxy, WstonSwapPoolStorageV2 {
 
 }
