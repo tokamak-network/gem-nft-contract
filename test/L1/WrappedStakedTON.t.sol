@@ -55,7 +55,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
 
         uint256 stakingIndex = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
-        uint256 wstonTotalSupply = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getTotalWSTONSupply();
+        uint256 wstonTotalSupply = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).totalSupply();
         uint256 sWtonBalance = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).stakeOf();
 
         //console.log("staking index = ", stakingIndex);
@@ -180,11 +180,10 @@ contract WrappedStakedTONTest is L1BaseTest {
         // user1 withdrawal request
         vm.startPrank(user1);
         // Making 2 withdrawal requests. one is 50 WSTON the other is 10 WSTON
-        totalSupply = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getTotalWSTONSupply();
-        totalStakedOf = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).stakeOf();
-
-        console.log("total WSTON supply after withdrawal:", totalSupply);
-        console.log("total sWTON supply after withdrawal:", totalStakedOf);
+        uint256 firstWithdrawalAmount = 50*10**27;
+        uint256 secondWithdrawalAmount = 10*10**27;
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(firstWithdrawalAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(secondWithdrawalAmount);
 
         vm.roll(block.number + delay);
 

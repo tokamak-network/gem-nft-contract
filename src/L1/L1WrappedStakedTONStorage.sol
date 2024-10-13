@@ -18,8 +18,6 @@ contract L1WrappedStakedTONStorage {
     address internal depositManager;
     address internal seigManager;
 
-    uint256 public totalStakedAmount;
-    uint256 public totalWstonMinted;
     uint256 internal stakingIndex;
     uint256 public lastSeigBlock;
 
