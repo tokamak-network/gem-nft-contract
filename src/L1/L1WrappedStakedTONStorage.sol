@@ -19,7 +19,7 @@ contract L1WrappedStakedTONStorage {
     address internal seigManager;
 
     uint256 internal stakingIndex;
-    uint256 public lastSeigBlock;
+    uint256 internal lastSeigBlock;
 
     mapping(address => WithdrawalRequest[]) internal withdrawalRequests;
     mapping (address => uint256) internal withdrawalRequestIndex;

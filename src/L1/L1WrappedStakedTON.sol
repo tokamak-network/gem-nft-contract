@@ -549,4 +549,8 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
     function getWithdrawalRequestIndex(address _user) external view returns(uint256) {
         return withdrawalRequestIndex[_user];
     }
+
+    function getlastSeigBlock() external view returns(uint256) {
+        return lastSeigBlock;
+    }
 }
