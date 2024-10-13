@@ -188,7 +188,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         vm.roll(block.number + delay);
 
         uint256 wtonBalanceBefore = IERC20(wton).balanceOf(user1);
-        //881390845570101520291980348
+        //1007868027750759615961946603
         uint256 stakingIndexBefore = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
 
         // Claim the withdrawal by index
@@ -197,6 +197,7 @@ contract WrappedStakedTONTest is L1BaseTest {
 
         // Check that the staking index is not affected
         uint256 stakingIndexAfter = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
+        // 1007868027750759615961946603
         assert(stakingIndexAfter == stakingIndexBefore);
 
         // Check that the user's balance is updated correctly

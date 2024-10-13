@@ -12,16 +12,16 @@ contract L1WrappedStakedTONStorage {
 
     bool paused;
 
-    address public layer2Address;
-    address public wton;
-    address public ton;
+    address internal layer2Address;
+    address internal wton;
+    address internal ton;
     address internal depositManager;
     address internal seigManager;
 
     uint256 internal stakingIndex;
     uint256 public lastSeigBlock;
 
-    mapping(address => WithdrawalRequest[]) public withdrawalRequests;
+    mapping(address => WithdrawalRequest[]) internal withdrawalRequests;
     mapping (address => uint256) internal withdrawalRequestIndex;
 
     // Array to keep track of users who have made withdrawal requests

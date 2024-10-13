@@ -432,6 +432,13 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
         return true;
     } 
 
+    /**
+     * @notice Updates the staking index based on the current total stake and total supply.
+     * @dev This function recalculates the staking index to reflect the current staking status.
+     * It ensures that the staking index is updated only if there is a positive total supply and total stake.
+     * @return uint256 Returns the updated staking index.
+     * @custom:events Emits a `StakingIndexUpdated` event with the new staking index.
+     */
     function updateStakingIndex() internal returns (uint256) {
         uint256 _stakingIndex;
         uint256 totalStake = stakeOf();
@@ -448,6 +455,12 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
         return _stakingIndex;
     }
 
+    /**
+     * @notice Adds a user to the list of users if they are not already present.
+     * @dev This function checks if the user exists in the list and adds them if not.
+     * It is used to keep track of users who have interacted with the contract.
+     * @param user The address of the user to add.
+     */
     function addUser(address user) internal {
         if (!userExists[user]) {
             users.push(user);
@@ -455,10 +468,20 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
         }
     }
 
+    /**
+     * @notice Calculates the amount of WSTON to be minted based on the deposit amount.
+     * @dev This function uses the current staking index to determine the equivalent WSTON amount for a given deposit.
+     * @param _amount The amount of WTON being deposited.
+     * @return uint256 Returns the calculated WSTON amount.
+     */
     function getDepositWstonAmount(uint256 _amount) internal view returns(uint256) {
         uint256 _wstonAmount = (_amount * DECIMALS) / stakingIndex;
         return _wstonAmount;
     }
+
+    //---------------------------------------------------------------------------------------
+    //------------------------VIEW FUNCTIONS / STORAGE GETTERS-------------------------------
+    //---------------------------------------------------------------------------------------
 
     function stakeOf() public view returns(uint256) {
         return ISeigManager(seigManager).stakeOf(layer2Address, address(this));
@@ -470,11 +493,6 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
         return request;
     }
 
-    function getWithdrawalRequest(address requester, uint256 index) external view returns(WithdrawalRequest memory) {
-        WithdrawalRequest memory request = withdrawalRequests[requester][index];
-        return request;
-    }
-    
     /**
      * @notice Calculates the total claimable amount for a specific user.
      * @dev Iterates over the user's withdrawal requests to sum up the amounts that are eligible for claiming.
@@ -498,6 +516,12 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
         return totalClaimableAmount;
     }
 
+    function getWithdrawalRequest(address requester, uint256 index) external view returns(WithdrawalRequest memory) {
+        WithdrawalRequest memory request = withdrawalRequests[requester][index];
+        return request;
+    }
+    
+
     function getDepositManager() external view returns(address) {
         return depositManager;
     }
@@ -508,5 +532,21 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
 
     function getStakingIndex() external view returns(uint256) {
         return stakingIndex;
+    }
+
+    function getTonAddress() external view returns(address) {
+        return ton;
+    }
+
+    function getWtonAddress() external view returns(address) {
+        return wton;
+    }
+
+    function getLayer2Address() external view returns(address) {
+        return layer2Address;
+    }
+
+    function getWithdrawalRequestIndex(address _user) external view returns(uint256) {
+        return withdrawalRequestIndex[_user];
     }
 }
