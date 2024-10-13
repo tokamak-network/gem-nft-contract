@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for L1/Mock/proxy/ProxyCoinage.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../index.html">all files</a> / <a href="index.html">L1/Mock/proxy/</a> ProxyCoinage.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/29</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/28</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/14</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/33</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
+&nbsp;
+import "../../../proxy/ProxyStorage.sol";
+import { AuthControlCoinage } from "../common/AuthControlCoinage.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+&nbsp;
+import "../interfaces/IProxyEvent.sol";
+import "../interfaces/IProxyAction.sol";
+&nbsp;
+contract ProxyCoinage is ProxyStorage, AuthControlCoinage, IProxyEvent, IProxyAction
+{
+&nbsp;
+    /* ========== DEPENDENCIES ========== */
+&nbsp;
+    /* ========== CONSTRUCTOR ========== */
+&nbsp;
+<span class="fstat-no" title="function not covered" >    constructor () {</span>
+<span class="cstat-no" title="statement not covered" >        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender)</span>;
+<span class="cstat-no" title="statement not covered" >        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE)</span>;
+<span class="cstat-no" title="statement not covered" >        _setRoleAdmin(OPERATOR_ROLE, DEFAULT_ADMIN_ROLE)</span>;
+    }
+&nbsp;
+&nbsp;
+    /* ========== onlyOwner ========== */
+&nbsp;
+    /// @inheritdoc IProxyAction
+<span class="fstat-no" title="function not covered" >    function setProxyPause(bool _pause) external override onlyOwner {</span>
+        pauseProxy = _pause;
+    }
+&nbsp;
+    /// @notice Set implementation contract
+    /// @param impl New implementation contract address
+<span class="fstat-no" title="function not covered" >    function upgradeTo(address impl) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        require(impl != address(0), "input is zero")</span>;
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            _implementation2(0) != impl,
+            "same addr"
+        );
+<span class="cstat-no" title="statement not covered" >        _setImplementation2(impl, 0, true)</span>;
+<span class="cstat-no" title="statement not covered" >        emit Upgraded(impl);</span>
+    }
+&nbsp;
+&nbsp;
+    /// @inheritdoc IProxyAction
+<span class="fstat-no" title="function not covered" >    function setImplementation2(</span>
+        address newImplementation,
+        uint256 _index,
+        bool _alive
+    ) external override onlyOwner {
+<span class="cstat-no" title="statement not covered" >        _setImplementation2(newImplementation, _index, _alive)</span>;
+    }
+&nbsp;
+    /// @inheritdoc IProxyAction
+<span class="fstat-no" title="function not covered" >    function setAliveImplementation2(address newImplementation, bool _alive)</span>
+        public override onlyOwner
+    {
+<span class="cstat-no" title="statement not covered" >        _setAliveImplementation2(newImplementation, _alive)</span>;
+    }
+&nbsp;
+    /// @inheritdoc IProxyAction
+<span class="fstat-no" title="function not covered" >    function setSelectorImplementations2(</span>
+        bytes4[] calldata _selectors,
+        address _imp
+    ) public override onlyOwner {
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            _selectors.length &gt; 0,
+            "Proxy: _selectors's size is zero"
+        );
+<span class="cstat-no" title="statement not covered" >        require(aliveImplementation[_imp], "Proxy: _imp is not alive")</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        for (uint256 i = 0; i &lt; _selectors.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >            require(</span>
+                selectorImplementation[_selectors[i]] != _imp,
+                "LiquidityVaultProxy: same imp"
+            );
+            selectorImplementation[_selectors[i]] = _imp;
+<span class="cstat-no" title="statement not covered" >            emit SetSelectorImplementation(_selectors[i], _imp);</span>
+        }
+    }
+&nbsp;
+    /* ========== Anyone can   ========== */
+&nbsp;
+&nbsp;
+&nbsp;
+    /* ========== VIEW ========== */
+&nbsp;
+    /// @dev returns the implementation
+<span class="fstat-no" title="function not covered" >    function implementation() external view returns (address) {</span>
+<span class="cstat-no" title="statement not covered" >        return _implementation2(0);</span>
+    }
+&nbsp;
+    /// @inheritdoc IProxyAction
+<span class="fstat-no" title="function not covered" >    function implementation2(uint256 _index) external override view returns (address) {</span>
+<span class="cstat-no" title="statement not covered" >        return _implementation2(_index);</span>
+    }
+&nbsp;
+&nbsp;
+    /// @inheritdoc IProxyAction
+<span class="fstat-no" title="function not covered" >    function getSelectorImplementation2(bytes4 _selector)</span>
+        public override
+        view
+        returns (address impl)
+    {
+<span class="cstat-no" title="statement not covered" >        address _impl = selectorImplementation[_selector];</span>
+<span class="cstat-no" title="statement not covered" >        if (_impl == address(0))</span>
+<span class="cstat-no" title="statement not covered" >            return proxyImplementation[0];</span>
+        else <span class="cstat-no" title="statement not covered" >if (aliveImplementation[_impl]){</span>
+<span class="cstat-no" title="statement not covered" >            return _impl;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        return proxyImplementation[0];</span>
+    }
+&nbsp;
+&nbsp;
+    /// @dev receive ether
+    receive() external payable {
+        revert("cannot receive Ether");
+    }
+&nbsp;
+    /// @dev fallback function , execute on undefined function call
+<span class="fstat-no" title="function not covered" >    fallback() external payable {</span>
+<span class="cstat-no" title="statement not covered" >        _fallback()</span>;
+    }
+&nbsp;
+    /* === ======= internal ========== */
+&nbsp;
+    /// @dev view implementation address of the proxy[index]
+    /// @param _index index of proxy
+    /// @return impl address of the implementation
+<span class="fstat-no" title="function not covered" >    function _implementation2(uint256 _index)</span>
+        internal
+        view
+        returns (address impl)
+    {
+<span class="cstat-no" title="statement not covered" >        return proxyImplementation[_index];</span>
+    }
+&nbsp;
+    /// @dev fallback function , execute on undefined function call
+<span class="fstat-no" title="function not covered" >    function _fallback() internal {</span>
+<span class="cstat-no" title="statement not covered" >        address _impl = getSelectorImplementation2(msg.sig);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            _impl != address(0) &amp;&amp; !pauseProxy,
+            "Proxy: impl OR proxy is false"
+        );
+&nbsp;
+        assembly {
+            // Copy msg.data. We take full control of memory in this inline assembly
+            // block because it will not return to Solidity code. We overwrite the
+            // Solidity scratch pad at memory position 0.
+            calldatacopy(0, 0, calldatasize())
+&nbsp;
+            // Call the implementation.
+            // out and outsize are 0 because we don't know the size yet.
+            let result := delegatecall(gas(), _impl, 0, calldatasize(), 0, 0)
+&nbsp;
+            // Copy the returned data.
+            returndatacopy(0, 0, returndatasize())
+&nbsp;
+            switch result
+                // delegatecall returns 0 on error.
+                case 0 {
+                    revert(0, returndatasize())
+                }
+                default {
+                    return(0, returndatasize())
+                }
+        }
+    }
+&nbsp;
+    /// @dev set the implementation address and status of the proxy[index]
+    /// @param newImplementation Address of the new implementation.
+    /// @param _index index of proxy
+    /// @param _alive alive status
+<span class="fstat-no" title="function not covered" >    function _setImplementation2(</span>
+        address newImplementation,
+        uint256 _index,
+        bool _alive
+    ) internal {
+<span class="cstat-no" title="statement not covered" >        if (_alive) proxyImplementation[_index] = newImplementation;</span>
+<span class="cstat-no" title="statement not covered" >        _setAliveImplementation2(newImplementation, _alive)</span>;
+    }
+&nbsp;
+    /// @dev set alive status of implementation
+    /// @param newImplementation Address of the new implementation.
+    /// @param _alive alive status
+<span class="fstat-no" title="function not covered" >    function _setAliveImplementation2(address newImplementation, bool _alive)</span>
+        internal
+    {
+        aliveImplementation[newImplementation] = _alive;
+<span class="cstat-no" title="statement not covered" >        emit SetAliveImplementation(newImplementation, _alive);</span>
+    }
+&nbsp;
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Oct 11 2024 15:51:23 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../sorter.js"></script>
+</body>
+</html>

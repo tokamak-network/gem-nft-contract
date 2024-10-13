@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import "../proxy/ProxyStorage.sol";
+import { ProxyStorage } from "../proxy/ProxyStorage.sol";
 import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import { ISeigManager } from "../interfaces/ISeigManager.sol";
 import { IDepositManager } from "../interfaces/IDepositManager.sol";
 import { L1WrappedStakedTONStorage } from "./L1WrappedStakedTONStorage.sol";
 
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 interface ICandidate {
     function updateSeigniorage() external returns(bool);
 }
@@ -23,24 +22,61 @@ interface ITON {
     function swapFromTON(uint256 tonAmount) external returns (bool);
 }
 
-
+/**
+ * @title L1WrappedStakedTON
+ * @author TOKAMAK OPAL TEAM
+ * @dev This contract allows users to deposit WTON or TON and receive WSTON in return.
+ * It manages staking, withdrawal requests, and updates seigniorage.
+ * The contract is upgradeable and uses OpenZeppelin libraries for security and functionality.
+ */
 contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuard, L1WrappedStakedTONStorage { 
     using SafeERC20 for IERC20; 
 
+    /**
+     * @notice Modifier to ensure the contract is not paused.
+     */
     modifier whenNotPaused() {
         require(!paused, "Pausable: paused");
         _;
     }
 
+    /**
+     * @notice Modifier to ensure the contract is paused.
+     */
     modifier whenPaused() {
         require(paused, "Pausable: not paused");
         _;
     }
 
-    constructor() {
-        _disableInitializers();
+    /**
+     * @dev Returns the number of decimals used to get its user representation.
+     * @return The number of decimals.
+     */
+    function decimals() public view virtual override returns (uint8) {
+        return 27;
     }
 
+    /**
+     * @dev Pauses the contract, preventing certain functions from being called.
+     * Can only be called by the owner.
+     */
+    function pause() public onlyOwner whenNotPaused {
+        paused = true;
+        emit Paused(msg.sender);
+    }
+
+    /**
+     * @dev Unpauses the contract, allowing certain functions to be called.
+     * Can only be called by the owner.
+     */
+    function unpause() public onlyOwner whenPaused {
+        paused = false;
+        emit Unpaused(msg.sender);
+    }
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------INITIALIZATION FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
 
     /**
      * @dev initializing the contract.
@@ -73,30 +109,22 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
     }
 
     /**
-     * @dev Returns the number of decimals used to get its user representation.
-     * @return The number of decimals.
+     * @notice function to update the depositManager contract address 
      */
-    function decimals() public view virtual override returns (uint8) {
-        return 27;
+    function setDepositManagerAddress(address _depositManager) external onlyOwner {
+        depositManager = _depositManager;
     }
 
     /**
-     * @dev Pauses the contract, preventing certain functions from being called.
-     * Can only be called by the owner.
+     * @notice function to update the seigManager contract address 
      */
-    function pause() public onlyOwner whenNotPaused {
-        paused = true;
-        emit Paused(msg.sender);
+    function setSeigManagerAddress(address _seigManager) external onlyOwner {
+        seigManager = _seigManager;
     }
 
-    /**
-     * @dev Unpauses the contract, allowing certain functions to be called.
-     * Can only be called by the owner.
-     */
-    function unpause() public onlyOwner whenPaused {
-        paused = false;
-        emit Unpaused(msg.sender);
-    }
+    //---------------------------------------------------------------------------------------
+    //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
+    //---------------------------------------------------------------------------------------
 
     /**
      * @dev Handles the deposits callback for TON or WTON tokens.
@@ -168,6 +196,56 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
             revert DepositFailed();
         }
     }
+
+    /**
+     * @notice Requests a withdrawal of WSTON.
+     * @dev This function allows users to request a withdrawal of their WSTON tokens.
+     * The withdrawal will be processed after a delay specified by the DepositManager.
+     * @param _wstonAmount The amount of WSTON to withdraw.
+     * @custom:requirements The caller must have a balance of at least `_wstonAmount` WSTON.
+     * The contract must not be paused.
+     * @custom:events Emits a `WithdrawalRequested` event upon successful request.
+     * @custom:reverts Reverts if the caller does not have enough WSTON balance.
+     */
+    function requestWithdrawal(uint256 _wstonAmount) external whenNotPaused {
+        uint256 delay = IDepositManager(depositManager).getDelayBlocks(layer2Address);
+        require(_requestWithdrawal(_wstonAmount, delay), "failed to request withdrawal");
+    }
+
+    /**
+     * @notice Claims all eligible withdrawal requests for the caller.
+     * @dev This function processes all withdrawal requests that are eligible for claiming.
+     * It transfers the corresponding TON or WTON to the caller.
+     * @param _token A boolean indicating whether to claim in TON (true) or WTON (false).
+     */
+    function claimWithdrawalTotal(bool _token) external whenNotPaused {
+        require(_claimWithdrawalTotal(_token), "failed to claim");
+    }
+
+    /**
+     * @notice Claims a specific withdrawal request for the caller by index.
+     * @dev This function processes a withdrawal request at a given index if it is eligible for claiming.
+     * It transfers the corresponding TON or WTON to the caller.
+     * @param _index The index of the withdrawal request to claim.
+     * @param _token A boolean indicating whether to claim in TON (true) or WTON (false).
+     */
+    function claimWithdrawalIndex(uint256 _index, bool _token) external whenNotPaused {
+        require(_claimWithdrawalIndex(_index, _token), "failed to claim");       
+    }
+
+    /**
+     * @notice Updates the seigniorage for the Layer 2 staking contract.
+     * @dev This function interacts with the SeigManager to update the seigniorage for the specified Layer 2 address.
+     * It is used to ensure that the staking rewards are up-to-date.
+     * @return bool Returns true if the seigniorage update is successful.
+     */
+    function updateSeigniorage() public returns(bool) { 
+        return ISeigManager(seigManager).updateSeigniorageLayer(layer2Address);
+    }
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------INTERNAL FUNCTIONS-------------------------------------------
+    //---------------------------------------------------------------------------------------
 
     /**
      * @dev Internal function to deposit WTON and mint WSTON for a specified address.
@@ -255,15 +333,6 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
     }
 
     /**
-     * @dev Requests a withdrawal of WSTON.
-     * @param _wstonAmount The amount of WSTON to withdraw.
-     */
-    function requestWithdrawal(uint256 _wstonAmount) external whenNotPaused {
-        uint256 delay = IDepositManager(depositManager).getDelayBlocks(layer2Address);
-        require(_requestWithdrawal(_wstonAmount, delay), "failed to request withdrawal");
-    }
-
-    /**
      * @dev Internal function to handle withdrawal requests.
      * @param _wstonAmount The amount of WSTON to withdraw.
      * @param delay The delay in blocks before the withdrawal can be processed.
@@ -295,16 +364,14 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
         unchecked {
             withdrawalRequestIndex[msg.sender] += 1;
         }
+        
+        totalWstonMinted -= _wstonAmount;
 
         // Burn wstonAmount
         _burn(msg.sender, _wstonAmount);
 
         emit WithdrawalRequested(msg.sender, _wstonAmount);
         return true;
-    }
-
-    function claimWithdrawalTotal(bool _token) external whenNotPaused {
-        require(_claimWithdrawalTotal(_token), "failed to claim");
     }
 
     function _claimWithdrawalTotal(bool _token) internal returns(bool){
@@ -341,10 +408,6 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
         return true;
     }
 
-    function claimWithdrawalIndex(uint256 _index, bool _token) external whenNotPaused {
-        require(_claimWithdrawalIndex(_index, _token), "failed to claim");       
-    }
-
     function _claimWithdrawalIndex(uint256 _index, bool _token) internal whenNotPaused returns(bool) {
         if(_index >= withdrawalRequests[msg.sender].length) {
             revert NoRequestToProcess();
@@ -376,10 +439,6 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
         return true;
     } 
 
-    function updateSeigniorage() public returns(bool) { 
-        return ISeigManager(seigManager).updateSeigniorageLayer(layer2Address);
-    }
-
     function updateStakingIndex() internal returns (uint256) {
         uint256 _stakingIndex;
         uint256 totalStake = stakeOf();
@@ -406,15 +465,6 @@ contract L1WrappedStakedTON is ProxyStorage, ERC20Upgradeable, OwnableUpgradeabl
     function getDepositWstonAmount(uint256 _amount) internal view returns(uint256) {
         uint256 _wstonAmount = (_amount * DECIMALS) / stakingIndex;
         return _wstonAmount;
-    }
-
-
-    function setDepositManagerAddress(address _depositManager) external onlyOwner {
-        depositManager = _depositManager;
-    }
-
-    function setSeigManagerAddress(address _seigManager) external onlyOwner {
-        seigManager = _seigManager;
     }
 
     function stakeOf() public view returns(uint256) {

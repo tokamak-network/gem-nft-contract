@@ -8,7 +8,6 @@ import {GemFactoryStorage} from "./GemFactoryStorage.sol";
 import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
 import { GemLibrary } from "../libraries/GemLibrary.sol";
 import { MiningLibrary } from "../libraries/MiningLibrary.sol";
-import { ForgeLibrary } from "../libraries/ForgeLibrary.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
@@ -25,15 +24,15 @@ interface ITreasury {
  * @title GemFactory
  * @author TOKAMAK OPAL TEAM
  * @dev The GemFactory contract is responsible for managing the lifecycle of GEM tokens within the system.
- * This includes the creation, mining, forging, and melting of GEMs. The contract provides functionalities
+ * This includes the creation, transfer, mining (check GemFactoryMining), forging (check GemFActoryForging), and melting of GEMs. The contract provides functionalities
  * for both administrative and user interactions, ensuring a comprehensive management of GEM tokens.
  *
  * Administrative Functions
  * - Premine GEMs: Allows administrators to create and allocate GEMs directly to the treasury contract.
- *   This is useful for initializing the system with a predefined set of GEMs that can be distributed or sold later.
+ *   The purpose is to initialize the system with a predefined set of GEMs that can be distributed or sold later.
  *
  * User Functions
- * - Mine GEMs: Users can engage in mining activities to acquire new GEMs. The mining process is governed
+ * - Mine GEMs (GemFactoryMining): Users can engage in mining activities to acquire new GEMs. The mining process is governed
  *   by specific rules and cooldown periods, ensuring a fair and balanced distribution of GEMs.
  * - Forge GEMs: Users have the ability to combine multiple GEMs of the same rarity to create a new, potentially
  *   more valuable GEM. This process involves burning the original GEMs and minting a new one.
@@ -50,11 +49,10 @@ interface ITreasury {
  * - The GemFactory contract integrates with other components of the system, such as the treasury and marketplace contracts,
  *   to facilitate seamless interactions and transactions involving GEMs.
  */
-contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable, GemFactoryStorage, OwnableUpgradeable, DRBConsumerBase, ReentrancyGuard {
+contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable, GemFactoryStorage, OwnableUpgradeable, ReentrancyGuard {
 
     using GemLibrary for GemFactoryStorage.Gem[];
     using MiningLibrary for GemFactoryStorage.Gem[];
-    using ForgeLibrary for GemFactoryStorage.Gem[];
 
     /**
      * @notice Modifier to ensure the contract is not paused.
@@ -119,21 +117,18 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
 
     /**
      * @notice Initializes the contract with the given parameters.
-     * @param _coordinator Address of the randomness coordinator.
      * @param _owner Address of the contract owner.
      * @param _wston Address of the WSTON token.
      * @param _ton Address of the TON token.
      * @param _treasury Address of the treasury contract.
      */
     function initialize(
-        address _coordinator,
         address _owner,
         address _wston, 
         address _ton,
         address _treasury  
     ) external initializer {
         __ERC721_init("GemSTON", "GEM");
-        __DRBConsumerBase_init(_coordinator);
         __Ownable_init(_owner);
         wston = _wston;
         ton = _ton;
@@ -292,207 +287,7 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
 
-    /**
-     * @notice function that allow users to forge their gems. Gems must have the same rarity. 
-     * Users can choose the color the forged gem will have if it respects specific conditions. 
-     * old gems are burnt while the new forged gem is minted.
-     * @param _tokenIds array of tokens to be forged. Must respect some length depending on the rarity chosen
-     * @param _rarity to check if the rarity of each token selected is the same
-     * @param _color color desired of the forged gem
-     */
-    function forgeTokens(
-        uint256[] memory _tokenIds,
-        Rarity _rarity,
-        uint8[2] memory _color
-    ) external whenNotPaused returns (uint256 newGemId) {
-        // Define ForgeParams struct with predefined values for various GEM types
-        ForgeLibrary.ForgeParams memory params = ForgeLibrary.ForgeParams({
-            RareGemsValue: RareGemsValue,
-            UniqueGemsValue: UniqueGemsValue,
-            EpicGemsValue: EpicGemsValue,
-            LegendaryGemsValue: LegendaryGemsValue,
-            MythicGemsValue: MythicGemsValue,
-            RareGemsMiningPeriod: RareGemsMiningPeriod,
-            UniqueGemsMiningPeriod: UniqueGemsMiningPeriod,
-            EpicGemsMiningPeriod: EpicGemsMiningPeriod,
-            LegendaryGemsMiningPeriod: LegendaryGemsMiningPeriod,
-            MythicGemsMiningPeriod: MythicGemsMiningPeriod,
-            RareminingTry: RareminingTry,
-            UniqueminingTry: UniqueminingTry,
-            EpicminingTry: EpicminingTry,
-            LegendaryminingTry: LegendaryminingTry,
-            MythicminingTry: MythicminingTry,
-            RareGemsCooldownPeriod: RareGemsCooldownPeriod,
-            UniqueGemsCooldownPeriod: UniqueGemsCooldownPeriod,
-            EpicGemsCooldownPeriod: EpicGemsCooldownPeriod,
-            LegendaryGemsCooldownPeriod: LegendaryGemsCooldownPeriod,
-            MythicGemsCooldownPeriod: MythicGemsCooldownPeriod
-        });
-
-        // Initialize variables for forged GEM properties
-        uint8[4] memory forgedQuadrants;
-        Rarity newRarity;
-        uint32 forgedGemsMiningPeriod;
-        uint32 forgedGemsCooldownPeriod;
-        uint8 forgedGemsminingTry;
-        uint256 forgedGemsValue;
-
-        // Call the forgeTokens function from Gems contract
-        (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry) = Gems.forgeTokens(
-            GEMIndexToOwner,
-            ownershipTokenCount,
-            msg.sender,
-            _tokenIds,
-            _rarity,
-            _color,
-            params
-        );
-
-        // Emit an event for the forged GEM
-        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
-
-        // Burn the old tokens
-        burnTokens(msg.sender, _tokenIds);
-
-        // Mint the new token
-        _safeMint(msg.sender, newGemId);
-        _setTokenURI(newGemId, ""); // Set empty URI for the new token
-
-        // Emit another event for the created GEM
-        emit Created(newGemId, newRarity, _color, forgedGemsValue, forgedQuadrants, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, "", msg.sender);
-
-        return newGemId;
-    }
-
-    /**
-     * @notice triggers the mining process of a gem by the function caller
-     * @param _tokenId Id of the token to be mined.
-     * @return true if the gem user started mining the gem
-     * @dev the Gem must be Rare or above
-     * @dev the cooldown period must have elapsed
-     * @dev the Gem must not be locked. Therefore, it must not be listed on the marketplace 
-     * @dev There must be more than 1 mining try left
-     */
-    function startMiningGEM(uint256 _tokenId) external whenNotPaused returns (bool) {
-        // Ensure the caller's address is not zero
-        if (msg.sender == address(0)) {
-            revert AddressZero();
-        }
-        // Ensure the caller is the owner of the GEM
-        if (ownerOf(_tokenId) != msg.sender) {
-            revert NotGemOwner();
-        }
-        // Ensure the cooldown period for the GEM has elapsed
-        if (Gems[_tokenId].gemCooldownPeriod > block.timestamp) {
-            revert CooldownPeriodNotElapsed();
-        }
-        // Ensure the GEM is not currently locked
-        if (Gems[_tokenId].isLocked) {
-            revert GemIsLocked();
-        }
-        // Ensure the GEM's rarity is not COMMON, as COMMON gems cannot be mined
-        if (Gems[_tokenId].rarity == Rarity.COMMON) {
-            revert WrongRarity();
-        }
-        // Ensure there are mining attempts left for the GEM
-        if (Gems[_tokenId].miningTry == 0) {
-            revert NoMiningTryLeft();
-        }
-
-        // Modify storage variables to start the mining process
-        Gems.startMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
-
-        // Emit an event indicating that mining has started
-        emit GemMiningStarted(_tokenId, msg.sender, block.timestamp, Gems[_tokenId].miningTry);
-        return true;
-    }
-
-    /**
-     * @notice function that cancels the mining process. note that the mining attempt spent is not recovered
-     * @param _tokenId the id of the token that is mining
-     * @dev the user must be the owner of the token
-     * @dev the user must be mining this token.
-     * @dev the user must not have already called pickMinedGem function
-     */
-    function cancelMining(uint256 _tokenId) external whenNotPaused returns (bool) {
-        // Ensure the caller is the owner of the GEM
-        if (GEMIndexToOwner[_tokenId] != msg.sender) {
-            revert NotGemOwner();
-        }
-        // Ensure the GEM is currently locked, indicating it is in the mining process
-        if (Gems[_tokenId].isLocked != true) {
-            revert GemIsNotLocked();
-        }
-        // Ensure the GEM is currently being mined by the user
-        if (userMiningToken[msg.sender][_tokenId] != true) {
-            revert NotMining();
-        }
-        // Ensure the GEM has not already been picked (randomness request not initiated)
-        if (Gems[_tokenId].randomRequestId != 0) {
-            revert GemAlreadyPicked();
-        }
-
-        // Modify the storage variables associated with the mining process to cancel it
-        Gems.cancelMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
-
-        // Emit an event indicating that mining has been canceled
-        emit MiningCancelled(_tokenId, msg.sender, block.timestamp);
-        return true;
-    }
-
-    /**
-     * @notice Picks a mined gem after the mining period has elapsed.
-     * @param _tokenId ID of the token to pick.
-     * @return requestId The request ID for randomness.
-     * @dev user pays msg.value and get back the excess ETH that is not spent on gas by the node
-     */
-    function pickMinedGEM(uint256 _tokenId) external payable whenNotPaused nonReentrant returns (uint256) {
-        // Ensure the caller is the owner of the GEM
-        if (ownerOf(_tokenId) != msg.sender) {
-            revert NotGemOwner();
-        }
-        // Ensure the mining period has elapsed
-        if (block.timestamp < userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod) {
-            revert MiningPeriodNotElapsed();
-        }
-        // Ensure the GEM is currently locked
-        if (Gems[_tokenId].isLocked == false) {
-            revert GemIsNotLocked();
-        }
-        // Ensure the GEM is currently being mined
-        if (userMiningToken[ownerOf(_tokenId)][_tokenId] != true) {
-            revert NotMining();
-        }
-
-        // Request randomness from the consumer with default parameters
-        (uint256 directFundingCost, uint256 requestId) = requestRandomness(0, 0, CALLBACK_GAS_LIMIT);
-        // Store the request ID in the GEM's data
-        Gems[_tokenId].randomRequestId = requestId;
-
-        // Update the request mapping with details of the request
-        s_requests[requestId].tokenId = _tokenId;
-        s_requests[requestId].requested = true;
-        s_requests[requestId].requester = msg.sender;
-        unchecked {
-            // Increment the request count
-            requestCount++;
-        }
-
-        // Refund excess ETH to the user if they overpaid
-        if (msg.value > directFundingCost) {
-            (bool success, ) = msg.sender.call{value: msg.value - directFundingCost}("");
-            if (!success) {
-                revert FailedToSendEthBack();
-            }
-            // Emit an event for the ETH refund
-            emit EthSentBack(msg.value - directFundingCost);
-        }
-
-        // Emit an event for the random GEM request
-        emit RandomGemRequested(_tokenId, Gems[_tokenId].randomRequestId);
-        return requestId;
-    }
-
+    
     /**
      * @notice Melts a gem, converting it back to its value.
      * @param _tokenId ID of the token to melt.
@@ -799,22 +594,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     //---------------------------------------------------------------------------------------
 
     /**
-     * @notice Burns tokens internally.
-     * @param _from Address from which tokens are burned.
-     * @param _tokenIds Array of token IDs to burn.
-     */
-    function burnTokens(address _from, uint256[] memory _tokenIds) internal {
-        for(uint256 i = 0; i < _tokenIds.length; ++i) {
-            // delete GEM from the Gems array and every other ownership/approve storage
-            delete Gems[_tokenIds[i]];
-            ownershipTokenCount[_from]--;
-            delete GEMIndexToOwner[_tokenIds[i]];
-            // ERC721 burn function
-            _burn(_tokenIds[i]);
-        }
-    }
-
-    /**
      * @notice Checks if a color exists based on the given indices.
      * @param _index1 The first index of the color.
      * @param _index2 The second index of the color.
@@ -841,62 +620,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
         GEMIndexToOwner[_tokenId] = _to;
         // Decrement the ownership count for the sender
         ownershipTokenCount[_from]--;
-    }
-
-    /**
-     * @notice Fulfills a random number request and processes GEM mining.
-     * @dev Implements the abstract function from DRBConsumerBase.
-     * @dev Counts the total of eligible gems for mining
-     * @dev Performs randomNumber % gemCount to get a number between 1 and gemCount
-     * @dev Unlocks the initial Gem, reset the cooldown period and the randomRequestId
-     * @dev Transfers the picked Gem from the treasury to the user
-     * @param requestId The ID of the request.
-     * @param randomNumber The random number generated.
-     */
-    function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
-        // Check if the request was made
-        if(!s_requests[requestId].requested) {
-            revert RequestNotMade();
-        }
-        // Mark the request as fulfilled and store the random number
-        s_requests[requestId].fulfilled = true;
-        s_requests[requestId].randomWord = randomNumber;
-        uint256 _tokenId = s_requests[requestId].tokenId;
-
-        // Retrieve the quadrants of the GEM
-        uint8[4] memory quadrants = Gems[s_requests[requestId].tokenId].quadrants;
-        
-        // Count the number of GEMs by quadrant and emit an event
-        (uint256 gemCount, uint256[] memory tokenIds) = countGemsByQuadrant(quadrants[0], quadrants[1], quadrants[2], quadrants[3]);
-        emit CountGemsByQuadrant(gemCount, tokenIds);
-
-        if(gemCount > 0) {
-            // Select a GEM based on the random number
-            uint256 modNbGemsAvailable = (randomNumber % gemCount);
-            s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
-
-            // reset storage variable of the initial GEM
-            Gems[_tokenId].isLocked = false;
-            Gems[_tokenId].randomRequestId = 0;
-            Gems[_tokenId].gemCooldownPeriod = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
-
-            // Delete user mining data
-            delete userMiningToken[ownerOf(_tokenId)][_tokenId];
-            delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
-
-            // we set mining try of the mined gem to 0 => mined gems can't mine other gems
-            Gems[s_requests[requestId].chosenTokenId].miningTry = 0;
-
-            // Transfer the GEM to the requester
-            require(ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId), "failed to transfer token");
-
-            // Emit an event for the GEM mining claim
-            emit GemMiningClaimed(_tokenId, msg.sender);
-        } else {
-            // No GEM available, set chosenTokenId to 0 and emit an event
-            s_requests[requestId].chosenTokenId = 0;
-            emit NoGemAvailable(_tokenId);
-        }
     }
 
     /**
@@ -1077,43 +800,6 @@ contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable,
     function getColorName(uint8 _index1, uint8 _index2) public view returns (string memory) {
         // Return the color name associated with the specified indices
         return colorName[_index1][_index2];
-    }
-
-    /**
-     * @notice Counts the number of Gems from the treasury with quadrants less than the specified values.
-     * @param quadrant1 The first quadrant value to compare.
-     * @param quadrant2 The second quadrant value to compare.
-     * @param quadrant3 The third quadrant value to compare.
-     * @param quadrant4 The fourth quadrant value to compare.
-     * @return The count of Gems and an array of their token IDs.
-     */
-    function countGemsByQuadrant(uint8 quadrant1, uint8 quadrant2, uint8 quadrant3, uint8 quadrant4) internal view returns (uint256, uint256[] memory) {
-        uint256 count = 0;
-        uint256[] memory tokenIds = new uint256[](Gems.length);
-        uint256 index = 0;
-        uint8 sumOfQuadrants = quadrant1 + quadrant2 + quadrant3+ quadrant4;
-
-        // Iterate through the Gems to count those with quadrants less than the specified sum
-        for (uint256 i = 0; i < Gems.length; ++i) {
-            uint8 GemSumOfQuadrants = Gems[i].quadrants[0] + Gems[i].quadrants[1] + Gems[i].quadrants[2] + Gems[i].quadrants[3];
-            if (GemSumOfQuadrants < sumOfQuadrants && 
-                GEMIndexToOwner[i] == treasury &&
-                !Gems[i].isLocked
-            ) {
-                tokenIds[index] = Gems[i].tokenId;
-                unchecked{
-                    index++;
-                    count++;
-                } 
-            }
-        }
-        // Resize the array to the actual count
-        uint256[] memory result = new uint256[](count);
-        for (uint256 j = 0; j < count; ++j) {
-            result[j] = tokenIds[j];
-        }
-
-        return (count, result);
     }
 
     /**

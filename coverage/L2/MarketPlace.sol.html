@@ -1,0 +1,1049 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for L2/MarketPlace.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">L2/</a> MarketPlace.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/54</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/68</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/23</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/74</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity 0.8.25;
+&nbsp;
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { GemFactoryStorage } from "./GemFactoryStorage.sol";
+import { MarketPlaceStorage } from "./MarketPlaceStorage.sol";
+import { GemFactory } from "./GemFactory.sol";
+import {AuthControl} from "../common/AuthControl.sol";
+import "../proxy/ProxyStorage.sol";
+&nbsp;
+interface ITreasury {
+    function transferWSTON(address _to, uint256 _amount) external returns(bool);
+    function transferTreasuryGEMto(address _to, uint256 _tokenId) external returns(bool);
+    function createPreminedGEM( 
+        GemFactoryStorage.Rarity _rarity,
+        uint8[2] memory _color, 
+        uint8[4] memory _quadrants,  
+        string memory _tokenURI
+    ) external returns (uint256);
+    function approveWstonForMarketplace(uint256 amount) external;
+}
+&nbsp;
+/**
+ * @title MarketPlace
+ * @author TOKAMAK OPAL TEAM
+ * @dev The MarketPlace contract facilitates the buying and selling of GEM tokens within the ecosystem.
+ * It provides a platform for users to list their GEMs for sale, purchase GEMs using different payment methods,
+ * and manage the sale status of their GEMs. The contract integrates with the GemFactory and Treasury contracts
+ * to ensure transactions and handling of GEM tokens and payments.
+ * - TON: Users can pay with TON tokens, with a fee applied based on the configured fee rate.
+ * - WSTON: Users can also pay with WSTON tokens, which are transferred directly to the seller.
+ * @dev this contract is meant to be deployed on Titan only (does not consider TON as a native token)
+ **/
+contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthControl {
+    using SafeERC20 for IERC20;
+&nbsp;
+    /**
+     * @notice Modifier to ensure the contract is not paused.
+     */
+<span class="fstat-no" title="function not covered" >    modifier whenNotPaused() {</span>
+<span class="cstat-no" title="statement not covered" >        if (paused) revert Paused();</span>
+        _;
+    }
+&nbsp;
+    /**
+     * @notice Modifier to ensure the contract is paused.
+     */
+<span class="fstat-no" title="function not covered" >    modifier whenPaused() {</span>
+<span class="cstat-no" title="statement not covered" >        if (!paused) revert NotPaused();</span>
+        _;
+    }
+&nbsp;
+    /**
+     * @notice Pauses the contract, preventing certain actions.
+     * @dev Can only be called by the owner when the contract is not paused.
+     */
+<span class="fstat-no" title="function not covered" >    function pause() public onlyOwner whenNotPaused {</span>
+        paused = true;
+    }
+&nbsp;
+    /**
+     * @notice Unpauses the contract, allowing actions to be performed.
+     * @dev Can only be called by the owner when the contract is paused.
+     */
+<span class="fstat-no" title="function not covered" >    function unpause() public onlyOwner whenNotPaused {</span>
+        paused = false;
+    }
+&nbsp;
+    /**
+     * @notice Initializes the marketplace contract with the given parameters.
+     * @param _treasury Address of the treasury contract.
+     * @param _gemfactory Address of the gem factory contract.
+     * @param _tonFeesRate Fee rate for TON transactions.
+     * @param _wston Address of the WSTON token.
+     * @param _ton Address of the TON token.
+     */
+<span class="fstat-no" title="function not covered" >    function initialize(</span>
+        address _treasury, 
+        address _gemfactory,
+        uint256 _tonFeesRate,
+        address _wston,
+        address _ton
+    ) external {
+<span class="cstat-no" title="statement not covered" >        if (initialized) revert AlreadyInitialized();</span>
+<span class="cstat-no" title="statement not covered" >        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender)</span>;
+        tonFeesRate = _tonFeesRate; // in bps (1% = 100bps)
+        gemFactory = _gemfactory;
+        treasury = _treasury;
+        wston = _wston;
+        ton = _ton;
+        initialized = true;
+    }
+&nbsp;
+    /**
+     * @notice Sets the discount rate for TON fees.
+     * @param _tonFeesRate New discount rate for TON fees.
+     * @dev The discount rate must be less than 100%.
+     */
+<span class="fstat-no" title="function not covered" >    function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {</span>
+        // Update the TON fee rate
+        tonFeesRate = _tonFeesRate;
+<span class="cstat-no" title="statement not covered" >        emit SetDiscountRate(_tonFeesRate);</span>
+    }
+&nbsp;
+    /**
+     * @notice Sets the staking index. note that this function is mainly used by the oracle each time a deposit is made on L1WSTON contract.
+     * @param _stakingIndex New staking index.
+     */
+<span class="fstat-no" title="function not covered" >    function setStakingIndex(uint256 _stakingIndex) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        if(_stakingIndex &lt; 1e27) {</span>
+            revert WrongStakingIndex();
+        }
+        // Update the staking index
+        stakingIndex = _stakingIndex;
+<span class="cstat-no" title="statement not covered" >        emit SetStakingIndex(_stakingIndex);</span>
+    }
+&nbsp;
+&nbsp;
+    //---------------------------------------------------------------------------------------
+    //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
+    //---------------------------------------------------------------------------------------
+&nbsp;
+    /**
+     * @notice Allows a user to buy a GEM listed on the marketplace.
+     * @param _tokenId The ID of the token to be purchased.
+     * @param _paymentMethod The payment method used. If true, the user purchases using L2 WSTON; if false, using TON.
+     * @dev This function handles the purchase process, including payment and transfer of ownership.
+     */
+<span class="fstat-no" title="function not covered" >    function buyGem(uint256 _tokenId, bool _paymentMethod) external whenNotPaused {</span>
+        // Attempt to buy the GEM, revert if unsuccessful
+<span class="cstat-no" title="statement not covered" >        if (!_buyGem(_tokenId, msg.sender, _paymentMethod)) revert PurchaseFailed();</span>
+    }
+&nbsp;
+    /**
+     * @notice Lists a GEM for sale on the marketplace.
+     * @param _tokenId The ID of the token to be listed for sale.
+     * @param _price The price at which the GEM is listed.
+     * @dev The GEM must be approved for transfer by the marketplace contract before it can be listed.
+     */
+<span class="fstat-no" title="function not covered" >    function putGemForSale(uint256 _tokenId, uint256 _price) external whenNotPaused {</span>
+        // Ensure the GEM is approved for transfer
+<span class="cstat-no" title="statement not covered" >        if (IGemFactory(gemFactory).getApproved(_tokenId) != address(this)) revert GemNotApproved();</span>
+        // Attempt to list the GEM for sale, revert if unsuccessful
+<span class="cstat-no" title="statement not covered" >        if (!_putGemForSale(_tokenId, _price)) revert ListingGemFailed();</span>
+    }
+&nbsp;
+    /**
+     * @notice Lists multiple GEMs for sale on the marketplace.
+     * @param tokenIds An array of token IDs to be listed for sale.
+     * @param prices An array of prices corresponding to each GEM.
+     * @dev Each GEM must be approved for transfer by the marketplace contract before it can be listed.
+     */
+<span class="fstat-no" title="function not covered" >    function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused {</span>
+        // Ensure there are tokens to list
+<span class="cstat-no" title="statement not covered" >        if(tokenIds.length == 0) {</span>
+            revert NoTokens();
+        }
+        // Ensure the lengths of token IDs and prices match
+<span class="cstat-no" title="statement not covered" >        if(tokenIds.length != prices.length) {</span>
+            revert WrongLength();
+        }
+&nbsp;
+        // Iterate over each token to list them for sale
+<span class="cstat-no" title="statement not covered" >        for (uint256 i = 0; i &lt; tokenIds.length; ++i){</span>
+            // Ensure each GEM is approved for transfer
+<span class="cstat-no" title="statement not covered" >            if (IGemFactory(gemFactory).getApproved(tokenIds[i]) != address(this)) revert GemNotApproved();</span>
+            // Attempt to list each GEM for sale, revert if unsuccessful
+<span class="cstat-no" title="statement not covered" >            if (!_putGemForSale(tokenIds[i], prices[i])) revert ListingGemFailed();</span>
+        }
+    }
+&nbsp;
+    /**
+     * @notice Removes a GEM from being listed for sale on the marketplace.
+     * @param _tokenId The ID of the token to be removed from sale.
+     * @dev Only the owner of the GEM can remove it from sale.
+     */
+<span class="fstat-no" title="function not covered" >    function removeGemForSale(uint256 _tokenId) external whenNotPaused {</span>
+        // Ensure the GEM is currently listed for sale
+<span class="cstat-no" title="statement not covered" >        if(gemsForSale[_tokenId].isActive != true) {</span>
+            revert GemIsNotForSale();
+        }
+        // Ensure the caller is the owner of the GEM
+<span class="cstat-no" title="statement not covered" >        if(IGemFactory(gemFactory).ownerOf(_tokenId) != msg.sender) {</span>
+            revert NotGemOwner();
+        }
+&nbsp;
+        // Unlock the GEM and remove it from the sale list
+<span class="cstat-no" title="statement not covered" >        GemFactory(gemFactory).setIsLocked(_tokenId, false)</span>;
+        delete gemsForSale[_tokenId];
+<span class="cstat-no" title="statement not covered" >        emit GemRemovedFromSale(_tokenId);</span>
+&nbsp;
+    }
+&nbsp;
+    //---------------------------------------------------------------------------------------
+    //--------------------------INTERNAL FUNCTIONS-------------------------------------------
+    //---------------------------------------------------------------------------------------
+&nbsp;
+    /**
+     * @notice Internal function to list a GEM for sale.
+     * @param _tokenId The ID of the token to be listed.
+     * @param _price The price at which the GEM is listed.
+     * @return bool Returns true if the operation is successful.
+     * @dev This function checks ownership and approval before listing the GEM.
+     */
+<span class="fstat-no" title="function not covered" >    function _putGemForSale(uint256 _tokenId, uint256 _price) internal returns (bool) {</span>
+        // Ensure the caller is the owner of the GEM
+<span class="cstat-no" title="statement not covered" >        if(IGemFactory(gemFactory).ownerOf(_tokenId) != msg.sender) {</span>
+            revert NotGemOwner();
+        }
+        // Ensure the price is greater than zero
+<span class="cstat-no" title="statement not covered" >        if(_price == 0) {</span>
+            revert WrongPrice();
+        }
+        // Ensure the GEM is not already locked or being mined
+<span class="cstat-no" title="statement not covered" >        if(IGemFactory(gemFactory).isTokenLocked(_tokenId) == true) {</span>
+            revert GemIsAlreadyForSaleOrIsMining();
+        }   
+&nbsp;
+        // Lock the GEM and list it for sale
+<span class="cstat-no" title="statement not covered" >        GemFactory(gemFactory).setIsLocked(_tokenId, true)</span>;
+        gemsForSale[_tokenId] = Sale({
+            seller: msg.sender,
+            price: _price,
+            isActive: true
+        });
+        
+        // Emit an event for the GEM being listed for sale
+<span class="cstat-no" title="statement not covered" >        emit GemForSale(_tokenId, msg.sender, _price);</span>
+<span class="cstat-no" title="statement not covered" >        return true;</span>
+    }
+    
+    /**
+     * @notice Internal function to handle the purchase of a GEM.
+     * @param _tokenId The ID of the token to be transferred.
+     * @param _payer Address of the payer.
+     * @param _paymentMethod The payment method used.
+     * @return bool Returns true if the operation is successful.
+     * @dev This function handles payment processing and GEM transfer.
+     */
+<span class="fstat-no" title="function not covered" >    function _buyGem(uint256 _tokenId, address _payer, bool _paymentMethod) internal nonReentrant returns(bool) {</span>
+        // Ensure the payer address is not zero
+<span class="cstat-no" title="statement not covered" >        if(_payer == address(0)) {</span>
+            revert AddressZero();
+        }
+        // Ensure the GEM is currently listed for sale
+<span class="cstat-no" title="statement not covered" >        if(!gemsForSale[_tokenId].isActive) {</span>
+            revert GemIsNotForSale();
+        }
+        
+<span class="cstat-no" title="statement not covered" >        uint256 price = gemsForSale[_tokenId].price;</span>
+        // Ensure the price is valid
+<span class="cstat-no" title="statement not covered" >        if(price == 0) {</span>
+            revert WrongPrice();
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        address seller = gemsForSale[_tokenId].seller;</span>
+        // Ensure the seller address is valid
+<span class="cstat-no" title="statement not covered" >        if(seller == address(0)) {</span>
+            revert WrongSeller();
+        }
+&nbsp;
+        // Ensure the buyer is not the seller
+<span class="cstat-no" title="statement not covered" >        if(msg.sender == seller &amp;&amp; msg.sender == _payer) {</span>
+            revert BuyerIsSeller("Use RemoveGemFromList instead");
+        }
+        
+        // Handle payment and transfer based on the payment method
+<span class="cstat-no" title="statement not covered" >        if (_paymentMethod) { </span>
+            // Transfer WSTON from payer to seller    
+<span class="cstat-no" title="statement not covered" >            IERC20(wston).transferFrom(_payer, seller, price)</span>;
+        } else {
+            // Calculate the total price in TON (we multiply the WSTON price by the staking index)
+<span class="cstat-no" title="statement not covered" >            uint256 wtonPrice = (price * stakingIndex) / DECIMALS;</span>
+            // Add the ton fees 
+<span class="cstat-no" title="statement not covered" >            uint256 totalprice = _toWAD(wtonPrice + ((wtonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));</span>
+            // Transfer TON from payer to treasury
+<span class="cstat-no" title="statement not covered" >            IERC20(ton).transferFrom(_payer, treasury, totalprice)</span>; // 18 decimals
+<span class="cstat-no" title="statement not covered" >            if (seller != treasury) {</span>
+                // Approve and transfer WSTON from treasury to seller
+<span class="cstat-no" title="statement not covered" >                ITreasury(treasury).approveWstonForMarketplace(price)</span>;
+<span class="cstat-no" title="statement not covered" >                IERC20(wston).transferFrom(treasury, seller, price)</span>; // 27 decimals
+            }
+        }
+&nbsp;
+        // Mark the GEM as no longer for sale and unlock it
+        gemsForSale[_tokenId].isActive = false;
+<span class="cstat-no" title="statement not covered" >        IGemFactory(gemFactory).setIsLocked(_tokenId, false)</span>;
+        // Transfer GEM ownership from seller to payer
+<span class="cstat-no" title="statement not covered" >        IGemFactory(gemFactory).transferFrom(seller, _payer, _tokenId)</span>;
+        
+        // Emit an event for the GEM purchase
+<span class="cstat-no" title="statement not covered" >        emit GemBought(_tokenId, _payer, seller, price);</span>
+<span class="cstat-no" title="statement not covered" >        return true;</span>
+    }
+&nbsp;
+    /**
+     * @dev Converts a value from WAD (18 decimals) to RAY (27 decimals).
+     * @param v The value to convert.
+     * @return The converted value in RAY.
+     */
+<span class="fstat-no" title="function not covered" >    function _toRAY(uint256 v) internal pure returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        return v * 10 ** 9;</span>
+    }
+&nbsp;
+    /**
+     * @dev Converts a value from RAY (27 decimals) to WAD (18 decimals).
+     * @param v The value to convert.
+     * @return The converted value in WAD.
+     */
+<span class="fstat-no" title="function not covered" >    function _toWAD(uint256 v) internal pure returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        return v / 10 ** 9;</span>
+    }
+    
+    //---------------------------------------------------------------------------------------
+    //-----------------------------STORAGE GETTERS-------------------------------------------
+    //---------------------------------------------------------------------------------------
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getStakingIndex() external view returns(uint256) { <span class="cstat-no" title="statement not covered" >return stakingIndex;</span>}</span>
+<span class="fstat-no" title="function not covered" >    function getTonFeesRate() external view returns(uint256) { <span class="cstat-no" title="statement not covered" >return tonFeesRate;</span>}</span>
+<span class="fstat-no" title="function not covered" >    function getGemFactoryAddress() external view returns(address) { <span class="cstat-no" title="statement not covered" >return gemFactory;</span>}</span>
+<span class="fstat-no" title="function not covered" >    function getTreasuryAddress() external view returns(address) { <span class="cstat-no" title="statement not covered" >return treasury;</span>}</span>
+<span class="fstat-no" title="function not covered" >    function getTonAddress() external view returns(address) { <span class="cstat-no" title="statement not covered" >return ton;</span>}</span>
+<span class="fstat-no" title="function not covered" >    function getWstonAddress() external view returns(address) { <span class="cstat-no" title="statement not covered" >return wston;</span>}</span>
+<span class="fstat-no" title="function not covered" >    function getPauseStatus() external view returns(bool) { <span class="cstat-no" title="statement not covered" >return paused;</span>}</span>
+<span class="fstat-no" title="function not covered" >    function getGemForSale(uint256 _tokenId) external view returns(Sale memory) { <span class="cstat-no" title="statement not covered" >return gemsForSale[_tokenId];</span>}</span>
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Oct 11 2024 15:51:23 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

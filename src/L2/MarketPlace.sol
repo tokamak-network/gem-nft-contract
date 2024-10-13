@@ -69,6 +69,10 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         paused = false;
     }
 
+    //---------------------------------------------------------------------------------------
+    //--------------------------INITIALIZATION FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
+
     /**
      * @notice Initializes the marketplace contract with the given parameters.
      * @param _treasury Address of the treasury contract.

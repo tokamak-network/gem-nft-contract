@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for L2/Mock/OptimismL1Fees.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">L2/Mock/</a> OptimismL1Fees.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/24</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/14</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/6</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/25</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity 0.8.25;
+import {IOVM_GasPriceOracle} from "./IOVM_GasPriceOracle.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+&nbsp;
+abstract contract OptimismL1Fees is Ownable {
+    /// @dev This is the padding size for unsigned RLP-encoded transaction without the signature data
+    /// @dev The padding size was estimated based on hypothetical max RLP-encoded transaction size
+    uint256 internal constant L1_UNSIGNED_RLP_ENC_TX_DATA_BYTES_SIZE = 71;
+    /// @dev Signature data size used in the GasPriceOracle predeploy
+    /// @dev reference: https://github.com/ethereum-optimism/optimism/blob/a96cbe7c8da144d79d4cec1303d8ae60a64e681e/packages/contracts-bedrock/contracts/L2/GasPriceOracle.sol#L145
+    uint256 internal constant L1_TX_SIGNATURE_DATA_BYTES_SIZE = 68;
+    // /// @dev L1_FEE_DATA_PADDING includes 71 bytes for L1 data padding for Optimism
+    // bytes internal constant L1_FEE_DATA_PADDING =
+    //     hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+    /// @dev OVM_GASPRICEORACLE_ADDR is the address of the OVM_GasPriceOracle precompile on Optimism.
+    /// @dev reference: https://community.optimism.io/docs/developers/build/transaction-fees/#estimating-the-l1-data-fee
+    address private constant OVM_GASPRICEORACLE_ADDR =
+        address(0x420000000000000000000000000000000000000F);
+    IOVM_GasPriceOracle internal constant OVM_GASPRICEORACLE =
+        IOVM_GasPriceOracle(OVM_GASPRICEORACLE_ADDR);
+&nbsp;
+    // mode
+    /// @dev  getL1FeeUpperBound() function from predeploy GasPriceOracle contract (available after Fjord upgrade)
+    uint8 internal constant L1_GAS_FEES_UPPER_BOUND_MODE = 0;
+    uint8 internal constant L1_GAS_FEES_ECOTONE_MODE = 1;
+    uint8 internal constant L1_GAS_FEES_LEGACY_MODE = 2;
+    uint8 internal constant NOT_L2 = 4;
+&nbsp;
+    uint8 public s_l1FeeCalculationMode = NOT_L2;
+&nbsp;
+    /// @dev L1 fee coefficient can be applied to options 2 or 3 to reduce possibly inflated gas price
+    uint8 public s_l1FeeCoefficient = 100;
+&nbsp;
+    error InvalidL1FeeCalculationMode(uint8 mode);
+    error InvalidL1FeeCoefficient(uint8 coefficient);
+&nbsp;
+    event L1FeeCalculationSet(uint8 mode, uint8 coefficient);
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setL1FeeCalculation(</span>
+        uint8 mode,
+        uint8 coefficient
+    ) external virtual onlyOwner {
+<span class="cstat-no" title="statement not covered" >        _setL1FeeCalculationInternal(mode, coefficient)</span>;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function _setL1FeeCalculationInternal(</span>
+        uint8 mode,
+        uint8 coefficient
+    ) internal {
+<span class="cstat-no" title="statement not covered" >        if (mode &gt;= 5) {</span>
+            revert InvalidL1FeeCalculationMode(mode);
+        }
+<span class="cstat-no" title="statement not covered" >        if (coefficient == 0 || coefficient &gt; 100) {</span>
+            revert InvalidL1FeeCoefficient(coefficient);
+        }
+&nbsp;
+        s_l1FeeCalculationMode = mode;
+        s_l1FeeCoefficient = coefficient;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        emit L1FeeCalculationSet(mode, coefficient);</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function _getL1CostWeiForCalldataSize(</span>
+        uint256 calldataSizeBytes
+    ) internal view returns (uint256) {
+<span class="cstat-no" title="statement not covered" >        uint8 l1FeeCalculationMode = s_l1FeeCalculationMode;</span>
+<span class="cstat-no" title="statement not covered" >        if (l1FeeCalculationMode == L1_GAS_FEES_ECOTONE_MODE) {</span>
+            // estimate based on unsigned fully RLP-encoded transaction size so we have to account for paddding bytes as well
+<span class="cstat-no" title="statement not covered" >            return</span>
+                _calculateOptimismL1DataFee(
+                    calldataSizeBytes + L1_UNSIGNED_RLP_ENC_TX_DATA_BYTES_SIZE
+                );
+        } else <span class="cstat-no" title="statement not covered" >if (l1FeeCalculationMode == L1_GAS_FEES_UPPER_BOUND_MODE) {</span>
+            // getL1FeeUpperBound expects unsigned fully RLP-encoded transaction size so we have to account for paddding bytes as well
+<span class="cstat-no" title="statement not covered" >            return</span>
+                OVM_GASPRICEORACLE.getL1FeeUpperBound(
+                    calldataSizeBytes + L1_UNSIGNED_RLP_ENC_TX_DATA_BYTES_SIZE
+                );
+        } else <span class="cstat-no" title="statement not covered" >if (l1FeeCalculationMode == L1_GAS_FEES_LEGACY_MODE)</span>
+<span class="cstat-no" title="statement not covered" >            return _calculateLegacyL1DataFee(calldataSizeBytes);</span>
+        else <span class="cstat-no" title="statement not covered" >return 0;</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function _getOptimismL1UpperBoundDataFee(</span>
+        uint256 calldataSizeBytes
+    ) internal view returns (uint256) {
+        // getL1FeeUpperBound expects unsigned fully RLP-encoded transaction size so we have to account for padding bytes as well
+<span class="cstat-no" title="statement not covered" >        return</span>
+            (s_l1FeeCoefficient *
+                OVM_GASPRICEORACLE.getL1FeeUpperBound(
+                    calldataSizeBytes + L1_UNSIGNED_RLP_ENC_TX_DATA_BYTES_SIZE
+                )) / 100;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function _calculateOptimismL1DataFee(</span>
+        uint256 calldataSizeBytes
+    ) internal view returns (uint256) {
+        // reference: https://docs.optimism.io/stack/transactions/fees#ecotone
+        // also: https://github.com/ethereum-optimism/specs/blob/main/specs/protocol/exec-engine.md#ecotone-l1-cost-fee-changes-eip-4844-da
+        // we treat all bytes in the calldata payload as non-zero bytes (cost: 16 gas) because accurate estimation is too expensive
+        // we also have to account for the signature data size
+<span class="cstat-no" title="statement not covered" >        uint256 l1GasUsed = (calldataSizeBytes +</span>
+            L1_TX_SIGNATURE_DATA_BYTES_SIZE) * 16;
+<span class="cstat-no" title="statement not covered" >        uint256 scaledBaseFee = OVM_GASPRICEORACLE.baseFeeScalar() *</span>
+            16 *
+            OVM_GASPRICEORACLE.l1BaseFee();
+<span class="cstat-no" title="statement not covered" >        uint256 scaledBlobBaseFee = OVM_GASPRICEORACLE.blobBaseFeeScalar() *</span>
+            OVM_GASPRICEORACLE.blobBaseFee();
+<span class="cstat-no" title="statement not covered" >        uint256 fee = l1GasUsed * (scaledBaseFee + scaledBlobBaseFee);</span>
+<span class="cstat-no" title="statement not covered" >        return</span>
+            (s_l1FeeCoefficient *
+                (fee / (16 * 10 ** OVM_GASPRICEORACLE.decimals()))) / 100;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function _calculateLegacyL1DataFee(</span>
+        uint256 calldataSizeBytes
+    ) internal view returns (uint256) {
+<span class="cstat-no" title="statement not covered" >        uint256 l1GasUsed = (calldataSizeBytes +</span>
+            L1_TX_SIGNATURE_DATA_BYTES_SIZE) *
+            16 +
+            OVM_GASPRICEORACLE.overhead();
+<span class="cstat-no" title="statement not covered" >        uint256 l1Fee = l1GasUsed * OVM_GASPRICEORACLE.l1BaseFee();</span>
+<span class="cstat-no" title="statement not covered" >        uint256 divisor = 10 ** OVM_GASPRICEORACLE.decimals();</span>
+<span class="cstat-no" title="statement not covered" >        uint256 unscaled = l1Fee * OVM_GASPRICEORACLE.scalar();</span>
+<span class="cstat-no" title="statement not covered" >        uint256 scaled = unscaled / divisor;</span>
+<span class="cstat-no" title="statement not covered" >        return scaled;</span>
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Oct 11 2024 15:51:23 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

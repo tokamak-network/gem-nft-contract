@@ -4,6 +4,8 @@ pragma solidity 0.8.25;
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import { GemFactory } from "../../src/L2/GemFactory.sol";
+import { GemFactoryForging } from "../../src/L2/GemFactoryForging.sol";
+import { GemFactoryMining } from "../../src/L2/GemFactoryMining.sol";
 import { GemFactoryProxy } from "../../src/L2/GemFactoryProxy.sol";
 import { Treasury } from "../../src/L2/Treasury.sol";
 import { TreasuryProxy } from "../../src/L2/TreasuryProxy.sol";
@@ -23,7 +25,6 @@ import { DRBConsumerBase } from "../../src/L2/Randomness/DRBConsumerBase.sol";
 import { Airdrop } from "../../src/L2/Airdrop.sol";
 import { AirdropProxy } from "../../src/L2/AirdropProxy.sol";
 import {IDRBCoordinator} from "../../src/interfaces/IDRBCoordinator.sol";
-
 
 contract L2BaseTest is Test {
 
@@ -63,6 +64,8 @@ contract L2BaseTest is Test {
     address payable user3;
 
     GemFactory gemfactory;
+    GemFactoryForging gemfactoryforging;
+    GemFactoryMining gemfactorymining;
     GemFactoryProxy gemfactoryProxy;
     address gemfactoryProxyAddress;
     Treasury treasury;
@@ -97,6 +100,7 @@ contract L2BaseTest is Test {
     uint256 randomBeaconFees = 0.005 ether;
 
     event CommonGemMinted();
+    event DebugSelector(bytes4 forgeTokensSelector);
     function setUp() public virtual {
         owner = payable(makeAddr("Owner"));
         user1 = payable(makeAddr("User1"));
@@ -135,11 +139,55 @@ contract L2BaseTest is Test {
             calldataSizeBytes
         );
 
+// --------------------------- GEM FACTORY DEPLOYMENT -------------------------------------------------
+
         // deploy GemFactory
         gemfactory = new GemFactory();
+        gemfactoryforging = new GemFactoryForging();
+        gemfactorymining = new GemFactoryMining();
         gemfactoryProxy = new GemFactoryProxy();
         gemfactoryProxy.upgradeTo(address(gemfactory));
+        // we set the forging implementation under the proxy    
+        gemfactoryProxy.setImplementation2(address(gemfactoryforging), 1, true);
+        // we set the mining implementation under the proxy    
+        gemfactoryProxy.setImplementation2(address(gemfactorymining), 2, true);
+        
+        
+        // Compute the function selector for GemFactoryForging
+        bytes4 forgeTokensSelector = bytes4(keccak256("forgeTokens(uint256[],uint8,uint8[2])"));
+        // Create a dynamic array for the selector
+        bytes4[] memory forgingSelectors = new bytes4[](1);
+        forgingSelectors[0] = forgeTokensSelector;
+        // Map the forgeTokens function to the GemFactoryForging implementation
+        gemfactoryProxy.setSelectorImplementations2(forgingSelectors, address(gemfactoryforging));
+
+        // Compute the function selector for GemFactoryMining
+        bytes4 startMiningSelector = bytes4(keccak256("startMiningGEM(uint256)"));
+        bytes4 cancelMiningSelector = bytes4(keccak256("cancelMining(uint256)"));
+        bytes4 pickMinedGEMSelector = bytes4(keccak256("pickMinedGEM(uint256)"));
+        bytes4 drbInitializeSelector = bytes4(keccak256("DRBInitialize(address)"));
+        bytes4 rawFulfillRandomWordsSelector = bytes4(keccak256("rawFulfillRandomWords(uint256,uint256)"));
+        // Create a dynamic array for the selector
+        bytes4[] memory miningSelector = new bytes4[](5);
+        miningSelector[0] = startMiningSelector;
+        miningSelector[1] = cancelMiningSelector;
+        miningSelector[2] = pickMinedGEMSelector;
+        miningSelector[3] = drbInitializeSelector;
+        miningSelector[4] = rawFulfillRandomWordsSelector;
+        // Map the mining functions to the GemFactoryMining implementation
+        gemfactoryProxy.setSelectorImplementations2(miningSelector, address(gemfactorymining));
+
+        // Debugging: Verify the mapping
+        address forgeTokenslementation = gemfactoryProxy.getSelectorImplementation2(forgeTokensSelector);
+        require(forgeTokenslementation == address(gemfactoryforging), "Selector not mapped to GemFactoryForging");
+
+        address startMiningImpl = gemfactoryProxy.getSelectorImplementation2(startMiningSelector);
+        require(startMiningImpl == address(gemfactorymining), "Selector not mapped to GemFactoryMining");
+
         gemfactoryProxyAddress = address(gemfactoryProxy);
+
+
+// ------------------------------- TREASURY DEPLOYMENT -------------------------------------------------
 
         // deploy and initialize treasury
         treasury = new Treasury();
@@ -178,11 +226,14 @@ contract L2BaseTest is Test {
         vm.startPrank(owner);
         // initialize gemfactory with newly created contract addreses
         GemFactory(gemfactoryProxyAddress).initialize(
-            address(drbCoordinatorMock),
             owner,
             wston,
             ton,
             treasuryProxyAddress
+        );
+
+        GemFactoryMining(gemfactoryProxyAddress).DRBInitialize(
+            address(drbCoordinatorMock)
         );
 
         GemFactory(gemfactoryProxyAddress).setGemsValue(

@@ -14,6 +14,7 @@ contract Proxy is
     IProxyEvent,
     IProxyAction
 {
+
     /* ========== CONSTRUCTOR ========== */
 
     constructor() {
@@ -122,7 +123,6 @@ contract Proxy is
     /// @dev fallback function , execute on undefined function call
     function _fallback() internal {
         address _impl = getSelectorImplementation2(msg.sig);
-
         require(
             _impl != address(0) && !pauseProxy,
             "Proxy: impl OR proxy is false"

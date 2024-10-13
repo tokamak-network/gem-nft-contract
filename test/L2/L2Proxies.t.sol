@@ -202,23 +202,29 @@ contract L2ProxyTest is WstonSwap {
         assert(counter == 1);
     }
 
+    /**
+     * @notice upgrading GemFactory with an additionnal function `setMiningTry(uint256)`. Ensuing the function is implemented
+     */
     function testGemFactoryProxy() public {
         vm.startPrank(owner);
         mockGemFactoryUpgraded = new MockGemFactoryUpgraded();
         gemfactoryProxy.upgradeTo(address(mockGemFactoryUpgraded));
 
         // assert storage variable are correctly kept after the upgrade
-        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getTreasuryAddress() != address(0));
-        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getTonAddress() != address(0));
-        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getWstonAddress() != address(0));
-        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getMarketPlaceAddress() != address(0));
-        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getAirdropAddress() != address(0));
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getTreasuryAddress() == treasuryProxyAddress);
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getTonAddress() == ton);
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getWstonAddress() == wston);
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getMarketPlaceAddress() == marketplaceProxyAddress);
+        assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getAirdropAddress() == airdropProxyAddress);
         assert(MockGemFactoryUpgraded(gemfactoryProxyAddress).getCommonGemsValue() != 0);
         
-        // check that the new counter storage and incrementCounter functions are deployed
-        MockGemFactoryUpgraded(gemfactoryProxyAddress).incrementCounter();
-        uint256 counter = MockGemFactoryUpgraded(gemfactoryProxyAddress).getCounter();
-        assert(counter == 1);
+        // check that the new setRareMiningTry functions is deployed
+        uint8 rareMiningTryBefore = MockGemFactoryUpgraded(gemfactoryProxyAddress).getRareminingTry();
+        assert(rareMiningTryBefore == 2);
+        // setting rare mining try to 10
+        MockGemFactoryUpgraded(gemfactoryProxyAddress).setRareMiningTry(10);
+        uint8 rareMiningTryAfter = MockGemFactoryUpgraded(gemfactoryProxyAddress).getRareminingTry();
+        assert(rareMiningTryAfter == 10);
 
     }
 
@@ -230,7 +236,6 @@ contract L2ProxyTest is WstonSwap {
         // We expect the initialize function to revert with the selector for "InvalidInitialization()"
         vm.expectRevert(Initializable.InvalidInitialization.selector);
         MockGemFactoryUpgraded(gemfactoryProxyAddress).initialize(
-            address(drbCoordinatorMock),
             owner,
             wston,
             ton,

@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for L2/GemFactoryStorage.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">L2/</a> GemFactoryStorage.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/0</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity 0.8.25;
+&nbsp;
+contract GemFactoryStorage {
+&nbsp;
+    enum Rarity {
+        COMMON,
+        RARE,
+        UNIQUE,
+        EPIC,
+        LEGENDARY,
+        MYTHIC
+    }
+&nbsp;
+    struct Gem {
+        uint256 tokenId;  
+        uint256 value; // 27 decimals
+        uint256 gemCooldownPeriod; // gem cooldown before user can start mining
+        uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
+        Rarity rarity; 
+        uint32 miningPeriod; // Mining delay before claiming
+        uint8 miningTry; 
+        bool isLocked; // Locked if gem is listed on the marketplace
+        uint8[4] quadrants; // 4 quadrants
+        uint8[2] color; // id of the color
+        string tokenURI; // IPFS address of the metadata file 
+    }
+&nbsp;
+    struct RequestStatus {
+        uint256 tokenId;
+        uint256 randomWord;
+        uint256 chosenTokenId;
+        address requester;
+        bool requested; // whether the request has been made
+        bool fulfilled; // whether the request has been successfully fulfilled
+    } 
+&nbsp;
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------STORAGE-------------------------------------------
+    //---------------------------------------------------------------------------------------
+&nbsp;
+    Gem[] public Gems;
+    mapping(uint8 =&gt; mapping(uint8 =&gt; string)) public colorName;
+    uint8 public colorsCount;
+    uint8[2][] public colors;
+&nbsp;
+    mapping(uint256 =&gt; address) public GEMIndexToOwner;
+    mapping(address =&gt; uint256) public ownershipTokenCount;
+&nbsp;
+    // Mining mappings
+    mapping(address =&gt; uint256) public tokenMiningByUser;
+    mapping(address =&gt; mapping(uint256 =&gt; bool)) public userMiningToken;
+    mapping(address =&gt; mapping(uint256 =&gt; uint256)) public userMiningStartTime;
+    mapping(uint256 =&gt; bool) public tokenReadyToMine;
+&nbsp;
+    // Random requests mapping
+    mapping(uint256 =&gt; RequestStatus) public s_requests; /* requestId --&gt; requestStatus */
+&nbsp;
+    bool public paused;
+&nbsp;
+    // Mining storage
+    // mining try is uint8 (will be always less than type(uint8).max = 255)
+    uint8 internal RareminingTry;
+    uint8 internal UniqueminingTry;
+    uint8 internal EpicminingTry;
+    uint8 internal LegendaryminingTry;
+    uint8 internal MythicminingTry;
+&nbsp;
+    uint32 internal RareGemsMiningPeriod;
+    uint32 internal UniqueGemsMiningPeriod;
+    uint32 internal EpicGemsMiningPeriod;
+    uint32 internal LegendaryGemsMiningPeriod;
+    uint32 internal MythicGemsMiningPeriod;
+&nbsp;
+    uint32 internal RareGemsCooldownPeriod;
+    uint32 internal UniqueGemsCooldownPeriod;
+    uint32 internal EpicGemsCooldownPeriod;
+    uint32 internal LegendaryGemsCooldownPeriod;
+    uint32 internal MythicGemsCooldownPeriod;
+&nbsp;
+    uint256 internal CommonGemsValue;
+    uint256 internal RareGemsValue;
+    uint256 internal UniqueGemsValue;
+    uint256 internal EpicGemsValue;
+    uint256 internal LegendaryGemsValue;
+    uint256 internal MythicGemsValue;
+&nbsp;
+    // past random requests Id.
+    uint256[] internal requestIds;
+    uint256 internal requestCount;
+&nbsp;
+    // contract addresses
+    address internal wston;
+    address internal ton;
+    address internal treasury;
+    address internal marketplace;
+    address internal airdrop;
+&nbsp;
+    // constants
+    uint32 public constant CALLBACK_GAS_LIMIT = 210000;
+&nbsp;
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------EVENTS--------------------------------------------
+    //---------------------------------------------------------------------------------------
+&nbsp;
+    // Premining events
+    event Created(
+        uint256 indexed tokenId, 
+        Rarity rarity, 
+        uint8[2] color, 
+        uint256 value,
+        uint8[4] quadrants, 
+        uint32 miningPeriod,
+        uint256 cooldownDueDate,
+        string tokenURI, 
+        address owner
+    );
+    event TransferGEM(address from, address to, uint256 tokenId);
+&nbsp;
+    // Mining Events
+    event GemMiningStarted(uint256 tokenId, address miner, uint256 startMiningTime, uint256 newminingTry);
+    event GemMiningClaimed(uint256 tokenId, address miner);
+    event GemMelted(uint256 _tokenId, address _from);
+    event RandomGemRequested(uint256 tokenId, uint256 requestNumber);
+    event NoGemAvailable(uint256 tokenId);
+    event CountGemsByQuadrant(uint256 gemCount, uint256[] tokenIds);
+    event MiningCancelled(uint256 _tokenId, address owner, uint256 timestamp);
+    event EthSentBack(uint256 amount);
+&nbsp;
+    // Forging Event
+    event GemForged(
+        address gemOwner,
+        uint256[] gemsTokenIds, 
+        uint256 newGemCreatedId, 
+        Rarity newRarity, 
+        uint8[4] forgedQuadrants, 
+        uint8[2] color, 
+        uint256 newValue
+    );
+    event ColorValidated(uint8 color_0, uint8 color_1);
+&nbsp;
+    // Pause Events
+    event Paused(address account);
+    event Unpaused(address account);
+&nbsp;
+    //storage setter events
+    event ColorAdded(uint8 indexed id, string color);
+    event BackgroundColorAdded(uint8 indexed id, string backgroundColor);
+&nbsp;
+    //storage modification events
+    event GemsCoolDownPeriodModified(
+        uint32 RareGemsCooldownPeriod,
+        uint32 UniqueGemsCooldownPeriod,
+        uint32 EpicGemsCooldownPeriod,
+        uint32 LegendaryGemsCooldownPeriod,
+        uint32 MythicGemsCooldownPeriod
+    );
+    event GemsMiningPeriodModified(
+        uint32 RareGemsMiningPeriod,
+        uint32 UniqueGemsMiningPeriod,
+        uint32 EpicGemsMiningPeriod,
+        uint32 LegendaryGemsMiningPeriod,
+        uint32 MythicGemsMiningPeriod
+    );
+    event GemsMiningTryModified(
+        uint8 RareGemsMiningTry,
+        uint8 UniqueGemsMiningTry,
+        uint8 EpicGemsMiningTry,
+        uint8 LegendaryGemsMiningTry,
+        uint8 MythicGemsMiningTry
+    );
+    event GemsValueModified(
+        uint256 CommonGemsValue,
+        uint256 RareGemsValue,
+        uint256 UniqueGemsValue,
+        uint256 EpicGemsValue,
+        uint256 LegendaryValue,
+        uint256 MythicValue
+    );
+&nbsp;
+    //---------------------------------------------------------------------------------------
+    //-------------------------------------ERRORS--------------------------------------------
+    //---------------------------------------------------------------------------------------
+&nbsp;
+    // gem creation errors
+    error NewGemInvalidQuadrant(uint8 quadrantIndex, uint8 expectedValue1, uint8 expectedValue2);
+    error SumOfQuadrantsTooHigh(uint8 sum, string rarity);
+    
+    // Forging errors
+    error InvalidQuadrant(uint8 quadrant, uint8 value);
+    error InvalidSumOfQuadrants();
+    error ColorNotExist();
+&nbsp;
+    // Mining errors
+    error MismatchedArrayLengths();
+    error AddressZero();
+    error NotGemOwner();
+    error CooldownPeriodNotElapsed();
+    error GemIsLocked();
+    error GemIsNotLocked();
+    error WrongRarity();
+    error NoMiningTryLeft();
+    error NotMining();
+    error GemAlreadyPicked();
+    error MiningPeriodNotElapsed();
+&nbsp;
+    // Transfer error
+    error SameSenderAndRecipient();
+    error TransferFailed();
+&nbsp;
+    // Random fullfil error
+    error RequestNotMade();
+    error FailedToSendEthBack();
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Oct 11 2024 15:51:23 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
