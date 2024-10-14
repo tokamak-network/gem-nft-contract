@@ -14,15 +14,15 @@ contract GemFactoryStorage {
 
     struct Gem {
         uint256 tokenId;  
+        uint256 value; // 27 decimals
         uint256 gemCooldownPeriod; // gem cooldown before user can start mining
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
-        uint256 value; // 27 decimals
         Rarity rarity; 
         uint32 miningPeriod; // Mining delay before claiming
         uint8 miningTry; 
+        bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
-        bool isLocked; // Locked if gem is listed on the marketplace
         string tokenURI; // IPFS address of the metadata file 
     }
 
@@ -30,9 +30,9 @@ contract GemFactoryStorage {
         uint256 tokenId;
         uint256 randomWord;
         uint256 chosenTokenId;
+        address requester;
         bool requested; // whether the request has been made
         bool fulfilled; // whether the request has been successfully fulfilled
-        address requester;
     } 
 
     //---------------------------------------------------------------------------------------
@@ -66,14 +66,12 @@ contract GemFactoryStorage {
     uint8 internal LegendaryminingTry;
     uint8 internal MythicminingTry;
 
-    uint32 internal CommonGemsMiningPeriod;
     uint32 internal RareGemsMiningPeriod;
     uint32 internal UniqueGemsMiningPeriod;
     uint32 internal EpicGemsMiningPeriod;
     uint32 internal LegendaryGemsMiningPeriod;
     uint32 internal MythicGemsMiningPeriod;
 
-    uint32 internal CommonGemsCooldownPeriod;
     uint32 internal RareGemsCooldownPeriod;
     uint32 internal UniqueGemsCooldownPeriod;
     uint32 internal EpicGemsCooldownPeriod;
@@ -151,7 +149,6 @@ contract GemFactoryStorage {
 
     //storage modification events
     event GemsCoolDownPeriodModified(
-        uint32 CommonGemsCooldownPeriod,
         uint32 RareGemsCooldownPeriod,
         uint32 UniqueGemsCooldownPeriod,
         uint32 EpicGemsCooldownPeriod,
@@ -159,7 +156,6 @@ contract GemFactoryStorage {
         uint32 MythicGemsCooldownPeriod
     );
     event GemsMiningPeriodModified(
-        uint32 CommonGemsMiningPeriod,
         uint32 RareGemsMiningPeriod,
         uint32 UniqueGemsMiningPeriod,
         uint32 EpicGemsMiningPeriod,
@@ -186,6 +182,10 @@ contract GemFactoryStorage {
     //-------------------------------------ERRORS--------------------------------------------
     //---------------------------------------------------------------------------------------
 
+    // gem creation errors
+    error NewGemInvalidQuadrant(uint8 quadrantIndex, uint8 expectedValue1, uint8 expectedValue2);
+    error SumOfQuadrantsTooHigh(uint8 sum, string rarity);
+    
     // Forging errors
     error InvalidQuadrant(uint8 quadrant, uint8 value);
     error InvalidSumOfQuadrants();
@@ -206,6 +206,7 @@ contract GemFactoryStorage {
 
     // Transfer error
     error SameSenderAndRecipient();
+    error TransferFailed();
 
     // Random fullfil error
     error RequestNotMade();

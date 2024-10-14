@@ -17,12 +17,6 @@ async function main() {
      await forgeLibrary.waitForDeployment();
      console.log("ForgeLibrary deployed to:", forgeLibrary.target);
 
-     // Deploy TransferLibrary
-     const TransferLibrary = await ethers.getContractFactory("TransferLibrary");
-     const transferLibrary = await TransferLibrary.deploy();
-     await transferLibrary.waitForDeployment();
-     console.log("TransferLibrary deployed to:", transferLibrary.target);
-
      // Deploy MiningLibrary
      const MiningLibrary = await ethers.getContractFactory("MiningLibrary");
      const miningLibrary = await MiningLibrary.deploy();
@@ -36,39 +30,29 @@ async function main() {
      console.log("gemLibrary deployed to:", gemLibrary.target);
  
      // Deploy GemFactory with linked ForgeLibrary
-     const GemFactory = await ethers.getContractFactory("GemFactory", {
-         libraries: {
-             ForgeLibrary: forgeLibrary.target,
-         },
-     });
-    const gemFactory = await GemFactory.deploy(coordinatorAddress);
+     const GemFactory = await ethers.getContractFactory("GemFactory");
+    const gemFactory = await GemFactory.deploy();
     await gemFactory.waitForDeployment(); // Ensure deployment is complete
     console.log("GemFactory deployed to:", gemFactory.target);
+
+
 
     // Verify GemFactory
     await run("verify:verify", {
     address: gemFactory.target,
-    constructorArguments: [coordinatorAddress],
+    constructorArguments: [],
     });
 
     // Deploy Treasury
   const Treasury = await ethers.getContractFactory("Treasury");
-  const treasury = await Treasury.deploy(
-    process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
-    process.env.TON_ADDRESS, // l2ton
-    gemFactory.target // gemFactory
-  );
+  const treasury = await Treasury.deploy();
   await treasury.waitForDeployment(); // Ensure deployment is complete
   console.log("Treasury deployed to:", treasury.target);
 
   // Verify Treasury
   await run("verify:verify", {
     address: treasury.target,
-    constructorArguments: [
-      process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
-      process.env.TON_ADDRESS, // l2ton
-      gemFactory.target // gemFactory
-    ],
+    constructorArguments: [],
   });
 
   // Deploy MarketPlace
@@ -83,7 +67,7 @@ async function main() {
     constructorArguments: [],
   });
 
-  // Deploy WstonSwapPool
+  /*// Deploy WstonSwapPool
   const WstonSwapPool = await ethers.getContractFactory("WstonSwapPool");
   const wstonSwapPool = await WstonSwapPool.deploy(
     process.env.TON_ADDRESS, // l2ton
@@ -106,6 +90,7 @@ async function main() {
       30 // swapPoolfeeRate
     ],
   });
+  */
 }
 
 main()

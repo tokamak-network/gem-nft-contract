@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "StorageSlot",
+  "sourceName": "src/L2/Mock/StorageSlot.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea2646970667358221220d2091111617ea51660a5570b3ce3b573374e977d0aa61d5a6b7d65264c4d1f0d64736f6c63430008190033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220d2091111617ea51660a5570b3ce3b573374e977d0aa61d5a6b7d65264c4d1f0d64736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

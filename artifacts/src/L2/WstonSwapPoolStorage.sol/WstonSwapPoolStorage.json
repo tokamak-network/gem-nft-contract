@@ -1,0 +1,395 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "WstonSwapPoolStorage",
+  "sourceName": "src/L2/WstonSwapPoolStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ContractTonBalanceTooLow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ContractWstonBalanceTooLow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InsufficientLpShares",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TonAllowanceTooLow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TonBalanceTooLow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongAmounts",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongStakingIndex",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WstonAllowanceTooLow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WstonBalanceTooLow",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tonFees",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "wstonFees",
+          "type": "uint256"
+        }
+      ],
+      "name": "FeesDistributed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tonAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "wstonAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "LiquidityAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tonAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "wstonAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "LiquidityRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakingIndexUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tonAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "wstonAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "SwappedTonForWston",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tonAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "wstonAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "SwappedWstonForTon",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DECIMALS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "FEE_RATE_DIVIDER",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feeRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "lpAddresses",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "lpShares",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "stakingIndex",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ton",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "tonFeeBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "tonReserve",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalShares",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "treasury",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "wston",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "wstonFeeBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "wstonReserve",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460155761034a908161001b8239f35b600080fdfe60806040818152600436101561001457600080fd5b600091823560e01c9081630cc459b2146102f8575080630fa40a12146102dc5780632e0f2625146102b757806330f508591461029957806336b17e131461027157806338062232146102535780633a98ef39146102355780633eb42dfd146102175780635c975abb146101f157806361d027b3146101c95780637cad7e7c1461016c57806385ffa3de1461014e578063978bbdb914610130578063c109a6dc146100f15763cc48b947146100c757600080fd5b346100ed57816003193601126100ed57905490516001600160a01b039091168152602090f35b5080fd5b50346100ed5760203660031901126100ed576004356001600160a01b0381169081900361012c57828291602094526007845220549051908152f35b8280fd5b50346100ed57816003193601126100ed576020906006549051908152f35b50346100ed57816003193601126100ed576020906005549051908152f35b50346100ed5760203660031901126100ed57600435600a5481101561012c57600a9092527fc65a7bb8d6351c1cf70c95a316cc6a92839c986682d98bc35f958f4883f9d2a89091015490516001600160a01b039091168152602090f35b50346100ed57816003193601126100ed5760025490516001600160a01b039091168152602090f35b50346100ed57816003193601126100ed5760209060ff600c5460081c1690519015158152f35b50346100ed57816003193601126100ed576020906008549051908152f35b50346100ed57816003193601126100ed57602090600b549051908152f35b50346100ed57816003193601126100ed576020906004549051908152f35b50346100ed57816003193601126100ed5760015490516001600160a01b039091168152602090f35b50346100ed57816003193601126100ed576020906003549051908152f35b50346100ed57816003193601126100ed5751676765c793fa10079d601b1b8152602090f35b50346100ed57816003193601126100ed57602090516127108152f35b8390346100ed57816003193601126100ed576020906009548152f3fea26469706673582212208a9bdb0f6958e5c3734e56bf38eb4a232862eb1cb3dfe2f11d9ec9705ad54afb64736f6c63430008190033",
+  "deployedBytecode": "0x60806040818152600436101561001457600080fd5b600091823560e01c9081630cc459b2146102f8575080630fa40a12146102dc5780632e0f2625146102b757806330f508591461029957806336b17e131461027157806338062232146102535780633a98ef39146102355780633eb42dfd146102175780635c975abb146101f157806361d027b3146101c95780637cad7e7c1461016c57806385ffa3de1461014e578063978bbdb914610130578063c109a6dc146100f15763cc48b947146100c757600080fd5b346100ed57816003193601126100ed57905490516001600160a01b039091168152602090f35b5080fd5b50346100ed5760203660031901126100ed576004356001600160a01b0381169081900361012c57828291602094526007845220549051908152f35b8280fd5b50346100ed57816003193601126100ed576020906006549051908152f35b50346100ed57816003193601126100ed576020906005549051908152f35b50346100ed5760203660031901126100ed57600435600a5481101561012c57600a9092527fc65a7bb8d6351c1cf70c95a316cc6a92839c986682d98bc35f958f4883f9d2a89091015490516001600160a01b039091168152602090f35b50346100ed57816003193601126100ed5760025490516001600160a01b039091168152602090f35b50346100ed57816003193601126100ed5760209060ff600c5460081c1690519015158152f35b50346100ed57816003193601126100ed576020906008549051908152f35b50346100ed57816003193601126100ed57602090600b549051908152f35b50346100ed57816003193601126100ed576020906004549051908152f35b50346100ed57816003193601126100ed5760015490516001600160a01b039091168152602090f35b50346100ed57816003193601126100ed576020906003549051908152f35b50346100ed57816003193601126100ed5751676765c793fa10079d601b1b8152602090f35b50346100ed57816003193601126100ed57602090516127108152f35b8390346100ed57816003193601126100ed576020906009548152f3fea26469706673582212208a9bdb0f6958e5c3734e56bf38eb4a232862eb1cb3dfe2f11d9ec9705ad54afb64736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

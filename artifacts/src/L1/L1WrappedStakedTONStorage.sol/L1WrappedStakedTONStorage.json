@@ -1,0 +1,332 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "L1WrappedStakedTONStorage",
+  "sourceName": "src/L1/L1WrappedStakedTONStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "DepositFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "FailedToSwapFromTONToWTON",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "requestor",
+          "type": "address"
+        }
+      ],
+      "name": "NoClaimableAmount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoRequestToProcess",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotEnoughFunds",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RequestAlreadyProcessed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WithdrawalDelayNotElapsed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrontAmount",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "DebugAllowance",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "name": "DebugBalance",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "token",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "wstonAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "depositTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "depositBlockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "Deposited",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Paused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "SeigniorageUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "stakingIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakingIndexUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Unpaused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "WithdrawalProcessed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "WithdrawalRequested",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DECIMALS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastSeigBlock",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "layer2Address",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ton",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawalRequests",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "withdrawableBlockNumber",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "processed",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "wton",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608080604052346015576101d2908161001b8239f35b600080fdfe60806040818152600436101561001457600080fd5b600091823560e01c9081632e0f262514610177575080634d3d629f1461014c5780634e5a2328146100d55780638d62d949146100ad578063cc48b947146100855763f35c89e81461006457600080fd5b346100815781600319360112610081576020906006549051908152f35b5080fd5b503461008157816003193601126100815760025490516001600160a01b039091168152602090f35b503461008157816003193601126100815760015490516001600160a01b039091168152602090f35b50346100815780600319360112610081576004356001600160a01b0381169081900361014857602435908352600760205281832080548210156101445760208460039260609652209102019081549160ff60026001830154920154169082519384526020840152151590820152f35b8380fd5b8280fd5b50346100815781600319360112610081579054905160089190911c6001600160a01b03168152602090f35b839034610081578160031936011261008157676765c793fa10079d601b1b8152602090f3fea264697066735822122075b57e76f05592baaa9a256bee0b7392ffb69e83831a1cdd2757450bf1880fe664736f6c63430008190033",
+  "deployedBytecode": "0x60806040818152600436101561001457600080fd5b600091823560e01c9081632e0f262514610177575080634d3d629f1461014c5780634e5a2328146100d55780638d62d949146100ad578063cc48b947146100855763f35c89e81461006457600080fd5b346100815781600319360112610081576020906006549051908152f35b5080fd5b503461008157816003193601126100815760025490516001600160a01b039091168152602090f35b503461008157816003193601126100815760015490516001600160a01b039091168152602090f35b50346100815780600319360112610081576004356001600160a01b0381169081900361014857602435908352600760205281832080548210156101445760208460039260609652209102019081549160ff60026001830154920154169082519384526020840152151590820152f35b8380fd5b8280fd5b50346100815781600319360112610081579054905160089190911c6001600160a01b03168152602090f35b839034610081578160031936011261008157676765c793fa10079d601b1b8152602090f3fea264697066735822122075b57e76f05592baaa9a256bee0b7392ffb69e83831a1cdd2757450bf1880fe664736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

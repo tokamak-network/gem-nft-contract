@@ -26,26 +26,52 @@ interface ITreasury {
     ) external returns (uint256);
 }
 
+/**
+ * @title RandomPack Contract for GEM Distribution
+ * @author TOKAMAK OPAL TEAM
+ * @notice This contract facilitates the creation and distribution of random GEM tokens.
+ * @dev The contract integrates with external systems (Gem Factory, Treasury, and a Randomness Coordinator).
+ * It allows users to request random GEMs by paying a fee and handles the minting and transfer of GEMs.
+ * The contract includes mechanisms for pausing operations and managing fees.
+ */
 contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase, RandomPackStorage {
     using SafeERC20 for IERC20;
 
+    /**
+     * @notice Modifier to ensure the contract is not paused.
+     */
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
       _;
     }
 
+    /**
+     * @notice Modifier to ensure the contract is paused.
+     */
     modifier whenPaused() {
         require(paused, "Pausable: not paused");
         _;
     }
 
+    /**
+     * @notice Pauses the contract, preventing certain actions.
+     * @dev Only callable by the owner when the contract is not paused.
+     */
     function pause() public onlyOwner whenNotPaused {
         paused = true;
     }
 
+    /**
+     * @notice Unpauses the contract, allowing actions to be performed.
+     * @dev Only callable by the owner when the contract is paused.
+     */
     function unpause() public onlyOwner whenNotPaused {
         paused = false;
     }
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------------INITIALIZE FUNCTIONS-----------------------------------
+    //---------------------------------------------------------------------------------------
 
     /**
      * @notice Initializes the RandomPack contract with the given parameters.
@@ -71,10 +97,6 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         callbackGasLimit = 600000;
         perfectCommonGemURI = "";
     }
-
-    //---------------------------------------------------------------------------------------
-    //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
-    //---------------------------------------------------------------------------------------
 
     /** 
      * @notice Sets the address of the gem factory.
@@ -130,6 +152,10 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         emit CallBackGasLimitUpdated(_callbackGasLimit);
     }
 
+    //---------------------------------------------------------------------------------------
+    //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
+
     /**
      * @notice Requests a random GEM and pays the required fees.
      * @return uint256 Returns the request ID for the randomness request.
@@ -143,23 +169,28 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         //user must approve the contract for the fees amount before calling the function
         IERC20(ton).safeTransferFrom(msg.sender, address(this), randomPackFees);
         
-        // defining the random value
+        // Request randomness from the consumer with default parameters
         (uint256 directFundingCost, uint256 requestId) = requestRandomness(0,0,callbackGasLimit);        
 
+        // Update the request mapping with details of the request
         s_requests[requestId].requested = true;
         s_requests[requestId].requester = msg.sender;
         unchecked {
+            // Increment the request count
             requestCount++;
         }
 
+        // Refund excess ETH to the user if they overpaid
         if(msg.value > directFundingCost) { // if there is ETH to refund
             (bool success, ) = msg.sender.call{value:  msg.value - directFundingCost}("");
             if(!success) {
                 revert FailedToSendEthBack();
             }
+            // Emit an event for the ETH refund
             emit EthSentBack(msg.value - directFundingCost);
         }
 
+        // Emit an event for the random GEM request
         emit RandomGemRequested(msg.sender);
         return requestId;
     }

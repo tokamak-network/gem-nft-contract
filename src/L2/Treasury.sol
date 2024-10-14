@@ -24,7 +24,15 @@ interface IWstonSwapPool {
     function swapTONforWSTON(uint256 tonAmount) external;
 }
 
-
+/**
+ * @title Treasury Contract for GEM and Token Management
+ * @author TOKAMAK OPAL TEAM
+ * @notice This contract manages the storage and transfer of GEM tokens and WSTON tokens within the ecosystem.
+ * It facilitates interactions with the Gem Factory, Marketplace, Random Pack, and Airdrop contracts.
+ * The contract includes functionalities for creating premined GEMs, handling token transfers, and managing sales on the marketplace.
+ * @dev The contract integrates with external interfaces for GEM creation, marketplace operations, and token swaps.
+ * It includes security features such as pausing operations and role-based access control.
+ */
 contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl, TreasuryStorage {
     using SafeERC20 for IERC20;
 
@@ -40,7 +48,13 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     }
 
     modifier onlyMarketPlace() {
-        require(msg.sender == _marketplace, "caller is  not the marketplace contract");
+        require(msg.sender == _marketplace, "caller is not the marketplace contract");
+        _;
+    }
+
+    modifier onlyWstonSwapPoolOrOwner() {
+        require(msg.sender == wstonSwapPool ||
+        isOwner(), "caller is not the Swapper");
         _;
     }
 
@@ -72,6 +86,10 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         paused = false;
     }
 
+    //---------------------------------------------------------------------------------------
+    //--------------------------------INITIALIZE FUNCTIONS-----------------------------------
+    //---------------------------------------------------------------------------------------
+
     /**
      * @notice Initializes the Treasury contract with the given parameters.
      * @param _wston Address of the WSTON token.
@@ -87,11 +105,7 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         initialized = true;
     }
 
-    //---------------------------------------------------------------------------------------
-    //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
-    //---------------------------------------------------------------------------------------
-
-    /**
+     /**
      * @notice Sets the address of the gem factory.
      * @param _gemFactory New address of the gem factory contract.
      */
@@ -137,35 +151,12 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     }
 
     /**
-     * @notice Approves the gem factory to spend WSTON tokens.
-     */
-    function approveGemFactory() external onlyOwnerOrAdmin {
-        _checkNonAddress(wston);
-        IERC20(wston).approve(gemFactory, type(uint256).max);
-    }
-
-    /**
-     * @notice Approves the marketplace to spend WSTON tokens.
-     */
-    function wstonApproveMarketPlace() external onlyOwnerOrAdmin {
-        _checkNonAddress(wston);
-        IERC20(wston).approve(_marketplace, type(uint256).max);
-    }
-
-    /**
-     * @notice Approves the marketplace to spend TON tokens.
-     */
-    function tonApproveMarketPlace() external onlyOwnerOrAdmin {
-        _checkNonAddress(ton);
-        IERC20(ton).approve(_marketplace, type(uint256).max);
-    }
-
-    /**
      * @notice Approves the WSTON swap pool to spend TON tokens.
      */
-    function tonApproveWstonSwapPool() external onlyOwnerOrAdmin {
+    function tonApproveWstonSwapPool(uint256 _amount) external onlyWstonSwapPoolOrOwner returns(bool) {
         _checkNonAddress(ton);
-        IERC20(ton).approve(wstonSwapPool, type(uint256).max);
+        IERC20(ton).approve(wstonSwapPool, _amount);
+        return true;
     }
 
     /**
@@ -184,6 +175,10 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     function approveWstonForMarketplace(uint256 amount) external onlyMarketPlace {
         IERC20(wston).approve(_marketplace, amount);
     }
+
+    //---------------------------------------------------------------------------------------
+    //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
 
     /**
      * @notice Transfers WSTON tokens to a specified address.
@@ -346,14 +341,6 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
      */
     function buyGem(uint256 _tokenId, bool _paymentMethod) external onlyOwnerOrAdmin {
         IMarketPlace(_marketplace).buyGem(_tokenId, _paymentMethod);
-    }
-
-    /**
-     * @notice Swaps TON for WSTON using the swap pool.
-     * @param tonAmount Amount of TON to swap for WSTON.
-     */
-    function swapTONforWSTON(uint256 tonAmount) external onlyOwnerOrAdmin {
-        IWstonSwapPool(wstonSwapPool).swapTONforWSTON(tonAmount);
     }
 
     /**

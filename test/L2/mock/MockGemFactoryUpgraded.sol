@@ -5,14 +5,8 @@ import {GemFactory} from "../../../src/L2/GemFactory.sol";
 
 contract MockGemFactoryUpgraded is GemFactory {
 
-    uint256 internal counter;
-
-    function incrementCounter() external {
-        counter++;
+    function setRareMiningTry(uint8 _rareMiningTry) external {
+        RareminingTry= _rareMiningTry;
     }
-
-    function getCounter() external view returns(uint256) {
-        return counter;
-    }  
 
 }

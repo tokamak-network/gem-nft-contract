@@ -69,7 +69,7 @@ contract GemFactoryTest is L2BaseTest {
         // checking the GEM was sent appropriately
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
         // ensuring the cooldown period was reset
-        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp + GemFactory(gemfactoryProxyAddress).getCommonGemsCooldownPeriod());
+        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp);
         
         // ensuring the tokenCount was updated accordingly
         assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(treasuryProxyAddress) == 0);
@@ -129,7 +129,7 @@ contract GemFactoryTest is L2BaseTest {
         // checking the GEM was sent appropriately
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
         // ensuring the cooldown period was reset
-        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp + GemFactory(gemfactoryProxyAddress).getCommonGemsCooldownPeriod());
+        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp);
         
         // ensuring the tokenCount was updated accordingly
         assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(treasuryProxyAddress) == 0);
@@ -484,8 +484,7 @@ contract GemFactoryTest is L2BaseTest {
         tokenIds[1] = newGemIds[1];
 
         uint8[2] memory color = [0, 1];
-
-        uint256 newGemId = GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        uint256 newGemId = GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         // Verify the new gem properties
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
@@ -576,7 +575,7 @@ contract GemFactoryTest is L2BaseTest {
 
         uint8[2] memory color = [1, 3];
 
-        uint256 newGemId = GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
+        uint256 newGemId = GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
 
         // Verify the new gem properties
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
@@ -651,7 +650,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[2] memory color = [0, 1];
 
         vm.expectRevert("Pausable: paused");
-        GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
     }
@@ -708,7 +707,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[2] memory color = [0, 1];
 
         vm.expectRevert(ForgeLibrary.NotGemOwner.selector);
-        GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
     }
@@ -772,7 +771,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to revert with the error message "wrong rarity Gems"
         vm.expectRevert(ForgeLibrary.WrongRarity.selector);
-        GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
     }
@@ -837,7 +836,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to revert with the error message "this color can't be obtained"
         vm.expectRevert(ForgeLibrary.NotValidColor.selector);
-        GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, invalidColor);
+        GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, invalidColor);
 
         vm.stopPrank();
     }
@@ -863,7 +862,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[4][] memory quadrants = new uint8[4][](4);
         quadrants[0] = [4, 5, 5, 5]; // epic quadrants
         quadrants[1] = [5, 4, 4, 5]; // epic quadrants
-        quadrants[2] = [4, 4, 4, 5]; // epic quadrants
+        quadrants[2] = [4, 4, 4, 5]; // epic quadrants  
         quadrants[3] = [4, 4, 5, 4]; // epic quadrants
 
         string[] memory tokenURIs = new string[](4);
@@ -906,7 +905,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[2] memory color = [2, 3];
         // Expect the transaction to revert with the error message "wrong number of Gems to be forged"
         vm.expectRevert(ForgeLibrary.WrongNumberOfGemToBeForged.selector);
-        GemFactory(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
         vm.stopPrank();
     }
 
@@ -944,7 +943,7 @@ contract GemFactoryTest is L2BaseTest {
         // Simulate the passage of time to ensure the GEM's cooldown period has elapsed
         uint256 twoWeeks = 14 * 24 * 60 * 60; // 7 days in seconds
         vm.warp(block.timestamp + twoWeeks + 1);
-        bool result = GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
+        bool result = GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemId);
         assert(result == true);
     }
 
@@ -992,7 +991,7 @@ contract GemFactoryTest is L2BaseTest {
         // Expect the transaction to succeed
         vm.prank(user1);
         vm.expectRevert("Pausable: paused");
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemId);
     }
 
     /**
@@ -1028,7 +1027,7 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
         // Expect the transaction to revert with the error message "Gem cooldown period has not elapsed"
         vm.expectRevert(abi.encodeWithSignature("CooldownPeriodNotElapsed()"));
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemId);
 
         vm.stopPrank();
     }
@@ -1074,7 +1073,7 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(user1);
         // Expect the transaction to revert with the error message "Gem is listed for sale or already mining"
         vm.expectRevert(abi.encodeWithSignature("GemIsLocked()"));
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemId);
         vm.stopPrank();
     }
 
@@ -1124,7 +1123,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to revert with the error message "GEMIndexToOwner[_tokenId] == msg.sender"
         vm.expectRevert(abi.encodeWithSignature("NotGemOwner()"));
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemId);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemId);
 
         vm.stopPrank();
     }
@@ -1141,7 +1140,7 @@ contract GemFactoryTest is L2BaseTest {
         // ensure the token is locked
         assert(GemFactory(gemfactoryProxyAddress).isTokenLocked(tokens[0]) == true);
         // call cancelMining function
-        GemFactory(gemfactoryProxyAddress).cancelMining(tokens[0]);
+        GemFactoryMining(gemfactoryProxyAddress).cancelMining(tokens[0]);
         // ensure the token is not locked
         assert(GemFactory(gemfactoryProxyAddress).isTokenLocked(tokens[0]) == false);
         vm.stopPrank();
@@ -1163,7 +1162,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // call cancelMining function
         vm.expectRevert("Pausable: paused");
-        GemFactory(gemfactoryProxyAddress).cancelMining(tokens[0]);
+        GemFactoryMining(gemfactoryProxyAddress).cancelMining(tokens[0]);
         vm.stopPrank();
     }
 
@@ -1179,7 +1178,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // call cancelMining function
         vm.expectRevert(GemFactoryStorage.NotGemOwner.selector);
-        GemFactory(gemfactoryProxyAddress).cancelMining(tokens[0]);
+        GemFactoryMining(gemfactoryProxyAddress).cancelMining(tokens[0]);
         vm.stopPrank();
     }
 
@@ -1251,11 +1250,11 @@ contract GemFactoryTest is L2BaseTest {
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
         // move foreward after the mining period time
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
         // call pickMinedGEM
-        GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(0);
 
         // check that the random request has been taken into account
@@ -1335,7 +1334,7 @@ contract GemFactoryTest is L2BaseTest {
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
         // move foreward after the mining period time
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
 
@@ -1348,7 +1347,7 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(user1);
         // call pickMinedGEM
         vm.expectRevert("Pausable: paused");
-        GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
  
         vm.stopPrank();
     }
@@ -1421,12 +1420,12 @@ contract GemFactoryTest is L2BaseTest {
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
 
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
 
         // call the pick function to get a random tokenid
-        uint256 requestId = GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 requestId = GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         // we simulate the coordinator calling filfillRandomness from the DRBConsumerBase abstract
         drbCoordinatorMock.fulfillRandomness(requestId);
 
@@ -1503,10 +1502,10 @@ contract GemFactoryTest is L2BaseTest {
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
 
         vm.warp(block.timestamp + UniqueGemsMiningPeriod + 1);
-        uint256 requestId = GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 requestId = GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         drbCoordinatorMock.fulfillRandomness(requestId);
 
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(0);
@@ -1515,7 +1514,7 @@ contract GemFactoryTest is L2BaseTest {
         // we try to recall startMiningGem a second time 
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
         vm.expectRevert(abi.encodeWithSignature("NoMiningTryLeft()"));
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
         
         vm.stopPrank();
 
@@ -1589,10 +1588,10 @@ contract GemFactoryTest is L2BaseTest {
         vm.warp(block.timestamp + EpicGemsCooldownPeriod + 1);
 
         // Ensure the user is mining the first GEM
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
 
         vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
-        uint256 firstRequestId = GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 firstRequestId = GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         drbCoordinatorMock.fulfillRandomness(firstRequestId);
 
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(0);
@@ -1601,11 +1600,11 @@ contract GemFactoryTest is L2BaseTest {
         // move on until the cooldown elapses
         vm.warp(block.timestamp + EpicGemsCooldownPeriod + 1);
 
-        GemFactory(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
+        GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
 
         // move on until the mining period elapses
         vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
-        uint256 secondRequestId = GemFactory(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
+        uint256 secondRequestId = GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         drbCoordinatorMock.fulfillRandomness(secondRequestId);
         GemFactoryStorage.RequestStatus memory secondRandomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(1);
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(secondRandomRequest.chosenTokenId) == user1);

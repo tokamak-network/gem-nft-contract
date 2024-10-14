@@ -13,6 +13,7 @@ interface ITreasury {
 
 /**
  * @title Airdrop Contract
+ * @author TOKAMAK OPAL TEAM
  * @notice This contract manages the airdrop of GEM tokens to users. 
  * @dev Inherits from ProxyStorage, AirdropStorage, AuthControl, and ReentrancyGuard.
  * @dev only admins are allowed to assign GEMs to users
@@ -170,10 +171,6 @@ contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
         emit EligibleTokenListCleared();
         return true;
     }
-
-    //---------------------------------------------------------------------------------------
-    //------------------------------VIEW FUNCTIONS/STORAGE GETTERS---------------------------
-    //---------------------------------------------------------------------------------------
 
     //---------------------------------------------------------------------------------------
     //------------------------------VIEW FUNCTIONS/STORAGE GETTERS---------------------------

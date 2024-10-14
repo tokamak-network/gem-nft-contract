@@ -1,0 +1,37 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "AuthRole",
+  "sourceName": "src/common/AuthRole.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PAUSE_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460135760e1908160198239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c908163389ed26714606f57506375b238fc14603457600080fd5b34606c5780600319360112606c5760206040517fdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec428152f35b80fd5b90503460a7578160031936011260a757807ffcb9fcbfa83b897fb2d5cf4b58962164105c1e71489a37ef3ae0db3fdce576f660209252f35b5080fdfea26469706673582212201fa93af244d3fb805d823b8c2c6a081e4e7388c42abf589446f30e30f430dee764736f6c63430008190033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c908163389ed26714606f57506375b238fc14603457600080fd5b34606c5780600319360112606c5760206040517fdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec428152f35b80fd5b90503460a7578160031936011260a757807ffcb9fcbfa83b897fb2d5cf4b58962164105c1e71489a37ef3ae0db3fdce576f660209252f35b5080fdfea26469706673582212201fa93af244d3fb805d823b8c2c6a081e4e7388c42abf589446f30e30f430dee764736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

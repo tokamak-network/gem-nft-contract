@@ -1,9 +1,83 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol": {
+      "lastModificationDate": 1723891451840,
+      "contentHash": "f808b485ee0cdc6768ee8385ae5f9a2a",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": []
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/interfaces/IERC721.sol": {
+      "lastModificationDate": 1723891451841,
+      "contentHash": "d8d23fc2f55ed934d1a1b91c9afd8526",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC721.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../token/ERC721/IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": []
+    },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/L1WrappedStakedTON.sol": {
-      "lastModificationDate": 1725304982771,
-      "contentHash": "900c1f6712798f14c9a453e9fa17bcad",
+      "lastModificationDate": 1728825408666,
+      "contentHash": "d0046bae3a182ac3cdbf060e88ed15f9",
       "sourceName": "src/L1/L1WrappedStakedTON.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -31,26 +105,66 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
+        "../proxy/ProxyStorage.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
         "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
         "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
         "../interfaces/ISeigManager.sol",
         "../interfaces/IDepositManager.sol",
         "./L1WrappedStakedTONStorage.sol",
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
         "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
       ],
       "versionPragmas": [
-        "^0.8.25"
+        "0.8.25"
       ],
       "artifacts": [
         "ICandidate",
+        "ITON",
         "L1WrappedStakedTON"
       ]
     },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/proxy/ProxyStorage.sol": {
+      "lastModificationDate": 1728036476229,
+      "contentHash": "232ff60e7857ea64233aa8d45b2e09f9",
+      "sourceName": "src/proxy/ProxyStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "ProxyStorage"
+      ]
+    },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/ISeigManager.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "dfda6864e7fbfeab08d53b75dd9e64c7",
+      "lastModificationDate": 1728036476231,
+      "contentHash": "b2528e283af6bb2583c32a272fdd6a96",
       "sourceName": "src/interfaces/ISeigManager.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -79,15 +193,15 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.25"
+        "0.8.25"
       ],
       "artifacts": [
         "ISeigManager"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IDepositManager.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "d397cc868700f11ff27131567aa46f81",
+      "lastModificationDate": 1728036476227,
+      "contentHash": "f7b70dd7b5f6b702266d2e6d0e4dad67",
       "sourceName": "src/interfaces/IDepositManager.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -116,15 +230,15 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.25"
+        "0.8.25"
       ],
       "artifacts": [
         "IDepositManager"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/L1WrappedStakedTONStorage.sol": {
-      "lastModificationDate": 1723520102468,
-      "contentHash": "617ccb076bd57ae3e080993e7d9c0be3",
+      "lastModificationDate": 1728825391113,
+      "contentHash": "a6fbf049752d948bd32fbe8c39d086bf",
       "sourceName": "src/L1/L1WrappedStakedTONStorage.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -153,10 +267,130 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.25"
+        "0.8.25"
       ],
       "artifacts": [
         "L1WrappedStakedTONStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol": {
+      "lastModificationDate": 1723891451638,
+      "contentHash": "77d30f3cd93f46b80b6f8f1ebc574ee4",
+      "sourceName": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/ContextUpgradeable.sol",
+        "../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "OwnableUpgradeable"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1723891451646,
+      "contentHash": "f0cedd674b4863ee90d1521a92ab82df",
+      "sourceName": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Initializable"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol": {
+      "lastModificationDate": 1723891451647,
+      "contentHash": "b3da1b9397f87a1af1687499f423c8b5",
+      "sourceName": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "../../utils/ContextUpgradeable.sol",
+        "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
+        "../../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20Upgradeable"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol": {
@@ -196,45 +430,6 @@
         "ReentrancyGuard"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
-      "lastModificationDate": 1723891451836,
-      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
-      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../utils/Context.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Ownable"
-      ]
-    },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
       "lastModificationDate": 1723891451848,
       "contentHash": "5517c8678c18eb1a8ba58810e7ca39ca",
@@ -270,48 +465,6 @@
       ],
       "artifacts": [
         "IERC20"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol": {
-      "lastModificationDate": 1723891451848,
-      "contentHash": "c6375ef25e84c90b3d15f9ec4eef218f",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./IERC20.sol",
-        "./extensions/IERC20Metadata.sol",
-        "../../utils/Context.sol",
-        "../../interfaces/draft-IERC6093.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ERC20"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol": {
@@ -355,10 +508,10 @@
         "SafeERC20"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/Context.sol": {
-      "lastModificationDate": 1723891451851,
-      "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
-      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "lastModificationDate": 1723891451649,
+      "contentHash": "c28aaa25d083a9a55bd9ec9e0b785122",
+      "sourceName": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -384,12 +537,14 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "../proxy/utils/Initializable.sol"
+      ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "Context"
+        "ContextUpgradeable"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol": {
@@ -545,8 +700,8 @@
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/L1WrappedStakedTONFactory.sol": {
-      "lastModificationDate": 1723479099726,
-      "contentHash": "e8bb4a03602a231db8bd6b93b1fef5a9",
+      "lastModificationDate": 1728068977299,
+      "contentHash": "7481913fe5d49c037ffd85c0b43fd994",
       "sourceName": "src/L1/L1WrappedStakedTONFactory.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -574,20 +729,23 @@
         }
       },
       "imports": [
+        "../common/AuthControl.sol",
         "./L1WrappedStakedTON.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
+        "./L1WrappedStakedTONFactoryStorage.sol",
+        "./L1WrappedStakedTONProxy.sol",
+        "../proxy/ProxyStorage.sol"
       ],
       "versionPragmas": [
-        "^0.8.25"
+        "0.8.25"
       ],
       "artifacts": [
         "L1WrappedStakedTONFactory"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol": {
-      "lastModificationDate": 1723891451849,
-      "contentHash": "1e64e2ad597dc5b2dae11346502baad4",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/common/AuthControl.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "1fb07099ef24050f62df0836eebb17d9",
+      "sourceName": "src/common/AuthControl.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -614,24 +772,175 @@
         }
       },
       "imports": [
-        "./IERC721.sol",
-        "./IERC721Receiver.sol",
-        "./extensions/IERC721Metadata.sol",
-        "../../utils/Context.sol",
-        "../../utils/Strings.sol",
-        "../../utils/introspection/ERC165.sol",
-        "../../interfaces/draft-IERC6093.sol"
+        "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "./AuthRole.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "AuthControl"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/L1WrappedStakedTONProxy.sol": {
+      "lastModificationDate": 1728127901421,
+      "contentHash": "36884e3128e82e0ffddcfbee3f023388",
+      "sourceName": "src/L1/L1WrappedStakedTONProxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./L1WrappedStakedTONStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "L1WrappedStakedTONProxy"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/L1WrappedStakedTONFactoryStorage.sol": {
+      "lastModificationDate": 1728068628202,
+      "contentHash": "ffd63f86e1cab28427fe761e12d96056",
+      "sourceName": "src/L1/L1WrappedStakedTONFactoryStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "L1WrappedStakedTONFactoryStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/common/AuthRole.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "268d4b06809bfe25bdc7c77d8908e228",
+      "sourceName": "src/common/AuthRole.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "AuthRole"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/access/AccessControl.sol": {
+      "lastModificationDate": 1727779421151,
+      "contentHash": "7cb919bc52d769c24efec856fd7c932b",
+      "sourceName": "@openzeppelin/contracts/access/AccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IAccessControl.sol",
+        "../utils/Context.sol",
+        "../utils/introspection/ERC165.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "ERC721"
+        "AccessControl"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol": {
-      "lastModificationDate": 1723891451852,
-      "contentHash": "6a55c353946e471d9792965d06208295",
+      "lastModificationDate": 1727779389789,
+      "contentHash": "08f6d7787c8a562c3793edcf2cfef015",
       "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -666,6 +975,396 @@
       ],
       "artifacts": [
         "ERC165"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "lastModificationDate": 1723891451851,
+      "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
+      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/access/IAccessControl.sol": {
+      "lastModificationDate": 1723891451836,
+      "contentHash": "e3a14b0714caaaa82d58fa0bc3756079",
+      "sourceName": "@openzeppelin/contracts/access/IAccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IAccessControl"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1723891451852,
+      "contentHash": "de0163561b417b800d01749cbbe2147e",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC165"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/proxy/Proxy.sol": {
+      "lastModificationDate": 1728665683122,
+      "contentHash": "98e34fddc9990d1964642a488d5641e7",
+      "sourceName": "src/proxy/Proxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ProxyStorage.sol",
+        "../common/AuthControl.sol",
+        "../interfaces/IProxyEvent.sol",
+        "../interfaces/IProxyAction.sol",
+        "@openzeppelin/contracts/utils/Address.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "Proxy"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IProxyEvent.sol": {
+      "lastModificationDate": 1728036476228,
+      "contentHash": "4abde6e4e26890eea041177c73141382",
+      "sourceName": "src/interfaces/IProxyEvent.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "IProxyEvent"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IProxyAction.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "a3c5dc2568ef8c302ddc5175e67710ff",
+      "sourceName": "src/interfaces/IProxyAction.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "IProxyAction"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/L1WrappedStakedTONFactoryProxy.sol": {
+      "lastModificationDate": 1728127879602,
+      "contentHash": "ed6822f284f17450333e38f9b1364d79",
+      "sourceName": "src/L1/L1WrappedStakedTONFactoryProxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./L1WrappedStakedTONFactoryStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "L1WrappedStakedTONFactoryProxy"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol": {
+      "lastModificationDate": 1723891451848,
+      "contentHash": "c6375ef25e84c90b3d15f9ec4eef218f",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC20.sol",
+        "./extensions/IERC20Metadata.sol",
+        "../../utils/Context.sol",
+        "../../interfaces/draft-IERC6093.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Burnable.sol": {
+      "lastModificationDate": 1723891451849,
+      "contentHash": "273d8d24b06f67207dd5f35c3a0c1086",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC20.sol",
+        "../../../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20Burnable"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/interfaces/IERC4906.sol": {
+      "lastModificationDate": 1723891451840,
+      "contentHash": "7f130e0d70179d683e9b9df0dda38a51",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC4906.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC165.sol",
+        "./IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC4906"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol": {
@@ -707,6 +1406,92 @@
         "IERC721"
       ]
     },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
+      "lastModificationDate": 1723891451850,
+      "contentHash": "12c206f185cb951213799561fdcaa40d",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC721/ERC721Upgradeable.sol": {
+      "lastModificationDate": 1723891451648,
+      "contentHash": "63787651bcdb931377c7c0deb863edbd",
+      "sourceName": "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+        "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+        "../../utils/ContextUpgradeable.sol",
+        "@openzeppelin/contracts/utils/Strings.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "../../utils/introspection/ERC165Upgradeable.sol",
+        "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
+        "../../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC721Upgradeable"
+      ]
+    },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol": {
       "lastModificationDate": 1723891451850,
       "contentHash": "fc8a9841f4bdd6329c26a00d5e75f4b3",
@@ -742,6 +1527,46 @@
       ],
       "artifacts": [
         "IERC721Receiver"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol": {
+      "lastModificationDate": 1723891451650,
+      "contentHash": "ea9d297971734d541e82cc31ec88b84f",
+      "sourceName": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "../../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC165Upgradeable"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/Strings.sol": {
@@ -782,82 +1607,6 @@
       ],
       "artifacts": [
         "Strings"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
-      "lastModificationDate": 1723891451850,
-      "contentHash": "12c206f185cb951213799561fdcaa40d",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../IERC721.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC721Metadata"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
-      "lastModificationDate": 1723891451852,
-      "contentHash": "de0163561b417b800d01749cbbe2147e",
-      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC165"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/math/Math.sol": {
@@ -934,10 +1683,10 @@
         "SignedMath"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/interfaces/IERC721.sol": {
-      "lastModificationDate": 1723891451841,
-      "contentHash": "d8d23fc2f55ed934d1a1b91c9afd8526",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC721.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/token/WTON.sol": {
+      "lastModificationDate": 1728036476229,
+      "contentHash": "5f82a5cd135b92447c10186b2e45f8fe",
+      "sourceName": "src/L1/Mock/token/WTON.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -964,17 +1713,31 @@
         }
       },
       "imports": [
-        "../token/ERC721/IERC721.sol"
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/math/Math.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+        "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "../../../interfaces/ISeigManager.sol",
+        "./ERC20OnApprove.sol",
+        "./OnApprove.sol",
+        "./TON.sol"
       ],
       "versionPragmas": [
-        "^0.8.20"
+        "0.8.25"
       ],
-      "artifacts": []
+      "artifacts": [
+        "WTON"
+      ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/interfaces/IERC4906.sol": {
-      "lastModificationDate": 1723891451840,
-      "contentHash": "7f130e0d70179d683e9b9df0dda38a51",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC4906.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/token/ERC20OnApprove.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "65bbedfa4237b9b9532dd9495412e35e",
+      "sourceName": "src/L1/Mock/token/ERC20OnApprove.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -1001,20 +1764,144 @@
         }
       },
       "imports": [
-        "./IERC165.sol",
-        "./IERC721.sol"
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "./OnApprove.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "ERC20OnApprove"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/token/OnApprove.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "fac2bfa1d3a6a72a7981926c217d1397",
+      "sourceName": "src/L1/Mock/token/OnApprove.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/introspection/ERC165.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "OnApprove"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/token/TON.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "f4104e1a1281a4f386341ac1d278a004",
+      "sourceName": "src/L1/Mock/token/TON.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "../../../interfaces/ISeigManager.sol",
+        "./SeigToken.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "TON"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1723891451836,
+      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "IERC4906"
+        "Ownable"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol": {
-      "lastModificationDate": 1723891451840,
-      "contentHash": "f808b485ee0cdc6768ee8385ae5f9a2a",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC165.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/introspection/ERC165Checker.sol": {
+      "lastModificationDate": 1723891451852,
+      "contentHash": "39cb7ad93657f9f444653cf94d6fc392",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -1041,58 +1928,102 @@
         }
       },
       "imports": [
-        "../utils/introspection/IERC165.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": []
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/access/AccessControl.sol": {
-      "lastModificationDate": 1723891451836,
-      "contentHash": "4c80b7fdf559a9a348e832a57d072a0b",
-      "sourceName": "@openzeppelin/contracts/access/AccessControl.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./IAccessControl.sol",
-        "../utils/Context.sol",
-        "../utils/introspection/ERC165.sol"
+        "./IERC165.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "AccessControl"
+        "ERC165Checker"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/access/IAccessControl.sol": {
-      "lastModificationDate": 1723891451836,
-      "contentHash": "e3a14b0714caaaa82d58fa0bc3756079",
-      "sourceName": "@openzeppelin/contracts/access/IAccessControl.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/token/SeigToken.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "25f1051e5c36fc165bb344ec9e3b4cb4",
+      "sourceName": "src/L1/Mock/token/SeigToken.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "../../../interfaces/ISeigManager.sol",
+        "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "./ERC20OnApprove.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "SeigToken"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/OptimismL1Fees.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "f6e5b0c92bcd931a49f8a31c8952dd38",
+      "sourceName": "src/L2/Mock/OptimismL1Fees.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IOVM_GasPriceOracle.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "OptimismL1Fees"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/IOVM_GasPriceOracle.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "81fbccbcaafda7a111541c0b2e7144cb",
+      "sourceName": "src/L2/Mock/IOVM_GasPriceOracle.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -1120,16 +2051,1525 @@
       },
       "imports": [],
       "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "IOVM_GasPriceOracle"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/DRBCoordinatorMock.sol": {
+      "lastModificationDate": 1728174064659,
+      "contentHash": "2b51fd288a64959b1a0e68a7db613aa7",
+      "sourceName": "src/L2/Mock/DRBCoordinatorMock.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ReentrancyGuardTransient.sol",
+        "./OptimismL1Fees.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "../Randomness/DRBConsumerBase.sol",
+        "../../interfaces/IDRBCoordinator.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "DRBCoordinatorMock"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Randomness/DRBConsumerBase.sol": {
+      "lastModificationDate": 1728400772278,
+      "contentHash": "0dfb3d721f451b69c429e9619823138c",
+      "sourceName": "src/L2/Randomness/DRBConsumerBase.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../interfaces/IDRBCoordinator.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "DRBConsumerBase"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IDRBCoordinator.sol": {
+      "lastModificationDate": 1728036476228,
+      "contentHash": "52bccc30599fd01269678d88ae81e027",
+      "sourceName": "src/interfaces/IDRBCoordinator.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "IDRBCoordinator"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/ReentrancyGuardTransient.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "0fd80c355fecde23e6757aa0c5d30e78",
+      "sourceName": "src/L2/Mock/ReentrancyGuardTransient.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./StorageSlot.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "ReentrancyGuardTransient"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/StorageSlot.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "dc82657cc5fbbcb60f054081e312b98f",
+      "sourceName": "src/L2/Mock/StorageSlot.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "StorageSlot"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/GemFactory.sol": {
+      "lastModificationDate": 1728737897160,
+      "contentHash": "ac2e70aff45e579b3474c1259f3d12bc",
+      "sourceName": "src/L2/GemFactory.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+        "./Randomness/DRBConsumerBase.sol",
+        "./GemFactoryStorage.sol",
+        "../interfaces/IDRBCoordinator.sol",
+        "../libraries/GemLibrary.sol",
+        "../libraries/MiningLibrary.sol",
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+        "../proxy/ProxyStorage.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "GemFactory",
+        "ITreasury"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/libraries/GemLibrary.sol": {
+      "lastModificationDate": 1728460138947,
+      "contentHash": "e78561c635e2c8c6ad48d5bd76f8d45a",
+      "sourceName": "src/libraries/GemLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../L2/GemFactoryStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "GemLibrary"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/libraries/MiningLibrary.sol": {
+      "lastModificationDate": 1728460879500,
+      "contentHash": "43c89789dfe6525dafabcd12ae9e5acd",
+      "sourceName": "src/libraries/MiningLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../L2/GemFactoryStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "MiningLibrary"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/GemFactoryStorage.sol": {
+      "lastModificationDate": 1728653436802,
+      "contentHash": "e48bf7b8cc21808e634c6610a1104b05",
+      "sourceName": "src/L2/GemFactoryStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "GemFactoryStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol": {
+      "lastModificationDate": 1723891451649,
+      "contentHash": "9f0f228c1bdec68e130ab539644f8887",
+      "sourceName": "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC721Upgradeable.sol",
+        "@openzeppelin/contracts/utils/Strings.sol",
+        "@openzeppelin/contracts/interfaces/IERC4906.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "../../../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "IAccessControl"
+        "ERC721URIStorageUpgradeable"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/common/AuthControl.sol": {
-      "lastModificationDate": 1724448337292,
-      "contentHash": "ef6802abf376e14eef344d642593f5b1",
-      "sourceName": "src/common/AuthControl.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/MarketPlace.sol": {
+      "lastModificationDate": 1728822040575,
+      "contentHash": "341053f7ac686c3c6259c0dbdce16d94",
+      "sourceName": "src/L2/MarketPlace.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "../interfaces/IGemFactory.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "./GemFactoryStorage.sol",
+        "./MarketPlaceStorage.sol",
+        "./GemFactory.sol",
+        "../common/AuthControl.sol",
+        "../proxy/ProxyStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "ITreasury",
+        "MarketPlace"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IGemFactory.sol": {
+      "lastModificationDate": 1728163523190,
+      "contentHash": "152ef5d5ac88c619d391ed517320cb70",
+      "sourceName": "src/interfaces/IGemFactory.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../L2/GemFactoryStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "IGemFactory"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/MarketPlaceStorage.sol": {
+      "lastModificationDate": 1728573219348,
+      "contentHash": "8efaa6d9cb072521cff169a168491312",
+      "sourceName": "src/L2/MarketPlaceStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "MarketPlaceStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/WstonSwapPoolV2.sol": {
+      "lastModificationDate": 1728580324208,
+      "contentHash": "106f0d2beb4dedee24bd3c35f723fef2",
+      "sourceName": "src/L2/WstonSwapPoolV2.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "../common/AuthControl.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "../proxy/ProxyStorage.sol",
+        "./WstonSwapPoolStorageV2.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "ITreasury",
+        "WstonSwapPoolV2"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/WstonSwapPoolStorageV2.sol": {
+      "lastModificationDate": 1728580353516,
+      "contentHash": "6f2f41cc276776b52849b5f8dbcda9f8",
+      "sourceName": "src/L2/WstonSwapPoolStorageV2.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "WstonSwapPoolStorageV2"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/WstonSwapPoolProxyV2.sol": {
+      "lastModificationDate": 1728649427440,
+      "contentHash": "fa228ccc4f2216f968bc72b30c9cb28d",
+      "sourceName": "src/L2/WstonSwapPoolProxyV2.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./WstonSwapPoolStorageV2.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "WstonSwapPoolProxyV2"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/WstonSwapPool.sol": {
+      "lastModificationDate": 1728306112145,
+      "contentHash": "5ab4aaf0acc0fbf260b9d6ccbfba467d",
+      "sourceName": "src/L2/WstonSwapPool.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "../common/AuthControl.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "../proxy/ProxyStorage.sol",
+        "./WstonSwapPoolStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "WstonSwapPool"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/WstonSwapPoolStorage.sol": {
+      "lastModificationDate": 1728306133729,
+      "contentHash": "da59d7e2b6a3ffa02efc478cc6543786",
+      "sourceName": "src/L2/WstonSwapPoolStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "WstonSwapPoolStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/WstonSwapPoolProxy.sol": {
+      "lastModificationDate": 1728128165437,
+      "contentHash": "20ce4e0fec2921e4e49a157f202354fb",
+      "sourceName": "src/L2/WstonSwapPoolProxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./WstonSwapPoolStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "WstonSwapPoolProxy"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Treasury.sol": {
+      "lastModificationDate": 1728580544346,
+      "contentHash": "1a9f1c6ed400629c667bc9651af43a94",
+      "sourceName": "src/L2/Treasury.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "../interfaces/IGemFactory.sol",
+        "./GemFactoryStorage.sol",
+        "../common/AuthControl.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+        "./TreasuryStorage.sol",
+        "../proxy/ProxyStorage.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "IMarketPlace",
+        "IWstonSwapPool",
+        "Treasury"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/TreasuryStorage.sol": {
+      "lastModificationDate": 1728176319039,
+      "contentHash": "2d7f4144a0f71772f262ebad9cadc323",
+      "sourceName": "src/L2/TreasuryStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "TreasuryStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/RandomPack.sol": {
+      "lastModificationDate": 1728578508768,
+      "contentHash": "4259b911c1d4796baf0eb28514a4dc8e",
+      "sourceName": "src/L2/RandomPack.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "../interfaces/IGemFactory.sol",
+        "./GemFactoryStorage.sol",
+        "../common/AuthControl.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+        "./RandomPackStorage.sol",
+        "../proxy/ProxyStorage.sol",
+        "./Randomness/DRBConsumerBase.sol",
+        "../interfaces/IDRBCoordinator.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "ITreasury",
+        "RandomPack"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/RandomPackStorage.sol": {
+      "lastModificationDate": 1728576502984,
+      "contentHash": "94b77f1aca726c78aa9537ee6fdc5046",
+      "sourceName": "src/L2/RandomPackStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "RandomPackStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/RandomPackProxy.sol": {
+      "lastModificationDate": 1728127942803,
+      "contentHash": "95a2f0dcfb443db3a5c6d4750a3ea5ea",
+      "sourceName": "src/L2/RandomPackProxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./RandomPackStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "RandomPackProxy"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/GemFactoryMining.sol": {
+      "lastModificationDate": 1728737812934,
+      "contentHash": "ac5d410d9ff3d23384af24986150d4c2",
+      "sourceName": "src/L2/GemFactoryMining.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/ProxyStorage.sol",
+        "./GemFactoryStorage.sol",
+        "../libraries/MiningLibrary.sol",
+        "./Randomness/DRBConsumerBase.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "GemFactoryMining",
+        "ITreasury"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/GemFactoryForging.sol": {
+      "lastModificationDate": 1728737827039,
+      "contentHash": "f196db17b14309c11c539d8e9669b9c5",
+      "sourceName": "src/L2/GemFactoryForging.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/ProxyStorage.sol",
+        "./GemFactoryStorage.sol",
+        "../libraries/ForgeLibrary.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "GemFactoryForging"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/libraries/ForgeLibrary.sol": {
+      "lastModificationDate": 1728576248586,
+      "contentHash": "93cc76fd207c5139c12b82efc808a965",
+      "sourceName": "src/libraries/ForgeLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../L2/GemFactoryStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "ForgeLibrary"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Airdrop.sol": {
+      "lastModificationDate": 1728576674863,
+      "contentHash": "6342b8e89588ba21ae1c4273bfcf774d",
+      "sourceName": "src/L2/Airdrop.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/ProxyStorage.sol",
+        "./AirdropStorage.sol",
+        "../common/AuthControl.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "../interfaces/IGemFactory.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "Airdrop",
+        "ITreasury"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/AirdropStorage.sol": {
+      "lastModificationDate": 1728560545075,
+      "contentHash": "2be147fc6744ad61e6a886a03e33cab0",
+      "sourceName": "src/L2/AirdropStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "AirdropStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/AirdropProxy.sol": {
+      "lastModificationDate": 1728127916440,
+      "contentHash": "445b61fea2a1d8663be0aa2c0021b3b7",
+      "sourceName": "src/L2/AirdropProxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./AirdropStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "AirdropProxy"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/GemFactoryProxy.sol": {
+      "lastModificationDate": 1728656977928,
+      "contentHash": "4feab501951f3034c64c2d04440b7bf9",
+      "sourceName": "src/L2/GemFactoryProxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./GemFactoryStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "GemFactoryProxy"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/TreasuryProxy.sol": {
+      "lastModificationDate": 1728127953157,
+      "contentHash": "a48cd8280e0fe7658909805782f1b1bf",
+      "sourceName": "src/L2/TreasuryProxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./TreasuryStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "TreasuryProxy"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/proxy/RefactorCoinageSnapshot.sol": {
+      "lastModificationDate": 1723475785369,
+      "contentHash": "24a6096a2c81ac3915e93dc0c901362d",
+      "sourceName": "src/L1/Mock/proxy/RefactorCoinageSnapshot.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IRefactor.sol",
+        "../interfaces/AutoRefactorCoinageI.sol",
+        "../libraries/DSMath.sol",
+        "../libraries/SArrays.sol",
+        "../../../proxy/ProxyStorage.sol",
+        "../common/AuthControlCoinage.sol",
+        "./RefactorCoinageSnapshotStorage.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "IIISeigManager",
+        "RefactorCoinageSnapshot"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IRefactor.sol": {
+      "lastModificationDate": 1723475785368,
+      "contentHash": "b18559bb50ab7be7d91ef69fa617549f",
+      "sourceName": "src/L1/Mock/interfaces/IRefactor.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "IRefactor"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/AutoRefactorCoinageI.sol": {
+      "lastModificationDate": 1723475785368,
+      "contentHash": "949aa46453d9bea932a292cdab143895",
+      "sourceName": "src/L1/Mock/interfaces/AutoRefactorCoinageI.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "AutoRefactorCoinageI"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/libraries/DSMath.sol": {
+      "lastModificationDate": 1723475785369,
+      "contentHash": "9b2972b8eaf915a5582c943e5bf0a4a5",
+      "sourceName": "src/L1/Mock/libraries/DSMath.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "DSMath"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/libraries/SArrays.sol": {
+      "lastModificationDate": 1723475785369,
+      "contentHash": "6847f64bf2d0d662d6e03298e16c5dee",
+      "sourceName": "src/L1/Mock/libraries/SArrays.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/math/Math.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "SArrays"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AuthControlCoinage.sol": {
+      "lastModificationDate": 1723475785367,
+      "contentHash": "44b84e8a55ac466b5775c2c9461f308a",
+      "sourceName": "src/L1/Mock/common/AuthControlCoinage.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -1158,19 +3598,58 @@
       "imports": [
         "@openzeppelin/contracts/utils/introspection/ERC165.sol",
         "@openzeppelin/contracts/access/AccessControl.sol",
-        "./AuthRole.sol"
+        "./AuthRoleCoinage.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
       ],
       "artifacts": [
-        "AuthControl"
+        "AuthControlCoinage"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/common/AuthRole.sol": {
-      "lastModificationDate": 1724435979229,
-      "contentHash": "5a814f9602aec761cec85dfec38c8379",
-      "sourceName": "src/common/AuthRole.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/proxy/RefactorCoinageSnapshotStorage.sol": {
+      "lastModificationDate": 1723475785369,
+      "contentHash": "a126ce8380434a01588669f8d39dddbf",
+      "sourceName": "src/L1/Mock/proxy/RefactorCoinageSnapshotStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IRefactor.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "RefactorCoinageSnapshotStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AuthRoleCoinage.sol": {
+      "lastModificationDate": 1723475785368,
+      "contentHash": "1c43ae09e4318f685f736d6cdeed1d11",
+      "sourceName": "src/L1/Mock/common/AuthRoleCoinage.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -1198,16 +3677,16 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.25"
+        "^0.8.4"
       ],
       "artifacts": [
-        "AuthRole"
+        "AuthRoleCoinage"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/proxy/ProxyL1WrappedStakedTON.sol": {
-      "lastModificationDate": 1724436303915,
-      "contentHash": "41b2860b88de7c20e43c84ad039ba2bb",
-      "sourceName": "src/proxy/ProxyL1WrappedStakedTON.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/RefactorCoinageSnapshotI.sol": {
+      "lastModificationDate": 1723475785369,
+      "contentHash": "e7ae48547805720c539562ccbfefa4b7",
+      "sourceName": "src/L1/Mock/interfaces/RefactorCoinageSnapshotI.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -1234,134 +3713,19 @@
         }
       },
       "imports": [
-        "./ProxyStorage.sol",
-        "../common/AuthControl.sol",
-        "../interfaces/IProxyEvent.sol",
-        "../interfaces/IProxyAction.sol",
-        "@openzeppelin/contracts/utils/Address.sol"
+        "../interfaces/IRefactor.sol"
       ],
       "versionPragmas": [
-        "^0.8.25"
+        "^0.8.4"
       ],
       "artifacts": [
-        "ProxyL1WrappedStakedTON"
+        "RefactorCoinageSnapshotI"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IProxyEvent.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "89fdc64946a74b5629f5d9de886eeb80",
-      "sourceName": "src/interfaces/IProxyEvent.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "IProxyEvent"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IProxyAction.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "af4ae2fc3b8330a298440955325a7659",
-      "sourceName": "src/interfaces/IProxyAction.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "IProxyAction"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/proxy/ProxyStorage.sol": {
-      "lastModificationDate": 1723479099729,
-      "contentHash": "ed894bbe4ebe31eb6f88eaee81745c83",
-      "sourceName": "src/proxy/ProxyStorage.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "ProxyStorage"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/MockTON.sol": {
-      "lastModificationDate": 1725360711057,
-      "contentHash": "3b00caac1f2db878cb270f605a8d1e14",
-      "sourceName": "src/L2/Mock/MockTON.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/SeigManagerStorage.sol": {
+      "lastModificationDate": 1723475785367,
+      "contentHash": "c451b93232226885f0d74f5fb3fbd23c",
+      "sourceName": "src/L1/Mock/SeigManagerStorage.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -1388,138 +3752,18 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "../../interfaces/IL2StandardERC20.sol"
+        "./interfaces/RefactorCoinageSnapshotI.sol"
       ],
       "versionPragmas": [
-        "^0.8.9"
+        "^0.8.4"
       ],
       "artifacts": [
-        "MockTON"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IL2StandardERC20.sol": {
-      "lastModificationDate": 1725360657492,
-      "contentHash": "d60fcc6cb1415458d7858bc6b5ff0567",
-      "sourceName": "src/interfaces/IL2StandardERC20.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/utils/introspection/IERC165.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.9"
-      ],
-      "artifacts": [
-        "IL2StandardERC20"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/L2StandardERC20.sol": {
-      "lastModificationDate": 1725360667162,
-      "contentHash": "57614c39caa46cefdb106eb3fde47f81",
-      "sourceName": "src/L2/L2StandardERC20.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "../interfaces/IL2StandardERC20.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.9"
-      ],
-      "artifacts": [
-        "L2StandardERC20"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/MockToken.sol": {
-      "lastModificationDate": 1723479099726,
-      "contentHash": "cbe5a5d420d67c0839a05861a95e6b06",
-      "sourceName": "src/L1/Mock/MockToken.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "MockToken"
+        "SeigManagerStorage"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/SeigManager.sol": {
-      "lastModificationDate": 1723475785367,
-      "contentHash": "010eb794a46aee8b328352165923926a",
+      "lastModificationDate": 1727782878339,
+      "contentHash": "19ac3108ef2f7b2de5e142405ed67997",
       "sourceName": "src/L1/Mock/SeigManager.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -1575,119 +3819,6 @@
         "SeigManager"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IRefactor.sol": {
-      "lastModificationDate": 1723475785368,
-      "contentHash": "b18559bb50ab7be7d91ef69fa617549f",
-      "sourceName": "src/L1/Mock/interfaces/IRefactor.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "IRefactor"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/RefactorCoinageSnapshotI.sol": {
-      "lastModificationDate": 1723475785369,
-      "contentHash": "e7ae48547805720c539562ccbfefa4b7",
-      "sourceName": "src/L1/Mock/interfaces/RefactorCoinageSnapshotI.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../interfaces/IRefactor.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "RefactorCoinageSnapshotI"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/libraries/DSMath.sol": {
-      "lastModificationDate": 1723475785369,
-      "contentHash": "9b2972b8eaf915a5582c943e5bf0a4a5",
-      "sourceName": "src/L1/Mock/libraries/DSMath.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "DSMath"
-      ]
-    },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/CoinageFactoryI.sol": {
       "lastModificationDate": 1723475785368,
       "contentHash": "f09f898dc67f999726990574b3e46f26",
@@ -1723,43 +3854,6 @@
       ],
       "artifacts": [
         "CoinageFactoryI"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/Layer2I.sol": {
-      "lastModificationDate": 1723475785369,
-      "contentHash": "6dee57d64d5d3ed2ad64bb1f0781fd86",
-      "sourceName": "src/L1/Mock/interfaces/Layer2I.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "Layer2I"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/SeigManagerI.sol": {
@@ -1799,6 +3893,82 @@
         "SeigManagerI"
       ]
     },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/MockToken.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "b2a0f82c0c705302910108deac495974",
+      "sourceName": "src/L1/Mock/MockToken.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "MockToken"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/Layer2I.sol": {
+      "lastModificationDate": 1723475785369,
+      "contentHash": "6dee57d64d5d3ed2ad64bb1f0781fd86",
+      "sourceName": "src/L1/Mock/interfaces/Layer2I.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Layer2I"
+      ]
+    },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IWTON.sol": {
       "lastModificationDate": 1723475785368,
       "contentHash": "ed23fcdb06c291a02c99d0591c7fe25c",
@@ -1834,45 +4004,6 @@
       ],
       "artifacts": [
         "IWTON"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/SeigManagerStorage.sol": {
-      "lastModificationDate": 1723475785367,
-      "contentHash": "c451b93232226885f0d74f5fb3fbd23c",
-      "sourceName": "src/L1/Mock/SeigManagerStorage.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./interfaces/RefactorCoinageSnapshotI.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "SeigManagerStorage"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AuthControlSeigManager.sol": {
@@ -1953,10 +4084,10 @@
         "AuthRoleSeigManager"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/proxy/RefactorCoinageSnapshotStorage.sol": {
-      "lastModificationDate": 1723475785369,
-      "contentHash": "a126ce8380434a01588669f8d39dddbf",
-      "sourceName": "src/L1/Mock/proxy/RefactorCoinageSnapshotStorage.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/DepositManager.sol": {
+      "lastModificationDate": 1727787809431,
+      "contentHash": "c892743fe71f10085edf8dfc3589c6ed",
+      "sourceName": "src/L1/Mock/DepositManager.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -1983,102 +4114,28 @@
         }
       },
       "imports": [
-        "../interfaces/IRefactor.sol"
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "./interfaces/IWTON.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "../../proxy/ProxyStorage.sol",
+        "./common/AccessibleCommon.sol",
+        "./DepositManagerStorage.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
       ],
       "artifacts": [
-        "RefactorCoinageSnapshotStorage"
+        "DepositManager",
+        "ILayer2",
+        "ILayer2Registry",
+        "IOnApprove",
+        "ISeigManager"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/proxy/RefactorCoinageSnapshotProxy.sol": {
-      "lastModificationDate": 1723475785369,
-      "contentHash": "309996cf1978f6320c36c4e880a82fc4",
-      "sourceName": "src/L1/Mock/proxy/RefactorCoinageSnapshotProxy.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./ProxyCoinage.sol",
-        "./RefactorCoinageSnapshotStorage.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "RefactorCoinageSnapshotProxy"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/proxy/ProxyCoinage.sol": {
-      "lastModificationDate": 1723475785369,
-      "contentHash": "54d14d17fa20957f7ddfe0036d002524",
-      "sourceName": "src/L1/Mock/proxy/ProxyCoinage.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../../../proxy/ProxyStorage.sol",
-        "../common/AuthControlCoinage.sol",
-        "@openzeppelin/contracts/utils/Address.sol",
-        "../interfaces/IProxyEvent.sol",
-        "../interfaces/IProxyAction.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "ProxyCoinage"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AuthControlCoinage.sol": {
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AccessibleCommon.sol": {
       "lastModificationDate": 1723475785367,
-      "contentHash": "44b84e8a55ac466b5775c2c9461f308a",
-      "sourceName": "src/L1/Mock/common/AuthControlCoinage.sol",
+      "contentHash": "62e463c0fc57eb597f013a073e17f632",
+      "sourceName": "src/L1/Mock/common/AccessibleCommon.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -2107,1155 +4164,93 @@
       "imports": [
         "@openzeppelin/contracts/utils/introspection/ERC165.sol",
         "@openzeppelin/contracts/access/AccessControl.sol",
-        "./AuthRoleCoinage.sol"
+        "./AccessRoleCommon.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
       ],
       "artifacts": [
-        "AuthControlCoinage"
+        "AccessibleCommon"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IProxyEvent.sol": {
-      "lastModificationDate": 1723479099729,
-      "contentHash": "89fdc64946a74b5629f5d9de886eeb80",
-      "sourceName": "src/L1/Mock/interfaces/IProxyEvent.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "IProxyEvent"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IProxyAction.sol": {
-      "lastModificationDate": 1723479099729,
-      "contentHash": "af4ae2fc3b8330a298440955325a7659",
-      "sourceName": "src/L1/Mock/interfaces/IProxyAction.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "IProxyAction"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AuthRoleCoinage.sol": {
-      "lastModificationDate": 1723475785368,
-      "contentHash": "1c43ae09e4318f685f736d6cdeed1d11",
-      "sourceName": "src/L1/Mock/common/AuthRoleCoinage.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "AuthRoleCoinage"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/proxy/RefactorCoinageSnapshot.sol": {
-      "lastModificationDate": 1723475785369,
-      "contentHash": "24a6096a2c81ac3915e93dc0c901362d",
-      "sourceName": "src/L1/Mock/proxy/RefactorCoinageSnapshot.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../interfaces/IRefactor.sol",
-        "../interfaces/AutoRefactorCoinageI.sol",
-        "../libraries/DSMath.sol",
-        "../libraries/SArrays.sol",
-        "../../../proxy/ProxyStorage.sol",
-        "../common/AuthControlCoinage.sol",
-        "./RefactorCoinageSnapshotStorage.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "IIISeigManager",
-        "RefactorCoinageSnapshot"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/AutoRefactorCoinageI.sol": {
-      "lastModificationDate": 1723475785368,
-      "contentHash": "949aa46453d9bea932a292cdab143895",
-      "sourceName": "src/L1/Mock/interfaces/AutoRefactorCoinageI.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "AutoRefactorCoinageI"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/libraries/SArrays.sol": {
-      "lastModificationDate": 1723475785369,
-      "contentHash": "6847f64bf2d0d662d6e03298e16c5dee",
-      "sourceName": "src/L1/Mock/libraries/SArrays.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/utils/math/Math.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "SArrays"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/proxy/ProxyGemFactory.sol": {
-      "lastModificationDate": 1724436280678,
-      "contentHash": "e54d81e501487f1094d11b975ff9b384",
-      "sourceName": "src/proxy/ProxyGemFactory.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./ProxyStorage.sol",
-        "../common/AuthControl.sol",
-        "../interfaces/IProxyEvent.sol",
-        "../interfaces/IProxyAction.sol",
-        "@openzeppelin/contracts/utils/Address.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "ProxyGemFactory"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/GemFactoryProxy.sol": {
-      "lastModificationDate": 1723479099721,
-      "contentHash": "3976cb15055ddff785aa2afe67576614",
-      "sourceName": "src/L2/GemFactoryProxy.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../proxy/ProxyGemFactory.sol",
-        "./GemFactoryStorage.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "GemFactoryProxy"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/GemFactoryStorage.sol": {
-      "lastModificationDate": 1725213626669,
-      "contentHash": "bbe9f58782a495e998a7e59d792d0761",
-      "sourceName": "src/L2/GemFactoryStorage.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "GemFactoryStorage"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/libraries/TransferLibrary.sol": {
-      "lastModificationDate": 1724870276547,
-      "contentHash": "c8e16c6189c924d6f41b8d85dd046de5",
-      "sourceName": "src/libraries/TransferLibrary.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../L2/GemFactoryStorage.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "TransferLibrary"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/GemFactory.sol": {
-      "lastModificationDate": 1725366377222,
-      "contentHash": "f7702a1c059981c702cb6f6720d4cd12",
-      "sourceName": "src/L2/GemFactory.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "./GemFactoryStorage.sol",
-        "../common/AuthControl.sol",
-        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
-        "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
-        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
-        "../proxy/ProxyStorage.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "./Randomness/DRBConsumerBase.sol",
-        "../interfaces/IDRBCoordinator.sol",
-        "../libraries/GemLibrary.sol",
-        "../libraries/MiningLibrary.sol",
-        "../libraries/TransferLibrary.sol",
-        "../libraries/ForgeLibrary.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "GemFactory",
-        "ITreasury"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IDRBCoordinator.sol": {
-      "lastModificationDate": 1723480714592,
-      "contentHash": "323e4214dbd3e3b3021c36852276a23f",
-      "sourceName": "src/interfaces/IDRBCoordinator.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "IDRBCoordinator"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/libraries/GemLibrary.sol": {
-      "lastModificationDate": 1724870181904,
-      "contentHash": "a50479dc051fdeb052285fbb66a77cff",
-      "sourceName": "src/libraries/GemLibrary.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../L2/GemFactoryStorage.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "GemLibrary"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/libraries/MiningLibrary.sol": {
-      "lastModificationDate": 1725215965650,
-      "contentHash": "5fc3de9e6c1db31a93e1f367775b603b",
-      "sourceName": "src/libraries/MiningLibrary.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../L2/GemFactoryStorage.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "MiningLibrary"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/libraries/ForgeLibrary.sol": {
-      "lastModificationDate": 1724872921964,
-      "contentHash": "7b429c50f00784d5a16270bd5eafcf21",
-      "sourceName": "src/libraries/ForgeLibrary.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../L2/GemFactoryStorage.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "ForgeLibrary"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Randomness/DRBConsumerBase.sol": {
-      "lastModificationDate": 1723480793637,
-      "contentHash": "bcd73138ede57971f8a3836f3c1391d4",
-      "sourceName": "src/L2/Randomness/DRBConsumerBase.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../../interfaces/IDRBCoordinator.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "DRBConsumerBase"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol": {
-      "lastModificationDate": 1723891451850,
-      "contentHash": "50d770b698931f015309e77a750f54f6",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../ERC721.sol",
-        "../../../utils/Strings.sol",
-        "../../../interfaces/IERC4906.sol",
-        "../../../interfaces/IERC165.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ERC721URIStorage"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/MarketPlace.sol": {
-      "lastModificationDate": 1725369877375,
-      "contentHash": "195457ad7ec76c2de29952e4ad484e9a",
-      "sourceName": "src/L2/MarketPlace.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "../interfaces/IGemFactory.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "./GemFactoryStorage.sol",
-        "./MarketPlaceStorage.sol",
-        "./GemFactory.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "ITreasury",
-        "MarketPlace"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IGemFactory.sol": {
-      "lastModificationDate": 1725364932364,
-      "contentHash": "7f9113ee823455e8957eeef41aaff4cf",
-      "sourceName": "src/interfaces/IGemFactory.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../L2/GemFactoryStorage.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "IGemFactory"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/MarketPlaceStorage.sol": {
-      "lastModificationDate": 1725258261420,
-      "contentHash": "aa710a79a7a65a07798d94544f4f07b7",
-      "sourceName": "src/L2/MarketPlaceStorage.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "MarketPlaceStorage"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/WstonSwapPool.sol": {
-      "lastModificationDate": 1725307052960,
-      "contentHash": "3ad50c1bc0d4fcd445cad7a695a7b4ec",
-      "sourceName": "src/L2/WstonSwapPool.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "WstonSwapPool"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Treasury.sol": {
-      "lastModificationDate": 1725370661185,
-      "contentHash": "1213910a689621fe31003c4839288e1f",
-      "sourceName": "src/L2/Treasury.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "../interfaces/IGemFactory.sol",
-        "./GemFactoryStorage.sol",
-        "../common/AuthControl.sol",
-        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "IMarketPlace",
-        "IWstonSwapPool",
-        "Treasury"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/RandomPack.sol": {
-      "lastModificationDate": 1725213101792,
-      "contentHash": "962efeb06afbf195a970732839f7f010",
-      "sourceName": "src/L2/RandomPack.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "../interfaces/IGemFactory.sol",
-        "./GemFactoryStorage.sol",
-        "../common/AuthControl.sol",
-        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
-        "./Randomness/DRBConsumerBase.sol",
-        "../interfaces/IDRBCoordinator.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "ITreasury",
-        "RandomPack"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/DRBCoordinatorMock.sol": {
-      "lastModificationDate": 1725001815250,
-      "contentHash": "ccdff6ad70f06a637b2bb04ade216650",
-      "sourceName": "src/L2/Mock/DRBCoordinatorMock.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./ReentrancyGuardTransient.sol",
-        "./OptimismL1Fees.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "../Randomness/DRBConsumerBase.sol",
-        "../../interfaces/IDRBCoordinator.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.23"
-      ],
-      "artifacts": [
-        "DRBCoordinatorMock"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/ReentrancyGuardTransient.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "1d0501402a5e4bd8362d3994ce5770e8",
-      "sourceName": "src/L2/Mock/ReentrancyGuardTransient.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./StorageSlot.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "ReentrancyGuardTransient"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/OptimismL1Fees.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "9bdbe24f41e8fcc8c50bad340a6354ca",
-      "sourceName": "src/L2/Mock/OptimismL1Fees.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./IOVM_GasPriceOracle.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "OptimismL1Fees"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/StorageSlot.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "ee5854e6c741c4df8d54a33590a5d77f",
-      "sourceName": "src/L2/Mock/StorageSlot.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "StorageSlot"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/IOVM_GasPriceOracle.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "529c31cfa8a280c8b587dbf0d589ec53",
-      "sourceName": "src/L2/Mock/IOVM_GasPriceOracle.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "IOVM_GasPriceOracle"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/Layer2Registry.sol": {
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/DepositManagerStorage.sol": {
       "lastModificationDate": 1723475785367,
-      "contentHash": "a5a0e17b53baf443ecec1b8d6f91e8c2",
-      "sourceName": "src/L1/Mock/Layer2Registry.sol",
+      "contentHash": "48730a1e3bbd93ff52e9d2b6dfd026b1",
+      "sourceName": "src/L1/Mock/DepositManagerStorage.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "DepositManagerStorage"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AccessRoleCommon.sol": {
+      "lastModificationDate": 1723475785367,
+      "contentHash": "3f06e9a5121d7ea95668090acd75123a",
+      "sourceName": "src/L1/Mock/common/AccessRoleCommon.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "AccessRoleCommon"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/Candidate.sol": {
+      "lastModificationDate": 1723475785366,
+      "contentHash": "b88d0f1189327e2396671c8c4ed6b3b6",
+      "sourceName": "src/L1/Mock/Candidate.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -3282,18 +4277,100 @@
         }
       },
       "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "./interfaces/IDAOCommittee.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "./interfaces/ICandidate.sol",
+        "./interfaces/Layer2I.sol",
         "./interfaces/Layer2RegistryI.sol",
         "../../proxy/ProxyStorage.sol",
-        "./common/AuthControlCoinage.sol",
-        "./Layer2RegistryStorage.sol"
+        "./common/AccessibleCommon.sol",
+        "./CandidateStorage.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
       ],
       "artifacts": [
-        "IILayer2",
+        "Candidate",
+        "ICoinage",
         "IISeigManager",
-        "Layer2Registry"
+        "IOperator"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IDAOCommittee.sol": {
+      "lastModificationDate": 1723475785368,
+      "contentHash": "3739f05d38d921d488c343360ed31bb2",
+      "sourceName": "src/L1/Mock/interfaces/IDAOCommittee.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IStorageStateCommittee.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "IDAOCommittee"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/ICandidate.sol": {
+      "lastModificationDate": 1723475785368,
+      "contentHash": "56f0bd84269e22dc4bae6e2899c11048",
+      "sourceName": "src/L1/Mock/interfaces/ICandidate.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "ICandidate"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/Layer2RegistryI.sol": {
@@ -3333,10 +4410,10 @@
         "Layer2RegistryI"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/Layer2RegistryStorage.sol": {
-      "lastModificationDate": 1723475785367,
-      "contentHash": "7cbac9a9b3c5c37919dc483d9c07afae",
-      "sourceName": "src/L1/Mock/Layer2RegistryStorage.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/CandidateStorage.sol": {
+      "lastModificationDate": 1723475785366,
+      "contentHash": "9e2fa9556850fe2f45981538cf0b72c5",
+      "sourceName": "src/L1/Mock/CandidateStorage.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -3367,7 +4444,7 @@
         "^0.8.4"
       ],
       "artifacts": [
-        "Layer2RegistryStorage"
+        "CandidateStorage"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IStorageStateCommittee.sol": {
@@ -3564,10 +4641,10 @@
         "LibAgenda"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IDAOCommittee.sol": {
-      "lastModificationDate": 1723475785368,
-      "contentHash": "3739f05d38d921d488c343360ed31bb2",
-      "sourceName": "src/L1/Mock/interfaces/IDAOCommittee.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/Layer2Registry.sol": {
+      "lastModificationDate": 1723475785367,
+      "contentHash": "a5a0e17b53baf443ecec1b8d6f91e8c2",
+      "sourceName": "src/L1/Mock/Layer2Registry.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -3594,69 +4671,24 @@
         }
       },
       "imports": [
-        "./IStorageStateCommittee.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "IDAOCommittee"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/Candidate.sol": {
-      "lastModificationDate": 1723475785366,
-      "contentHash": "b88d0f1189327e2396671c8c4ed6b3b6",
-      "sourceName": "src/L1/Mock/Candidate.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "./interfaces/IDAOCommittee.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "./interfaces/ICandidate.sol",
-        "./interfaces/Layer2I.sol",
         "./interfaces/Layer2RegistryI.sol",
         "../../proxy/ProxyStorage.sol",
-        "./common/AccessibleCommon.sol",
-        "./CandidateStorage.sol"
+        "./common/AuthControlCoinage.sol",
+        "./Layer2RegistryStorage.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
       ],
       "artifacts": [
-        "Candidate",
-        "ICoinage",
+        "IILayer2",
         "IISeigManager",
-        "IOperator"
+        "Layer2Registry"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/ICandidate.sol": {
-      "lastModificationDate": 1723475785368,
-      "contentHash": "56f0bd84269e22dc4bae6e2899c11048",
-      "sourceName": "src/L1/Mock/interfaces/ICandidate.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/Layer2RegistryStorage.sol": {
+      "lastModificationDate": 1723475785367,
+      "contentHash": "7cbac9a9b3c5c37919dc483d9c07afae",
+      "sourceName": "src/L1/Mock/Layer2RegistryStorage.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -3687,13 +4719,13 @@
         "^0.8.4"
       ],
       "artifacts": [
-        "ICandidate"
+        "Layer2RegistryStorage"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AccessibleCommon.sol": {
-      "lastModificationDate": 1723475785367,
-      "contentHash": "62e463c0fc57eb597f013a073e17f632",
-      "sourceName": "src/L1/Mock/common/AccessibleCommon.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/proxy/ProxyCoinage.sol": {
+      "lastModificationDate": 1723475785369,
+      "contentHash": "54d14d17fa20957f7ddfe0036d002524",
+      "sourceName": "src/L1/Mock/proxy/ProxyCoinage.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -3720,21 +4752,23 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/utils/introspection/ERC165.sol",
-        "@openzeppelin/contracts/access/AccessControl.sol",
-        "./AccessRoleCommon.sol"
+        "../../../proxy/ProxyStorage.sol",
+        "../common/AuthControlCoinage.sol",
+        "@openzeppelin/contracts/utils/Address.sol",
+        "../interfaces/IProxyEvent.sol",
+        "../interfaces/IProxyAction.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
       ],
       "artifacts": [
-        "AccessibleCommon"
+        "ProxyCoinage"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/CandidateStorage.sol": {
-      "lastModificationDate": 1723475785366,
-      "contentHash": "9e2fa9556850fe2f45981538cf0b72c5",
-      "sourceName": "src/L1/Mock/CandidateStorage.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IProxyEvent.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "4abde6e4e26890eea041177c73141382",
+      "sourceName": "src/L1/Mock/interfaces/IProxyEvent.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -3762,16 +4796,16 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.4"
+        "0.8.25"
       ],
       "artifacts": [
-        "CandidateStorage"
+        "IProxyEvent"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/common/AccessRoleCommon.sol": {
-      "lastModificationDate": 1723475785367,
-      "contentHash": "3f06e9a5121d7ea95668090acd75123a",
-      "sourceName": "src/L1/Mock/common/AccessRoleCommon.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/interfaces/IProxyAction.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "a3c5dc2568ef8c302ddc5175e67710ff",
+      "sourceName": "src/L1/Mock/interfaces/IProxyAction.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -3799,16 +4833,16 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.4"
+        "0.8.25"
       ],
       "artifacts": [
-        "AccessRoleCommon"
+        "IProxyAction"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/DepositManager.sol": {
-      "lastModificationDate": 1723475785367,
-      "contentHash": "c892743fe71f10085edf8dfc3589c6ed",
-      "sourceName": "src/L1/Mock/DepositManager.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/proxy/RefactorCoinageSnapshotProxy.sol": {
+      "lastModificationDate": 1723475785369,
+      "contentHash": "309996cf1978f6320c36c4e880a82fc4",
+      "sourceName": "src/L1/Mock/proxy/RefactorCoinageSnapshotProxy.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -3835,59 +4869,14 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "./interfaces/IWTON.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "../../proxy/ProxyStorage.sol",
-        "./common/AccessibleCommon.sol",
-        "./DepositManagerStorage.sol"
+        "./ProxyCoinage.sol",
+        "./RefactorCoinageSnapshotStorage.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
       ],
       "artifacts": [
-        "DepositManager",
-        "ILayer2",
-        "ILayer2Registry",
-        "IOnApprove",
-        "ISeigManager"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/DepositManagerStorage.sol": {
-      "lastModificationDate": 1723475785367,
-      "contentHash": "48730a1e3bbd93ff52e9d2b6dfd026b1",
-      "sourceName": "src/L1/Mock/DepositManagerStorage.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "DepositManagerStorage"
+        "RefactorCoinageSnapshotProxy"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/Mock/CoinageFactory.sol": {
@@ -3932,9 +4921,49 @@
         "IIAutoRefactorCoinage"
       ]
     },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/MarketPlaceProxy.sol": {
+      "lastModificationDate": 1728127935248,
+      "contentHash": "7240430e24cf127e948e769709e79080",
+      "sourceName": "src/L2/MarketPlaceProxy.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/Proxy.sol",
+        "./MarketPlaceStorage.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "MarketPlaceProxy"
+      ]
+    },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IMockL2WSTON.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "904ce41f5431fc30d68c1a8c83ba7079",
+      "lastModificationDate": 1728036476228,
+      "contentHash": "819ed33ea6a7184609b5e075f06658dd",
       "sourceName": "src/interfaces/IMockL2WSTON.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -3966,16 +4995,16 @@
         "@openzeppelin/contracts/utils/introspection/IERC165.sol"
       ],
       "versionPragmas": [
-        "^0.8.25"
+        "0.8.25"
       ],
       "artifacts": [
         "IMockL2WSTON"
       ]
     },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L1/L1WrappedStakedTONProxy.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "8f24d85c097e52ab1ddb64d4f1ba20e9",
-      "sourceName": "src/L1/L1WrappedStakedTONProxy.sol",
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/IL2StandardERC20.sol": {
+      "lastModificationDate": 1725360657492,
+      "contentHash": "d60fcc6cb1415458d7858bc6b5ff0567",
+      "sourceName": "src/interfaces/IL2StandardERC20.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -4002,19 +5031,99 @@
         }
       },
       "imports": [
-        "../proxy/ProxyL1WrappedStakedTON.sol",
-        "./L1WrappedStakedTONStorage.sol"
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol"
       ],
       "versionPragmas": [
-        "^0.8.25"
+        "^0.8.9"
       ],
       "artifacts": [
-        "L1WrappedStakedTONProxy"
+        "IL2StandardERC20"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/Mock/MockTON.sol": {
+      "lastModificationDate": 1727441167447,
+      "contentHash": "3b00caac1f2db878cb270f605a8d1e14",
+      "sourceName": "src/L2/Mock/MockTON.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "../../interfaces/IL2StandardERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.9"
+      ],
+      "artifacts": [
+        "MockTON"
+      ]
+    },
+    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/L2/L2StandardERC20.sol": {
+      "lastModificationDate": 1728036476227,
+      "contentHash": "306c588462b2e70b32010687cd6ad98f",
+      "sourceName": "src/L2/L2StandardERC20.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 20
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "../interfaces/IL2StandardERC20.sol"
+      ],
+      "versionPragmas": [
+        "0.8.25"
+      ],
+      "artifacts": [
+        "L2StandardERC20"
       ]
     },
     "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/interfaces/ICRRRNGCoordinator.sol": {
-      "lastModificationDate": 1723479099722,
-      "contentHash": "f149f5ccdf78e6be97e105de2ce707dc",
+      "lastModificationDate": 1728036476227,
+      "contentHash": "d205bcc7a98d5f0699160c016c6240bd",
       "sourceName": "src/interfaces/ICRRRNGCoordinator.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -4043,7 +5152,7 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.25"
+        "0.8.25"
       ],
       "artifacts": [
         "ICRRRNGCoordinator"
@@ -4084,43 +5193,6 @@
       ],
       "artifacts": [
         "IL1StandardBridge"
-      ]
-    },
-    "/Users/mehdiberiane/Documents/tokamak/gem-nft-contract/src/libraries/DSMath.sol": {
-      "lastModificationDate": 1723479099729,
-      "contentHash": "4b06b37c4358e51eb7fefa4f821cf9e9",
-      "sourceName": "src/libraries/DSMath.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 20
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.25"
-      ],
-      "artifacts": [
-        "DSMath"
       ]
     }
   }

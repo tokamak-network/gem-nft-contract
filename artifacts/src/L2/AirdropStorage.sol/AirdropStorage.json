@@ -1,0 +1,85 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "AirdropStorage",
+  "sourceName": "src/L2/AirdropStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "AlreadyInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoEligibleUsers",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TokenNotAvailable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TokenNotOwnedByTreasury",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UserAlreadyClaimedCurrentAirdrop",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UserNotEligible",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "EligibleTokenListCleared",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "TokensAssigned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "TokensClaimed",
+      "type": "event"
+    }
+  ],
+  "bytecode": "0x60808060405234601357603a908160198239f35b600080fdfe600080fdfea26469706673582212203919e61a06c56aa1f8ba937e25d8813ac67d8fb1e823a78ef1c89b226021512664736f6c63430008190033",
+  "deployedBytecode": "0x600080fdfea26469706673582212203919e61a06c56aa1f8ba937e25d8813ac67d8fb1e823a78ef1c89b226021512664736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -230,7 +230,6 @@ contract MockL1WrappedStakedTONUpgraded is ProxyStorage, ERC20Upgradeable, Ownab
                 "deposit failed"
             );
             wstonAmount = getDepositWstonAmount(_amount);
-            totalStakedAmount += _amount;
 
 
         } else {    
@@ -244,10 +243,8 @@ contract MockL1WrappedStakedTONUpgraded is ProxyStorage, ERC20Upgradeable, Ownab
                 "approveAndCall failed"
             ); 
             wstonAmount = getDepositWstonAmount(_amount * 1e9);
-            totalStakedAmount += _amount * 1e9;
         }
         
-        totalWstonMinted += wstonAmount;
 
         // we mint WSTON
         _mint(_to, wstonAmount);
@@ -387,9 +384,9 @@ contract MockL1WrappedStakedTONUpgraded is ProxyStorage, ERC20Upgradeable, Ownab
         uint256 _stakingIndex;
         uint256 totalStake = stakeOf();
         
-        if (totalWstonMinted > 0 && totalStake > 0) {
+        if (totalSupply() > 0 && totalStake > 0) {
             // Multiply first to avoid precision loss, then divide
-            _stakingIndex = (totalStake * DECIMALS) / totalWstonMinted;
+            _stakingIndex = (totalStake * DECIMALS) / totalSupply();
         } else {
             _stakingIndex = stakingIndex;
         }
@@ -423,12 +420,6 @@ contract MockL1WrappedStakedTONUpgraded is ProxyStorage, ERC20Upgradeable, Ownab
     function stakeOf() public view returns(uint256) {
         return ISeigManager(seigManager).stakeOf(layer2Address, address(this));
     }
-
-    function totalSupply() public view override returns(uint256) {
-        return totalWstonMinted;
-    }
-
-    function getTotalWSTONSupply() external view returns(uint256) {return totalSupply();} 
 
     function getLastWithdrawalRequest(address requester) external view returns(WithdrawalRequest memory) {
         uint256 index = withdrawalRequestIndex[requester] - 1;

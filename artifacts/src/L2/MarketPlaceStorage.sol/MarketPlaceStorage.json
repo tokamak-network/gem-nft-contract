@@ -1,0 +1,266 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "MarketPlaceStorage",
+  "sourceName": "src/L2/MarketPlaceStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "AddressZero",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "errorMessage",
+          "type": "string"
+        }
+      ],
+      "name": "BuyerIsSeller",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GemIsAlreadyForSaleOrIsMining",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GemIsNotForSale",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GemNotApproved",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ListingGemFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoTokens",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotGemOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotPaused",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Paused",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PurchaseFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongLength",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongPrice",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongSeller",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongStakingIndex",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "GemBought",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        }
+      ],
+      "name": "GemForSale",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "GemRemovedFromSale",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "discountRate",
+          "type": "uint256"
+        }
+      ],
+      "name": "SetDiscountRate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "stakingIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "SetStakingIndex",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "claimer",
+          "type": "address"
+        }
+      ],
+      "name": "WSTONClaimed",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DECIMALS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TON_FEES_RATE_DIVIDER",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "gemsForSale",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608080604052346030576b033b2e3c9fd0803ce800000060065561ffff196007541660075561010590816100368239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c90816308ec897d1460b1575080632e0f262514608c57639c41b42b14603e57600080fd5b34608957602036600319011260895760406060916004358152806020522060018060a01b038154169060ff600260018301549201541690604051928352602083015215156040820152f35b80fd5b503460895780600319360112608957604051676765c793fa10079d601b1b8152602090f35b90503460cb578160031936011260cb578061271060209252f35b5080fdfea264697066735822122030e4ccc8785687d27ba7d2c3161e6da5a2cde8509fc22c75f711e1fc28e9eb1f64736f6c63430008190033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c90816308ec897d1460b1575080632e0f262514608c57639c41b42b14603e57600080fd5b34608957602036600319011260895760406060916004358152806020522060018060a01b038154169060ff600260018301549201541690604051928352602083015215156040820152f35b80fd5b503460895780600319360112608957604051676765c793fa10079d601b1b8152602090f35b90503460cb578160031936011260cb578061271060209252f35b5080fdfea264697066735822122030e4ccc8785687d27ba7d2c3161e6da5a2cde8509fc22c75f711e1fc28e9eb1f64736f6c63430008190033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

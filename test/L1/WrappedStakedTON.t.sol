@@ -55,7 +55,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
 
         uint256 stakingIndex = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
-        uint256 wstonTotalSupply = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getTotalWSTONSupply();
+        uint256 wstonTotalSupply = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).totalSupply();
         uint256 sWtonBalance = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).stakeOf();
 
         //console.log("staking index = ", stakingIndex);
@@ -110,7 +110,7 @@ contract WrappedStakedTONTest is L1BaseTest {
         vm.stopPrank();
     }
 
-    function testClaimWithdrawal() public {
+    function testClaimWithdrawalTotal() public {
         // user1 deposit
         vm.startPrank(user1);
         uint256 depositAmount = 200 * 10**27;
@@ -156,6 +156,57 @@ contract WrappedStakedTONTest is L1BaseTest {
 
         vm.stopPrank();
     }
+
+    function testClaimWithdrawalIndex() public {
+        // user1 deposit
+        vm.startPrank(user1);
+        uint256 depositAmount = 200 * 10**27;
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        // move to the next 100000 block
+        vm.roll(block.number + 100000);
+
+        // user2 deposits
+        vm.startPrank(user2);
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        // move to the next 100000 block
+        vm.roll(block.number + 100000);
+
+        // user1 withdrawal request
+        vm.startPrank(user1);
+        // Making 2 withdrawal requests. one is 50 WSTON the other is 10 WSTON
+        uint256 firstWithdrawalAmount = 50*10**27;
+        uint256 secondWithdrawalAmount = 10*10**27;
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(firstWithdrawalAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(secondWithdrawalAmount);
+
+        vm.roll(block.number + delay);
+
+        uint256 wtonBalanceBefore = IERC20(wton).balanceOf(user1);
+        //1007868027750759615961946603
+        uint256 stakingIndexBefore = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
+
+        // Claim the withdrawal by index
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1, false);
+        L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getWithdrawalRequest(user1, 1);
+
+        // Check that the staking index is not affected
+        uint256 stakingIndexAfter = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
+        // 1007868027750759615961946603
+        assert(stakingIndexAfter == stakingIndexBefore);
+
+        // Check that the user's balance is updated correctly
+        assert(IERC20(wton).balanceOf(user1) == wtonBalanceBefore + request.amount);
+        assert(request.processed == true);
+
+        vm.stopPrank();
+    }
+
 
     function testDepositUsingTON() public {
         vm.startPrank(user1);

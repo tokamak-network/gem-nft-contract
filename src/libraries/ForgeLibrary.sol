@@ -67,10 +67,12 @@ library ForgeLibrary {
         uint8[2] memory _color,
         ForgeParams memory params
     ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint32 forgedGemsMiningPeriod, uint32 forgedGemsCooldownPeriod, uint8 forgedGemsminingTry) {
+         // Ensure the sender's address is not zero
         if(msgSender == address(0)) {
             revert AddressZero();
         }
 
+        // Determine the properties of the new GEM based on the desired rarity
         if (_rarity == GemFactoryStorage.Rarity.COMMON) {
             if(_tokenIds.length != 2) {
                 revert WrongNumberOfGemToBeForged();
@@ -115,9 +117,11 @@ library ForgeLibrary {
             revert("wrong rarity");
         }
 
+        // Initialize variables for quadrant summation and color validation
         uint8[4] memory sumOfQuadrants;
         bool colorValidated = false;
 
+        // Iterate over each token to validate ownership, lock status, and rarity
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if(GEMIndexToOwner[_tokenIds[i]] != msgSender) {
                 revert NotGemOwner();
@@ -129,11 +133,13 @@ library ForgeLibrary {
                 revert WrongRarity();
             }
 
+            // Sum the quadrants of the tokens
             sumOfQuadrants[0] += Gems[_tokenIds[i]].quadrants[0];
             sumOfQuadrants[1] += Gems[_tokenIds[i]].quadrants[1];
             sumOfQuadrants[2] += Gems[_tokenIds[i]].quadrants[2];
             sumOfQuadrants[3] += Gems[_tokenIds[i]].quadrants[3];
 
+            // Validate the color of the tokens
             for (uint256 j = 0; j < _tokenIds.length; j++) {
                 if (!colorValidated) {
                     colorValidated = _checkColor(Gems, _tokenIds[i], _tokenIds[j], _color[0], _color[1]);
@@ -143,10 +149,12 @@ library ForgeLibrary {
                 }
             }
         }
+        // Ensure the color is valid
         if(!colorValidated) {
             revert NotValidColor();
         }
 
+        // Calculate the new quadrants for the forged GEM
         sumOfQuadrants[0] %= 2;
         sumOfQuadrants[1] %= 2;
         sumOfQuadrants[2] %= 2;
@@ -162,7 +170,7 @@ library ForgeLibrary {
         for (uint8 i = 0; i < 4; i++) {
             forgedQuadrants[i] = baseValue + sumOfQuadrants[i];
         }
-
+        // Adjust quadrants if they all exceed the base value by 1
         if (
             forgedQuadrants[0] == baseValue + 1 &&
             forgedQuadrants[1] == baseValue + 1 &&
@@ -175,8 +183,10 @@ library ForgeLibrary {
             forgedQuadrants[3] = baseValue;
         }
 
+        // Determine the new rarity of the forged GEM
         newRarity = GemFactoryStorage.Rarity(uint8(_rarity) + 1);
-
+        
+        // Create the new GEM and add it to the storage
         GemFactoryStorage.Gem memory _Gem = GemFactoryStorage.Gem({
             tokenId: 0,
             rarity: newRarity,
@@ -194,10 +204,12 @@ library ForgeLibrary {
         newGemId = Gems.length - 1;
         Gems[newGemId].tokenId = newGemId;
 
+        // Ensure the new GEM ID is valid and updating GEM storage
         require(newGemId == uint256(uint32(newGemId)));
         GEMIndexToOwner[newGemId] = msgSender;
         ownershipTokenCount[msgSender]++;
 
+        // Return the properties of the newly forged GEM
         return (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry);
     }
 
@@ -225,7 +237,9 @@ library ForgeLibrary {
         uint8 _color_1
     ) internal view returns (bool colorValidated) {
         colorValidated = false;
+        // Ensure the tokens are different
         if (tokenA != tokenB) {
+            // Retrieve colors of the two tokens
             uint8[2] memory _color1 = Gems[tokenA].color;
             uint8 _color1_0 = _color1[0];
             uint8 _color1_1 = _color1[1];
@@ -233,14 +247,17 @@ library ForgeLibrary {
             uint8 _color2_0 = _color2[0];
             uint8 _color2_1 = _color2[1];
 
+            // Check if both tokens have identical colors and match the desired color
             if (_color1_0 == _color1_1 && _color2_0 == _color2_1 && _color1_0 == _color2_0) {
                 colorValidated = (_color_0 == _color1_0 && _color_1 == _color1_1);
                 return colorValidated;
             }
+            // Check if both tokens have identical colors but different from each other
             if (_color1_0 == _color1_1 && _color2_0 == _color2_1) {
                 colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_0));
                 return colorValidated;
             }
+            // Check if one token has identical colors and the other has one matching color
             if (((_color1_0 != _color1_1 && _color2_0 == _color2_1) && (_color1_0 == _color2_0 || _color1_1 == _color2_0)) || ((_color1_0 == _color1_1 && _color2_0 != _color2_1) && (_color2_0 == _color1_0 || _color2_1 == _color1_0))) {
                 if (_color1_0 != _color1_1) {
                     colorValidated = ((_color_0 == _color1_0 && _color_1 == _color1_1) || (_color_1 == _color1_0 && _color_0 == _color1_1));
@@ -250,6 +267,7 @@ library ForgeLibrary {
                     return colorValidated;
                 }
             }
+            // Check if one token has identical colors and the other has no matching colors
             if (((_color1_0 != _color1_1 && _color2_0 == _color2_1) && (_color1_0 != _color2_0 && _color1_1 != _color2_0)) || ((_color1_0 == _color1_1 && _color2_0 != _color2_1) && (_color1_0 != _color2_0 && _color1_0 != _color2_1))) {
                 if (_color1_0 != _color1_1) {
                     colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_1 == _color1_0 && _color_0 == _color2_0) || (_color_1 == _color1_1 && _color_0 == _color2_0));
@@ -259,10 +277,12 @@ library ForgeLibrary {
                     return colorValidated;
                 }
             }
+            // Check if both tokens have different colors but match each other
             if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && ((_color1_0 == _color2_0 && _color1_1 == _color2_1) || (_color1_0 == _color2_1 && _color1_1 == _color2_0))) {
                 colorValidated = ((_color_0 == _color1_0 && _color_1 == _color1_1) || (_color_0 == _color1_1 && _color_1 == _color1_0));
                 return colorValidated;
             }
+            // Check if both tokens have different colors with at least one matching color
             if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && (_color1_0 == _color2_0 || _color1_0 == _color2_1 || _color1_1 == _color2_0 || _color1_1 == _color2_1)) {
                 if (_color1_0 == _color2_0) {
                     colorValidated = ((_color_0 == _color1_1 && _color_1 == _color2_1) || (_color_0 == _color2_1 && _color_1 == _color1_1));
@@ -278,11 +298,13 @@ library ForgeLibrary {
                     return colorValidated;
                 }
             }
+            // Check if both tokens have completely different colors
             if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && _color1_0 != _color2_0 && _color1_1 != _color2_0 && _color1_0 != _color2_1 && _color1_1 != _color2_1) {
                 colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color1_0 && _color_1 == _color2_1) || (_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color1_1 && _color_1 == _color2_1) || (_color_0 == _color2_0 && _color_1 == _color1_0) || (_color_0 == _color2_0 && _color_1 == _color1_1) || (_color_0 == _color2_1 && _color_1 == _color1_0) || (_color_0 == _color2_1 && _color_1 == _color1_1));
                 return colorValidated;
             }
         } else {
+            // Return false if the tokens are the same
             return colorValidated;
         }
     }

@@ -27,6 +27,8 @@ interface ITreasury {
 contract MockMarketPlaceUpgraded is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthControl {
     using SafeERC20 for IERC20;
 
+    string public commonGemTokenUri;
+
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");
       _;
@@ -127,9 +129,7 @@ contract MockMarketPlaceUpgraded is ProxyStorage, MarketPlaceStorage, Reentrancy
     }
 
     function setDiscountRate(uint256 _tonFeesRate) external onlyOwner {
-        if(_tonFeesRate >= 100) {
-            revert WrongDiscountRate();
-        }
+        require(_tonFeesRate < 100, "discount rate must be less than 100%");
         tonFeesRate = _tonFeesRate;
         emit SetDiscountRate(_tonFeesRate);
     }
