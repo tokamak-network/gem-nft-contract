@@ -344,14 +344,6 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     }
 
     /**
-     * @notice Swaps TON for WSTON using the swap pool.
-     * @param tonAmount Amount of TON to swap for WSTON.
-     */
-    function swapTONforWSTON(uint256 tonAmount) external onlyOwnerOrAdmin {
-        IWstonSwapPool(wstonSwapPool).swapTONforWSTON(tonAmount);
-    }
-
-    /**
      * @notice Handles the receipt of an ERC721 token.
      * @return bytes4 Returns the selector of the onERC721Received function.
      */
