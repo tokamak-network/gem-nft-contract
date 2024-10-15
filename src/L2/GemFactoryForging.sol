@@ -16,8 +16,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
  * However, please note that this contract is deployed and operational
  */
 contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageUpgradeable {
-   
-   using ForgeLibrary for GemFactoryStorage.Gem[];
 
     /**
      * @notice Modifier to ensure the contract is not paused.
@@ -27,6 +25,7 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
       _;
     }
 
+    using ForgeLibrary for GemFactoryStorage.Gem[];
 
      /**
      * @notice function that allow users to forge their gems. Gems must have the same rarity. 

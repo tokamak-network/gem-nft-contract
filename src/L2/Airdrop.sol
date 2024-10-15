@@ -20,22 +20,29 @@ interface ITreasury {
  * @dev user claim gems by their own
  */
 contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
-    /**
+
+    error ContractNotPaused();
+    error ContractPaused();
+   /**
      * @notice Modifier to ensure the contract is not paused.
      */
+
     modifier whenNotPaused() {
-      require(!paused, "Pausable: paused");
-      _;
+        if (paused) {
+            revert ContractPaused();
+        }
+        _;
     }
-    
+
     /**
      * @notice Modifier to ensure the contract is paused.
      */
     modifier whenPaused() {
-        require(paused, "Pausable: not paused");
+        if (!paused) {
+            revert ContractNotPaused();
+        }
         _;
     }
-
     /**
      * @notice Pauses the contract, preventing certain actions.
      * @dev Can only be called by the owner when the contract is not paused.

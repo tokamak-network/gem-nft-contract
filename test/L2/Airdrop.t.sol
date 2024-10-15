@@ -6,6 +6,8 @@ import { AirdropStorage } from "../../src/L2/AirdropStorage.sol";
 
 
 contract AirdropTest is L2BaseTest {
+        error ContractPaused();
+    error ContractNotPaused();
     function setUp() public override {
         super.setUp();
     }
@@ -139,7 +141,7 @@ contract AirdropTest is L2BaseTest {
         vm.stopPrank();
 
         vm.startPrank(user1);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(ContractPaused.selector));
         Airdrop(airdropProxyAddress).claimAirdrop();
         vm.stopPrank();
     }
