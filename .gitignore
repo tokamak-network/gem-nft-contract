@@ -11,6 +11,7 @@ out/
 # Docs
 docs/
 coverage.json
+coverage/
 
 # Dotenv file
 .env

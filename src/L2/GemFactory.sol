@@ -7,7 +7,6 @@ import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {GemFactoryStorage} from "./GemFactoryStorage.sol";
 import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
 import { GemLibrary } from "../libraries/GemLibrary.sol";
-import { MiningLibrary } from "../libraries/MiningLibrary.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
@@ -52,7 +51,6 @@ interface ITreasury {
 contract GemFactory is ProxyStorage, Initializable, ERC721URIStorageUpgradeable, GemFactoryStorage, OwnableUpgradeable, ReentrancyGuard {
 
     using GemLibrary for GemFactoryStorage.Gem[];
-    using MiningLibrary for GemFactoryStorage.Gem[];
 
     /**
      * @notice Modifier to ensure the contract is not paused.
