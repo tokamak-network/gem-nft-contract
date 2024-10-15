@@ -268,9 +268,10 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         uint8[4][] memory _quadrants, 
         string[] memory _tokenURIs
     ) public onlyOwnerOrRandomPackOrMarketplace returns (uint256[] memory) {
+        uint256 _raritiesLength = _rarities.length;
         //calculate the value of the pool of Gems to be created
         uint256 sumOfNewPoolValues;
-        for (uint256 i = 0; i < _rarities.length; ++i) {
+        for (uint256 i = 0; i < _raritiesLength; ++i) {
             sumOfNewPoolValues += IGemFactory(gemFactory).getValueBasedOnRarity(_rarities[i]);
         }
 

@@ -542,9 +542,9 @@ contract L1WrappedStakedTON is
     function getTotalClaimableAmountByUser(address user) external view returns (uint256 totalClaimableAmount) {
         uint256 currentBlock = block.number;
         uint256 userIndex = withdrawalRequestIndex[user];
-
+        uint256 withdrawalRequestLength = withdrawalRequests[user].length;
         // Iterate over each withdrawal request for the user
-        for (uint256 j = userIndex; j < withdrawalRequests[user].length; ++j) {
+        for (uint256 j = userIndex; j < withdrawalRequestLength; ++j) {
             WithdrawalRequest memory request = withdrawalRequests[user][j];
 
             // Check if the request is eligible for claiming
