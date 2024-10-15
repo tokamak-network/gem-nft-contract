@@ -211,4 +211,10 @@ contract GemFactoryStorage {
     // Random fullfil error
     error RequestNotMade();
     error FailedToSendEthBack();
+
+    // access errors
+    error UnauthorizedCaller(address caller);
+    error ContractPaused();
+    error ContractNotPaused();
+    error URIQueryForNonexistentToken(uint256 tokenId);
 }

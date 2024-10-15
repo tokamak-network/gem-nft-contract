@@ -60,11 +60,6 @@ contract GemFactory is
     using GemLibrary for GemFactoryStorage.Gem[];
     using MiningLibrary for GemFactoryStorage.Gem[];
 
-    error UnauthorizedCaller(address caller);
-    error ContractPaused();
-    error ContractNotPaused();
-    error URIQueryForNonexistentToken(uint256 tokenId);
-
     /**
      * @notice Modifier to ensure the contract is not paused.
      */
