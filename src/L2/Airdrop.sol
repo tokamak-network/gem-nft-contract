@@ -20,22 +20,29 @@ interface ITreasury {
  * @dev user claim gems by their own
  */
 contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
-    /**
+
+    error ContractNotPaused();
+    error ContractPaused();
+   /**
      * @notice Modifier to ensure the contract is not paused.
      */
+
     modifier whenNotPaused() {
-      require(!paused, "Pausable: paused");
-      _;
+        if (paused) {
+            revert ContractPaused();
+        }
+        _;
     }
-    
+
     /**
      * @notice Modifier to ensure the contract is paused.
      */
     modifier whenPaused() {
-        require(paused, "Pausable: not paused");
+        if (!paused) {
+            revert ContractNotPaused();
+        }
         _;
     }
-
     /**
      * @notice Pauses the contract, preventing certain actions.
      * @dev Can only be called by the owner when the contract is not paused.
@@ -83,11 +90,13 @@ contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
      */
     function assignGemForAirdrop(uint256[] memory _tokenIds, address _to) external onlyOwnerOrAdmin returns (bool) {
         uint256[] storage existingTokens = tokensEligible[_to];
+        uint256 tokenIdLength = _tokenIds.length;
+              uint256 existingTokensLength = existingTokens.length;
 
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
+        for (uint256 i = 0; i < tokenIdLength; ++i) {
             uint256 tokenId = _tokenIds[i];
 
-            for (uint256 k = 0; k < existingTokens.length; ++k) {
+            for (uint256 k = 0; k < existingTokensLength; ++k) {
                 if (existingTokens[k] == tokenId) {
                     continue;
                 }
@@ -122,11 +131,13 @@ contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
      * @dev Transfers ownership of each GEM token to the caller. Can only be called when not paused.
      */
     function claimAirdrop() external whenNotPaused nonReentrant {
+
         if(userClaimed[msg.sender] == true) {
             revert UserAlreadyClaimedCurrentAirdrop();
         }
         uint256[] memory _tokenIds = tokensEligible[msg.sender];
-        if(_tokenIds.length == 0) {
+        uint256 tokenIdsLength = _tokenIds.length;
+        if(tokenIdsLength == 0) {
             revert UserNotEligible();
         }
 
@@ -135,7 +146,7 @@ contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
         delete tokensEligible[msg.sender];
         userHasEligibleTokens[msg.sender] = false;
 
-        for (uint256 i = 0; i < _tokenIds.length; ++i) {
+        for (uint256 i = 0; i < tokenIdsLength; ++i) {
             // This condition is made in case there was duplicates in the list so it does not revert
             if (IGemFactory(gemFactory).ownerOf(_tokenIds[i]) == treasury) {
                 IGemFactory(gemFactory).setIsLocked(_tokenIds[i], false);
@@ -152,13 +163,14 @@ contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
      * @return A boolean indicating success.
      */
     function clearEligibleTokensList() external onlyOwnerOrAdmin returns(bool) {
+      uint256 usersWithEligibleTokensLength= usersWithEligibleTokens.length;
         // make the function revert if there is no eligible tokens
-        if(usersWithEligibleTokens.length == 0) {
+        if(usersWithEligibleTokensLength == 0) {
             revert NoEligibleUsers();
         }
         
         // deleting tokenEligible Mapping for each userthat was assigned with airdrop tokens
-        for (uint256 i = 0; i < usersWithEligibleTokens.length; ++i) {
+        for (uint256 i = 0; i < usersWithEligibleTokensLength; ++i) {
             address user = usersWithEligibleTokens[i];
             delete tokensEligible[user];
             userClaimed[user] = false;

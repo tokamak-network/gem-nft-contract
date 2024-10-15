@@ -258,9 +258,9 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         uint256[] memory tokenIds = new uint256[](Gems.length);
         uint256 index = 0;
         uint8 sumOfQuadrants = quadrant1 + quadrant2 + quadrant3+ quadrant4;
-
+    uint256 gemsLength = Gems.length;
         // Iterate through the Gems to count those with quadrants less than the specified sum
-        for (uint256 i = 0; i < Gems.length; ++i) {
+        for (uint256 i = 0; i < gemsLength; ++i) {
             uint8 GemSumOfQuadrants = Gems[i].quadrants[0] + Gems[i].quadrants[1] + Gems[i].quadrants[2] + Gems[i].quadrants[3];
             if (GemSumOfQuadrants < sumOfQuadrants && 
                 GEMIndexToOwner[i] == treasury &&

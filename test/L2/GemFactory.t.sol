@@ -5,63 +5,70 @@ import "./L2BaseTest.sol";
 import "../../src/libraries/ForgeLibrary.sol";
 
 contract GemFactoryTest is L2BaseTest {
+    error ContractPaused();
+    error ContractNotPaused();
+    error UnauthorizedCaller(address caller);
 
     function setUp() public override {
         super.setUp();
     }
 
     /**
-     * @notice function defining a standard COMMON GEM 
+     * @notice function defining a standard COMMON GEM
      */
-    function defineDefaultGem() public pure returns(GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) {
+    function defineDefaultGem()
+        public
+        pure
+        returns (
+            GemFactoryStorage.Rarity rarity,
+            uint8[2] memory color,
+            uint8[4] memory quadrants,
+            string memory tokenURI
+        )
+    {
         // Define GEM properties
         rarity = GemFactoryStorage.Rarity.COMMON;
-        color = [0,0];
+        color = [0, 0];
         quadrants = [1, 2, 1, 1];
         tokenURI = "https://example.com/token/1";
     }
 
     /**
-    * @notice testing of the creation of a single GEM (should be done only from the treasury contract)
-    */
+     * @notice testing of the creation of a single GEM (should be done only from the treasury contract)
+     */
     function testCreateGEM() public {
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         // Verify GEM creation
         assert(newGemId == 0);
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
-        assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemId))) == keccak256(abi.encodePacked(tokenURI)));
+        assert(
+            keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemId)))
+                == keccak256(abi.encodePacked(tokenURI))
+        );
 
         vm.stopPrank();
     }
 
     /**
-    * @notice testing of the transferFrom function
-    * @dev we assert that storage variables are approrpiately updated
-    */
+     * @notice testing of the transferFrom function
+     * @dev we assert that storage variables are approrpiately updated
+     */
     function testTransferFrom() public {
         // creating a single GEM
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         //transferring the GEM from the treasury to user1
         vm.startPrank(treasuryProxyAddress);
@@ -70,29 +77,25 @@ contract GemFactoryTest is L2BaseTest {
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
         // ensuring the cooldown period was reset
         assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp);
-        
+
         // ensuring the tokenCount was updated accordingly
-        assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(treasuryProxyAddress) == 0);
-        assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(user1) == 1);
+        assert(GemFactory(gemfactoryProxyAddress).getOwnershipTokenCount(treasuryProxyAddress) == 0);
+        assert(GemFactory(gemfactoryProxyAddress).getOwnershipTokenCount(user1) == 1);
         vm.stopPrank();
     }
 
     /**
-    * @notice testing of the behavior of transferFrom function if the gem is locked
-    */
+     * @notice testing of the behavior of transferFrom function if the gem is locked
+     */
     function testTransferFromShouldRevertIftokenLocked() public {
         // creating a single GEM
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         // listing the gem into the marketplace
         uint256 gemPrice = 1500 * 10 ** 27;
@@ -108,118 +111,102 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing of the safeTransferFrom function
-    */
+     * @notice testing of the safeTransferFrom function
+     */
     function testSafeTransferFrom() public {
         // creating a single GEM
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         vm.startPrank(treasuryProxyAddress);
-        GemFactory(gemfactoryProxyAddress).safeTransferFrom(treasuryProxyAddress, user1, newGemId); 
+        GemFactory(gemfactoryProxyAddress).safeTransferFrom(treasuryProxyAddress, user1, newGemId);
         // checking the GEM was sent appropriately
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
         // ensuring the cooldown period was reset
         assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp);
-        
+
         // ensuring the tokenCount was updated accordingly
-        assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(treasuryProxyAddress) == 0);
-        assert(GemFactory(gemfactoryProxyAddress). getOwnershipTokenCount(user1) == 1); 
+        assert(GemFactory(gemfactoryProxyAddress).getOwnershipTokenCount(treasuryProxyAddress) == 0);
+        assert(GemFactory(gemfactoryProxyAddress).getOwnershipTokenCount(user1) == 1);
         vm.stopPrank();
     }
 
     /**
-    * @notice testing of the safeTransferFrom function's behavior if the recipient does not implement onERC721Receive function
-    * to avoid tokens being locked inside of contracts
-    * @dev we create a GEM for the treasury and send try to transfer the GEM to the airdrop contract which intendly does not implement onERC721Receive
-    */
+     * @notice testing of the safeTransferFrom function's behavior if the recipient does not implement onERC721Receive function
+     * to avoid tokens being locked inside of contracts
+     * @dev we create a GEM for the treasury and send try to transfer the GEM to the airdrop contract which intendly does not implement onERC721Receive
+     */
     function testSafeTransferFromShouldRevertIfRecipientNotAppropriate() public {
         // creating a single GEM
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         vm.startPrank(treasuryProxyAddress);
         // ensure the transfer fails due to the fact airdrop contract does not implement onERC721Receive function
         vm.expectRevert();
-        GemFactory(gemfactoryProxyAddress).safeTransferFrom(treasuryProxyAddress, airdropProxyAddress, newGemId); 
-       
+        GemFactory(gemfactoryProxyAddress).safeTransferFrom(treasuryProxyAddress, airdropProxyAddress, newGemId);
+
         vm.stopPrank();
     }
 
     /**
-    * @notice testing the access restrictions of createGem function from GemFactory 
-    */
+     * @notice testing the access restrictions of createGem function from GemFactory
+     */
     function testCreateGEMShouldRevertIfNotFromTreasury() public {
         vm.startPrank(owner);
 
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
-        vm.expectRevert("function callable from treasury contract only");
-        GemFactory(gemfactoryProxyAddress).createGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        vm.expectRevert(abi.encodeWithSelector(UnauthorizedCaller.selector, owner));
+        GemFactory(gemfactoryProxyAddress).createGEM(rarity, color, quadrants, tokenURI);
 
         vm.stopPrank();
     }
 
     /**
-    * @notice testing the access restrictions of createPreminedGem function from the Treasury 
-    */
+     * @notice testing the access restrictions of createPreminedGem function from the Treasury
+     */
     function testCreatePreminedGEMShouldRevertIfNotFromOwner() public {
         // trying to create a GEM using user1's wallet
         vm.startPrank(user1);
 
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         vm.expectRevert("caller is neither owner nor randomPack contract");
-        Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         vm.stopPrank();
     }
 
     /**
-    * @notice testing of the creation of multiple GEMs (should be done only from the treasury contract)
-    */
+     * @notice testing of the creation of multiple GEMs (should be done only from the treasury contract)
+     */
     function testCreatePreminedGEMPool() public {
         vm.startPrank(owner);
 
         // Define GEM properties
         uint8[2][] memory colors = new uint8[2][](2);
-        colors[0] = [0,0];
-        colors[1] = [1,1];
+        colors[0] = [0, 0];
+        colors[1] = [1, 1];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
-        
+
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [2, 3, 3, 2];
         quadrants[1] = [4, 3, 4, 3];
@@ -229,39 +216,41 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM creation
         assert(newGemIds.length == 2);
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
-        assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemIds[0]))) == keccak256(abi.encodePacked(tokenURIs[0])));
-        assert(keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemIds[1]))) == keccak256(abi.encodePacked(tokenURIs[1])));
+        assert(
+            keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemIds[0])))
+                == keccak256(abi.encodePacked(tokenURIs[0]))
+        );
+        assert(
+            keccak256(abi.encodePacked(GemFactory(gemfactoryProxyAddress).tokenURI(newGemIds[1])))
+                == keccak256(abi.encodePacked(tokenURIs[1]))
+        );
 
         vm.stopPrank();
     }
 
     /**
-    * @notice testing the access restrictions of createPreminedGEMPool function from the Treasury 
-    */
+     * @notice testing the access restrictions of createPreminedGEMPool function from the Treasury
+     */
     function testCreatePreminedGEMPoolShouldRevertIfNotFromOwner() public {
         // trying to create a GEM using user1's wallet
         vm.startPrank(user1);
 
         // Define GEM properties
         uint8[2][] memory colors = new uint8[2][](2);
-        colors[0] = [0,0];
-        colors[1] = [1,1];
+        colors[0] = [0, 0];
+        colors[1] = [1, 1];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
-        
+
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [2, 3, 3, 2];
         quadrants[1] = [4, 3, 4, 3];
@@ -272,30 +261,25 @@ contract GemFactoryTest is L2BaseTest {
 
         vm.expectRevert("caller is neither owner nor randomPack contract");
         // Call createPreminedGEMPool function from the Treasury contract
-        Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
         vm.stopPrank();
     }
 
     /**
-    * @notice testing the access restrictions of createGEMPool function from GemFactory 
-    */
+     * @notice testing the access restrictions of createGEMPool function from GemFactory
+     */
     function testCreateGEMPoolShouldRevertIfNotFromTreasury() public {
         vm.startPrank(owner);
 
         // Define GEM properties
         uint8[2][] memory colors = new uint8[2][](2);
-        colors[0] = [0,0];
-        colors[1] = [1,1];
+        colors[0] = [0, 0];
+        colors[1] = [1, 1];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
-        
+
         uint8[4][] memory quadrants = new uint8[4][](2);
         quadrants[0] = [2, 3, 3, 2];
         quadrants[1] = [4, 3, 4, 3];
@@ -304,33 +288,24 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[0] = "https://example.com/token/1";
         tokenURIs[1] = "https://example.com/token/2";
 
-        vm.expectRevert("function callable from treasury contract only");
-        GemFactory(gemfactoryProxyAddress).createGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        vm.expectRevert(abi.encodeWithSelector(UnauthorizedCaller.selector, owner));
+        GemFactory(gemfactoryProxyAddress).createGEMPool(rarities, colors, quadrants, tokenURIs);
 
         vm.stopPrank();
     }
 
     /**
-    * @notice testing the melt function from the GemFactory
-    */
+     * @notice testing the melt function from the GemFactory
+     */
     function testMeltGEM() public {
         vm.startPrank(owner);
 
-         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        // defining a default GEM
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
@@ -357,21 +332,17 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of a user trying to melt a GEM he does not own
-    */
+     * @notice testing the behavior of a user trying to melt a GEM he does not own
+     */
     function testMeltGEMShouldRevertIfNotGemOwner() public {
         vm.startPrank(owner);
 
-         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        // defining a default GEM
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
@@ -393,20 +364,16 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the function if the contract is paused
-    */
+     * @notice testing the behavior of the function if the contract is paused
+     */
     function testMeltGEMShouldRevertIfContractPaused() public {
         vm.startPrank(owner);
-         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) = defineDefaultGem();
+        // defining a default GEM
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
@@ -423,14 +390,15 @@ contract GemFactoryTest is L2BaseTest {
 
         // Start prank as user2 and try to melt the GEM
         vm.startPrank(user1);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(ContractPaused.selector));
+
         GemFactory(gemfactoryProxyAddress).meltGEM(newGemId);
         vm.stopPrank();
     }
 
     /**
-    * @notice testing the forgeTokens function from GemFactory
-    */
+     * @notice testing the forgeTokens function from GemFactory
+     */
     function testForgeGem() public {
         vm.startPrank(owner);
 
@@ -452,12 +420,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -484,7 +448,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenIds[1] = newGemIds[1];
 
         uint8[2] memory color = [0, 1];
-        uint256 newGemId = GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
+        uint256 newGemId =
+            GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         // Verify the new gem properties
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
@@ -503,10 +468,10 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the forgeTokens function from GemFactory with 4 Gems (rarity = UNIQUE)
-    */
+     * @notice testing the forgeTokens function from GemFactory with 4 Gems (rarity = UNIQUE)
+     */
     function testForgeUniqueGems() public {
-         vm.startPrank(owner);
+        vm.startPrank(owner);
 
         // Define GEM properties
         uint8[2][] memory colors = new uint8[2][](4);
@@ -534,12 +499,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[3] = "https://example.com/token/4";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -575,7 +536,8 @@ contract GemFactoryTest is L2BaseTest {
 
         uint8[2] memory color = [1, 3];
 
-        uint256 newGemId = GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
+        uint256 newGemId =
+            GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
 
         // Verify the new gem properties
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
@@ -594,8 +556,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the function if the contract is paused
-    */
+     * @notice testing the behavior of the function if the contract is paused
+     */
     function testForgeGemsShouldRevertIfPaused() public {
         vm.startPrank(owner);
 
@@ -617,12 +579,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -649,15 +607,15 @@ contract GemFactoryTest is L2BaseTest {
         tokenIds[1] = newGemIds[1];
         uint8[2] memory color = [0, 1];
 
-        vm.expectRevert("Pausable: paused");
+    vm.expectRevert("Pausable: paused");
         GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
     }
 
-        /**
-    * @notice testing the behavior of the function if the function caller is not the Gems owner
-    */
+    /**
+     * @notice testing the behavior of the function if the function caller is not the Gems owner
+     */
     function testForgeGemsShouldRevertIfNotGemOwner() public {
         vm.startPrank(owner);
 
@@ -679,12 +637,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -713,8 +667,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the function if the rarity of the tokens passed in argument are not the same
-    */
+     * @notice testing the behavior of the function if the rarity of the tokens passed in argument are not the same
+     */
     function testForgeGemShouldRevertIfRaritiesNotSame() public {
         vm.startPrank(owner);
 
@@ -736,12 +690,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -777,8 +727,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the function if the color passed in argument does not follow the forging rules
-    */
+     * @notice testing the behavior of the function if the color passed in argument does not follow the forging rules
+     */
     function testForgeGemShouldRevertIfColorNotCorrect() public {
         vm.startPrank(owner);
 
@@ -800,12 +750,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -842,8 +788,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the function if the number of Gems to be forged are not correct
-    */
+     * @notice testing the behavior of the function if the number of Gems to be forged are not correct
+     */
     function testForgeGemShouldRevertIfGemsNumberNotCorrect() public {
         vm.startPrank(owner);
         // Define GEM properties with the same rarity and valid colors
@@ -862,7 +808,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[4][] memory quadrants = new uint8[4][](4);
         quadrants[0] = [4, 5, 5, 5]; // epic quadrants
         quadrants[1] = [5, 4, 4, 5]; // epic quadrants
-        quadrants[2] = [4, 4, 4, 5]; // epic quadrants  
+        quadrants[2] = [4, 4, 4, 5]; // epic quadrants
         quadrants[3] = [4, 4, 5, 4]; // epic quadrants
 
         string[] memory tokenURIs = new string[](4);
@@ -871,12 +817,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[2] = "https://example.com/token/3";
         tokenURIs[3] = "https://example.com/token/4";
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
         // Verify GEM creation
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
@@ -910,8 +852,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the StartMiningGem function from the GemFactory
-    */
+     * @notice testing the behavior of the StartMiningGem function from the GemFactory
+     */
     function testStartMiningGEM() public {
         vm.startPrank(owner);
         // Define GEM properties
@@ -921,12 +863,7 @@ contract GemFactoryTest is L2BaseTest {
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
@@ -948,8 +885,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the StartMiningGem function if the contract is paused
-    */
+     * @notice testing the behavior of the StartMiningGem function if the contract is paused
+     */
     function testStartMiningGEMShouldRevertIfPaused() public {
         vm.startPrank(owner);
         // Define GEM properties
@@ -959,12 +896,7 @@ contract GemFactoryTest is L2BaseTest {
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
@@ -990,13 +922,13 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to succeed
         vm.prank(user1);
-        vm.expectRevert("Pausable: paused");
+    vm.expectRevert("Pausable: paused");
         GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemId);
     }
 
     /**
-    * @notice testing the behavior of the StartMiningGem function if the cooldown period has not elapsed
-    */
+     * @notice testing the behavior of the StartMiningGem function if the cooldown period has not elapsed
+     */
     function testStartMiningGEMShouldRevertIfCooldownNotElapsed() public {
         vm.startPrank(owner);
         // Define GEM properties
@@ -1006,12 +938,7 @@ contract GemFactoryTest is L2BaseTest {
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
@@ -1033,8 +960,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the StartMiningGem function if the Gem is locked
-    */
+     * @notice testing the behavior of the StartMiningGem function if the Gem is locked
+     */
     function testStartMiningGEMShouldRevertIfGemLocked() public {
         vm.startPrank(owner);
         // Define GEM properties
@@ -1043,12 +970,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
         vm.stopPrank();
@@ -1078,8 +1000,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the StartMiningGem function if the caller is not the gem owner
-    */
+     * @notice testing the behavior of the StartMiningGem function if the caller is not the gem owner
+     */
     function testStartMiningGEMShouldRevertIfNotOwner() public {
         vm.startPrank(owner);
 
@@ -1090,12 +1012,7 @@ contract GemFactoryTest is L2BaseTest {
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
-            rarity,
-            color,
-            quadrants,
-            tokenURI
-        );
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
@@ -1129,8 +1046,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the cancelMining function 
-    */
+     * @notice testing the behavior of the cancelMining function
+     */
     function testCancelMining() public {
         testStartMiningGEM();
 
@@ -1147,8 +1064,8 @@ contract GemFactoryTest is L2BaseTest {
     }
 
     /**
-    * @notice testing the behavior of the cancelMining function if the contract is paused
-    */
+     * @notice testing the behavior of the cancelMining function if the contract is paused
+     */
     function testCancelMiningshouldRevertIfPaused() public {
         testStartMiningGEM();
 
@@ -1161,14 +1078,14 @@ contract GemFactoryTest is L2BaseTest {
         uint256[] memory tokens = GemFactory(gemfactoryProxyAddress).tokensOfOwner(user1);
 
         // call cancelMining function
-        vm.expectRevert("Pausable: paused");
+    vm.expectRevert("Pausable: paused");
         GemFactoryMining(gemfactoryProxyAddress).cancelMining(tokens[0]);
         vm.stopPrank();
     }
 
     /**
-    * @notice testing the behavior of the cancelMining function if caller is not the gem owner
-    */
+     * @notice testing the behavior of the cancelMining function if caller is not the gem owner
+     */
     function testCancelMiningshouldRevertIfNotGemOwner() public {
         testStartMiningGEM();
 
@@ -1182,9 +1099,9 @@ contract GemFactoryTest is L2BaseTest {
         vm.stopPrank();
     }
 
-    /**     
-    * @notice testing the behavior of the pickRandomGem function
-    */
+    /**
+     * @notice testing the behavior of the pickRandomGem function
+     */
     function testStartMiningGEMRandomGem() public {
         vm.startPrank(owner);
 
@@ -1218,12 +1135,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[4] = "https://example.com/token/5";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1263,12 +1176,11 @@ contract GemFactoryTest is L2BaseTest {
         assert(randomRequest.requester == user1);
 
         vm.stopPrank();
-
     }
 
-    /**     
-    * @notice testing the behavior of the pickRandomGem function if the contract is paused
-    */
+    /**
+     * @notice testing the behavior of the pickRandomGem function if the contract is paused
+     */
     function testPickMinedGemShouldRevertIfPaused() public {
         vm.startPrank(owner);
 
@@ -1302,12 +1214,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[4] = "https://example.com/token/5";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1346,15 +1254,15 @@ contract GemFactoryTest is L2BaseTest {
 
         vm.startPrank(user1);
         // call pickMinedGEM
-        vm.expectRevert("Pausable: paused");
+    vm.expectRevert("Pausable: paused");
         GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
- 
+
         vm.stopPrank();
     }
 
-    /**     
-    * @notice testing the behavior of the DRBCoordinator
-    */
+    /**
+     * @notice testing the behavior of the DRBCoordinator
+     */
     function testRandomBeaconMiningGem() public {
         vm.startPrank(owner);
 
@@ -1388,12 +1296,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[4] = "https://example.com/token/5";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1435,9 +1339,9 @@ contract GemFactoryTest is L2BaseTest {
         vm.stopPrank();
     }
 
-    /**     
-    * @notice testing the behavior of the startMining if gem has no mining try left
-    */
+    /**
+     * @notice testing the behavior of the startMining if gem has no mining try left
+     */
     function teststartMiningGEMRevertsIfNoMiningTryLeft() public {
         vm.startPrank(owner);
 
@@ -1471,12 +1375,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[4] = "https://example.com/token/5";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1510,19 +1410,18 @@ contract GemFactoryTest is L2BaseTest {
 
         GemFactoryStorage.RequestStatus memory randomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(0);
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(randomRequest.chosenTokenId) == user1);
-        
-        // we try to recall startMiningGem a second time 
+
+        // we try to recall startMiningGem a second time
         vm.warp(block.timestamp + UniqueGemsCooldownPeriod + 1);
         vm.expectRevert(abi.encodeWithSignature("NoMiningTryLeft()"));
         GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemIds[0]);
-        
-        vm.stopPrank();
 
+        vm.stopPrank();
     }
 
-    /**     
-    * @notice testing the behavior of the mining process twice
-    */
+    /**
+     * @notice testing the behavior of the mining process twice
+     */
     function testStartAndPickMiningTwice() public {
         vm.startPrank(owner);
 
@@ -1556,12 +1455,8 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[4] = "https://example.com/token/5";
 
         // Call createPreminedGEMPool function from the Treasury contract
-        uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
-            rarities,
-            colors,
-            quadrants,
-            tokenURIs
-        );
+        uint256[] memory newGemIds =
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1606,10 +1501,9 @@ contract GemFactoryTest is L2BaseTest {
         vm.warp(block.timestamp + EpicGemsMiningPeriod + 1);
         uint256 secondRequestId = GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
         drbCoordinatorMock.fulfillRandomness(secondRequestId);
-        GemFactoryStorage.RequestStatus memory secondRandomRequest = GemFactory(gemfactoryProxyAddress).getRandomRequest(1);
+        GemFactoryStorage.RequestStatus memory secondRandomRequest =
+            GemFactory(gemfactoryProxyAddress).getRandomRequest(1);
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(secondRandomRequest.chosenTokenId) == user1);
         vm.stopPrank();
-
     }
-
 }
