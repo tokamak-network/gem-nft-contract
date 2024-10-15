@@ -158,17 +158,18 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      * @dev Each GEM must be approved for transfer by the marketplace contract before it can be listed.
      */
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused {
+        uint256 tokenIdsLength = tokenIds.length;
         // Ensure there are tokens to list
-        if(tokenIds.length == 0) {
+        if(tokenIdsLength == 0) {
             revert NoTokens();
         }
         // Ensure the lengths of token IDs and prices match
-        if(tokenIds.length != prices.length) {
+        if(tokenIdsLength != prices.length) {
             revert WrongLength();
         }
 
         // Iterate over each token to list them for sale
-        for (uint256 i = 0; i < tokenIds.length; ++i){
+        for (uint256 i = 0; i < tokenIdsLength; ++i){
             // Ensure each GEM is approved for transfer
             if (IGemFactory(gemFactory).getApproved(tokenIds[i]) != address(this)) revert GemNotApproved();
             // Attempt to list each GEM for sale, revert if unsuccessful

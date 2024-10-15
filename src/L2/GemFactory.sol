@@ -105,6 +105,7 @@ contract GemFactory is
         }
         _;
     }
+
     /**
      * @notice Pauses the contract, preventing certain actions.
      * @dev Only callable by the owner when the contract is not paused.
@@ -480,7 +481,7 @@ contract GemFactory is
         uint256[] memory newGemIds = new uint256[](_rarities.length);
 
         // Loop through each set of attributes and create a GEM
-        for (uint256 i = 0; i < _rarities.length; ++i) {
+        for (uint256 i = 0; i < length; ++i) {
             // Create a GEM with the specified attributes and store its ID
             newGemIds[i] = createGEM(_rarities[i], _colors[i], _quadrants[i], _tokenURIs[i]);
         }
@@ -813,12 +814,13 @@ function tokenURI(uint256 tokenId) public view override returns (string memory) 
      * @return The count of available Gems and an array of their token IDs.
      */
     function getGemListAvailableForRandomPack() external view returns (uint256, uint256[] memory) {
-        uint256 count = 0;
-        uint256[] memory tokenIds = new uint256[](Gems.length);
-        uint256 index = 0;
+                    uint256 gemslength = Gems.length;
 
+        uint256 count = 0;
+        uint256[] memory tokenIds = new uint256[](gemslength);
+        uint256 index = 0;
         // Iterate through the Gems to find those available for random pack selection
-        for (uint256 i = 0; i < Gems.length; ++i) {
+        for (uint256 i = 0; i < gemslength; ++i) {
             if (GEMIndexToOwner[i] == treasury && !Gems[i].isLocked) {
                 tokenIds[index] = Gems[i].tokenId;
                 unchecked {
@@ -881,8 +883,10 @@ function tokenURI(uint256 tokenId) public view override returns (string memory) 
      * @return totalValue The cumulative value of all GEMs.
      */
     function getGemsSupplyTotalValue() external view returns (uint256 totalValue) {
+        uint256 gemslength = Gems.length;
+
         // Sum the values of all Gems to get the total supply value
-        for (uint256 i = 0; i < Gems.length; ++i) {
+        for (uint256 i = 0; i < gemslength; ++i) {
             totalValue += Gems[i].value;
         }
     }
