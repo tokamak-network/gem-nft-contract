@@ -24,3 +24,6 @@ broadcast/
 
 # Artifacts
 artifacts/
+
+.github/
+.vscode/
