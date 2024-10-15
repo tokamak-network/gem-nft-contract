@@ -176,7 +176,7 @@ contract L2BaseTest is Test {
         miningSelector[4] = rawFulfillRandomWordsSelector;
         // Map the mining functions to the GemFactoryMining implementation
         gemfactoryProxy.setSelectorImplementations2(miningSelector, address(gemfactorymining));
-
+    
         // Debugging: Verify the mapping
         address forgeTokenslementation = gemfactoryProxy.getSelectorImplementation2(forgeTokensSelector);
         require(forgeTokenslementation == address(gemfactoryforging), "Selector not mapped to GemFactoryForging");
