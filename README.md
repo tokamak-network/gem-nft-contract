@@ -32,6 +32,10 @@ The marketplace allows users to list their GEMs for sale at desired prices in WS
 
 The Treasury contract is responsible for creating pools of pre-mined GEMs (admin-only). It handles all transactions made by users, including locking GEM values and holding TON/WSTON tokens in reserve. The admin can list pre-mined GEMs for sale on the marketplace or use the swapper to obtain WSTON. Note that new GEMs cannot be created if the WSTON collateral does not cover the new GEM's value.
 
+### RandomPack (L2)
+
+This contract allows users to obtain a random GEM from the pre-mined GEM pool (held in the Treasury) in exchange for an upfront fee. The fee rate can be customized by the admin. The VDF random beacon is used to generate a random value, which runs an off-chain node and calls the ```fulfillRandomWords``` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted, provided there are sufficient funds in the Treasury contract.
+
 ### GemFactory (L2)
 
 This contract carries the logic behind GEMs Minting, Forging, mining and melting.
@@ -51,9 +55,16 @@ This contract carries the logic behind GEMs Minting, Forging, mining and melting
 - Mining: Users must wait for the cooldown period to elapse before mining a Gem. After initiating mining, they must wait for the mining period to complete before randomly selecting and claiming a Gem. The probability of obtaining a Gem is equally distributed across the pool of pre-mined Gems, but users cannot obtain a Gem rarer than the one they are mining with.
 - Melting: Melting burns the GEM and sends the associated WSTON from the Treasury to the user.
 
-### RandomPack (L2)
+### GemFactoryProxy (L2)
 
-This contract allows users to obtain a random GEM from the pre-mined GEM pool (held in the Treasury) in exchange for an upfront fee. The fee rate can be customized by the admin. The VDF random beacon is used to generate a random value, which runs an off-chain node and calls the ```fulfillRandomWords``` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted, provided there are sufficient funds in the Treasury contract.
+GemFactory is split into three different contracts due to contract size issues. Therefore, the deployment of these contracts must adhere to specific proxy rules. After deploying instances of each contract, as well as an instance of the GemFactoryProxy, the deployer must call the upgradeTo function to set the initial implementation using the GemFactory instance address.
+
+Next, the deployer must use the `setImplementation` function with an index of 1, passing the address of the GemFactoryForging instance. Finally, the deployer must call the `setImplementation` function again with an index of 2, passing the address of the GemFactoryMining instance.
+
+It is then mandatory to call the `setSelectorImplementations2` function for the `forgeTokens(uint256[], uint8, uint8[2])` function, as well as for each function within the GemFactoryMining implementation. This ensures that the proxy knows which implementation the function signature must be routed to when called.
+
+Refers to the following test suite for more information on the deployment process: [L2BaseTest.t.sol](test/L2/L2BaseTest.sol)
+
 
 ### L1WrappedStakedTON (L1)
 
@@ -68,7 +79,6 @@ This contract is responsible for staking users' WTON and minting WSTON for the s
 ### L1WrappedStakedTONFactory (L1)
 
 The factory allows the creation of new L1WrappedStakedTON contract. The owner/admins of the factory become the owner of L1WrappedStakedTON created through the `createWSTON` function. Note that L1WrappedStakedTON owners must use the upgradeWSTONTo function to upgrade the implementation of the L1WrapedStakedTON contract they own.
-
 
 ## Installation
 

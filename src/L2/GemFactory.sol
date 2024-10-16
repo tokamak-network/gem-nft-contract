@@ -809,8 +809,7 @@ function tokenURI(uint256 tokenId) public view override returns (string memory) 
      * @return The count of available Gems and an array of their token IDs.
      */
     function getGemListAvailableForRandomPack() external view returns (uint256, uint256[] memory) {
-                    uint256 gemslength = Gems.length;
-
+        uint256 gemslength = Gems.length;
         uint256 count = 0;
         uint256[] memory tokenIds = new uint256[](gemslength);
         uint256 index = 0;
