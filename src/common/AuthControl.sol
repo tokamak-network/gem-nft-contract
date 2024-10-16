@@ -9,6 +9,7 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
 
     error ZeroAddress();
     error SameAdmin();
+    error SameOwner();
 
     modifier onlyAdmin() {
         require(isAdmin(msg.sender), "AuthControl: Caller is not an admin");
@@ -56,29 +57,20 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
         renounceRole(PAUSE_ROLE, account);
     }
 
-    /// @dev transfer admin
-    /// @param newAdmin new admin address
-    function transferAdmin(address newAdmin) public virtual onlyOwner {
-        if (newAdmin == address(0)) {
+    /// @dev transfer owner
+    /// @param newOwner new owner address
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        if (newOwner == address(0)) {
             revert ZeroAddress();
         }
         
-        if (msg.sender == newAdmin) {
-            revert SameAdmin();
+        if (msg.sender == newOwner) {
+            revert SameOwner();
         }
 
-        grantRole(ADMIN_ROLE, newAdmin);
-        renounceRole(ADMIN_ROLE, msg.sender);
-    }
-
-    function transferOwnership(address newAdmin) public virtual onlyOwner {
-        transferAdmin(newAdmin);
-    }
-
-    function renounceOwnership() public onlyOwner {
+        grantRole(DEFAULT_ADMIN_ROLE, newOwner);
         renounceRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
-
 
     /// @dev whether admin
     /// @param account  address to check

@@ -69,12 +69,12 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
         uint8[4] memory forgedQuadrants;
         Rarity newRarity;
         uint32 forgedGemsMiningPeriod;
-        uint32 forgedGemsCooldownPeriod;
+        uint256 forgedGemsCooldownDueDate;
         uint8 forgedGemsminingTry;
         uint256 forgedGemsValue;
 
         // Call the forgeTokens function from Gems contract
-        (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry) = Gems.forgeTokens(
+        (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownDueDate, forgedGemsminingTry) = Gems.forgeTokens(
             GEMIndexToOwner,
             ownershipTokenCount,
             msg.sender,
@@ -95,7 +95,7 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
         _setTokenURI(newGemId, ""); // Set empty URI for the new token
 
         // Emit another event for the created GEM
-        emit Created(newGemId, newRarity, _color, forgedGemsValue, forgedQuadrants, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, "", msg.sender);
+        emit Created(newGemId, newRarity, _color, forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsMiningPeriod, forgedGemsCooldownDueDate, "", msg.sender);
 
         return newGemId;
     }
