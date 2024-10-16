@@ -6,7 +6,7 @@ import {AuthControl} from "../common/AuthControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "../proxy/ProxyStorage.sol";
 
-import { WstonSwapPoolStorageV2 } from "./WstonSwapPoolStorageV2.sol";
+import { WstonSwapPoolStorage } from "./WstonSwapPoolStorage.sol";
 
 interface ITreasury {
     function tonApproveWstonSwapPool(uint256 _amount) external returns(bool);
@@ -20,7 +20,7 @@ interface ITreasury {
  * The contract includes mechanisms for pausing operations and ensuring secure token transfers.
  * @dev The contract uses OpenZeppelin's ReentrancyGuard for security and AuthControl for access management.
  */
-contract WstonSwapPoolV2 is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapPoolStorageV2 {
+contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapPoolStorage {
 
     /**
      * @notice Modifier to ensure the contract is not paused.

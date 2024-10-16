@@ -2,15 +2,15 @@
 pragma solidity 0.8.25;
 
 import "./L2BaseTest.sol";
-import { WstonSwapPoolV2 } from "../../src/L2/WstonSwapPoolV2.sol";
-import { WstonSwapPoolStorageV2 } from "../../src/L2/WstonSwapPoolStorageV2.sol";
-import { WstonSwapPoolProxyV2 } from "../../src/L2/WstonSwapPoolProxyV2.sol";
+import { WstonSwapPool } from "../../src/L2/WstonSwapPool.sol";
+import { WstonSwapPoolStorage } from "../../src/L2/WstonSwapPoolStorage.sol";
+import { WstonSwapPoolProxy } from "../../src/L2/WstonSwapPoolProxy.sol";
 
 contract WstonSwap is L2BaseTest {
 
-    WstonSwapPoolV2 wstonSwapPoolV2;
-    WstonSwapPoolProxyV2 wstonSwapPoolProxyV2;
-    address wstonSwapPoolProxyV2Address;
+    WstonSwapPool wstonSwapPool;
+    WstonSwapPoolProxy wstonSwapPoolProxy;
+    address wstonSwapPoolProxyAddress;
 
     uint256 public constant INITIAL_STAKING_INDEX = 10**27;
     uint256 public constant DECIMALS = 10**27;
@@ -20,25 +20,25 @@ contract WstonSwap is L2BaseTest {
 
         vm.startPrank(owner);
 
-        wstonSwapPoolV2 = new WstonSwapPoolV2();
-        wstonSwapPoolProxyV2 = new WstonSwapPoolProxyV2();
-        wstonSwapPoolProxyV2.upgradeTo(address(wstonSwapPoolV2));
-        wstonSwapPoolProxyV2Address = address(wstonSwapPoolProxyV2);
-        WstonSwapPoolV2(wstonSwapPoolProxyV2Address).initialize(
+        wstonSwapPool = new WstonSwapPool();
+        wstonSwapPoolProxy = new WstonSwapPoolProxy();
+        wstonSwapPoolProxy.upgradeTo(address(wstonSwapPool));
+        wstonSwapPoolProxyAddress = address(wstonSwapPoolProxy);
+        WstonSwapPool(wstonSwapPoolProxyAddress).initialize(
             ton,
             wston,
             INITIAL_STAKING_INDEX,
             treasuryProxyAddress
         );
 
-        Treasury(treasuryProxyAddress).setWstonSwapPool(wstonSwapPoolProxyV2Address);
+        Treasury(treasuryProxyAddress).setWstonSwapPool(wstonSwapPoolProxyAddress);
 
         vm.stopPrank();
 
     }
 
     function testSetUp() public view {
-        uint256 stakingIndex = WstonSwapPoolV2(wstonSwapPoolProxyV2Address).getStakingIndex();
+        uint256 stakingIndex = WstonSwapPool(wstonSwapPoolProxyAddress).getStakingIndex();
         assert(stakingIndex == INITIAL_STAKING_INDEX);
     }
 
@@ -59,8 +59,8 @@ contract WstonSwap is L2BaseTest {
         vm.startPrank(user1);
         uint256 wstonAmount = 100 * 1e27;
         // approving the swapper to spend the amount
-        IERC20(wston).approve(wstonSwapPoolProxyV2Address, wstonAmount);
-        WstonSwapPoolV2(wstonSwapPoolProxyV2Address).swap(wstonAmount);
+        IERC20(wston).approve(wstonSwapPoolProxyAddress, wstonAmount);
+        WstonSwapPool(wstonSwapPoolProxyAddress).swap(wstonAmount);
         vm.stopPrank();
 
         // calculate the TON/WSTON balance of user1 and treasury after the swap
@@ -95,15 +95,15 @@ contract WstonSwap is L2BaseTest {
         // update the staking index
         vm.startPrank(owner);
         uint256 newStakingIndex = 1076596847394850392748594837;
-        WstonSwapPoolV2(wstonSwapPoolProxyV2Address).updateStakingIndex(newStakingIndex);
+        WstonSwapPool(wstonSwapPoolProxyAddress).updateStakingIndex(newStakingIndex);
         vm.stopPrank();
         
         // user1 calls the swap function after approving
         vm.startPrank(user1);
         uint256 wstonAmount = 100 * 1e27;
         // approving the swapper to spend the amount
-        IERC20(wston).approve(wstonSwapPoolProxyV2Address, wstonAmount);
-        WstonSwapPoolV2(wstonSwapPoolProxyV2Address).swap(wstonAmount);
+        IERC20(wston).approve(wstonSwapPoolProxyAddress, wstonAmount);
+        WstonSwapPool(wstonSwapPoolProxyAddress).swap(wstonAmount);
         vm.stopPrank();
 
         // calculate the TON/WSTON balance of user1 and treasury after the swap
@@ -136,9 +136,9 @@ contract WstonSwap is L2BaseTest {
         vm.startPrank(user1);
         uint256 wstonAmount = 100 * 1e27;
         // approving the swapper to spend the amount
-        IERC20(wston).approve(wstonSwapPoolProxyV2Address, wstonAmount);
-        vm.expectRevert(WstonSwapPoolStorageV2.ContractTonBalanceOrAllowanceTooLow.selector);
-        WstonSwapPoolV2(wstonSwapPoolProxyV2Address).swap(wstonAmount);
+        IERC20(wston).approve(wstonSwapPoolProxyAddress, wstonAmount);
+        vm.expectRevert(WstonSwapPoolStorage.ContractTonBalanceOrAllowanceTooLow.selector);
+        WstonSwapPool(wstonSwapPoolProxyAddress).swap(wstonAmount);
         vm.stopPrank();
     }
 }

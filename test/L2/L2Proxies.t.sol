@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import "./WstonSwapV2.t.sol";
+import "./WstonSwap.t.sol";
 import {MockWstonSwapPoolUpgraded} from "./mock/MockSwapPoolUpgraded.sol";
 import {MockTreasuryUpgraded} from "./mock/MockTreasuryUpgraded.sol";
 import {MockMarketPlaceUpgraded} from "./mock/MockMarketPlaceUpgraded.sol";
@@ -31,16 +31,16 @@ contract L2ProxyTest is WstonSwap {
         // we upgrade the swapper
         vm.startPrank(owner);
         mockSwapPoolUpgraded = new MockWstonSwapPoolUpgraded();
-        wstonSwapPoolProxyV2.upgradeTo(address(mockSwapPoolUpgraded));
+        wstonSwapPoolProxy.upgradeTo(address(mockSwapPoolUpgraded));
 
 
         // we ensure that old storage variables were kept 
-        uint256 stakingIndex = WstonSwapPoolV2(wstonSwapPoolProxyV2Address).getStakingIndex();
+        uint256 stakingIndex = WstonSwapPool(wstonSwapPoolProxyAddress).getStakingIndex();
         assert(stakingIndex != 0);
         
         // we ensure the new implementation is considered by calling incrementCounter();
-        MockWstonSwapPoolUpgraded(wstonSwapPoolProxyV2Address).incrementCounter();
-        uint256 counter = MockWstonSwapPoolUpgraded(wstonSwapPoolProxyV2Address).getCounter();
+        MockWstonSwapPoolUpgraded(wstonSwapPoolProxyAddress).incrementCounter();
+        uint256 counter = MockWstonSwapPoolUpgraded(wstonSwapPoolProxyAddress).getCounter();
         assert(counter == 1);
 
         vm.stopPrank();
@@ -59,7 +59,7 @@ contract L2ProxyTest is WstonSwap {
         
         // we expect the upgradeTo function to revert
         vm.expectRevert("AuthControl: Caller is not the owner");
-        wstonSwapPoolProxyV2.upgradeTo(address(mockSwapPoolUpgraded));
+        wstonSwapPoolProxy.upgradeTo(address(mockSwapPoolUpgraded));
 
         vm.stopPrank();
     }
@@ -71,7 +71,7 @@ contract L2ProxyTest is WstonSwap {
 
         // we expect the initialize function to revert
         vm.expectRevert("already initialized");
-        WstonSwapPoolV2(wstonSwapPoolProxyV2Address).initialize(
+        WstonSwapPool(wstonSwapPoolProxyAddress).initialize(
             ton,
             wston,
             INITIAL_STAKING_INDEX,

@@ -26,15 +26,19 @@ GEMs have the following specifications:
 
 ### MarketPlace (L2)
 
-The marketplace allows users to list their GEMs for sale at desired prices in WSTON. Interested buyers can pay in L2 TON or L2 WSTON (at a discounted price). Upon successful transfer, the NFT is sent to the new owner. Users can list multiple GEMs for sale in a single transaction using the ```putGemListForSale``` function. Ownership of the NFT is not transferred when calling the ```putGemForSale``` function; instead, the GEM's ```isLocked``` status is set to true, preventing its transfer until it is either purchased or removed from sale.
+The marketplace allows users to list their GEMs for sale at desired prices in WSTON. Interested buyers can pay in L2 TON or L2 WSTON (at a discounted price). Upon successful transfer, the NFT is sent to the new owner. Users can list multiple GEMs for sale in a single transaction using the `putGemListForSale` function. Ownership of the NFT is not transferred when calling the `putGemForSale` function; instead, the GEM's `isLocked` status is set to true, preventing its transfer until it is either purchased or removed from sale.
 
 ### Treasury (L2)
 
-The Treasury contract is responsible for creating pools of pre-mined GEMs (admin-only). It handles all transactions made by users, including locking GEM values and holding TON/WSTON tokens in reserve. The admin can list pre-mined GEMs for sale on the marketplace or use the swapper to obtain WSTON. Note that new GEMs cannot be created if the WSTON collateral does not cover the new GEM's value.
+The Treasury contract is responsible for creating pools of pre-mined GEMs, which is an admin-only function. It manages all user transactions, including locking GEM values and holding TON/WSTON tokens in reserve. The admin has the ability to list pre-mined GEMs for sale on the marketplace. Therefore it is also possible for the owner or admins to remove (if owned by the treasury) or buy a Gem from the marketplace. It's important to note that new GEMs cannot be created if the WSTON collateral does not cover the value of the new GEM.
 
 ### RandomPack (L2)
 
-This contract allows users to obtain a random GEM from the pre-mined GEM pool (held in the Treasury) in exchange for an upfront fee. The fee rate can be customized by the admin. The VDF random beacon is used to generate a random value, which runs an off-chain node and calls the ```fulfillRandomWords``` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted, provided there are sufficient funds in the Treasury contract.
+This contract allows users to obtain a random GEM from the pre-mined GEM pool, which is held in the Treasury, in exchange for an upfront fee. The admin can customize the fee rate. The VDF random beacon is used to generate a random value, which involves running an off-chain node that calls the `fulfillRandomWords` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted (only if there are sufficient funds in the Treasury contract).
+
+## WstonSwapPool (L2)
+
+Users can swap their WSTON for TON if the Treasury holds enough TON. This feature is free of fees and can be accessed by anyone. The Treasury is always seeking WSTON as it will be used as collateral for newly minted GEMs.
 
 ### GemFactory (L2)
 

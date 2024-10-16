@@ -2,7 +2,7 @@
 pragma solidity 0.8.25;
 
 
-contract WstonSwapPoolStorageV2 {
+contract WstonSwapPoolStorage {
    // Constants
    uint256 public constant DECIMALS = 10**27;
     

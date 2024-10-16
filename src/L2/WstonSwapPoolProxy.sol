@@ -2,12 +2,12 @@
 pragma solidity 0.8.25;
 
 import "../proxy/Proxy.sol";
-import "./WstonSwapPoolStorageV2.sol";
+import "./WstonSwapPoolStorage.sol";
 
 /**
  * @title
  * @dev
  */
-contract WstonSwapPoolProxyV2 is Proxy, WstonSwapPoolStorageV2 {
+contract WstonSwapPoolProxy is Proxy, WstonSwapPoolStorage {
 
 }
