@@ -180,14 +180,15 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             requestCount++;
         }
 
-        // Refund excess ETH to the user if they overpaid
         if(msg.value > directFundingCost) { // if there is ETH to refund
-            (bool success, ) = msg.sender.call{value:  msg.value - directFundingCost}("");
+            // Refund excess ETH to the user if they overpaid
+            uint256 ethToRefund = msg.value - directFundingCost;
+            (bool success, ) = msg.sender.call{value: ethToRefund}("");
             if(!success) {
                 revert FailedToSendEthBack();
             }
             // Emit an event for the ETH refund
-            emit EthSentBack(msg.value - directFundingCost);
+            emit EthSentBack(ethToRefund);
         }
 
         // Emit an event for the random GEM request
