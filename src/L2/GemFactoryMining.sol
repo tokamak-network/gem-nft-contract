@@ -75,7 +75,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
             revert NotGemOwner();
         }
         // Ensure the cooldown period for the GEM has elapsed
-        if (Gems[_tokenId].gemCooldownPeriod > block.timestamp) {
+        if (Gems[_tokenId].gemCooldownDueDate > block.timestamp) {
             revert CooldownPeriodNotElapsed();
         }
         // Ensure the GEM is not currently locked
@@ -226,9 +226,12 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
 
             // Transfer the GEM to the requester
             require(ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId), "failed to transfer token");
+            
+            // fetching the mined gem's cooldown period
+            uint256 minedGemCooldownDueDate = Gems[s_requests[requestId].chosenTokenId].gemCooldownDueDate;
 
             // Emit an event for the GEM mining claim
-            emit GemMiningClaimed(_tokenId, msg.sender);
+            emit GemMiningClaimed(_tokenId, minedGemCooldownDueDate, msg.sender);
         } else {
             // No GEM available, set chosenTokenId to 0 and emit an event
             s_requests[requestId].chosenTokenId = 0;
@@ -238,7 +241,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         // reset storage variable of the initial GEM
         Gems[_tokenId].isLocked = false;
         Gems[_tokenId].randomRequestId = 0;
-        Gems[_tokenId].gemCooldownPeriod = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
+        Gems[_tokenId].gemCooldownDueDate = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
 
         // Delete user mining data
         delete userMiningToken[ownerOf(_tokenId)][_tokenId];

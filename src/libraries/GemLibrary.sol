@@ -42,7 +42,7 @@ library GemLibrary {
             color: color,
             value: value,
             miningPeriod: miningPeriod,
-            gemCooldownPeriod: gemCooldownPeriod,
+            gemCooldownDueDate: gemCooldownPeriod,
             miningTry: miningTry,
             isLocked: false,
             tokenURI: tokenURI,

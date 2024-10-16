@@ -54,7 +54,7 @@ library ForgeLibrary {
      * @return newRarity The new rarity of the forged gem.
      * @return forgedGemsValue The value of the forged gem.
      * @return forgedGemsMiningPeriod The mining period of the forged gem.
-     * @return forgedGemsCooldownPeriod The cooldown period of the forged gem.
+     * @return forgedGemsCooldownDueDate The cooldown period of the forged gem.
      * @return forgedGemsminingTry The number of mining attempts for the forged gem.
      */
     function forgeTokens(
@@ -66,11 +66,12 @@ library ForgeLibrary {
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color,
         ForgeParams memory params
-    ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint32 forgedGemsMiningPeriod, uint32 forgedGemsCooldownPeriod, uint8 forgedGemsminingTry) {
+    ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint32 forgedGemsMiningPeriod, uint256 forgedGemsCooldownDueDate, uint8 forgedGemsminingTry) {
          // Ensure the sender's address is not zero
         if(msgSender == address(0)) {
             revert AddressZero();
         }
+        uint32 forgedGemsCooldownPeriod;
 
         // Determine the properties of the new GEM based on the desired rarity
         if (_rarity == GemFactoryStorage.Rarity.COMMON) {
@@ -185,6 +186,9 @@ library ForgeLibrary {
 
         // Determine the new rarity of the forged GEM
         newRarity = GemFactoryStorage.Rarity(uint8(_rarity) + 1);
+
+        // determining the cooldown due date
+        forgedGemsCooldownDueDate = block.timestamp + forgedGemsCooldownPeriod;
         
         // Create the new GEM and add it to the storage
         GemFactoryStorage.Gem memory _Gem = GemFactoryStorage.Gem({
@@ -194,7 +198,7 @@ library ForgeLibrary {
             color: _color,
             value: forgedGemsValue,
             miningPeriod: forgedGemsMiningPeriod,
-            gemCooldownPeriod: block.timestamp + forgedGemsCooldownPeriod,
+            gemCooldownDueDate: forgedGemsCooldownDueDate,
             miningTry: forgedGemsminingTry,
             isLocked: false,
             tokenURI: "",
@@ -210,7 +214,7 @@ library ForgeLibrary {
         ownershipTokenCount[msgSender]++;
 
         // Return the properties of the newly forged GEM
-        return (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownPeriod, forgedGemsminingTry);
+        return (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownDueDate, forgedGemsminingTry);
     }
 
     /**

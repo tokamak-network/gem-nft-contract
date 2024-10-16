@@ -445,7 +445,7 @@ contract GemFactory is
 
         // Emit an event for the creation of the new GEM
         emit Created(
-            newGemId, _rarity, _color, _value, _quadrants, _miningPeriod, _cooldownDueDate, _tokenURI, msg.sender
+            newGemId, _rarity, _color, _miningTry, _value, _quadrants, _miningPeriod, _cooldownDueDate, _tokenURI, msg.sender
         );
         return newGemId;
     }
@@ -613,7 +613,7 @@ contract GemFactory is
      */
     function _transferGEM(address _from, address _to, uint256 _tokenId) private {
         // Update the GEM's cooldown period based on its rarity
-        Gems[_tokenId].gemCooldownPeriod = block.timestamp + _getCooldownPeriod(Gems[_tokenId].rarity);
+        Gems[_tokenId].gemCooldownDueDate = block.timestamp + _getCooldownPeriod(Gems[_tokenId].rarity);
         // Increment the ownership count for the recipient
         ownershipTokenCount[_to]++;
         // Update the owner of the GEM

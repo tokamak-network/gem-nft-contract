@@ -76,7 +76,7 @@ contract GemFactoryTest is L2BaseTest {
         // checking the GEM was sent appropriately
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
         // ensuring the cooldown period was reset
-        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp);
+        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownDueDate == block.timestamp);
 
         // ensuring the tokenCount was updated accordingly
         assert(GemFactory(gemfactoryProxyAddress).getOwnershipTokenCount(treasuryProxyAddress) == 0);
@@ -128,7 +128,7 @@ contract GemFactoryTest is L2BaseTest {
         // checking the GEM was sent appropriately
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == user1);
         // ensuring the cooldown period was reset
-        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownPeriod == block.timestamp);
+        assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).gemCooldownDueDate == block.timestamp);
 
         // ensuring the tokenCount was updated accordingly
         assert(GemFactory(gemfactoryProxyAddress).getOwnershipTokenCount(treasuryProxyAddress) == 0);
@@ -456,7 +456,7 @@ contract GemFactoryTest is L2BaseTest {
         assert(newGem.rarity == GemFactoryStorage.Rarity.RARE);
         assert(newGem.color[0] == color[0] && newGem.color[1] == color[1]);
         assert(newGem.miningPeriod == RareGemsMiningPeriod);
-        assert(newGem.gemCooldownPeriod == block.timestamp + RareGemsCooldownPeriod);
+        assert(newGem.gemCooldownDueDate == block.timestamp + RareGemsCooldownPeriod);
 
         // Verify the new gem quadrants
         assert(newGem.quadrants[0] == 2);
@@ -544,7 +544,7 @@ contract GemFactoryTest is L2BaseTest {
         assert(newGem.rarity == GemFactoryStorage.Rarity.EPIC);
         assert(newGem.color[0] == color[0] && newGem.color[1] == color[1]);
         assert(newGem.miningPeriod == EpicGemsMiningPeriod);
-        assert(newGem.gemCooldownPeriod == block.timestamp + EpicGemsCooldownPeriod);
+        assert(newGem.gemCooldownDueDate == block.timestamp + EpicGemsCooldownPeriod);
 
         // Verify the new gem quadrants
         assert(newGem.quadrants[0] == 4);

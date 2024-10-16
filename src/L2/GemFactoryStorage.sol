@@ -15,7 +15,7 @@ contract GemFactoryStorage {
     struct Gem {
         uint256 tokenId;  
         uint256 value; // 27 decimals
-        uint256 gemCooldownPeriod; // gem cooldown before user can start mining
+        uint256 gemCooldownDueDate; // gem cooldown before user can start mining
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
         Rarity rarity; 
         uint32 miningPeriod; // Mining delay before claiming
@@ -108,6 +108,7 @@ contract GemFactoryStorage {
         uint256 indexed tokenId, 
         Rarity rarity, 
         uint8[2] color, 
+        uint8 miningTry,
         uint256 value,
         uint8[4] quadrants, 
         uint32 miningPeriod,
@@ -119,7 +120,7 @@ contract GemFactoryStorage {
 
     // Mining Events
     event GemMiningStarted(uint256 tokenId, address miner, uint256 startMiningTime, uint256 newminingTry);
-    event GemMiningClaimed(uint256 tokenId, address miner);
+    event GemMiningClaimed(uint256 tokenId, uint256 minedGemCooldownDueDate, address miner);
     event GemMelted(uint256 _tokenId, address _from);
     event RandomGemRequested(uint256 tokenId, uint256 requestNumber);
     event NoGemAvailable(uint256 tokenId);
