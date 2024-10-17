@@ -223,5 +223,23 @@ contract WrappedStakedTONTest is L1BaseTest {
 
         vm.stopPrank();
     }
+
+    function testOnApprove() public {
+        vm.startPrank(user1);
+        uint256 tonDepositAmount = 100 * 10**18;
+        bytes memory data = abi.encode(user1, tonDepositAmount);
+
+        //approving the proxy to spend TON
+        TON(ton).approve(address(l1wrappedstakedtonProxy), tonDepositAmount);
+
+        bool success = TON(ton).approveAndCall(address(l1wrappedstakedtonProxy), tonDepositAmount, data);
+        require(success);
+        vm.stopPrank();
+
+        //check if user's Titan WSTON balance = 100 WSTON
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).balanceOf(user1) == tonDepositAmount * 1e9);
+        // check if contract balance = 100 sWTON
+        assert(SeigManager(seigManager).stakeOf(candidate, address(l1wrappedstakedtonProxy)) == tonDepositAmount * 1e9);
+    }
     
 }

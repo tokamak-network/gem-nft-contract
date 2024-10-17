@@ -38,6 +38,8 @@ contract L1WrappedStakedTON is
 {
     using SafeERC20 for IERC20;
 
+    event decodeSuccess(address to, uint256 amount);
+
     /**
      * @notice Modifier to ensure the contract is not paused.
      */
@@ -147,12 +149,13 @@ contract L1WrappedStakedTON is
      * @param data Additional data for the approval.
      * @return Returns true if the operation is successful.
      */
-    function onApprove(address _to, uint256 _amount, bytes calldata data) external returns (bool) {
+    function onApprove(address _to, address /*spender*/, uint256 _amount, bytes calldata data) external returns (bool) {
         if (msg.sender != ton && msg.sender != wton) {
             revert InvalidCaller();
         }
 
         (address to, uint256 amount) = _decodeDepositAndGetWSTONOnApproveData(data);
+        emit decodeSuccess(to, amount);
 
         if (_to != to || _amount != amount) {
             revert InvalidToOrAmount();
@@ -183,22 +186,26 @@ contract L1WrappedStakedTON is
         pure
         returns (address to, uint256 amount)
     {
-        if (data.length != 52) {
+        if (data.length != 64) {
             revert InvalidOnApproveData();
         }
         assembly {
             // The layout of a "bytes calldata" is:
-            // The first 20 bytes: to
+            // The first 32 bytes: to
             // The next 32 bytes: amount
-            to := shr(96, calldataload(data.offset))
-            amount := calldataload(add(data.offset, 20))
+
+            // Load the address from the first 32 bytes of data
+            to := shr(96, calldataload(add(data.offset, 12))) // Shift right to get the address
+
+            // Load the amount from the next 32 bytes of data
+            amount := calldataload(add(data.offset, 32))
         }
     }
+
     /**
      * @dev Deposits WTON and mints WSTON for the sender.
      * @param _amount The amount of WTON to deposit.
      */
-
     function depositWTONAndGetWSTON(uint256 _amount, bool _token) external whenNotPaused nonReentrant {
         if (!_depositAndGetWSTONTo(msg.sender, _amount, _token)) {
             revert DepositFailed();
