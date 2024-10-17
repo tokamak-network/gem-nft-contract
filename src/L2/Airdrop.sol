@@ -21,9 +21,7 @@ interface ITreasury {
  */
 contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
 
-    error ContractNotPaused();
-    error ContractPaused();
-   /**
+    /**
      * @notice Modifier to ensure the contract is not paused.
      */
 

@@ -135,16 +135,7 @@ contract L1WrappedStakedTON is
     //---------------------------------------------------------------------------------------
     //--------------------------ERROR DEFINITIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
-    error InvalidCaller();
-    error InvalidToOrAmount();
-    error InvalidOnApproveData();
-    error WithdrawalRequestFailed();
-    error ClaimWithdrawalFailed();
-    error ProcessRequestFailed();
-    error SeigniorageUpdateFailed();
-    error ApproveAndCallFailed();
-    error ContractNotPaused();
-    error ContractPaused();
+
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
