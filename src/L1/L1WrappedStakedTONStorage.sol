@@ -30,6 +30,7 @@ contract L1WrappedStakedTONStorage {
 
     //deposit even
     event Deposited(address to, bool token, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
+    event decodeSuccess(address to, uint256 amount);
     event SeigniorageUpdated();
 
     // withdrawal events

@@ -37,9 +37,7 @@ contract L1WrappedStakedTON is
     L1WrappedStakedTONStorage
 {
     using SafeERC20 for IERC20;
-
-    event decodeSuccess(address to, uint256 amount);
-
+    
     /**
      * @notice Modifier to ensure the contract is not paused.
      */

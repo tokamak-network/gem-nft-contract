@@ -804,18 +804,29 @@ function tokenURI(uint256 tokenId) public view override returns (string memory) 
         return colorName[_index1][_index2];
     }
 
+    function availableGemsRandomPack() external view returns(bool) {
+        uint256 gemslength = Gems.length;
+        // Iterate through the Gems to find if at least one of them is eligible
+        for (uint256 i = 0; i < gemslength; ++i) {
+            if (GEMIndexToOwner[i] == treasury && !Gems[i].isLocked) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @notice Retrieves a list of GEM IDs available for random pack selection.
      * @return The count of available Gems and an array of their token IDs.
      */
-    function getGemListAvailableForRandomPack() external view returns (uint256, uint256[] memory) {
+    function getGemListAvailableByRarity(Rarity _rarity) external view returns (uint256, uint256[] memory) {
         uint256 gemslength = Gems.length;
         uint256 count = 0;
         uint256[] memory tokenIds = new uint256[](gemslength);
         uint256 index = 0;
         // Iterate through the Gems to find those available for random pack selection
         for (uint256 i = 0; i < gemslength; ++i) {
-            if (GEMIndexToOwner[i] == treasury && !Gems[i].isLocked) {
+            if (GEMIndexToOwner[i] == treasury && !Gems[i].isLocked && Gems[i].rarity == _rarity) {
                 tokenIds[index] = Gems[i].tokenId;
                 unchecked {
                     index++;
