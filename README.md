@@ -34,7 +34,17 @@ The Treasury contract is responsible for creating pools of pre-mined GEMs, which
 
 ### RandomPack (L2)
 
-This contract allows users to obtain a random GEM from the pre-mined GEM pool, which is held in the Treasury, in exchange for an upfront fee. The admin can customize the fee rate. The VDF random beacon is used to generate a random value, which involves running an off-chain node that calls the `fulfillRandomWords` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted (only if there are sufficient funds in the Treasury contract).
+This contract allows users to obtain a random GEM from the pre-mined GEM pool, which is held in the Treasury, in exchange for an upfront fee. The admin can customize the fee rate. The VDF random beacon is used to generate a random value, which involves running an off-chain node that calls the `fulfillRandomWords` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted (only if there are sufficient funds in the Treasury contract). 
+
+To distribution of the probability is based on the rarity. Here is an example of a probability distribution
+- common Gem probability: 70%
+- rare Gem probability: 20%
+- unique Gem probability: 10%
+- epic Gem probability: 0%
+- legendary Gem probability: 0%
+- mythic Gem probability: 0%
+
+this values are setup by the contract owner at initialization
 
 ## WstonSwapPool (L2)
 
