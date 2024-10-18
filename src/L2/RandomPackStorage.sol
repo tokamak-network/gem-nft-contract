@@ -23,9 +23,9 @@ contract RandomPackStorage {
     
     string internal perfectCommonGemURI;
 
-    bool paused = false;
-    bool initialized = false;
-    bool probInitialized = false;
+    bool internal paused = false;
+    bool internal initialized = false;
+    bool internal probInitialized = false;
 
     // constants
     uint32 internal callbackGasLimit;
