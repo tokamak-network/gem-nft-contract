@@ -1007,6 +1007,8 @@ function tokenURI(uint256 tokenId) public view override returns (string memory) 
     function getRequestIds() external view returns (uint256[] memory) {
         return requestIds;
     }
+    function getPaused() external view returns(bool) {return paused;}
+
 
     function getRequestCount() external view returns (uint256) {
         return requestCount;

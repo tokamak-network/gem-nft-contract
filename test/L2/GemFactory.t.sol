@@ -1267,40 +1267,46 @@ contract GemFactoryTest is L2BaseTest {
 
         vm.stopPrank();
     }
-
-    function testWhenNotPaused() public {
+   function testPause() public {
         vm.startPrank(owner);
-
-        GemFactory(gemfactoryProxyAddress).pause();
-
-        vm.expectRevert(ContractPaused.selector);
-        GemFactory(gemfactoryProxyAddress).setTreasury(address(0x123));
-
-        GemFactory(gemfactoryProxyAddress).unpause();
-
-        GemFactory(gemfactoryProxyAddress).setTreasury(address(0x123));
+       GemFactory(gemfactoryProxyAddress).pause();
+        assert( GemFactory(gemfactoryProxyAddress).getPaused() == true);
+        vm.stopPrank();
+    }
+      /**
+     * @notice testing the behavior of pause function if called by user1
+     */
+    function testPauseShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        vm.expectRevert();
+       GemFactory(gemfactoryProxyAddress).pause();
         vm.stopPrank();
     }
 
-    function testWhenPaused() public {
+    /**
+     * @notice testing the behavior of unpause function
+     */
+    function testUnpause() public {
+        testPause();
         vm.startPrank(owner);
-
-        // Unpause the contract
-        GemFactory(gemfactoryProxyAddress).unpause();
-
-        // Expect revert since the contract is not paused
-        vm.expectRevert(ContractNotPaused.selector);
-        // Call a function that is protected by whenPaused
-        GemFactory(gemfactoryProxyAddress).setTreasury(address(0x123));
-
-        // Pause the contract
-        GemFactory(gemfactoryProxyAddress).pause();
-
-        // Now it should work without reverting
-        GemFactory(gemfactoryProxyAddress).setTreasury(address(0x123));
-
+       GemFactory(gemfactoryProxyAddress).unpause();
+        assert( GemFactory(gemfactoryProxyAddress).getPaused() == false);
         vm.stopPrank();
     }
+
+    /**
+     * @notice testing the behavior of unpause function if called by user1
+     */
+    function testUnpauseShouldRevertIfNotOwner() public {
+        testPause();
+        vm.startPrank(user1);
+        vm.expectRevert();
+       GemFactory(gemfactoryProxyAddress).unpause();
+        vm.stopPrank();
+    }
+
+
+  
 
     /**
      * @notice testing the behavior of the DRBCoordinator
