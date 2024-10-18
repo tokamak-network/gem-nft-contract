@@ -264,6 +264,7 @@ contract GemFactoryTest is L2BaseTest {
         Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
         vm.stopPrank();
     }
+    
 
     /**
      * @notice testing the access restrictions of createGEMPool function from GemFactory
@@ -1260,6 +1261,15 @@ contract GemFactoryTest is L2BaseTest {
         vm.stopPrank();
     }
 
+    function testSetTreasury() public {
+    vm.startPrank(owner);
+    address newTreasuryAddress = address(0x123);
+    // Set a new treasury address
+    GemFactory(gemfactoryProxyAddress).setTreasury(newTreasuryAddress);
+
+    vm.stopPrank();
+}
+
     /**
      * @notice testing the behavior of the DRBCoordinator
      */
@@ -1418,6 +1428,38 @@ contract GemFactoryTest is L2BaseTest {
 
         vm.stopPrank();
     }
+
+
+function testMeltGem() public {
+    vm.startPrank(owner);
+
+    // Define GEM properties
+    (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        defineDefaultGem();
+
+    // Create a GEM
+    uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+    vm.stopPrank();
+
+    vm.startPrank(treasuryProxyAddress);
+    // Transfer GEM to user1
+    GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
+    vm.stopPrank();
+
+    // Melt the GEM as user1
+    vm.startPrank(user1);
+    uint256 balanceBefore = IERC20(wston).balanceOf(user1);
+
+    // Call meltGEM function
+    GemFactory(gemfactoryProxyAddress).meltGEM(newGemId);
+
+    // Verify WSTON balance update
+    uint256 balanceAfter = IERC20(wston).balanceOf(user1);
+    uint256 gemValue = GemFactory(gemfactoryProxyAddress).getCommonGemsValue();
+    assert(balanceAfter == balanceBefore + gemValue);
+
+    vm.stopPrank();
+}
 
     /**
      * @notice testing the behavior of the mining process twice
