@@ -65,7 +65,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      * @notice Unpauses the contract, allowing actions to be performed.
      * @dev Only callable by the owner when the contract is paused.
      */
-    function unpause() public onlyOwner whenNotPaused {
+    function unpause() public onlyOwner whenPaused {
         paused = false;
     }
 

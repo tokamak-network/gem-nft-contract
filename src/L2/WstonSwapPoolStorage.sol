@@ -12,11 +12,11 @@ contract WstonSwapPoolStorage {
     address public treasury;
 
     // Uint256
-    uint256 public stakingIndex;
+    uint256 internal stakingIndex;
     
     // Bools
     bool internal initialized;
-    bool public paused;
+    bool internal paused;
 
     // Events
     event SwappedWstonForTon(address indexed user, uint256 tonAmount, uint256 wstonAmount);

@@ -65,7 +65,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      * @notice Unpauses the contract, allowing actions to be performed.
      * @dev Can only be called by the owner when the contract is paused.
      */
-    function unpause() public onlyOwner whenNotPaused {
+    function unpause() public onlyOwner whenPaused {
         paused = false;
     }
 

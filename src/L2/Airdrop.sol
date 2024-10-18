@@ -53,7 +53,7 @@ contract Airdrop is ProxyStorage, AirdropStorage, AuthControl, ReentrancyGuard {
      * @notice Unpauses the contract, allowing actions to be performed.
      * @dev Can only be called by the owner when the contract is paused.
      */
-    function unpause() public onlyOwner whenNotPaused {
+    function unpause() public onlyOwner whenPaused {
         paused = false;
     }
 

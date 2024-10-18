@@ -205,4 +205,36 @@ contract WstonSwap is L2BaseTest {
         vm.stopPrank();
     }
 
+    /**
+     * @notice testing the behavior of updateStakingIndex function if caller is not the owner
+     */
+    function testUpdateStakingIndexShouldRevertIfWrongStakingIndex() public {
+        vm.startPrank(owner);
+        uint256 stakingIndex = 0;
+        vm.expectRevert(WstonSwapPoolStorage.WrongStakingIndex.selector);
+        WstonSwapPool(wstonSwapPoolProxyAddress).updateStakingIndex(stakingIndex);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of pause function
+     */
+    function testPause() public {
+        vm.startPrank(owner);
+        WstonSwapPool(wstonSwapPoolProxyAddress).pause();
+        assert( WstonSwapPool(wstonSwapPoolProxyAddress).getPaused() == true);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function
+     */
+    function testUnpause() public {
+        testPause();
+        vm.startPrank(owner);
+        WstonSwapPool(wstonSwapPoolProxyAddress).unpause();
+        assert( WstonSwapPool(wstonSwapPoolProxyAddress).getPaused() == false);
+        vm.stopPrank();
+    }
+
 }

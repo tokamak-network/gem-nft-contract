@@ -37,17 +37,6 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         require(paused, "Pausable: not paused");
         _;
     }
-    
-    /**
-     * @notice Modifier to ensure the caller is the treasury contract
-     */
-    modifier onlyTreasury() {
-        require(
-            msg.sender == treasury, 
-            "function callable from treasury contract only"
-        );
-        _;
-    }
 
     /**
      * @notice Pauses the contract, preventing certain actions.
@@ -61,7 +50,7 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
      * @notice Unpauses the contract, allowing actions to be performed.
      * @dev Only callable by the owner when the contract is paused.
      */
-    function unpause() public onlyOwner whenNotPaused {
+    function unpause() public onlyOwner whenPaused {
         paused = false;
     }
 
@@ -163,5 +152,8 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
     //---------------------------------------------------------------------------------------
 
     function getStakingIndex() external view returns(uint256) {return stakingIndex;}
-
+    function getPaused() external view returns(bool) {return paused;}
+    function getTreasuryAddress() external view returns(address) { return treasury;}
+    function getWstonAddress() external view returns(address) { return wston;}
+    function getTonAddress() external view returns(address) { return ton;}
 }
