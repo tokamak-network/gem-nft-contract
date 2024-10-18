@@ -30,7 +30,7 @@ The marketplace allows users to list their GEMs for sale at desired prices in WS
 
 ### Treasury (L2)
 
-The Treasury contract is responsible for creating pools of pre-mined GEMs, which is an admin-only function. It manages all user transactions, including locking GEM values and holding TON/WSTON tokens in reserve. The admin has the ability to list pre-mined GEMs for sale on the marketplace. Therefore it is also possible for the owner or admins to remove (if owned by the treasury) or buy a Gem from the marketplace. It's important to note that new GEMs cannot be created if the WSTON collateral does not cover the value of the new GEM.
+The Treasury contract is responsible for creating pools of pre-mined GEMs, which is an admin-only function. It manages all user transactions, including locking GEM values and holding TON/WSTON tokens in reserve. The admin has the abil  ity to list pre-mined GEMs for sale on the marketplace. Therefore it is also possible for the owner or admins to remove (if owned by the treasury) or buy a Gem from the marketplace. It's important to note that new GEMs cannot be created if the WSTON collateral does not cover the value of the new GEM.
 
 ### RandomPack (L2)
 
@@ -46,7 +46,7 @@ To distribution of the probability is based on the rarity. Here is an example of
 
 this values are setup by the contract owner at initialization
 
-## WstonSwapPool (L2)
+### WstonSwapPool (L2)
 
 Users can swap their WSTON for TON if the Treasury holds enough TON. This feature is free of fees and can be accessed by anyone. The Treasury is always seeking WSTON as it will be used as collateral for newly minted GEMs.
 
