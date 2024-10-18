@@ -3,7 +3,7 @@ pragma solidity 0.8.25;
 
 import "./L1BaseTest.sol";
 
-contract WrappedStakedTONTest is L1BaseTest {
+contract L1WrappedStakedTONTest is L1BaseTest {
 
     function setUp() public override {
         super.setUp();

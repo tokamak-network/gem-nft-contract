@@ -65,6 +65,10 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         paused = false;
     }
 
+    //---------------------------------------------------------------------------------------
+    //------------------------------INITIALIZE FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
+
     /**
      * @notice Initializes the WstonSwapPool contract with the given parameters.
      * @param _ton The address of the TON token contract.
