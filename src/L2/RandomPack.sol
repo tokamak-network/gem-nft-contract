@@ -107,7 +107,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      * @param _gemFactory New address of the gem factory contract.
      */
     function setGemFactory(address _gemFactory) external onlyOwner {
-        if(gemFactory == address(0)) {
+        if(_gemFactory == address(0)) {
             revert InvalidAddress();
         }
         gemFactory = _gemFactory;
@@ -119,7 +119,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      * @param _randomPackFees New fees for random pack requests.
      */
     function setRandomPackFees(uint256 _randomPackFees) external onlyOwner {
-        if(randomPackFees == 0) {
+        if(_randomPackFees == 0) {
             revert RandomPackFeesEqualToZero();
         }
         randomPackFees = _randomPackFees;
@@ -375,4 +375,5 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
     function getRequestCount() external view returns(uint256) {return requestCount;}
     function getRandomPackFees() external view returns(uint256) {return randomPackFees;}
     function getPerfectCommonGemURI() external view returns(string memory) {return perfectCommonGemURI;}
+    function getPaused() external view returns(bool) {return paused;}
 }

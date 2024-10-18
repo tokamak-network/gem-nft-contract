@@ -30,8 +30,11 @@ contract WstonSwap is L2BaseTest {
             INITIAL_STAKING_INDEX,
             treasuryProxyAddress
         );
-
         Treasury(treasuryProxyAddress).setWstonSwapPool(wstonSwapPoolProxyAddress);
+        assert(WstonSwapPool(wstonSwapPoolProxyAddress).getTonAddress() == ton);
+        assert(WstonSwapPool(wstonSwapPoolProxyAddress).getWstonAddress() == wston);
+        assert(WstonSwapPool(wstonSwapPoolProxyAddress).getTreasuryAddress() == treasuryProxyAddress);
+        assert(WstonSwapPool(wstonSwapPoolProxyAddress).getStakingIndex() == INITIAL_STAKING_INDEX);
 
         vm.stopPrank();
 
@@ -41,6 +44,8 @@ contract WstonSwap is L2BaseTest {
         uint256 stakingIndex = WstonSwapPool(wstonSwapPoolProxyAddress).getStakingIndex();
         assert(stakingIndex == INITIAL_STAKING_INDEX);
     }
+
+    // ----------------------------------- INITIALIZERS --------------------------------------
 
     /**
      * @notice testing the behavior of initialize function if called for the second time
@@ -56,6 +61,8 @@ contract WstonSwap is L2BaseTest {
         );
         vm.stopPrank();
     }
+
+    // ----------------------------------- CORE FUNCTIONS --------------------------------------
 
     /**
      * @notice testing the swap function 
@@ -216,6 +223,8 @@ contract WstonSwap is L2BaseTest {
         vm.stopPrank();
     }
 
+    // ----------------------------------- PAUSE/UNPAUSE --------------------------------------
+
     /**
      * @notice testing the behavior of pause function
      */
@@ -227,6 +236,27 @@ contract WstonSwap is L2BaseTest {
     }
 
     /**
+     * @notice testing the behavior of pause function if called by user1
+     */
+    function testPauseShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        WstonSwapPool(wstonSwapPoolProxyAddress).pause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if already unpaused
+     */
+    function testPauseShouldRevertIfPaused() public {
+        testPause();
+        vm.startPrank(owner);
+        vm.expectRevert("Pausable: paused");
+        WstonSwapPool(wstonSwapPoolProxyAddress).pause();
+        vm.stopPrank();
+    }
+
+    /**
      * @notice testing the behavior of unpause function
      */
     function testUnpause() public {
@@ -234,6 +264,27 @@ contract WstonSwap is L2BaseTest {
         vm.startPrank(owner);
         WstonSwapPool(wstonSwapPoolProxyAddress).unpause();
         assert( WstonSwapPool(wstonSwapPoolProxyAddress).getPaused() == false);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if called by user1
+     */
+    function testUnpauseShouldRevertIfNotOwner() public {
+        testPause();
+        vm.startPrank(user1);
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        WstonSwapPool(wstonSwapPoolProxyAddress).unpause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if already unpaused
+     */
+    function testUnpauseShouldRevertIfunpaused() public {
+        vm.startPrank(owner);
+        vm.expectRevert("Pausable: not paused");
+        WstonSwapPool(wstonSwapPoolProxyAddress).unpause();
         vm.stopPrank();
     }
 

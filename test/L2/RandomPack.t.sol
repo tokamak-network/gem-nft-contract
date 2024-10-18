@@ -30,7 +30,193 @@ contract RandomPackTest is L2BaseTest {
         );
         vm.stopPrank();
 
+        assert(RandomPack(randomPackProxyAddress).getTreasuryAddress() == treasuryProxyAddress);
+        assert(RandomPack(randomPackProxyAddress).getGemFactoryAddress() == gemfactoryProxyAddress);
+        assert(RandomPack(randomPackProxyAddress).getTonAddress() == ton);
+        assert(RandomPack(randomPackProxyAddress).getCallbackGasLimit() == 600000);
+        assert(RandomPack(randomPackProxyAddress).getRequestCount() == 0);
+        assert(RandomPack(randomPackProxyAddress).getRandomPackFees() == randomPackFees);
+        assert(keccak256(abi.encodePacked(RandomPack(randomPackProxyAddress).getPerfectCommonGemURI())) == keccak256(abi.encodePacked("")));
+
     }
+
+    // ----------------------------------- INITIALIZERS --------------------------------------
+
+    /**
+     * @notice testing the behavior of initialize function if called for the second time
+     */
+    function testInitializeShouldRevertIfCalledTwice() public {
+        vm.startPrank(owner);
+        // should revert
+        vm.expectRevert(RandomPackStorage.AlreadyInitialized.selector);
+        RandomPack(randomPackProxyAddress).initialize(
+            address(drbCoordinatorMock),
+            ton,
+            gemfactoryProxyAddress,
+            treasuryProxyAddress,
+            randomPackFees
+        );
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setGemFactory function
+     */
+    function testSetGemFactory() public {
+        vm.startPrank(owner);
+        vm.expectEmit(true, true, true, true);
+        emit RandomPackStorage.GemFactoryAddressUpdated(address(0x1));
+        RandomPack(randomPackProxyAddress).setGemFactory(address(0x1));
+        assert(RandomPack(randomPackProxyAddress).getGemFactoryAddress() == address(0x1));
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setGemFactory function if address zero
+     */
+    function testSetGemFactoryShouldRevertIfAddressZero() public {
+        vm.startPrank(owner);
+        vm.expectRevert(RandomPackStorage.InvalidAddress.selector);
+        RandomPack(randomPackProxyAddress).setGemFactory(address(0));
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setGemFactory function if not owner
+     */
+    function testSetGemFactoryShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        RandomPack(randomPackProxyAddress).setGemFactory(address(0x1));
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setRandomPackFees function
+     */
+    function testSetRandomPackFees() public {
+        uint256 newFees = 15*10**18;
+        vm.startPrank(owner);
+        vm.expectEmit(true, true, true, true);
+        emit RandomPackStorage.RandomPackFeesUpdated(newFees);
+        RandomPack(randomPackProxyAddress).setRandomPackFees(newFees);
+        assert(RandomPack(randomPackProxyAddress).getRandomPackFees() == newFees);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setRandomPackFees function if new value is 0
+     */
+    function testSetRandomPackFeesShouldRevertIfAddressZero() public {
+        vm.startPrank(owner);
+        vm.expectRevert(RandomPackStorage.RandomPackFeesEqualToZero.selector);
+        RandomPack(randomPackProxyAddress).setRandomPackFees(0);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setRandomPackFees function if not owner
+     */
+    function testSetRandomPackFeesShouldRevertIfNotOwner() public {
+        uint256 newFees = 15*10**18;
+        vm.startPrank(user1);
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        RandomPack(randomPackProxyAddress).setRandomPackFees(newFees);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setTreasury function
+     */
+    function testSetTreasury() public {
+        vm.startPrank(owner);
+        vm.expectEmit(true, true, true, true);
+        emit RandomPackStorage.TreasuryAddressUpdated(address(0x1));
+        RandomPack(randomPackProxyAddress).setTreasury(address(0x1));
+        assert(RandomPack(randomPackProxyAddress).getTreasuryAddress() == address(0x1));
+        vm.stopPrank();
+    }
+
+        /**
+     * @notice testing the behavior of setTreasury function if address zero
+     */
+    function testSetTreasuryShouldRevertIfAddressZero() public {
+        vm.startPrank(owner);
+        vm.expectRevert(RandomPackStorage.InvalidAddress.selector);
+        RandomPack(randomPackProxyAddress).setTreasury(address(0));
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setTreasury function if not owner
+     */
+    function testSetTreasuryShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        RandomPack(randomPackProxyAddress).setTreasury(address(0x1));
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setCommonGemTokenURI function 
+     */
+    function testSetCommonGemTokenURI() public {
+        vm.startPrank(owner);
+        string memory tokenURI = "https://example.com/token/1";
+        emit RandomPackStorage.PerfectCommonGemURIUpdated(tokenURI);
+        RandomPack(randomPackProxyAddress).setPerfectCommonGemURI(tokenURI);
+        assert(keccak256(abi.encodePacked(RandomPack(randomPackProxyAddress).getPerfectCommonGemURI())) == keccak256(abi.encodePacked(tokenURI)));
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of setCallbackGasLimit function 
+     */
+    function testSetCallbackGasLimit() public {
+        vm.startPrank(owner);
+        uint32 newcallback = 50000;
+        emit RandomPackStorage.CallBackGasLimitUpdated(newcallback);
+        RandomPack(randomPackProxyAddress).setCallbackGasLimit(newcallback);
+        assert(RandomPack(randomPackProxyAddress).getCallbackGasLimit() == newcallback);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of SetProbabilities function if all probabilities are equal to 0
+     */
+    function testSetProbabilitiesShouldRevertIfAllProbAreEqualToZero() public {
+         vm.startPrank(owner);
+         vm.expectRevert(RandomPackStorage.invalidProbabilities.selector);
+         RandomPack(randomPackProxyAddress).setProbabilities(
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        );
+         vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of SetProbabilities function if the sum of all probbilities is not equal to 100
+     */
+    function testSetProbabilitiesShouldRevertIfSumIsNotEqualToHundred() public {
+         vm.startPrank(owner);
+         vm.expectRevert(RandomPackStorage.invalidProbabilities.selector);
+         //sum = 110
+         RandomPack(randomPackProxyAddress).setProbabilities(
+            50,
+            20,
+            10,
+            10,
+            10,
+            10
+        );
+         vm.stopPrank();
+    }
+
+    // ----------------------------------- CORE FUNCTIONS --------------------------------------
 
     /**
      * @notice testing the getRandomGem function 
@@ -178,4 +364,73 @@ contract RandomPackTest is L2BaseTest {
 
         vm.stopPrank();
     }
+
+
+    // ----------------------------------- PAUSE/UNPAUSE --------------------------------------
+
+
+    /**
+     * @notice testing the behavior of pause function
+     */
+    function testPause() public {
+        vm.startPrank(owner);
+        RandomPack(randomPackProxyAddress).pause();
+        assert(RandomPack(randomPackProxyAddress).getPaused() == true);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of pause function if called by user1
+     */
+    function testPauseShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        RandomPack(randomPackProxyAddress).pause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if already unpaused
+     */
+    function testPauseShouldRevertIfPaused() public {
+        testPause();
+        vm.startPrank(owner);
+        vm.expectRevert("Pausable: paused");
+        RandomPack(randomPackProxyAddress).pause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function
+     */
+    function testUnpause() public {
+        testPause();
+        vm.startPrank(owner);
+        RandomPack(randomPackProxyAddress).unpause();
+        assert(RandomPack(randomPackProxyAddress).getPaused() == false);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if called by user1
+     */
+    function testUnpauseShouldRevertIfNotOwner() public {
+        testPause();
+        vm.startPrank(user1);
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        RandomPack(randomPackProxyAddress).unpause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if already unpaused
+     */
+    function testUnpauseShouldRevertIfunpaused() public {
+        vm.startPrank(owner);
+        vm.expectRevert("Pausable: not paused");
+        RandomPack(randomPackProxyAddress).unpause();
+        vm.stopPrank();
+    }
+
+
 }
