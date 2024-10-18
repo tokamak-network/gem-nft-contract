@@ -9,6 +9,71 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         super.setUp();
     }
 
+    // ----------------------------------- INITIALIZERS --------------------------------------
+
+    /**
+    * @notice test the behavior of initialize function if called for a second time
+    */
+    function testInitializeWstonContractShouldRevertIfCalledTwice() public {
+        vm.startPrank(owner);
+        vm.expectRevert();
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).initialize(
+            candidate,
+            wton,
+            ton,
+            depositManager,
+            seigManager,
+            owner,
+            "Titan Wrapped Staked TON",
+            "Titan WSTON"
+        );
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice test the behavior of setDepositManagerAddress function
+    */
+    function testsetDepositManagerAddress() public {
+        vm.startPrank(owner);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).setDepositManagerAddress(address(0x1));
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getDepositManager() == address(0x1));  
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice test the behavior of setDepositManagerAddress function if the caller is not the owner
+    */
+    function testsetDepositManagerAddressShouldRevertIfNotOwner() public {
+        // user1 tries to setDepositManager address
+        vm.startPrank(user1);
+        vm.expectRevert();
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).setDepositManagerAddress(address(0x1));
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice test the behavior of setSeigManagerAddress function
+    */
+    function testsetSeigManagerAddress() public {
+        vm.startPrank(owner);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).setSeigManagerAddress(address(0x2));
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getSeigManager() == address(0x2));
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice test the behavior of setSeigManagerAddress function if the caller is not the owner
+    */
+    function testsetSeigManagerAddressShouldRevertIfNotOwner() public {
+        // user1 tries to setSeigManager address
+        vm.startPrank(user1);
+        vm.expectRevert();
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).setSeigManagerAddress(address(0x2));
+        vm.stopPrank();
+    }
+
+    // ----------------------------------- CORE FUNCTIONS -------------------------------------
+
     function testDeposit() public {
         vm.startPrank(user1);
         uint256 depositAmount = 200 * 10**27;
@@ -240,6 +305,71 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).balanceOf(user1) == tonDepositAmount * 1e9);
         // check if contract balance = 100 sWTON
         assert(SeigManager(seigManager).stakeOf(candidate, address(l1wrappedstakedtonProxy)) == tonDepositAmount * 1e9);
+    }
+
+    // ----------------------------------- PAUSE/UNPAUSE --------------------------------------
+
+    /**
+     * @notice testing the behavior of pause function
+     */
+    function testPause() public {
+        vm.startPrank(owner);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).pause();
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getPaused() == true);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of pause function if called by user1
+     */
+    function testPauseShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        vm.expectRevert();
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).pause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if already unpaused
+     */
+    function testPauseShouldRevertIfPaused() public {
+        testPause();
+        vm.startPrank(owner);
+        vm.expectRevert(L1WrappedStakedTONStorage.ContractPaused.selector);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).pause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function
+     */
+    function testUnpause() public {
+        testPause();
+        vm.startPrank(owner);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).unpause();
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getPaused() == false);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if called by user1
+     */
+    function testUnpauseShouldRevertIfNotOwner() public {
+        testPause();
+        vm.startPrank(user1);
+        vm.expectRevert();
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).unpause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if already unpaused
+     */
+    function testUnpauseShouldRevertIfunpaused() public {
+        vm.startPrank(owner);
+        vm.expectRevert(L1WrappedStakedTONStorage.ContractNotPaused.selector);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).unpause();
+        vm.stopPrank();
     }
     
 }

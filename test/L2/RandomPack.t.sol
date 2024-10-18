@@ -187,14 +187,7 @@ contract RandomPackTest is L2BaseTest {
     function testSetProbabilitiesShouldRevertIfAllProbAreEqualToZero() public {
          vm.startPrank(owner);
          vm.expectRevert(RandomPackStorage.invalidProbabilities.selector);
-         RandomPack(randomPackProxyAddress).setProbabilities(
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-        );
+         RandomPack(randomPackProxyAddress).setProbabilities(0,0,0,0,0,0);
          vm.stopPrank();
     }
 
@@ -205,14 +198,7 @@ contract RandomPackTest is L2BaseTest {
          vm.startPrank(owner);
          vm.expectRevert(RandomPackStorage.invalidProbabilities.selector);
          //sum = 110
-         RandomPack(randomPackProxyAddress).setProbabilities(
-            50,
-            20,
-            10,
-            10,
-            10,
-            10
-        );
+         RandomPack(randomPackProxyAddress).setProbabilities(50,20,10,10,10,10);
          vm.stopPrank();
     }
 

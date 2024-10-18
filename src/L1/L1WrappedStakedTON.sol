@@ -588,4 +588,8 @@ contract L1WrappedStakedTON is
     function getlastSeigBlock() external view returns (uint256) {
         return lastSeigBlock;
     }
+
+    function getPaused() external view returns (bool) {
+        return paused;
+    }
 }

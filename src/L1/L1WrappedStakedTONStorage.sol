@@ -10,7 +10,7 @@ contract L1WrappedStakedTONStorage {
 
     uint256 public constant DECIMALS = 10**27;
 
-    bool paused;
+    bool internal paused;
 
     address internal layer2Address;
     address internal wton;

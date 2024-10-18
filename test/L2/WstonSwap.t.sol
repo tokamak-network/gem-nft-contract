@@ -62,6 +62,39 @@ contract WstonSwap is L2BaseTest {
         vm.stopPrank();
     }
 
+    /**
+     * @notice testing the behavior of updateStakingIndex function
+     */
+    function testUpdateStakingIndex() public {
+        vm.startPrank(owner);
+        uint256 stakingIndex = 1063100206614753047688069608;
+        WstonSwapPool(wstonSwapPoolProxyAddress).updateStakingIndex(stakingIndex);
+        assert(WstonSwapPool(wstonSwapPoolProxyAddress).getStakingIndex() == stakingIndex);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of updateStakingIndex function if caller is not the owner
+     */
+    function testUpdateStakingIndexShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        uint256 stakingIndex = 1063100206614753047688069608;
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        WstonSwapPool(wstonSwapPoolProxyAddress).updateStakingIndex(stakingIndex);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of updateStakingIndex function if caller is not the owner
+     */
+    function testUpdateStakingIndexShouldRevertIfWrongStakingIndex() public {
+        vm.startPrank(owner);
+        uint256 stakingIndex = 0;
+        vm.expectRevert(WstonSwapPoolStorage.WrongStakingIndex.selector);
+        WstonSwapPool(wstonSwapPoolProxyAddress).updateStakingIndex(stakingIndex);
+        vm.stopPrank();
+    }
+
     // ----------------------------------- CORE FUNCTIONS --------------------------------------
 
     /**
@@ -187,39 +220,6 @@ contract WstonSwap is L2BaseTest {
         IERC20(wston).approve(wstonSwapPoolProxyAddress, wstonAmount);
         vm.expectRevert(WstonSwapPoolStorage.WstonBalanceTooLow.selector);
         WstonSwapPool(wstonSwapPoolProxyAddress).swap(wstonAmount);
-        vm.stopPrank();
-    }
-
-    /**
-     * @notice testing the behavior of updateStakingIndex function
-     */
-    function testUpdateStakingIndex() public {
-        vm.startPrank(owner);
-        uint256 stakingIndex = 1063100206614753047688069608;
-        WstonSwapPool(wstonSwapPoolProxyAddress).updateStakingIndex(stakingIndex);
-        assert(WstonSwapPool(wstonSwapPoolProxyAddress).getStakingIndex() == stakingIndex);
-        vm.stopPrank();
-    }
-
-    /**
-     * @notice testing the behavior of updateStakingIndex function if caller is not the owner
-     */
-    function testUpdateStakingIndexShouldRevertIfNotOwner() public {
-        vm.startPrank(user1);
-        uint256 stakingIndex = 1063100206614753047688069608;
-        vm.expectRevert("AuthControl: Caller is not the owner");
-        WstonSwapPool(wstonSwapPoolProxyAddress).updateStakingIndex(stakingIndex);
-        vm.stopPrank();
-    }
-
-    /**
-     * @notice testing the behavior of updateStakingIndex function if caller is not the owner
-     */
-    function testUpdateStakingIndexShouldRevertIfWrongStakingIndex() public {
-        vm.startPrank(owner);
-        uint256 stakingIndex = 0;
-        vm.expectRevert(WstonSwapPoolStorage.WrongStakingIndex.selector);
-        WstonSwapPool(wstonSwapPoolProxyAddress).updateStakingIndex(stakingIndex);
         vm.stopPrank();
     }
 

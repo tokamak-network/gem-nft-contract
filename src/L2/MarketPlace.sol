@@ -159,12 +159,13 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      */
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused {
         uint256 tokenIdsLength = tokenIds.length;
+        uint256 pricesLength = prices.length;
         // Ensure there are tokens to list
         if(tokenIdsLength == 0) {
             revert NoTokens();
         }
         // Ensure the lengths of token IDs and prices match
-        if(tokenIdsLength != prices.length) {
+        if(tokenIdsLength != pricesLength) {
             revert WrongLength();
         }
 
@@ -256,16 +257,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         }
         
         uint256 price = gemsForSale[_tokenId].price;
-        // Ensure the price is valid
-        if(price == 0) {
-            revert WrongPrice();
-        }
-
         address seller = gemsForSale[_tokenId].seller;
-        // Ensure the seller address is valid
-        if(seller == address(0)) {
-            revert WrongSeller();
-        }
 
         // Ensure the buyer is not the seller
         if(msg.sender == seller && msg.sender == _payer) {
@@ -302,15 +294,6 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
     }
 
     /**
-     * @dev Converts a value from WAD (18 decimals) to RAY (27 decimals).
-     * @param v The value to convert.
-     * @return The converted value in RAY.
-     */
-    function _toRAY(uint256 v) internal pure returns (uint256) {
-        return v * 10 ** 9;
-    }
-
-    /**
      * @dev Converts a value from RAY (27 decimals) to WAD (18 decimals).
      * @param v The value to convert.
      * @return The converted value in WAD.
@@ -331,4 +314,5 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
     function getWstonAddress() external view returns(address) { return wston;}
     function getPauseStatus() external view returns(bool) { return paused;}
     function getGemForSale(uint256 _tokenId) external view returns(Sale memory) { return gemsForSale[_tokenId];}
+    function getPaused() external view returns(bool) { return paused;}
 }
