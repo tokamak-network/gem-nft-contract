@@ -133,10 +133,6 @@ contract L1WrappedStakedTON is
     }
 
     //---------------------------------------------------------------------------------------
-    //--------------------------ERROR DEFINITIONS-------------------------------------------
-    //---------------------------------------------------------------------------------------
-
-    //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
 
@@ -368,12 +364,14 @@ contract L1WrappedStakedTON is
         stakingIndex = updateStakingIndex();
         emit StakingIndexUpdated(stakingIndex);
 
+        // calculate the WTON amount to withdraw
         uint256 _amountToWithdraw = (_wstonAmount * stakingIndex) / DECIMALS;
 
         if (!IDepositManager(depositManager).requestWithdrawal(layer2Address, _amountToWithdraw)) {
             revert WithdrawalRequestFailed();
         }
 
+        // pushing a new withdrawal request to the withdrawalRequests[] array
         withdrawalRequests[msg.sender].push(
             WithdrawalRequest({
                 withdrawableBlockNumber: block.number + delay,
@@ -393,6 +391,11 @@ contract L1WrappedStakedTON is
         return true;
     }
 
+    /**
+     * @dev Internal function to handle the claim of all withdrawal requests related to msg.sender.
+     * @param _token false is WTON and true is TON. 
+     * @return bool Returns true if the operation is successful.
+     */
     function _claimWithdrawalTotal(bool _token) internal returns (bool) {
         uint256 totalClaimableAmount = 0;
         uint256 currentBlock = block.number;
@@ -431,25 +434,36 @@ contract L1WrappedStakedTON is
         return true;
     }
 
+    /**
+     * @dev Internal function to handle the claim of a withdrawal requests related to a specific index.
+     * @param _index the index the user wishes to claim
+     * @param _token false is WTON and true is TON. 
+     * @return bool Returns true if the operation is successful.
+     */
     function _claimWithdrawalIndex(uint256 _index, bool _token) internal whenNotPaused returns (bool) {
         if (_index >= withdrawalRequests[msg.sender].length) {
             revert NoRequestToProcess();
         }
 
+        // stack the withdrawal request corresponding to the index 
         WithdrawalRequest storage request = withdrawalRequests[msg.sender][_index];
 
+        // revert if the request has been procesed
         if (request.processed == true) {
             revert RequestAlreadyProcessed();
         }
 
+        // revert if the delay has not elapsed
         if (request.withdrawableBlockNumber > block.number) {
             revert WithdrawalDelayNotElapsed();
         }
 
+        // set the processed storage to true
         withdrawalRequests[msg.sender][_index].processed = true;
 
         uint256 amount;
 
+        // handling the token transfer if calling processRequest from the depositManager is successful
         if (_token) {
             amount = (request.amount) / 10 ** 9;
             if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
