@@ -55,6 +55,354 @@ contract GemFactoryTest is L2BaseTest {
 
         vm.stopPrank();
     }
+function testCreateGEMColorNotExist() public {
+    vm.startPrank(treasuryProxyAddress);  // Use treasuryProxyAddress instead of owner
+
+    // Define GEM properties with an invalid color
+    uint8[2] memory invalidColor = [255, 255]; // Assume this color doesn't exist
+    uint8[4] memory quadrants = [1, 2, 1, 1];
+    string memory tokenURI = "https://example.com/token/1";
+
+    // Expect the transaction to revert with "ColorNotExist()"
+    vm.expectRevert(abi.encodeWithSignature("ColorNotExist()"));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.COMMON, invalidColor, quadrants, tokenURI);
+
+    vm.stopPrank();
+}
+
+//common rarity quadrant tests:
+function testCreateGEMInvalidQuadrantsAndSumForCommon() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    string memory tokenURI = "https://example.com/token/1";
+
+    uint8[4][4] memory invalidQuadrantsCommon = [
+        [3, 1, 2, 2], // Invalid at index 0
+        [1, 3, 2, 2], // Invalid at index 1
+        [1, 1, 3, 2], // Invalid at index 2
+        [1, 1, 2, 3]  // Invalid at index 3
+    ];
+
+    for (uint8 i = 0; i < 4; i++) {
+        vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", i, 1, 2));
+        GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.COMMON, color, invalidQuadrantsCommon[i], tokenURI);
+    }
+
+    uint8[4] memory sumTooHighQuadrants = [2, 2, 2, 2]; // Sum exceeds the limit (8)
+    vm.expectRevert(abi.encodeWithSignature("SumOfQuadrantsTooHigh(uint8,string)", 8, "COMMON"));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.COMMON, color, sumTooHighQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+
+function testCreateGEMInvalidQuadrantAtIndex1() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4] memory invalidQuadrants = [1, 3, 1, 1]; 
+    string memory tokenURI = "https://example.com/token/1";
+
+    vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", 1, 1, 2));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.COMMON, color, invalidQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+function testCreateGEMInvalidQuadrantAtIndex2() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4] memory invalidQuadrants = [1, 1, 3, 1]; 
+    string memory tokenURI = "https://example.com/token/1";
+
+    vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", 2, 1, 2));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.COMMON, color, invalidQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+function testCreateGEMInvalidQuadrantAtIndex3() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4] memory invalidQuadrants = [1, 1, 1, 3]; 
+    string memory tokenURI = "https://example.com/token/1";
+
+    vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", 3, 1, 2));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.COMMON, color, invalidQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+
+function testCreateGEMSumOfQuadrantsTooHigh() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4] memory highSumQuadrants = [2, 2, 2, 2]; 
+    string memory tokenURI = "https://example.com/token/1";
+
+    vm.expectRevert(abi.encodeWithSignature("SumOfQuadrantsTooHigh(uint8,string)", 8, "COMMON"));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.COMMON, color, highSumQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+
+//rare rarity quadrant tests:
+function testCreateGEMInvalidQuadrantsAndSumForRare() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    string memory tokenURI = "https://example.com/token/1";
+
+    uint8[4][4] memory invalidQuadrantsRare = [
+        [4, 2, 2, 3], // Invalid at index 0
+        [2, 4, 2, 3], // Invalid at index 1
+        [2, 2, 4, 3], // Invalid at index 2
+        [2, 2, 3, 4]  // Invalid at index 3
+    ];
+
+    for (uint8 i = 0; i < 4; i++) {
+        vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", i, 2, 3));
+        GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.RARE, color, invalidQuadrantsRare[i], tokenURI);
+    }
+
+    uint8[4] memory sumTooHighQuadrants = [3, 3, 3, 3]; // Sum exceeds the limit (12)
+    vm.expectRevert(abi.encodeWithSignature("SumOfQuadrantsTooHigh(uint8,string)", 12, "RARE"));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.RARE, color, sumTooHighQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+
+function testCreateGEMInvalidQuadrantForRareRarity() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4] memory invalidQuadrants = [4, 2, 2, 3]; 
+    string memory tokenURI = "https://example.com/token/1";
+
+    vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", 0, 2, 3));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.RARE, color, invalidQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+function testCreateGEMInvalidQuadrantsForRareRarity() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4][4] memory invalidQuadrants = [
+        [4, 2, 2, 3], // Invalid at index 0
+        [2, 4, 2, 3], // Invalid at index 1
+        [2, 2, 4, 3], // Invalid at index 2
+        [2, 2, 3, 4]  // Invalid at index 3
+    ];
+    string memory tokenURI = "https://example.com/token/1";
+
+    for (uint8 i = 0; i < 4; i++) {
+        vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", i, 2, 3));
+        GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.RARE, color, invalidQuadrants[i], tokenURI);
+    }
+
+    vm.stopPrank();
+}
+
+
+
+//Unique rarity quadrant tests:
+function testCreateGEMInvalidQuadrantsAndSumForUnique() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    string memory tokenURI = "https://example.com/token/1";
+
+    uint8[4][4] memory invalidQuadrantsUnique = [
+        [5, 3, 3, 4], // Invalid at index 0
+        [3, 5, 3, 4], // Invalid at index 1
+        [3, 3, 5, 4], // Invalid at index 2
+        [3, 3, 4, 5]  // Invalid at index 3
+    ];
+
+    for (uint8 i = 0; i < 4; i++) {
+        vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", i, 3, 4));
+        GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.UNIQUE, color, invalidQuadrantsUnique[i], tokenURI);
+    }
+
+    uint8[4] memory sumTooHighQuadrants = [4, 4, 4, 4]; // Sum exceeds the limit (16)
+    vm.expectRevert(abi.encodeWithSignature("SumOfQuadrantsTooHigh(uint8,string)", 16, "UNIQUE"));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.UNIQUE, color, sumTooHighQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+
+function testCreateGEMInvalidQuadrantForUniqueRarity() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4] memory invalidQuadrants = [5, 3, 4, 4]; 
+    string memory tokenURI = "https://example.com/token/1";
+
+    vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", 0, 3, 4));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.UNIQUE, color, invalidQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+function testCreateGEMInvalidQuadrantsForUnique() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    string memory tokenURI = "https://example.com/token/1";
+
+    uint8[4][4] memory invalidQuadrantsUnique = [
+        [5, 3, 3, 4], // Invalid at index 0
+        [3, 5, 3, 4], // Invalid at index 1
+        [3, 3, 5, 4], // Invalid at index 2
+        [3, 3, 4, 5]  // Invalid at index 3
+    ];
+
+    for (uint8 i = 0; i < 4; i++) {
+        vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", i, 3, 4));
+        GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.UNIQUE, color, invalidQuadrantsUnique[i], tokenURI);
+    }
+
+    vm.stopPrank();
+}
+
+//Epic rarity quadrant tests:
+function testCreateGEMInvalidQuadrantsAndSumForEpic() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    string memory tokenURI = "https://example.com/token/1";
+
+    uint8[4][4] memory invalidQuadrantsEpic = [
+        [6, 4, 5, 5], // Invalid at index 0
+        [4, 6, 5, 5], // Invalid at index 1
+        [4, 4, 6, 5], // Invalid at index 2
+        [4, 4, 5, 6]  // Invalid at index 3
+    ];
+
+    for (uint8 i = 0; i < 4; i++) {
+        vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", i, 4, 5));
+        GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.EPIC, color, invalidQuadrantsEpic[i], tokenURI);
+    }
+
+    uint8[4] memory sumTooHighQuadrants = [5, 5, 5, 5]; // Sum exceeds the limit (20)
+    vm.expectRevert(abi.encodeWithSignature("SumOfQuadrantsTooHigh(uint8,string)", 20, "EPIC"));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.EPIC, color, sumTooHighQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+
+function testCreateGEMInvalidQuadrantForEpicRarity() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4] memory invalidQuadrants = [6, 4, 4, 5]; 
+    string memory tokenURI = "https://example.com/token/1";
+
+    vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", 0, 4, 5));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.EPIC, color, invalidQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+function testCreateGEMInvalidQuadrantsForEpic() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    string memory tokenURI = "https://example.com/token/1";
+
+    uint8[4][4] memory invalidQuadrantsEpic = [
+        [6, 4, 5, 5], // Invalid at index 0
+        [4, 6, 5, 5], // Invalid at index 1
+        [4, 4, 6, 5], // Invalid at index 2
+        [4, 4, 5, 6]  // Invalid at index 3
+    ];
+
+    for (uint8 i = 0; i < 4; i++) {
+        vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", i, 4, 5));
+        GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.EPIC, color, invalidQuadrantsEpic[i], tokenURI);
+    }
+
+    vm.stopPrank();
+}
+
+//Legendary rarity quadrant tests:
+function testCreateGEMInvalidQuadrantForLegendaryRarity() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    uint8[4] memory invalidQuadrants = [7, 5, 6, 5]; 
+    string memory tokenURI = "https://example.com/token/legendary";
+
+    vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", 0, 5, 6));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.LEGENDARY, color, invalidQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+function testCreateGEMInvalidQuadrantsForLegendary() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [0, 0];
+    string memory tokenURI = "https://example.com/token/1";
+
+    uint8[4][4] memory invalidQuadrantsLegendary = [
+        [7, 5, 6, 6], // Invalid at index 0
+        [5, 7, 6, 6], // Invalid at index 1
+        [5, 5, 7, 6], // Invalid at index 2
+        [5, 5, 6, 7]  // Invalid at index 3
+    ];
+
+    for (uint8 i = 0; i < 4; i++) {
+        vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", i, 5, 6));
+        GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.LEGENDARY, color, invalidQuadrantsLegendary[i], tokenURI);
+    }
+
+    vm.stopPrank();
+}
+//Mythic rarity quadrant tests:
+function testCreateGEMInvalidQuadrantForMythicRarity() public {
+    vm.startPrank(treasuryProxyAddress);
+
+    uint8[2] memory color = [6, 6];
+    uint8[4] memory invalidQuadrants = [6, 6, 6, 5]; 
+    string memory tokenURI = "https://example.com/token/mythic";
+
+    vm.expectRevert(abi.encodeWithSignature("NewGemInvalidQuadrant(uint8,uint8,uint8)", 0, 6, 6));
+    GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.MYTHIC, color, invalidQuadrants, tokenURI);
+
+    vm.stopPrank();
+}
+
+
+function testCreateGEMLegendary() public {
+    vm.startPrank(treasuryProxyAddress); 
+
+    uint8[2] memory color = [0, 1];
+    uint8[4] memory quadrants = [5, 6, 5, 5];
+    string memory tokenURI = "https://example.com/token/legendary";
+
+    uint256 newGemId = GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.LEGENDARY, color, quadrants, tokenURI);
+
+    assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress); 
+    assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).rarity == GemFactoryStorage.Rarity.LEGENDARY);
+
+    vm.stopPrank();
+}
+
+
+function testCreateGEMMythic() public {
+    vm.startPrank(treasuryProxyAddress);  
+
+    uint8[2] memory color = [6, 6];
+    uint8[4] memory quadrants = [6, 6, 6, 6]; 
+    string memory tokenURI = "https://example.com/token/mythic";
+
+    uint256 newGemId = GemFactory(gemfactoryProxyAddress).createGEM(GemFactoryStorage.Rarity.MYTHIC, color, quadrants, tokenURI);
+
+    assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);  
+    assert(GemFactory(gemfactoryProxyAddress).getGem(newGemId).rarity == GemFactoryStorage.Rarity.MYTHIC);
+
+    vm.stopPrank();
+}
+
 
     /**
      * @notice testing of the transferFrom function
@@ -1497,6 +1845,19 @@ contract GemFactoryTest is L2BaseTest {
 
         vm.stopPrank();
     }
+    
+    function testMeltGemAddressZeroRevert() public {
+    // Trying to melt a GEM from address zero should revert
+    vm.startPrank(address(0));
+
+    uint256 newGemId = 1; // Assume this GEM ID exists
+    vm.expectRevert();
+
+    GemFactory(gemfactoryProxyAddress).meltGEM(newGemId);
+
+    vm.stopPrank();
+}
+
 
     function testGetRareGemsValue() public view {
         uint256 value = GemFactory(gemfactoryProxyAddress).getRareGemsValue();

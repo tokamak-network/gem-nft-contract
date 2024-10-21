@@ -311,6 +311,7 @@ contract GemFactory is
         // Emit an event indicating the GEM has been melted
         emit GemMelted(_tokenId, msg.sender);
     }
+    
 
     /**
      * @notice Creates a premined pool of GEM based on their attributes passed in the parameters and assigns their ownership to the contract.

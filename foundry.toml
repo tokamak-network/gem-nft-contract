@@ -4,6 +4,7 @@ solc_version = "0.8.25"
 src = "src"
 out = "out"
 viaIR = true
+cache = true
 optimizer = true # Enable the optimizer
 optimizer_runs = 20 # Set the number of optimizer runs
 libs = ["lib"]
