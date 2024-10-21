@@ -576,5 +576,71 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).unpause();
         vm.stopPrank();
     }
-    
+        /**
+     * @notice test the behavior of getTonAddress function
+     */
+    function testGetTonAddress() public {
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getTonAddress() == ton);
+    }
+
+    /**
+     * @notice test the behavior of getWtonAddress function
+     */
+    function testGetWtonAddress() public {
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getWtonAddress() == wton);
+    }
+
+
+    /**
+     * @notice test the behavior of getWithdrawalRequestIndex function
+     */
+    function testGetWithdrawalRequestIndex() public {
+        vm.startPrank(user1);
+        uint256 depositAmount = 200 * 10**27;
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(depositAmount);
+        vm.stopPrank();
+
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getWithdrawalRequestIndex(user1) == 1);
+    }
+
+    /**
+     * @notice test the behavior of getlastSeigBlock function
+     */
+    function testGetLastSeigBlock() public {
+        vm.startPrank(user1);
+        uint256 depositAmount = 200 * 10**27;
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        uint256 lastSeigBlock = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getlastSeigBlock();
+        assert(lastSeigBlock > 0);
+    }
+
+    /**
+     * @notice test the behavior of getPaused function
+     */
+    function testGetPaused() public {
+        // Check that the contract is not paused initially
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getPaused() == false);
+
+        // Pause the contract
+        vm.startPrank(owner);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).pause();
+        vm.stopPrank();
+
+        // Check that the contract is now paused
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getPaused() == true);
+
+        // Unpause the contract
+        vm.startPrank(owner);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).unpause();
+        vm.stopPrank();
+
+        // Check that the contract is no longer paused
+        assert(L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getPaused() == false);
+    }
+
 }
