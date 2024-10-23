@@ -122,6 +122,15 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         emit SetStakingIndex(_stakingIndex);
     }
 
+    /**
+     * @notice updates the gemfactory proxy address
+     * @param _gemFactory New gemFactory proxy address
+     */
+    function setGemFactory(address _gemFactory) external onlyOwner {
+        gemFactory = _gemFactory;
+        emit GemFactoryAddressUpdated(_gemFactory);
+    }
+
 
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
@@ -142,7 +151,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      * @notice Lists a GEM for sale on the marketplace.
      * @param _tokenId The ID of the token to be listed for sale.
      * @param _price The price at which the GEM is listed.
-     * @dev The GEM must be approved for transfer by the marketplace contract before it can be listed.
+     * @dev The GEM must be approved for transfer for the marketplace contract before it can be listed.
      */
     function putGemForSale(uint256 _tokenId, uint256 _price) external whenNotPaused {
         // Ensure the GEM is approved for transfer

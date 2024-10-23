@@ -35,11 +35,21 @@ async function main() {
     await gemFactory.waitForDeployment();
     console.log("GemFactory deployed to:", gemFactory.target);
 
+    await run("verify:verify", {
+        address: gemFactory.target,
+        constructorArguments: [],
+      });
+
     // Instantiate the GemFactoryForging
     const GemFactoryForging = await ethers.getContractFactory("GemFactoryForging");
     const gemFactoryForging = await GemFactoryForging.deploy();
     await gemFactoryForging.waitForDeployment();
     console.log("GemFactoryForging deployed to:", gemFactoryForging.target);
+
+    await run("verify:verify", {
+        address: gemFactoryForging.target,
+        constructorArguments: [],
+      });
 
     // Instantiate the GemFactoryMining
     const GemFactoryMining = await ethers.getContractFactory("GemFactoryMining");
@@ -47,12 +57,23 @@ async function main() {
     await gemFactoryMining.waitForDeployment();
     console.log("GemFactoryMining deployed to:", gemFactoryMining.target);
 
+    await run("verify:verify", {
+        address: gemFactoryMining.target,
+        constructorArguments: [],
+      });
+
     // ------------------------ GEMFACTORY PROXY ---------------------------------
 
     const GemFactoryProxy = await ethers.getContractFactory("GemFactoryProxy");
     const gemFactoryProxy = await GemFactoryProxy.deploy();
     await gemFactoryProxy.waitForDeployment();
     console.log("GemFactoryProxy deployed to:", gemFactoryProxy.target);
+
+    // verifying the contract
+    await run("verify:verify", {
+        address: gemFactoryProxy.target,
+        constructorArguments: [],
+      });
 
     // Set the first index to the GemFactory contract
     const upgradeTo = await gemFactoryProxy.upgradeTo(gemFactory.target);

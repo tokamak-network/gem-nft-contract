@@ -418,16 +418,27 @@ contract L1WrappedStakedTON is
 
         // Process request in TON or WTON
         if (_token) {
-            if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
-                revert ProcessRequestFailed();
-            }
             totalClaimableAmount = totalClaimableAmount / 10 ** 9;
-            IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
-        } else {
-            if (!IDepositManager(depositManager).processRequest(layer2Address, false)) {
-                revert ProcessRequestFailed();
+            /// if there is enough funds in the contract, it means that someone else has already processRequest
+            /// this avoid the scenario where processRequest fails because it was already called previously 
+            /// and no request can be processed anymore in the depositManager
+            if(IERC20(ton).balanceOf(address(this)) >= totalClaimableAmount) {
+                IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
+            } else{
+                if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
+                    revert ProcessRequestFailed();
+                }
+                IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
             }
-            IERC20(wton).safeTransfer(msg.sender, totalClaimableAmount);
+        } else {
+            if(IERC20(wton).balanceOf(address(this)) >= totalClaimableAmount) {
+                IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
+            } else{
+                if (!IDepositManager(depositManager).processRequest(layer2Address, false)) {
+                    revert ProcessRequestFailed();
+                }
+                IERC20(wton).safeTransfer(msg.sender, totalClaimableAmount);
+            }
         }
 
         emit WithdrawalProcessed(msg.sender, totalClaimableAmount);
@@ -466,12 +477,21 @@ contract L1WrappedStakedTON is
         // handling the token transfer if calling processRequest from the depositManager is successful
         if (_token) {
             amount = (request.amount) / 10 ** 9;
+            /// if there is enough funds in the contract, it means that someone else has already processRequest
+            /// this avoid the scenario where processRequest fails because it was already called previously 
+            /// and no request can be processed anymore in the depositManager
+            if(IERC20(ton).balanceOf(address(this)) >= amount) {
+                IERC20(ton).safeTransfer(msg.sender, amount);
+            }
             if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
                 revert ProcessRequestFailed();
             }
             IERC20(ton).safeTransfer(msg.sender, amount);
         } else {
             amount = request.amount;
+            if(IERC20(wton).balanceOf(address(this)) >= amount) {
+                IERC20(wton).safeTransfer(msg.sender, amount);
+            }
             if (!IDepositManager(depositManager).processRequest(layer2Address, false)) {
                 revert ProcessRequestFailed();
             }

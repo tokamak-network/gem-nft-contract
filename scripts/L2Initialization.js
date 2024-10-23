@@ -31,7 +31,6 @@ async function main() {
   // ---------------------------- GEMFACTORY INITIALIZATION ---------------------------------
   // Attach the GemFactory interface to the GemFactoryProxy address
   const gemFactoryProxyAsGemFactory = GemFactory.attach(gemFactoryProxyAddress);
-  /*
     // Initialize GemFactory with newly created contract addresses
     const initializeTx = await gemFactoryProxyAsGemFactory.initialize(
       owner,
@@ -60,7 +59,7 @@ async function main() {
   const tx2 = await Treasury.initialize(
     process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
-    gemFactoryAddress
+    gemFactoryProxyAddress
   );
   await tx2.wait();
   console.log("Treasury initialized");
@@ -70,7 +69,7 @@ async function main() {
   // Call the MarketPlace initialize function
   const tx3 = await MarketPlace.initialize(
     treasuryAddress,
-    gemFactoryAddress,
+    gemFactoryProxyAddress,
     BigInt(10), // ton fee rate = 10
     process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
@@ -165,11 +164,10 @@ async function main() {
   await gemFactoryProxyAsGemFactory.addColor("Amethyst/Amber",6,1);
   await gemFactoryProxyAsGemFactory.addColor("Garnet",7,7);
 
-  */
-
+  
   await RandomPack.setGemFactory(gemFactoryAddress);
   console.log("gemFactory set in RandomPack")
-
+  
   await RandomPack.setTreasury(treasuryAddress);
   console.log("Treasury set in RandomPack")
 }
