@@ -235,26 +235,24 @@ contract L1WrappedStakedTON is
     }
 
     /**
-     * @notice Claims all eligible withdrawal requests for the caller.
+     * @notice Claims all eligible withdrawal requests for the caller. User gets TON only
      * @dev This function processes all withdrawal requests that are eligible for claiming.
      * It transfers the corresponding TON or WTON to the caller.
-     * @param _token A boolean indicating whether to claim in TON (true) or WTON (false).
      */
-    function claimWithdrawalTotal(bool _token) external whenNotPaused {
-        if (!_claimWithdrawalTotal(_token)) {
+    function claimWithdrawalTotal() external whenNotPaused {
+        if (!_claimWithdrawalTotal()) {
             revert ClaimWithdrawalFailed();
         }
     }
     /**
-     * @notice Claims a specific withdrawal request for the caller by index.
+     * @notice Claims a specific withdrawal request for the caller by index. User gets TON only
      * @dev This function processes a withdrawal request at a given index if it is eligible for claiming.
      * It transfers the corresponding TON or WTON to the caller.
      * @param _index The index of the withdrawal request to claim.
-     * @param _token A boolean indicating whether to claim in TON (true) or WTON (false).
      */
 
-    function claimWithdrawalIndex(uint256 _index, bool _token) external whenNotPaused {
-        if (!_claimWithdrawalIndex(_index, _token)) {
+    function claimWithdrawalIndex(uint256 _index) external whenNotPaused {
+        if (!_claimWithdrawalIndex(_index)) {
             revert ClaimWithdrawalFailed();
         }
     }
@@ -392,11 +390,10 @@ contract L1WrappedStakedTON is
     }
 
     /**
-     * @dev Internal function to handle the claim of all withdrawal requests related to msg.sender.
-     * @param _token false is WTON and true is TON. 
+     * @dev Internal function to handle the claim of all withdrawal requests related to msg.sender. Funds are sent in TON only
      * @return bool Returns true if the operation is successful.
      */
-    function _claimWithdrawalTotal(bool _token) internal returns (bool) {
+    function _claimWithdrawalTotal() internal returns (bool) {
         uint256 totalClaimableAmount = 0;
         uint256 currentBlock = block.number;
 
@@ -416,29 +413,17 @@ contract L1WrappedStakedTON is
             revert NoClaimableAmount(msg.sender);
         }
 
-        // Process request in TON or WTON
-        if (_token) {
-            totalClaimableAmount = totalClaimableAmount / 10 ** 9;
-            /// if there is enough funds in the contract, it means that someone else has already processRequest
-            /// this avoid the scenario where processRequest fails because it was already called previously 
-            /// and no request can be processed anymore in the depositManager
-            if(IERC20(ton).balanceOf(address(this)) >= totalClaimableAmount) {
-                IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
-            } else{
-                if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
-                    revert ProcessRequestFailed();
-                }
-                IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
+        totalClaimableAmount = totalClaimableAmount / 10 ** 9;
+        /// if there is enough funds in the contract, it means that someone else has already processRequest
+        /// this avoid the scenario where processRequest fails because it was already called previously 
+        /// and no request can be processed anymore in the depositManager
+        if(IERC20(ton).balanceOf(address(this)) >= totalClaimableAmount) {
+            IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
+        } else{
+            if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
+                revert ProcessRequestFailed();
             }
-        } else {
-            if(IERC20(wton).balanceOf(address(this)) >= totalClaimableAmount) {
-                IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
-            } else{
-                if (!IDepositManager(depositManager).processRequest(layer2Address, false)) {
-                    revert ProcessRequestFailed();
-                }
-                IERC20(wton).safeTransfer(msg.sender, totalClaimableAmount);
-            }
+            IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
         }
 
         emit WithdrawalProcessed(msg.sender, totalClaimableAmount);
@@ -446,12 +431,11 @@ contract L1WrappedStakedTON is
     }
 
     /**
-     * @dev Internal function to handle the claim of a withdrawal requests related to a specific index.
+     * @dev Internal function to handle the claim of a withdrawal requests related to a specific index. Funds are sent in TON only
      * @param _index the index the user wishes to claim
-     * @param _token false is WTON and true is TON. 
      * @return bool Returns true if the operation is successful.
      */
-    function _claimWithdrawalIndex(uint256 _index, bool _token) internal whenNotPaused returns (bool) {
+    function _claimWithdrawalIndex(uint256 _index) internal whenNotPaused returns (bool) {
         if (_index >= withdrawalRequests[msg.sender].length) {
             revert NoRequestToProcess();
         }
@@ -472,30 +456,19 @@ contract L1WrappedStakedTON is
         // set the processed storage to true
         withdrawalRequests[msg.sender][_index].processed = true;
 
-        uint256 amount;
+        // staking the amount to be withdrawn
+        uint256 amount = (request.amount) / 10 ** 9;
 
-        // handling the token transfer if calling processRequest from the depositManager is successful
-        if (_token) {
-            amount = (request.amount) / 10 ** 9;
-            /// if there is enough funds in the contract, it means that someone else has already processRequest
-            /// this avoid the scenario where processRequest fails because it was already called previously 
-            /// and no request can be processed anymore in the depositManager
-            if(IERC20(ton).balanceOf(address(this)) >= amount) {
-                IERC20(ton).safeTransfer(msg.sender, amount);
-            }
+        /// if there is enough funds in the contract, it means that someone else has already processRequest
+        /// this avoid the scenario where processRequest fails because it was already called previously 
+        /// and no request can be processed anymore in the depositManager
+        if(IERC20(ton).balanceOf(address(this)) >= amount) {
+            IERC20(ton).safeTransfer(msg.sender, amount);
+        } else {
             if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
                 revert ProcessRequestFailed();
             }
             IERC20(ton).safeTransfer(msg.sender, amount);
-        } else {
-            amount = request.amount;
-            if(IERC20(wton).balanceOf(address(this)) >= amount) {
-                IERC20(wton).safeTransfer(msg.sender, amount);
-            }
-            if (!IDepositManager(depositManager).processRequest(layer2Address, false)) {
-                revert ProcessRequestFailed();
-            }
-            IERC20(wton).safeTransfer(msg.sender, amount);
         }
 
         emit WithdrawalProcessed(msg.sender, amount);

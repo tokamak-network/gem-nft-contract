@@ -222,21 +222,21 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         vm.roll(block.number + delay);
 
-        uint256 wtonBalanceBefore = IERC20(wton).balanceOf(user1);
+        uint256 tonBalanceBefore = IERC20(ton).balanceOf(user1);
         uint256 stakingIndexBefore = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
 
         // expected amount to be received ===> check the emit event to see if it's corresponding
-        uint256 wtonAmountReceived = (depositAmount * stakingIndexBefore) / 1e27;
+        uint256 tonAmountReceived = (depositAmount * stakingIndexBefore) / 1e36;
 
         vm.expectEmit(true,true,true,true);
-        emit L1WrappedStakedTONStorage.WithdrawalProcessed(user1, wtonAmountReceived);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal(false);
+        emit L1WrappedStakedTONStorage.WithdrawalProcessed(user1, tonAmountReceived);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal();
         L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getWithdrawalRequest(user1, 0);
        
         //checking the staking index is not affected
         uint256 stakingIndexAfter = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
         assert(stakingIndexAfter == stakingIndexBefore);
-        assert(IERC20(wton).balanceOf(user1) == wtonBalanceBefore + request.amount);
+        assert(IERC20(ton).balanceOf(user1) == tonBalanceBefore + tonAmountReceived);
         assert(request.processed == true);
 
         vm.stopPrank();
@@ -257,7 +257,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
                 user1
             )
         );
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal(false);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal();
         vm.stopPrank();
     }
 
@@ -294,17 +294,17 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         vm.roll(block.number + delay);
 
-        uint256 wtonBalanceBefore = IERC20(wton).balanceOf(user1);
+        uint256 tonBalanceBefore = IERC20(ton).balanceOf(user1);
         //1007868027750759615961946603
         uint256 stakingIndexBefore = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
 
 
         // calculate the amount expected to be sent ( in WTON)
-        uint256 amountToBeSend = (secondWithdrawalAmount * stakingIndexBefore) / 1e27;
+        uint256 amountToBeSend = (secondWithdrawalAmount * stakingIndexBefore) / 1e36;
         // Claim the withdrawal by index
         vm.expectEmit(true,true,true,true);
         emit L1WrappedStakedTONStorage.WithdrawalProcessed(user1, amountToBeSend);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1, false);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1);
 
         L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getWithdrawalRequest(user1, 1);
         // Check that the staking index is not affected
@@ -312,7 +312,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         assert(stakingIndexAfter == stakingIndexBefore);
 
         // Check that the user's balance is updated correctly
-        assert(IERC20(wton).balanceOf(user1) == wtonBalanceBefore + request.amount);
+        assert(IERC20(ton).balanceOf(user1) == tonBalanceBefore + amountToBeSend);
         assert(request.processed == true);
 
         vm.stopPrank();
@@ -348,13 +348,9 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         vm.roll(block.number + delay);
 
-        uint256 wtonBalanceBefore = IERC20(wton).balanceOf(user1);
-        //1007868027750759615961946603
-        uint256 stakingIndexBefore = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
-
         // Claim the withdrawal with index = 2 ===> should revert
         vm.expectRevert(L1WrappedStakedTONStorage.NoRequestToProcess.selector);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(2, false);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(2);
         vm.stopPrank();
     }
 
@@ -388,19 +384,18 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         vm.roll(block.number + delay);
 
-        uint256 wtonBalanceBefore = IERC20(wton).balanceOf(user1);
         //1007868027750759615961946603
         uint256 stakingIndexBefore = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getStakingIndex();
         // calculate the amount expected to be sent ( in WTON)
-        uint256 amountToBeSend = (secondWithdrawalAmount * stakingIndexBefore) / 1e27;
+        uint256 amountToBeSend = (secondWithdrawalAmount * stakingIndexBefore) / 1e36;
         // Claim the withdrawal with index = 1
         vm.expectEmit(true,true,true,true);
         emit L1WrappedStakedTONStorage.WithdrawalProcessed(user1, amountToBeSend);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1, false);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1);
 
         // try to reclain the same index
         vm.expectRevert(L1WrappedStakedTONStorage.RequestAlreadyProcessed.selector);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1, false);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1);
         vm.stopPrank();
     }
 
@@ -435,7 +430,52 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // rolling up to 1 block before due date
         vm.roll(block.number + delay - 1);
         vm.expectRevert(L1WrappedStakedTONStorage.WithdrawalDelayNotElapsed.selector);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1, false);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalIndex(1);
+    }
+
+    /**
+    * @notice this tests aims to prove that if 2 different user request withdrawal and one of them claimWithdrawal, 
+    * the second user is still able to claimWithdrawal 
+    */
+    function testClaimWithdrawalByTwoDifferentUsers() public {
+        // user1 deposit
+        vm.startPrank(user1);
+        uint256 depositAmount = 200 * 10**27;
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        // user2 deposits
+        vm.startPrank(user2);
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        // move to the next 200000 block
+        vm.roll(block.number + 200000);
+
+        // user1 withdrawal request
+        vm.startPrank(user1);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(depositAmount);
+        vm.stopPrank();
+
+        // user2 withdrawal request
+        vm.startPrank(user2);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(depositAmount);
+        vm.stopPrank();
+
+        // rolling up to 1 block before due date
+        vm.roll(block.number + delay);
+
+        // user1 claim withdrawal
+        vm.startPrank(user1);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal();
+        vm.stopPrank();
+
+        // user1 claim withdrawal
+        vm.startPrank(user2);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal();
+        vm.stopPrank();
     }
 
 
