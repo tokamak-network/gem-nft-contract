@@ -420,8 +420,11 @@ contract L1WrappedStakedTON is
         if(IERC20(ton).balanceOf(address(this)) >= totalClaimableAmount) {
             IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
         } else{
-            if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
-                revert ProcessRequestFailed();
+            uint256 numPendingRequests = IDepositManager(depositManager).numPendingRequests(layer2Address, address(this));
+            if(numPendingRequests > 0) {               
+                if (!IDepositManager(depositManager).processRequests(layer2Address, numPendingRequests, true)) {
+                    revert ProcessRequestFailed();
+                }
             }
             IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
         }
@@ -465,8 +468,11 @@ contract L1WrappedStakedTON is
         if(IERC20(ton).balanceOf(address(this)) >= amount) {
             IERC20(ton).safeTransfer(msg.sender, amount);
         } else {
-            if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
-                revert ProcessRequestFailed();
+            uint256 numPendingRequests = IDepositManager(depositManager).numPendingRequests(layer2Address, address(this));
+            if(numPendingRequests > 0) {               
+                if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
+                    revert ProcessRequestFailed();
+                }
             }
             IERC20(ton).safeTransfer(msg.sender, amount);
         }

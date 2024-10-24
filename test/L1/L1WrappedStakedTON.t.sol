@@ -441,8 +441,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // user1 deposit
         vm.startPrank(user1);
         uint256 depositAmount = 200 * 10**27;
-        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), 1);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(1, false);
         vm.stopPrank();
 
         // user2 deposits
@@ -456,7 +456,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         // user1 withdrawal request
         vm.startPrank(user1);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(1);
         vm.stopPrank();
 
         // user2 withdrawal request
@@ -468,12 +468,12 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         vm.roll(block.number + delay);
 
         // user1 claim withdrawal
-        vm.startPrank(user1);
+        vm.startPrank(user2);
         L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal();
         vm.stopPrank();
 
         // user1 claim withdrawal
-        vm.startPrank(user2);
+        vm.startPrank(user1);
         L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal();
         vm.stopPrank();
     }
