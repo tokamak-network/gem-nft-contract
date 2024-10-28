@@ -136,6 +136,13 @@ contract L1WrappedStakedTON is
         seigManager = _seigManager;
     }
 
+    /**
+     * @notice function to update the maxNumWithdrawal variable
+     */
+    function setMaxNumWithdrawal(uint8 _maxNumWithdrawal) external onlyOwner {
+        maxNumWithdrawal = _maxNumWithdrawal;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
     //---------------------------------------------------------------------------------------
