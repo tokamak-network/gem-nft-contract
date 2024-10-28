@@ -47,6 +47,8 @@ contract L1BaseTest is Test {
     uint256 delay = 93046;
     uint256 seigPerBlock = 3920000000000000000000000000;
     uint256 lastSeigBlock = block.number;
+    uint256 minimumWithdrawalAmount = 10 * 1e27;
+    uint8 maxNumWithdrawal = 5;
 
     uint256 public constant DECIMALS = 10**27;
 
@@ -67,25 +69,25 @@ contract L1BaseTest is Test {
         // we mint 1,000,000 TON to the owner
         TON(ton).mint(owner, 1000000 * 10 ** 18);
 
-        // Transfer 20,000 TON to user 1 and user 2
-        TON(ton).transfer(user1, 20000 * 10 ** 18); 
-        TON(ton).transfer(user2, 20000 * 10 ** 18); 
+        // Transfer 200,000 TON to user 1 and user 2
+        TON(ton).transfer(user1, 200000 * 10 ** 18); 
+        TON(ton).transfer(user2, 200000 * 10 ** 18); 
 
-        // we swap 10,000 TON to WTON
+        // we swap 100,000 TON to WTON
         vm.startPrank(user1);
-        TON(ton).approve(wton, 10000 * 10 ** 18);
-        WTON(wton).swapFromTON(10000 * 10 ** 18);
+        TON(ton).approve(wton, 100000 * 10 ** 18);
+        WTON(wton).swapFromTON(100000 * 10 ** 18);
         vm.stopPrank();
 
         vm.startPrank(user2); 
-        TON(ton).approve(wton, 10000 * 10 ** 18);
-        WTON(wton).swapFromTON(10000 * 10 ** 18); 
+        TON(ton).approve(wton, 100000 * 10 ** 18);
+        WTON(wton).swapFromTON(100000 * 10 ** 18); 
         vm.stopPrank();
 
         vm.startPrank(owner);
         // give ETH to User1 to cover gasFees associated with using VRF functions
-        vm.deal(user1, 100 ether);
-        vm.deal(user2, 100 ether);
+        vm.deal(user1, 1000 ether);
+        vm.deal(user2, 1000 ether);
 
         depositManager = address(new DepositManager());
         seigManager = address(new SeigManager());
@@ -136,6 +138,8 @@ contract L1BaseTest is Test {
             candidate,
             depositManager,
             seigManager,
+            minimumWithdrawalAmount,
+            maxNumWithdrawal,
             "Titan Wrapped Staked TON",
             "Titan WSTON"
         );

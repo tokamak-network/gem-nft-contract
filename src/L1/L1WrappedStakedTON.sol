@@ -105,6 +105,8 @@ contract L1WrappedStakedTON is
         address _depositManager,
         address _seigManager,
         address _owner,
+        uint256 _minimumWithdrawalAmount,
+        uint8 _maxNumWithdrawal,
         string memory _name,
         string memory _symbol
     ) public initializer {
@@ -115,6 +117,8 @@ contract L1WrappedStakedTON is
         layer2Address = _layer2Address;
         wton = _wton;
         ton = _ton;
+        minimumWithdrawalAmount = _minimumWithdrawalAmount;
+        maxNumWithdrawal = _maxNumWithdrawal;
         stakingIndex = DECIMALS;
     }
 
@@ -358,6 +362,16 @@ contract L1WrappedStakedTON is
             revert NotEnoughFunds();
         }
 
+        // minimum withdrawal amount implemented to avoid the function claimWithdrawal to run out of gas
+        if(_wstonAmount < minimumWithdrawalAmount) {
+            revert MinimalWithdrawalAmount();
+        }
+
+        // revert if the user has reached the maximum number of withdrawal requests
+        if(numWithdrawalRequestsByUser[msg.sender] == maxNumWithdrawal) {
+            revert MaximumNumberOfWithdrawalsReached();
+        }
+
         // updating the staking index
         stakingIndex = updateStakingIndex();
         emit StakingIndexUpdated(stakingIndex);
@@ -380,6 +394,7 @@ contract L1WrappedStakedTON is
 
         unchecked {
             withdrawalRequestIndex[msg.sender] += 1;
+            numWithdrawalRequestsByUser[msg.sender] += 1;
         }
 
         // Burn wstonAmount
@@ -412,6 +427,9 @@ contract L1WrappedStakedTON is
         if (totalClaimableAmount == 0) {
             revert NoClaimableAmount(msg.sender);
         }
+
+        // reset the number of withdrawal requests for this user
+        delete numWithdrawalRequestsByUser[msg.sender];
 
         totalClaimableAmount = totalClaimableAmount / 10 ** 9;
         /// if there is enough funds in the contract, it means that someone else has already processRequest
@@ -459,6 +477,9 @@ contract L1WrappedStakedTON is
         // set the processed storage to true
         withdrawalRequests[msg.sender][_index].processed = true;
 
+        // decrease the number of withdrawal requests for this user
+        numWithdrawalRequestsByUser[msg.sender] --;
+
         // staking the amount to be withdrawn
         uint256 amount = (request.amount) / 10 ** 9;
 
@@ -467,10 +488,11 @@ contract L1WrappedStakedTON is
         /// and no request can be processed anymore in the depositManager
         if(IERC20(ton).balanceOf(address(this)) >= amount) {
             IERC20(ton).safeTransfer(msg.sender, amount);
-        } else {
+        } 
+        else {
             uint256 numPendingRequests = IDepositManager(depositManager).numPendingRequests(layer2Address, address(this));
             if(numPendingRequests > 0) {               
-                if (!IDepositManager(depositManager).processRequest(layer2Address, true)) {
+                if (!IDepositManager(depositManager).processRequests(layer2Address, numPendingRequests, true)) {
                     revert ProcessRequestFailed();
                 }
             }
@@ -479,6 +501,15 @@ contract L1WrappedStakedTON is
 
         emit WithdrawalProcessed(msg.sender, amount);
         return true;
+    }
+
+    /**
+    * @notice process one or multiple requests. This function can be called by anyone
+    */
+    function processWithdrawalRequest(uint256 numRequests) external returns(bool) {
+        if (!IDepositManager(depositManager).processRequests(layer2Address, numRequests, true)) {
+                revert ProcessRequestFailed();
+        }
     }
 
     /**

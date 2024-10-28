@@ -20,9 +20,12 @@ contract L1WrappedStakedTONStorage {
 
     uint256 internal stakingIndex;
     uint256 internal lastSeigBlock;
+    uint256 internal minimumWithdrawalAmount;
+    uint8 internal maxNumWithdrawal;
 
     mapping(address => WithdrawalRequest[]) internal withdrawalRequests;
     mapping (address => uint256) internal withdrawalRequestIndex;
+    mapping(address => uint8) internal numWithdrawalRequestsByUser;
 
     // Array to keep track of users who have made withdrawal requests
     address[] internal users;
@@ -49,6 +52,7 @@ contract L1WrappedStakedTONStorage {
     // errors
     error DepositFailed();
     error NotEnoughFunds();
+    error MinimalWithdrawalAmount();
     error WrontAmount();
     error NoRequestToProcess();
     error RequestAlreadyProcessed();
@@ -65,5 +69,6 @@ contract L1WrappedStakedTONStorage {
     error ApproveAndCallFailed();
     error ContractNotPaused();
     error ContractPaused();
+    error MaximumNumberOfWithdrawalsReached();
 
 }

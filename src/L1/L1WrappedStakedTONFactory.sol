@@ -43,6 +43,8 @@ contract L1WrappedStakedTONFactory is ProxyStorage, AuthControl, L1WrappedStaked
         address _layer2Address,
         address _depositManager,
         address _seigManager,
+        uint256 _minimumWithdrawalAmount,
+        uint8 _maxNumWithdrawal,
         string memory _name,
         string memory _symbol
     ) external onlyOwnerOrAdmin 
@@ -63,6 +65,8 @@ contract L1WrappedStakedTONFactory is ProxyStorage, AuthControl, L1WrappedStaked
             _depositManager,
             _seigManager,
             msg.sender,
+            _minimumWithdrawalAmount,
+            _maxNumWithdrawal,
             _name,
             _symbol
         );

@@ -24,6 +24,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
             depositManager,
             seigManager,
             owner,
+            minimumWithdrawalAmount,
+            maxNumWithdrawal,
             "Titan Wrapped Staked TON",
             "Titan WSTON"
         );
@@ -441,8 +443,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // user1 deposit
         vm.startPrank(user1);
         uint256 depositAmount = 200 * 10**27;
-        WTON(wton).approve(address(l1wrappedstakedtonProxy), 1);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(1, false);
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
         vm.stopPrank();
 
         // user2 deposits
@@ -456,7 +458,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         // user1 withdrawal request
         vm.startPrank(user1);
-        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(1);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(minimumWithdrawalAmount);
         vm.stopPrank();
 
         // user2 withdrawal request
@@ -476,6 +478,30 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         vm.startPrank(user1);
         L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal();
         vm.stopPrank();
+    }
+
+    /**
+    * @notice checking if requestWithdrawal reverts if the caller has already reached the maximum withdrawals limit
+    */
+    function testrequestWithdrawalShouldRevertIfTooManyRequests() public {
+        // user1 deposit
+        vm.startPrank(user1);
+        uint256 depositAmount = 100000 * 10**27;
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+
+
+        // move to the next 200000 block
+        vm.roll(block.number + 200000);
+
+        // requesting 1 request less than the limit
+        for (uint i = 0; i < maxNumWithdrawal; ++i) {
+            L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(10 * 1e27);
+        }
+
+        // attempting the request another time
+        vm.expectRevert(L1WrappedStakedTONStorage.MaximumNumberOfWithdrawalsReached.selector);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(10 * 1e27);
     }
 
 

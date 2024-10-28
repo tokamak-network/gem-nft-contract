@@ -23,19 +23,41 @@ contract L1WrappedStakedTONFactoryTest is L1BaseTest {
     function testCreateWSTONToken() public {
         // Test with valid inputs
         vm.startPrank(owner);
-        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(address(0x3), address(0x4), address(0x5), "Token", "TKN");
+        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(
+            address(0x3), 
+            address(0x4), 
+            address(0x5), 
+            minimumWithdrawalAmount, 
+            maxNumWithdrawal,
+            "Token", 
+            "TKN"
+        );
 
         // Test with zero address
         vm.expectRevert("Address cannot be zero");
-        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(address(0), address(0x4), address(0x5), "Token", "TKN");
+        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(
+            address(0), 
+            address(0x4), 
+            address(0x5),
+            minimumWithdrawalAmount, 
+            maxNumWithdrawal, 
+            "Token", 
+            "TKN"
+        );
         vm.stopPrank();
 
         // Test with non-admin
         vm.startPrank(user1);
         vm.expectRevert("not Owner or Admin");
-         L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(address(0x3), address(0x4), address(0x5), "Token", "TKN");
-
-
+         L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(
+            address(0x3), 
+            address(0x4), 
+            address(0x5), 
+            minimumWithdrawalAmount, 
+            maxNumWithdrawal, 
+            "Token", 
+            "TKN"
+        );
 
     }
 
