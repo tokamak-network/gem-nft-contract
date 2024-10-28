@@ -37,7 +37,7 @@ contract L1WrappedStakedTON is
     L1WrappedStakedTONStorage
 {
     using SafeERC20 for IERC20;
-    
+        
     /**
      * @notice Modifier to ensure the contract is not paused.
      */
@@ -566,7 +566,7 @@ contract L1WrappedStakedTON is
      * @dev we iterrate over the number of pending requests and check if it is withdrawable 
      * @return count the total number of withdrawable requests
      */
-    function numWithdrawableRequests() internal view returns (uint256) {
+    function numWithdrawableRequests() internal returns (uint256) {
         uint256 numRequests = IDepositManager(depositManager).numRequests(layer2Address, address(this));
         uint256 index = IDepositManager(depositManager).withdrawalRequestIndex(layer2Address, address(this));
         uint256 count;
@@ -575,7 +575,7 @@ contract L1WrappedStakedTON is
         uint256 numberPendingRequests = numRequests - index;
 
         for(uint256 i = 0; i < numberPendingRequests; ++i) {
-            (uint128 withdrawableBlockNumber,,bool processed) = IDepositManager(depositManager).withdrawalRequest(layer2Address, address(this), i);
+            (uint128 withdrawableBlockNumber,,bool processed) = IDepositManager(depositManager).withdrawalRequest(layer2Address, address(this), index  + i);
             if(withdrawableBlockNumber <= block.number && !processed) {
                 count++;
             }

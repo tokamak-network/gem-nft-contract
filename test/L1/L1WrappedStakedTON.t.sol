@@ -578,6 +578,73 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         vm.stopPrank();
     }
 
+    /**
+     * @notice testing the behavior of numWithdrawableRequests
+     * User1 and user2 both deposit 200 WTON
+     * User1 makes 2 withdrawal requests for 100 WSTON each. User2 makes 1 withdrawal request for 100 WSTON
+     * We roll after the delay and user1 claimsWithdrawal. numWithdrawableRequests should return 3
+     * @dev we manually calculate each variable of the function to check if it is in accordance
+     */
+    function testNumWithdrawableRequests() public {
+        // user1 deposit 200 WTON
+        vm.startPrank(user1);
+        uint256 depositAmount = 200 * 10**27;
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        // move to the next 100000 block
+        vm.roll(block.number + 100000);
+
+        // user2 deposits 200 WTON
+        vm.startPrank(user2);
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        // move to the next 100000 block
+        vm.roll(block.number + 100000);
+
+        // user1 makes 2 withdrawal requests for a total of 100 WSTON
+        vm.startPrank(user1);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(50*1e27);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(50*1e27);
+        vm.stopPrank();
+
+        // move to the next 1000000 block
+        vm.roll(block.number + 1000000);
+
+        // user1 claims withdrawal
+        vm.startPrank(user1);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).claimWithdrawalTotal();
+        vm.stopPrank();
+
+        // user2 makes 2 withdrawals requests for a total of 100 WSTON
+        vm.startPrank(user2);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(50*1e27);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(50*1e27);
+        vm.stopPrank();
+
+        // move to the next 1000000 block
+        vm.roll(block.number + 1000000);
+
+        /// at this stage we got a total of 2 requests that are withdrawable
+        /// we manually calculate the count variable from numWithdrawableRequests
+        uint256 numRequests = DepositManager(depositManager).numRequests(candidate, address(l1wrappedstakedtonProxy)); // should be equal to 4
+        uint256 index = DepositManager(depositManager).withdrawalRequestIndex(candidate, address(l1wrappedstakedtonProxy)); // should be equal to 2
+        uint256 numberPendingRequests = numRequests - index; // should be equal to 2
+        uint256 count;
+        for(uint256 i = 0; i < numberPendingRequests; ++i) {
+            (uint128 withdrawableBlockNumber,,bool processed) = DepositManager(depositManager).withdrawalRequest(candidate, address(l1wrappedstakedtonProxy), index + i);
+            if(withdrawableBlockNumber <= block.number && !processed) {
+                count++;
+            }
+        }
+        console.log("count: ", count);
+        assert(count == 2);
+
+    }
+
     // ----------------------------------- PAUSE/UNPAUSE --------------------------------------
 
     /**
