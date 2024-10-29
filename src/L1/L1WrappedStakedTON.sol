@@ -539,7 +539,6 @@ contract L1WrappedStakedTON is
         }
 
         stakingIndex = _stakingIndex;
-        emit StakingIndexUpdated(_stakingIndex);
         return _stakingIndex;
     }
 
@@ -615,7 +614,7 @@ contract L1WrappedStakedTON is
         uint256 userIndex = withdrawalRequestIndex[user];
         uint256 withdrawalRequestLength = withdrawalRequests[user].length;
         // Iterate over each withdrawal request for the user
-        for (uint256 j = userIndex; j < withdrawalRequestLength; ++j) {
+        for (uint256 j = 0; j < userIndex; ++j) {
             WithdrawalRequest memory request = withdrawalRequests[user][j];
 
             // Check if the request is eligible for claiming

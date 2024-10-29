@@ -645,6 +645,47 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
     }
 
+    function testGetTotalClaimableAmountByUser() public {
+        // user1 deposit 200 WTON
+        vm.startPrank(user1);
+        uint256 depositAmount = 200 * 10**27;
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        // move to the next 100000 block
+        vm.roll(block.number + 100000);
+
+        // user2 deposits 200 WTON
+        vm.startPrank(user2);
+        WTON(wton).approve(address(l1wrappedstakedtonProxy), depositAmount);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).depositWTONAndGetWSTON(depositAmount, false);
+        vm.stopPrank();
+
+        // move to the next 100000 block
+        vm.roll(block.number + 100000);
+
+        // user1 makes 2 withdrawal requests for a total of 100 WSTON
+        vm.startPrank(user1);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(50*1e27);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(50*1e27);
+        vm.stopPrank();
+
+        // move to the next 1000000 block
+        vm.roll(block.number + 1000000);
+
+
+        // user2 makes 2 withdrawals requests for a total of 100 WSTON
+        vm.startPrank(user2);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(50*1e27);
+        L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).requestWithdrawal(50*1e27);
+        vm.stopPrank();
+
+        uint256 totalClaimableAmount = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getTotalClaimableAmountByUser(user1);
+        console.log("totalClaimableAmount user1: ",totalClaimableAmount);
+
+    }
+
     // ----------------------------------- PAUSE/UNPAUSE --------------------------------------
 
     /**
