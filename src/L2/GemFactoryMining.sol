@@ -92,7 +92,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         }
 
         // Modify storage variables to start the mining process
-        Gems.startMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
+        Gems.startMining(userMiningToken, userMiningStartTime, numberMiningGemsByRarity, msg.sender, _tokenId);
 
         // Emit an event indicating that mining has started
         emit GemMiningStarted(_tokenId, msg.sender, block.timestamp, Gems[_tokenId].miningTry);
@@ -125,7 +125,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         }
 
         // Modify the storage variables associated with the mining process to cancel it
-        Gems.cancelMining(userMiningToken, userMiningStartTime, msg.sender, _tokenId);
+        Gems.cancelMining(userMiningToken, userMiningStartTime, numberMiningGemsByRarity, msg.sender, _tokenId);
 
         // Emit an event indicating that mining has been canceled
         emit MiningCancelled(_tokenId, msg.sender, block.timestamp);
@@ -172,12 +172,14 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
 
         // Refund excess ETH to the user if they overpaid
         if (msg.value > directFundingCost) {
-            (bool success, ) = msg.sender.call{value: msg.value - directFundingCost}("");
+            // Refund excess ETH to the user if they overpaid
+            uint256 ethToRefund = msg.value - directFundingCost;
+            (bool success, ) = msg.sender.call{value: ethToRefund}("");
             if (!success) {
                 revert FailedToSendEthBack();
             }
             // Emit an event for the ETH refund
-            emit EthSentBack(msg.value - directFundingCost);
+            emit EthSentBack(ethToRefund);
         }
 
         // Emit an event for the random GEM request
@@ -243,9 +245,10 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         Gems[_tokenId].randomRequestId = 0;
         Gems[_tokenId].gemCooldownDueDate = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
 
-        // Delete user mining data
+        // Delete/update user mining data
         delete userMiningToken[ownerOf(_tokenId)][_tokenId];
         delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
+        numberMiningGemsByRarity[Gems[_tokenId].rarity]--;
     }
 
     /**

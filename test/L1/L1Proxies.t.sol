@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import "./WrappedStakedTON.t.sol";
+import "./L1WrappedStakedTON.t.sol";
 import {MockL1WrappedStakedTONUpgraded} from "./mock/MockL1WrappedStakedTONUpgraded.sol";
 import {MockL1WrappedStakedTONFactoryUpgraded} from "./mock/MockL1WrappedStakedTONFactoryUpgraded.sol";
 
-contract L1ProxyTest is WrappedStakedTONTest {
+contract L1ProxyTest is L1WrappedStakedTONTest {
 
     MockL1WrappedStakedTONUpgraded mockL1WrappedStakedTONUpgraded;
     MockL1WrappedStakedTONFactoryUpgraded mockL1WrappedStakedTONFactoryUpgraded;

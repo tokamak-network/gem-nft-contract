@@ -10,7 +10,7 @@ contract L1WrappedStakedTONStorage {
 
     uint256 public constant DECIMALS = 10**27;
 
-    bool paused;
+    bool internal paused;
 
     address internal layer2Address;
     address internal wton;
@@ -20,9 +20,12 @@ contract L1WrappedStakedTONStorage {
 
     uint256 internal stakingIndex;
     uint256 internal lastSeigBlock;
+    uint256 internal minimumWithdrawalAmount;
+    uint8 internal maxNumWithdrawal;
 
     mapping(address => WithdrawalRequest[]) internal withdrawalRequests;
     mapping (address => uint256) internal withdrawalRequestIndex;
+    mapping(address => uint8) internal numWithdrawalRequestsByUser;
 
     // Array to keep track of users who have made withdrawal requests
     address[] internal users;
@@ -30,6 +33,7 @@ contract L1WrappedStakedTONStorage {
 
     //deposit even
     event Deposited(address to, bool token, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
+    event decodeSuccess(address to, uint256 amount);
     event SeigniorageUpdated();
 
     // withdrawal events
@@ -48,12 +52,23 @@ contract L1WrappedStakedTONStorage {
     // errors
     error DepositFailed();
     error NotEnoughFunds();
+    error MinimalWithdrawalAmount();
     error WrontAmount();
     error NoRequestToProcess();
     error RequestAlreadyProcessed();
     error WithdrawalDelayNotElapsed();
     error NoClaimableAmount(address requestor);
     error FailedToSwapFromTONToWTON(uint256 amount);
-      
+    error InvalidCaller();
+    error InvalidToOrAmount();
+    error InvalidOnApproveData();
+    error WithdrawalRequestFailed();
+    error ClaimWithdrawalFailed();
+    error ProcessRequestFailed();
+    error SeigniorageUpdateFailed();
+    error ApproveAndCallFailed();
+    error ContractNotPaused();
+    error ContractPaused();
+    error MaximumNumberOfWithdrawalsReached();
 
 }

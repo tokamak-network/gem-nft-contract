@@ -7,59 +7,92 @@ async function main() {
   
   // Fetch environment variables
   const gemFactoryAddress = process.env.GEM_FACTORY;
+  const gemFactoryMiningAddress = process.env.GEM_FACTORY_MINING;
+  const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
   const marketPlaceAddress = process.env.MARKETPLACE;
   const treasuryAddress = process.env.TREASURY;
   const swapPool = process.env.WSTON_SWAP_POOL;
   const randomPackAddress = process.env.RANDOM_PACK;
   const drbCoordinatorAddress = process.env.DRB_COORDINATOR_MOCK;
-  const owner = "0x8be59251502Bd3a6C27649E8603C228b0a0a0889"
+  const owner = "0x15759359e60a3b9e59eA7A96D10Fa48829f83bEb"
   
-  if (!gemFactoryAddress || !marketPlaceAddress || !treasuryAddress || !randomPackAddress || !drbCoordinatorAddress) {
+  if (!gemFactoryAddress || !gemFactoryProxyAddress|| !marketPlaceAddress || !treasuryAddress || !randomPackAddress || !drbCoordinatorAddress) {
     throw new Error("Environment variables GEM_FACTORY, MARKETPLACE, TREASURY, RANDOM_PACK and DRB_COORDINATOR_MOCK must be set");
   }
   
   // Get contract instances
   const GemFactory = await ethers.getContractAt("GemFactory", gemFactoryAddress);
+  const GemFactoryMining = await ethers.getContractAt("GemFactoryMining", gemFactoryMiningAddress);
   const MarketPlace = await ethers.getContractAt("MarketPlace", marketPlaceAddress);
   const Treasury = await ethers.getContractAt("Treasury", treasuryAddress);
   const RandomPack = await ethers.getContractAt("RandomPack", randomPackAddress)
 
 
-  /*
-
-  // Call the GemFactory initialize function
-  const tx = await GemFactory.initialize(
-    drbCoordinatorAddress,
-    owner,
-    process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
-    process.env.TON_ADDRESS, // l2ton
-    treasuryAddress, // treasury
-    { gasLimit: 10000000 }
+  // ---------------------------- GEMFACTORY INITIALIZATION ---------------------------------
+  // Attach the GemFactory interface to the GemFactoryProxy address
+  const gemFactoryProxyAsGemFactory = GemFactory.attach(gemFactoryProxyAddress);
+    // Initialize GemFactory with newly created contract addresses
+    const initializeTx = await gemFactoryProxyAsGemFactory.initialize(
+      owner,
+      process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
+      process.env.TON_ADDRESS, // l2ton
+      treasuryAddress, // treasury
+      { gasLimit: 10000000 }
   );
-  await tx.wait();
+  await initializeTx.wait();
   console.log("GemFactory initialized");
+
+
+  // Attach the GemFactoryMining interface to the GemFactoryProxy address
+  const gemFactoryProxyAsGemFactoryMining = GemFactoryMining.attach(gemFactoryProxyAddress);
+
+  // Initialize GemFactoryMining with DRB Coordinator Mock address
+  const drbInitializeTx = await gemFactoryProxyAsGemFactoryMining.DRBInitialize(
+    drbCoordinatorAddress
+  );
+  await drbInitializeTx.wait();
+  console.log("GemFactoryMining DRB initialized");
+
+  // ---------------------------- TREASURY INITIALIZATION ---------------------------------
 
   // Call the Treasury initialize function
   const tx2 = await Treasury.initialize(
     process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
-    gemFactoryAddress
+    gemFactoryProxyAddress
   );
   await tx2.wait();
   console.log("Treasury initialized");
 
+  // -------------------------- MARKETPLACE INITIALIZATION -------------------------------
+
   // Call the MarketPlace initialize function
   const tx3 = await MarketPlace.initialize(
     treasuryAddress,
-    gemFactoryAddress,
+    gemFactoryProxyAddress,
     BigInt(10), // ton fee rate = 10
     process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
   );
   await tx3.wait();
   console.log("MarketPlace initialized");
-*/
-  await GemFactory.setGemsValue(
+
+  // -------------------------- RANDOMPACK INITIALIZATION -------------------------------
+
+  //initializing the randomPack contract
+  const tx4 = await RandomPack.initialize(
+    drbCoordinatorAddress,
+    process.env.TON_ADDRESS, // l2ton
+    gemFactoryAddress,
+    treasuryAddress,
+    BigInt(15), // ton fee prices = 10
+  );
+  await tx4.wait();
+  console.log("RandomPack initialized");
+
+  // -------------------------------- STORAGE SETTER ----------------------------------
+
+  await gemFactoryProxyAsGemFactory.setGemsValue(
     BigInt(10) ** BigInt(27) * BigInt(10), // commonGemsValue
     BigInt(10) ** BigInt(27) * BigInt(19), // rareGemsValue
     BigInt(10) ** BigInt(27) * BigInt(54), // uniqueGemsValue
@@ -70,7 +103,7 @@ async function main() {
   );
   console.log("gem values set");
 
-  await GemFactory.setGemsMiningPeriods(
+  await gemFactoryProxyAsGemFactory.setGemsMiningPeriods(
     BigInt(10 * 60), // RareGemsMiningPeriod (10 min)
     BigInt(10 * 60), // UniqueGemsMiningPeriod (10 min)
     BigInt(10 * 60), // EpicGemsMiningPeriod (10 min)
@@ -81,7 +114,7 @@ async function main() {
   console.log("Gems Mining Periods set");
 
   // Set Gems Cooldown Periods
-  await GemFactory.setGemsCooldownPeriods(
+  await gemFactoryProxyAsGemFactory.setGemsCooldownPeriods(
     BigInt(1 * 7 * 24 * 60 * 60), // RareGemsCooldownPeriod (1 weeks)
     BigInt(3 * 24 * 60 * 60), // UniqueGemsCooldownPeriod (3 days)
     BigInt(24 * 60 * 60), // EpicGemsCooldownPeriod (24 hours)
@@ -92,7 +125,7 @@ async function main() {
   console.log("Gems Cooldown Periods set");
 
   // Set Mining Trys
-  await GemFactory.setMiningTrys(
+  await gemFactoryProxyAsGemFactory.setMiningTries(
     BigInt(1),  // rareminingTry
     BigInt(2),  // uniqueminingTry
     BigInt(4), // epicminingTry
@@ -103,23 +136,12 @@ async function main() {
   console.log("Mining Trys set");
 
   // Set MarketPlace Address in GemFactory
-  await GemFactory.setMarketPlaceAddress(marketPlaceAddress);
+  await gemFactoryProxyAsGemFactory.setMarketPlaceAddress(marketPlaceAddress);
   console.log("MarketPlace address set in GemFactory");
 
   await Treasury.setMarketPlace(marketPlaceAddress);
   console.log("MarketPlace address set in Treasury");
-  
-  // Approve GemFactory to spend Treasury WSTON
-  await Treasury.approveGemFactory();
-  console.log("GemFactory approved in Treasury");
 
-  // Approve MarketPlace to spend Treasury WSTON
-  await Treasury.wstonApproveMarketPlace();
-  console.log("MarketPlace approved to spend Treasury WSTON");
-
-  // Approve MarketPlace to spend Treasury TON
-  await Treasury.tonApproveMarketPlace();
-  console.log("MarketPlace approved to spend Treasury TON");
 
   await Treasury.setWstonSwapPool(swapPool);
   console.log("Swap pool address set in Treasury");
@@ -128,26 +150,24 @@ async function main() {
   console.log("Random pack address set in Treasury");
 
   // we set up the list of colors available for the GEM
-  await GemFactory.addColor("Ruby",0,0);
-  await GemFactory.addColor("Ruby/Amber",0,1);
-  await GemFactory.addColor("Amber",1,1);
-  await GemFactory.addColor("Topaz",2,2);
-  await GemFactory.addColor("Topaz/Emerald",2,3);
-  await GemFactory.addColor("Emerald/Topaz",3,2);
-  await GemFactory.addColor("Emerald",3,3);
-  await GemFactory.addColor("Emerald/Amber",3,1);
-  await GemFactory.addColor("Turquoise",4,4);
-  await GemFactory.addColor("Sapphire",5,5);
-  await GemFactory.addColor("Amethyst",6,6);
-  await GemFactory.addColor("Amethyst/Amber",6,1);
-  await GemFactory.addColor("Garnet",7,7);
+  await gemFactoryProxyAsGemFactory.addColor("Ruby",0,0);
+  await gemFactoryProxyAsGemFactory.addColor("Ruby/Amber",0,1);
+  await gemFactoryProxyAsGemFactory.addColor("Amber",1,1);
+  await gemFactoryProxyAsGemFactory.addColor("Topaz",2,2);
+  await gemFactoryProxyAsGemFactory.addColor("Topaz/Emerald",2,3);
+  await gemFactoryProxyAsGemFactory.addColor("Emerald/Topaz",3,2);
+  await gemFactoryProxyAsGemFactory.addColor("Emerald",3,3);
+  await gemFactoryProxyAsGemFactory.addColor("Emerald/Amber",3,1);
+  await gemFactoryProxyAsGemFactory.addColor("Turquoise",4,4);
+  await gemFactoryProxyAsGemFactory.addColor("Sapphire",5,5);
+  await gemFactoryProxyAsGemFactory.addColor("Amethyst",6,6);
+  await gemFactoryProxyAsGemFactory.addColor("Amethyst/Amber",6,1);
+  await gemFactoryProxyAsGemFactory.addColor("Garnet",7,7);
 
-  await Treasury.tonApproveWstonSwapPool();
-  console.log("WstonSwapPool approved to spend Treasury TON")
-
+  
   await RandomPack.setGemFactory(gemFactoryAddress);
   console.log("gemFactory set in RandomPack")
-
+  
   await RandomPack.setTreasury(treasuryAddress);
   console.log("Treasury set in RandomPack")
 }

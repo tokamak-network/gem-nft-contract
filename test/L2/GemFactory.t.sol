@@ -607,7 +607,7 @@ contract GemFactoryTest is L2BaseTest {
         tokenIds[1] = newGemIds[1];
         uint8[2] memory color = [0, 1];
 
-    vm.expectRevert("Pausable: paused");
+        vm.expectRevert("Pausable: paused");
         GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
@@ -922,7 +922,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Expect the transaction to succeed
         vm.prank(user1);
-    vm.expectRevert("Pausable: paused");
+        vm.expectRevert("Pausable: paused");
         GemFactoryMining(gemfactoryProxyAddress).startMiningGEM(newGemId);
     }
 
@@ -1078,7 +1078,7 @@ contract GemFactoryTest is L2BaseTest {
         uint256[] memory tokens = GemFactory(gemfactoryProxyAddress).tokensOfOwner(user1);
 
         // call cancelMining function
-    vm.expectRevert("Pausable: paused");
+        vm.expectRevert("Pausable: paused");
         GemFactoryMining(gemfactoryProxyAddress).cancelMining(tokens[0]);
         vm.stopPrank();
     }
@@ -1254,11 +1254,59 @@ contract GemFactoryTest is L2BaseTest {
 
         vm.startPrank(user1);
         // call pickMinedGEM
-    vm.expectRevert("Pausable: paused");
+        vm.expectRevert("Pausable: paused");
         GemFactoryMining(gemfactoryProxyAddress).pickMinedGEM{value: miningFees}(newGemIds[0]);
 
         vm.stopPrank();
     }
+
+    function testSetTreasury() public {
+        vm.startPrank(owner);
+        address newTreasuryAddress = address(0x123);
+        GemFactory(gemfactoryProxyAddress).setTreasury(newTreasuryAddress);
+
+        vm.stopPrank();
+    }
+   function testPause() public {
+        vm.startPrank(owner);
+       GemFactory(gemfactoryProxyAddress).pause();
+        assert( GemFactory(gemfactoryProxyAddress).getPaused() == true);
+        vm.stopPrank();
+    }
+      /**
+     * @notice testing the behavior of pause function if called by user1
+     */
+    function testPauseShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        vm.expectRevert();
+       GemFactory(gemfactoryProxyAddress).pause();
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function
+     */
+    function testUnpause() public {
+        testPause();
+        vm.startPrank(owner);
+       GemFactory(gemfactoryProxyAddress).unpause();
+        assert( GemFactory(gemfactoryProxyAddress).getPaused() == false);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice testing the behavior of unpause function if called by user1
+     */
+    function testUnpauseShouldRevertIfNotOwner() public {
+        testPause();
+        vm.startPrank(user1);
+        vm.expectRevert();
+       GemFactory(gemfactoryProxyAddress).unpause();
+        vm.stopPrank();
+    }
+
+
+  
 
     /**
      * @notice testing the behavior of the DRBCoordinator
@@ -1419,6 +1467,146 @@ contract GemFactoryTest is L2BaseTest {
         vm.stopPrank();
     }
 
+    function testMeltGem() public {
+        vm.startPrank(owner);
+
+        // Define GEM properties
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+            defineDefaultGem();
+
+        // Create a GEM
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        vm.stopPrank();
+
+        vm.startPrank(treasuryProxyAddress);
+        // Transfer GEM to user1
+        GemFactory(gemfactoryProxyAddress).transferFrom(treasuryProxyAddress, user1, newGemId);
+        vm.stopPrank();
+
+        // Melt the GEM as user1
+        vm.startPrank(user1);
+        uint256 balanceBefore = IERC20(wston).balanceOf(user1);
+
+        // Call meltGEM function
+        GemFactory(gemfactoryProxyAddress).meltGEM(newGemId);
+
+        // Verify WSTON balance update
+        uint256 balanceAfter = IERC20(wston).balanceOf(user1);
+        uint256 gemValue = GemFactory(gemfactoryProxyAddress).getCommonGemsValue();
+        assert(balanceAfter == balanceBefore + gemValue);
+
+        vm.stopPrank();
+    }
+
+    function testGetRareGemsValue() public view {
+        uint256 value = GemFactory(gemfactoryProxyAddress).getRareGemsValue();
+        assertEq(value, 19000000000000000000000000000);
+    }
+
+    function testGetUniqueGemsValue() public view {
+        uint256 value = GemFactory(gemfactoryProxyAddress).getUniqueGemsValue();
+        assertEq(value, 53000000000000000000000000000);
+    }
+
+    function testGetEpicGemsValue() public view {
+        uint256 value = GemFactory(gemfactoryProxyAddress).getEpicGemsValue();
+        assertEq(value, 204000000000000000000000000000);
+    }
+
+    function testGetLegendaryGemsValue() public view {
+        uint256 value = GemFactory(gemfactoryProxyAddress).getLegendaryGemsValue();
+        assertEq(value, 605000000000000000000000000000);
+    }
+
+    function testGetMythicGemsValue() public view {
+        uint256 value = GemFactory(gemfactoryProxyAddress).getMythicGemsValue();
+        assertEq(value, 4000000000000000000000000000000);
+    }
+
+    function testGetRareMiningTry() public view {
+        uint8 value = GemFactory(gemfactoryProxyAddress).getRareminingTry();
+        assertEq(value, 2);
+    }
+
+    function testGetUniqueMiningTry() public view {
+        uint8 value = GemFactory(gemfactoryProxyAddress).getUniqueminingTry();
+        assertEq(value, 1);
+    }
+
+    function testGetEpicMiningTry() public view {
+        uint8 value = GemFactory(gemfactoryProxyAddress).getEpicminingTry();
+        assertEq(value, 10);
+    }
+
+    function testGetLegendaryMiningTry() public view {
+        uint8 value = GemFactory(gemfactoryProxyAddress).getLegendaryminingTry();
+        assertEq(value, 15);
+    }
+
+    function testGetMythicMiningTry() public view {
+        uint8 value = GemFactory(gemfactoryProxyAddress).getMythicminingTry();
+        assertEq(value, 20);
+    }
+
+    function testGetRareGemsMiningPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getRareGemsMiningPeriod();
+        assertEq(value, 1209600);
+    }
+
+    function testGetUniqueGemsMiningPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getUniqueGemsMiningPeriod();
+        assertEq(value, 1814400);
+    }
+
+    function testGetEpicGemsMiningPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getEpicGemsMiningPeriod();
+        assertEq(value, 2419200);
+    }
+
+    function testGetLegendaryGemsMiningPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getLegendaryGemsMiningPeriod();
+        assertEq(value, 3024000);
+    }
+
+    function testGetMythicGemsMiningPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getMythicGemsMiningPeriod();
+        assertEq(value, 3628800);
+    }
+
+    function testGetRareGemsCooldownPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getRareGemsCooldownPeriod();
+        assertEq(value, 1209600);
+    }
+
+    function testGetUniqueGemsCooldownPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getUniqueGemsCooldownPeriod();
+        assertEq(value, 1814400);
+    }
+
+    function testGetEpicGemsCooldownPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getEpicGemsCooldownPeriod();
+        assertEq(value, 2419200);
+    }
+
+    function testGetLegendaryGemsCooldownPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getLegendaryGemsCooldownPeriod();
+        assertEq(value, 3024000);
+    }
+
+    function testGetMythicGemsCooldownPeriod() public view {
+        uint32 value = GemFactory(gemfactoryProxyAddress).getMythicGemsCooldownPeriod();
+        assertEq(value, 3628800);
+    }
+
+    function testGetRequestCount() public view {
+        uint256 value = GemFactory(gemfactoryProxyAddress).getRequestCount();
+        assertEq(value, 0);
+    }
+
+    function testGetOwnershipTokenCount() public view {
+        uint256 value = GemFactory(gemfactoryProxyAddress).getOwnershipTokenCount(address(this));
+        assertEq(value, 0);
+    }
     /**
      * @notice testing the behavior of the mining process twice
      */

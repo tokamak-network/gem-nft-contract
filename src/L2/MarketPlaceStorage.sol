@@ -33,6 +33,7 @@ contract MarketPlaceStorage {
     event WSTONClaimed(uint256 tokenId, address claimer);
     event SetDiscountRate(uint256 discountRate);
     event SetStakingIndex(uint256 stakingIndex);
+    event GemFactoryAddressUpdated(address gemfactory);
 
 
     error NoTokens();

@@ -52,6 +52,7 @@ contract GemFactoryStorage {
     mapping(address => mapping(uint256 => bool)) public userMiningToken;
     mapping(address => mapping(uint256 => uint256)) public userMiningStartTime;
     mapping(uint256 => bool) public tokenReadyToMine;
+    mapping(Rarity => uint256) public numberMiningGemsByRarity;
 
     // Random requests mapping
     mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */

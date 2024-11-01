@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import "./WstonSwapV2.t.sol";
+import "./WstonSwap.t.sol";
 import {MockWstonSwapPoolUpgraded} from "./mock/MockSwapPoolUpgraded.sol";
 import {MockTreasuryUpgraded} from "./mock/MockTreasuryUpgraded.sol";
 import {MockMarketPlaceUpgraded} from "./mock/MockMarketPlaceUpgraded.sol";
@@ -21,6 +21,9 @@ contract L2ProxyTest is WstonSwap {
     MockGemFactoryUpgraded mockGemFactoryUpgraded;
     MockRandomPackUpgraded mockRandomPackUpgraded;
     
+
+    // --------------------------------- PROXY UPGRADE TESTING --------------------------------------
+
     /**
      * @dev We created a MockSwapPoolUpgraded and added a function called resetFees() which can only be called by the owner
      */
@@ -31,16 +34,16 @@ contract L2ProxyTest is WstonSwap {
         // we upgrade the swapper
         vm.startPrank(owner);
         mockSwapPoolUpgraded = new MockWstonSwapPoolUpgraded();
-        wstonSwapPoolProxyV2.upgradeTo(address(mockSwapPoolUpgraded));
+        wstonSwapPoolProxy.upgradeTo(address(mockSwapPoolUpgraded));
 
 
         // we ensure that old storage variables were kept 
-        uint256 stakingIndex = WstonSwapPoolV2(wstonSwapPoolProxyV2Address).getStakingIndex();
+        uint256 stakingIndex = WstonSwapPool(wstonSwapPoolProxyAddress).getStakingIndex();
         assert(stakingIndex != 0);
         
         // we ensure the new implementation is considered by calling incrementCounter();
-        MockWstonSwapPoolUpgraded(wstonSwapPoolProxyV2Address).incrementCounter();
-        uint256 counter = MockWstonSwapPoolUpgraded(wstonSwapPoolProxyV2Address).getCounter();
+        MockWstonSwapPoolUpgraded(wstonSwapPoolProxyAddress).incrementCounter();
+        uint256 counter = MockWstonSwapPoolUpgraded(wstonSwapPoolProxyAddress).getCounter();
         assert(counter == 1);
 
         vm.stopPrank();
@@ -59,7 +62,7 @@ contract L2ProxyTest is WstonSwap {
         
         // we expect the upgradeTo function to revert
         vm.expectRevert("AuthControl: Caller is not the owner");
-        wstonSwapPoolProxyV2.upgradeTo(address(mockSwapPoolUpgraded));
+        wstonSwapPoolProxy.upgradeTo(address(mockSwapPoolUpgraded));
 
         vm.stopPrank();
     }
@@ -71,7 +74,7 @@ contract L2ProxyTest is WstonSwap {
 
         // we expect the initialize function to revert
         vm.expectRevert("already initialized");
-        WstonSwapPoolV2(wstonSwapPoolProxyV2Address).initialize(
+        WstonSwapPool(wstonSwapPoolProxyAddress).initialize(
             ton,
             wston,
             INITIAL_STAKING_INDEX,
@@ -212,6 +215,9 @@ contract L2ProxyTest is WstonSwap {
 
     }
 
+    /**
+    * @notice testingthe behavior of initialize function when called for the second time from the new implementation
+    */
     function testGemFactoryProxyRevertsIfInitializedTwice() public {
         testGemFactoryProxy();
 
@@ -225,6 +231,111 @@ contract L2ProxyTest is WstonSwap {
             ton,
             treasuryProxyAddress
         );
+        vm.stopPrank();
+    }
+
+    // --------------------------------- PROXY CORE FUNCTIONS --------------------------------------
+
+    /**
+    * @notice testing the behavior of setProxyPause function
+    */
+    function testSetProxyPause() public {
+        vm.startPrank(owner);
+        gemfactoryProxy.setProxyPause(true);
+        assert(gemfactoryProxy.pauseProxy() == true);
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing the behavior of setProxyPause function if called by a random user
+    */
+    function testSetProxyPauseShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        gemfactoryProxy.setProxyPause(true);
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing the behavior of upgradeTo if called by a random user
+    */
+    function testUpgradeToShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        mockGemFactoryUpgraded = new MockGemFactoryUpgraded();
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        gemfactoryProxy.upgradeTo(address(mockGemFactoryUpgraded));
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing the behavior of upgradeTo if the implementation address is the same as the previous one
+    */
+    function testUpgradeToShouldRevertIfSameImplementation() public {
+        vm.startPrank(owner);
+        vm.expectRevert("same addr");
+        gemfactoryProxy.upgradeTo(address(gemfactory));
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing the behavior of setImplementation2 if called by a random user
+    */
+    function testSetImplementation2ShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+        mockGemFactoryUpgraded = new MockGemFactoryUpgraded();
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        gemfactoryProxy.setImplementation2(address(mockGemFactoryUpgraded), 1, true);
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing the behavior of setSelectorImplementations2 if called by a random user
+    */
+    function testsetSelectorImplementations2ShouldRevertIfNotOwner() public {
+        vm.startPrank(user1);
+
+        // Compute the function selector for GemFactoryForging
+        bytes4 forgeTokensSelector = bytes4(keccak256("forgeTokens(uint256[],uint8,uint8[2])"));
+        // Create a dynamic array for the selector
+        bytes4[] memory forgingSelectors = new bytes4[](1);
+        forgingSelectors[0] = forgeTokensSelector;
+
+        vm.expectRevert("AuthControl: Caller is not the owner");
+        gemfactoryProxy.setSelectorImplementations2(forgingSelectors, address(gemfactoryforging));
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing the behavior of setSelectorImplementations2 if the selector length is equal to 0
+    */
+    function testsetSelectorImplementations2ShouldRevertIfSelectorEmpty() public {
+        vm.startPrank(owner);
+
+        // Create an empty array for the selector
+        bytes4[] memory forgingSelectors;
+
+        // should revert 
+        vm.expectRevert("Proxy: _selectors's size is zero");
+        gemfactoryProxy.setSelectorImplementations2(forgingSelectors, address(gemfactoryforging));
+        vm.stopPrank();
+    }
+
+    /**
+    * @notice testing the behavior of setSelectorImplementations2 if the the implementation is not alive
+    */
+    function testsetSelectorImplementations2ShouldRevertIfImplNotAlive() public {
+        vm.startPrank(owner);
+        // making the forging impl not alive anymore
+        gemfactoryProxy.setAliveImplementation2(address(gemfactoryforging), false);
+
+        // Compute the function selector for GemFactoryForging
+        bytes4 forgeTokensSelector = bytes4(keccak256("forgeTokens(uint256[],uint8,uint8[2])"));
+        // Create a dynamic array for the selector
+        bytes4[] memory forgingSelectors = new bytes4[](1);
+        forgingSelectors[0] = forgeTokensSelector;
+
+        vm.expectRevert("Proxy: _imp is not alive");
+        gemfactoryProxy.setSelectorImplementations2(forgingSelectors, address(gemfactoryforging));
         vm.stopPrank();
     }
 }

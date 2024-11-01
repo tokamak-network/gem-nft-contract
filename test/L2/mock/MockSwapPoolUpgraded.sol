@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {WstonSwapPoolV2} from "../../../src/L2/WstonSwapPoolV2.sol";
+import {WstonSwapPool} from "../../../src/L2/WstonSwapPool.sol";
 
-contract MockWstonSwapPoolUpgraded is WstonSwapPoolV2 {
+contract MockWstonSwapPoolUpgraded is WstonSwapPool {
 
     uint256 internal counter;
 

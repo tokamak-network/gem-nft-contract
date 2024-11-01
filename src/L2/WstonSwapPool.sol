@@ -6,7 +6,7 @@ import {AuthControl} from "../common/AuthControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "../proxy/ProxyStorage.sol";
 
-import { WstonSwapPoolStorageV2 } from "./WstonSwapPoolStorageV2.sol";
+import { WstonSwapPoolStorage } from "./WstonSwapPoolStorage.sol";
 
 interface ITreasury {
     function tonApproveWstonSwapPool(uint256 _amount) external returns(bool);
@@ -20,7 +20,7 @@ interface ITreasury {
  * The contract includes mechanisms for pausing operations and ensuring secure token transfers.
  * @dev The contract uses OpenZeppelin's ReentrancyGuard for security and AuthControl for access management.
  */
-contract WstonSwapPoolV2 is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapPoolStorageV2 {
+contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapPoolStorage {
 
     /**
      * @notice Modifier to ensure the contract is not paused.
@@ -37,17 +37,6 @@ contract WstonSwapPoolV2 is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwa
         require(paused, "Pausable: not paused");
         _;
     }
-    
-    /**
-     * @notice Modifier to ensure the caller is the treasury contract
-     */
-    modifier onlyTreasury() {
-        require(
-            msg.sender == treasury, 
-            "function callable from treasury contract only"
-        );
-        _;
-    }
 
     /**
      * @notice Pauses the contract, preventing certain actions.
@@ -61,9 +50,13 @@ contract WstonSwapPoolV2 is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwa
      * @notice Unpauses the contract, allowing actions to be performed.
      * @dev Only callable by the owner when the contract is paused.
      */
-    function unpause() public onlyOwner whenNotPaused {
+    function unpause() public onlyOwner whenPaused {
         paused = false;
     }
+
+    //---------------------------------------------------------------------------------------
+    //------------------------------INITIALIZE FUNCTIONS-------------------------------------
+    //---------------------------------------------------------------------------------------
 
     /**
      * @notice Initializes the WstonSwapPool contract with the given parameters.
@@ -159,5 +152,8 @@ contract WstonSwapPoolV2 is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwa
     //---------------------------------------------------------------------------------------
 
     function getStakingIndex() external view returns(uint256) {return stakingIndex;}
-
+    function getPaused() external view returns(bool) {return paused;}
+    function getTreasuryAddress() external view returns(address) { return treasury;}
+    function getWstonAddress() external view returns(address) { return wston;}
+    function getTonAddress() external view returns(address) { return ton;}
 }

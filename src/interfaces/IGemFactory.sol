@@ -38,7 +38,9 @@ interface IGemFactory {
 
     function isTokenLocked(uint256 _tokenId) external view returns(bool);
 
-    function getGemListAvailableForRandomPack() external view returns (uint256, uint256[] memory);
+    function getGemListAvailableByRarity(uint8 _rarity) external view returns (uint256, uint256[] memory);
+
+    function availableGemsRandomPack() external view returns(bool);
 
     function getGemsSupplyTotalValue() external view returns(uint256 totalValue);
 

@@ -37,23 +37,30 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
         _;
     }
 
+    modifier onlyOwnerOrPauser() {
+        require(
+            hasRole(PAUSE_ROLE, msg.sender) || isOwner(),
+            "AuthControl: Caller is not a pauser"
+        );
+        _;
+    }
+
     /// @dev add admin
     /// @param account  address to add
     function addAdmin(address account) public virtual onlyOwner {
         grantRole(ADMIN_ROLE, account);
     }
 
-    function addPauser(address account) public virtual onlyOwnerOrAdmin {
+    function addPauser(address account) public virtual onlyOwner {
         grantRole(PAUSE_ROLE, account);
     }
 
     /// @dev remove admin
-    /// @param account  address to remove
-    function removeAdmin(address account) public virtual onlyOwner {
-        renounceRole(ADMIN_ROLE, account);
+    function removeAdmin() public virtual onlyAdmin {
+        renounceRole(ADMIN_ROLE, msg.sender);
     }
 
-    function removePauser(address account) public virtual onlyOwner {
+    function removePauser(address account) public virtual onlyOwnerOrPauser {
         renounceRole(PAUSE_ROLE, account);
     }
 
@@ -68,7 +75,9 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
             revert SameOwner();
         }
 
+        // granting owner and admin roles to the newOwner
         grantRole(DEFAULT_ADMIN_ROLE, newOwner);
+        grantRole(ADMIN_ROLE, newOwner);
         renounceRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
@@ -80,6 +89,10 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
 
     function isOwner() public view virtual returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function isPauser(address account) public view virtual returns (bool) {
+        return hasRole(PAUSE_ROLE, account);
     }
 
     function supportsInterface(

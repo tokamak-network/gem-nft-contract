@@ -23,11 +23,17 @@ contract RandomPackStorage {
     
     string internal perfectCommonGemURI;
 
-    bool paused = false;
+    bool internal paused = false;
+    bool internal initialized = false;
+    bool internal probInitialized = false;
 
     // constants
     uint32 internal callbackGasLimit;
 
+    uint8 constant public DIVIDER = 100;
+    mapping(uint8 => uint8) internal probabilities; // stores the probability based on the rarity => in percent
+
+    //events
     event RandomGemRequested(address requestor);
     event RandomGemToBeTransferred(uint256 tokenId, address newOwner);
     event RandomGemTransferred(uint256 tokenId, address newOwner);
@@ -40,9 +46,12 @@ contract RandomPackStorage {
     event CallBackGasLimitUpdated(uint256 _callbackGasLimit);
     event EthSentBack(uint256 amount);
 
+    // errors
     error InvalidAddress();
     error RandomPackFeesEqualToZero();
     error RequestNotMade();
     error FailedToSendEthBack();
+    error invalidProbabilities();
+    error AlreadyInitialized();
     
 }

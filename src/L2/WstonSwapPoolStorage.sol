@@ -2,7 +2,7 @@
 pragma solidity 0.8.25;
 
 
-contract WstonSwapPoolStorageV2 {
+contract WstonSwapPoolStorage {
    // Constants
    uint256 public constant DECIMALS = 10**27;
     
@@ -12,11 +12,11 @@ contract WstonSwapPoolStorageV2 {
     address public treasury;
 
     // Uint256
-    uint256 public stakingIndex;
+    uint256 internal stakingIndex;
     
     // Bools
     bool internal initialized;
-    bool public paused;
+    bool internal paused;
 
     // Events
     event SwappedWstonForTon(address indexed user, uint256 tonAmount, uint256 wstonAmount);

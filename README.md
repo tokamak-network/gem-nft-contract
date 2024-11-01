@@ -26,15 +26,29 @@ GEMs have the following specifications:
 
 ### MarketPlace (L2)
 
-The marketplace allows users to list their GEMs for sale at desired prices in WSTON. Interested buyers can pay in L2 TON or L2 WSTON (at a discounted price). Upon successful transfer, the NFT is sent to the new owner. Users can list multiple GEMs for sale in a single transaction using the ```putGemListForSale``` function. Ownership of the NFT is not transferred when calling the ```putGemForSale``` function; instead, the GEM's ```isLocked``` status is set to true, preventing its transfer until it is either purchased or removed from sale.
+The marketplace allows users to list their GEMs for sale at desired prices in WSTON. Interested buyers can pay in L2 TON or L2 WSTON (at a discounted price). Upon successful transfer, the NFT is sent to the new owner. Users can list multiple GEMs for sale in a single transaction using the `putGemListForSale` function. Ownership of the NFT is not transferred when calling the `putGemForSale` function; instead, the GEM's `isLocked` status is set to true, preventing its transfer until it is either purchased or removed from sale.
 
 ### Treasury (L2)
 
-The Treasury contract is responsible for creating pools of pre-mined GEMs (admin-only). It handles all transactions made by users, including locking GEM values and holding TON/WSTON tokens in reserve. The admin can list pre-mined GEMs for sale on the marketplace or use the swapper to obtain WSTON. Note that new GEMs cannot be created if the WSTON collateral does not cover the new GEM's value.
+The Treasury contract is responsible for creating pools of pre-mined GEMs, which is an admin-only function. It manages all user transactions, including locking GEM values and holding TON/WSTON tokens in reserve. The admin has the abil  ity to list pre-mined GEMs for sale on the marketplace. Therefore it is also possible for the owner or admins to remove (if owned by the treasury) or buy a Gem from the marketplace. It's important to note that new GEMs cannot be created if the WSTON collateral does not cover the value of the new GEM.
 
 ### RandomPack (L2)
 
-This contract allows users to obtain a random GEM from the pre-mined GEM pool (held in the Treasury) in exchange for an upfront fee. The fee rate can be customized by the admin. The VDF random beacon is used to generate a random value, which runs an off-chain node and calls the ```fulfillRandomWords``` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted, provided there are sufficient funds in the Treasury contract.
+This contract allows users to obtain a random GEM from the pre-mined GEM pool, which is held in the Treasury, in exchange for an upfront fee. The admin can customize the fee rate. The VDF random beacon is used to generate a random value, which involves running an off-chain node that calls the `fulfillRandomWords` function to transfer ownership of the selected GEM. If no GEM is available in the pool, a new perfect Common GEM is minted (only if there are sufficient funds in the Treasury contract). 
+
+To distribution of the probability is based on the rarity. Here is an example of a probability distribution
+- common Gem probability: 70%
+- rare Gem probability: 20%
+- unique Gem probability: 10%
+- epic Gem probability: 0%
+- legendary Gem probability: 0%
+- mythic Gem probability: 0%
+
+this values are setup by the contract owner at initialization
+
+### WstonSwapPool (L2)
+
+Users can swap their WSTON for TON if the Treasury holds enough TON. This feature is free of fees and can be accessed by anyone. The Treasury is always seeking WSTON as it will be used as collateral for newly minted GEMs.
 
 ### GemFactory (L2)
 
@@ -153,11 +167,14 @@ Titan Sepolia
 TON_ADDRESS=0x7c6b91D9Be155A6Db01f749217d76fF02A7227F2
 TITAN_WRAPPED_STAKED_TON=0x256Cf034962292C111436F43e5d92a9EC24dcD3C
 DRB_COORDINATOR_MOCK=0xe960E5E63e811812b2F5287D026f1aa6cA67E7f6
-GEM_FACTORY=0x3Bb140B246d72Ce264681dd13622507d8f6bCF54
-TREASURY=0x531Ce86B05F30344C85B2cA877861F715048bbd2
-MARKETPLACE=0xef835B964baDd828A9a47f3888F6fFcAc093DE03
-WSTON_SWAP_POOL=0x9dbFDA1De782a918E8d8e9c355da830A5ee70d6E
-RANDOM_PACK=0xA662bEC667FE4670DB4DB33120B2D6B89885fe45
+GEM_FACTORY_PROXY=0x38C36199174fD7CAf762a63Fc455D83c00790492
+GEM_FACTORY=0x7521C4dFd582c498D15372fAcBA262d27348357c
+GEM_FACTORY_FORGING=0x7690C135a0D6ba300bC797550b41dE33feb43aff
+GEM_FACTORY_MINING=0x282eB9525D710A73a4f6a67250a4EE0CDDF13436
+TREASURY=0xc9FB4b4547137409D46E0c26cbF7c03978B8c787
+MARKETPLACE=0x0fC9adf4143dd0e3E024576820f32e39CE0703bf
+WSTON_SWAP_POOL=0xFa8781fb2354Bea1f452924EaD38f824B72981c8
+RANDOM_PACK=0x9e0d7f7F5ddB5f8d3e3B2d8070876c251f29962F
 ```
 
 Ethereum Sepolia

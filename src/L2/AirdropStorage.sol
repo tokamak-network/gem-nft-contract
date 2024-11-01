@@ -23,4 +23,6 @@ contract AirdropStorage {
     error UserAlreadyClaimedCurrentAirdrop();
     error UserNotEligible();
     error NoEligibleUsers();
+    error ContractNotPaused();
+    error ContractPaused();
 }

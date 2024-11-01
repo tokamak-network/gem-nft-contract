@@ -65,7 +65,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      * @notice Unpauses the contract, allowing actions to be performed.
      * @dev Only callable by the owner when the contract is paused.
      */
-    function unpause() public onlyOwner whenNotPaused {
+    function unpause() public onlyOwner whenPaused {
         paused = false;
     }
 
@@ -88,6 +88,9 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         address _treasury, 
         uint256 _randomPackFees
     ) external {
+        if(initialized) {
+            revert AlreadyInitialized();
+        }
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         __DRBConsumerBase_init(_coordinator);
         gemFactory = _gemFactory;
@@ -96,6 +99,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         randomPackFees = _randomPackFees;
         callbackGasLimit = 600000;
         perfectCommonGemURI = "";
+        initialized = true;
     }
 
     /** 
@@ -103,7 +107,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      * @param _gemFactory New address of the gem factory contract.
      */
     function setGemFactory(address _gemFactory) external onlyOwner {
-        if(gemFactory == address(0)) {
+        if(_gemFactory == address(0)) {
             revert InvalidAddress();
         }
         gemFactory = _gemFactory;
@@ -115,7 +119,7 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      * @param _randomPackFees New fees for random pack requests.
      */
     function setRandomPackFees(uint256 _randomPackFees) external onlyOwner {
-        if(randomPackFees == 0) {
+        if(_randomPackFees == 0) {
             revert RandomPackFeesEqualToZero();
         }
         randomPackFees = _randomPackFees;
@@ -152,6 +156,53 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         emit CallBackGasLimitUpdated(_callbackGasLimit);
     }
 
+    /**
+     * @notice Sets the probability for the fulfillRandomness function based on the rarity
+     * @param _commonProb probability of getting a common gem => must be set in percentage
+     * @param _rareProb probability of getting a rare gem => must be set in percentage
+     * @param _uniqueProb probability of getting a unique gem => must be set in percentage
+     * @param _epicProb probability of getting a epic gem => must be set in percentage
+     * @param _legendaryProb probability of getting a legendary gem => must be set in percentage
+     * @param _mythicProb probability of getting a mythic gem => must be set in percentage
+     * @dev only callable by the owner
+     * @dev at least 1 probability must be greater than 0
+     * @dev the sum of the probability must be equal to 100
+     */
+    function setProbabilities(
+        uint8 _commonProb,
+        uint8 _rareProb,
+        uint8 _uniqueProb,
+        uint8 _epicProb,
+        uint8 _legendaryProb,
+        uint8 _mythicProb
+    ) external onlyOwner {
+        // ensure at least one probability is > 0 and that the sum = 100
+        if(
+            _commonProb == 0 && 
+            _rareProb == 0 && 
+            _uniqueProb == 0 && 
+            _epicProb == 0 && 
+            _legendaryProb == 0 && 
+            _mythicProb == 0
+        ) {
+            revert invalidProbabilities();
+        }
+        uint8 sumOfProb = _commonProb + _rareProb + _uniqueProb + _epicProb + _legendaryProb + _mythicProb;
+        if(sumOfProb != DIVIDER) {
+            revert invalidProbabilities();
+        }
+
+        probabilities[0] = _commonProb;
+        probabilities[1] = _rareProb;
+        probabilities[2] = _uniqueProb;
+        probabilities[3] = _epicProb;
+        probabilities[4] = _legendaryProb;
+        probabilities[5] = _mythicProb;
+
+        // used for sanity check in requestRandomGem function
+        probInitialized = true;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
     //---------------------------------------------------------------------------------------
@@ -160,8 +211,14 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
      * @notice Requests a random GEM and pays the required fees.
      * @return uint256 Returns the request ID for the randomness request.
      * @dev function has nonReentrant modifier and follows CEI
+     * @dev the function reverts if probabilities were not initialized
      */
     function requestRandomGem() external payable whenNotPaused nonReentrant returns(uint256) {
+        // revert if every probabilities are equal to 0
+        if(!probInitialized) {
+            revert invalidProbabilities();
+        }
+        // msg.sender must be different from address(0)
         if(msg.sender == address(0)) {
             revert InvalidAddress();
         }
@@ -180,14 +237,15 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             requestCount++;
         }
 
-        // Refund excess ETH to the user if they overpaid
         if(msg.value > directFundingCost) { // if there is ETH to refund
-            (bool success, ) = msg.sender.call{value:  msg.value - directFundingCost}("");
+            // Refund excess ETH to the user if they overpaid
+            uint256 ethToRefund = msg.value - directFundingCost;
+            (bool success, ) = msg.sender.call{value: ethToRefund}("");
             if(!success) {
                 revert FailedToSendEthBack();
             }
             // Emit an event for the ETH refund
-            emit EthSentBack(msg.value - directFundingCost);
+            emit EthSentBack(ethToRefund);
         }
 
         // Emit an event for the random GEM request
@@ -214,34 +272,96 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
 
     /**
      * @notice Fulfills the randomness request with the given random number and transfers a random GEM to the appropriate user
-     * @dev the function lists down the Gems available in the treasury (not locked) through the getGemListAvailableForRandomPack function 
-     * @dev if there is no gem available, the function creates a new common gem with specific attributes
      * @param requestId The ID of the randomness request.
      * @param randomNumber The random number generated.
+     * @dev the function lists down the Gems available in the treasury (not locked) through the availableGemsFandomPack function 
+     * @dev selects the Gem based on the rarity probabilities set
+     * @dev if there is no gem available, the function creates a new common gem with specific attributes
      */
     function fulfillRandomWords(uint256 requestId, uint256 randomNumber) internal override {
-        if(!s_requests[requestId].requested) {
+        // staking the storage for gaz savings
+        GemPackRequestStatus storage request = s_requests[requestId];
+        
+        // the request must be requested
+        if(!request.requested) {
             revert RequestNotMade();
         }
         s_requests[requestId].fulfilled = true;
         s_requests[requestId].randomWord = randomNumber;
 
-        (uint256 gemCount, uint256[] memory tokenIds) = IGemFactory(gemFactory).getGemListAvailableForRandomPack();
-
-        if(gemCount > 0) {
-            // same calculation as for the mining process
-            uint256 modNbGemsAvailable = (randomNumber % gemCount);
-            s_requests[requestId].chosenTokenId = tokenIds[modNbGemsAvailable];
-            // transfer the gem from the treasury to the user.
-            ITreasury(treasury).transferTreasuryGEMto(s_requests[requestId].requester, s_requests[requestId].chosenTokenId);
-            emit RandomGemTransferred(s_requests[requestId].chosenTokenId, s_requests[requestId].requester);
-        } else {
-            // if there is no gem available in the pool, we mint a new perfect common gem. note that it reverts if the treasury does not have enough WSTON.
-            s_requests[requestId].chosenTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], "");
-            ITreasury(treasury).transferTreasuryGEMto(msg.sender, s_requests[requestId].chosenTokenId);
-            emit CommonGemMinted();
+        // mints a new common gem if there is no Gems available 
+        if (!IGemFactory(gemFactory).availableGemsRandomPack()) {
+            mintCommonGem(request);
+            return;
         }
+
+        // getting a random value between 1 and 100
+        uint256 selectedProb = randomNumber % DIVIDER;
+
+        // we check for each rarity if the random value generated is corresponding. e.g if 5% of getting mythic => selectedProb must be >= 95
+        for (uint8 rarity = 5; rarity > 0; --rarity) {
+            if (selectedProb >= sumProbabilities(rarity)) {
+                if (transferGemByRarity(request, rarity, randomNumber)) {
+                    return;
+                }
+            } 
+        }
+
+        // transferring an existing common gem if there is Gem(s) available but none of them were chosen
+        if (transferGemByRarity(request, 0, randomNumber)) {
+            return;
+        }
+            
+        // mints a new common gem if there is Gem available but none of them were chosen
+        mintCommonGem(request);
     }
+
+    /**
+     * @notice Mints a new common gem and transfers it to the requester.
+     * @param request The request object containing requester details.
+     * @dev this function reverts if there is no WSTON availbe as a collateral for a new Common Gem
+     */
+    function mintCommonGem(GemPackRequestStatus storage request) private {
+        request.chosenTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0, 0], [1, 1, 1, 1], "");
+        ITreasury(treasury).transferTreasuryGEMto(request.requester, request.chosenTokenId);
+        emit CommonGemMinted();
+    }
+
+    /**
+     * @notice Transfers a gem of a specific rarity to the requester if available.
+     * @param request The request object containing requester details.
+     * @param rarity The rarity level of the gem to transfer.
+     * @param randomNumber The random number used to select the rarity.
+     * @dev the random number is also used to choose the token Id from the array of available Gems for a specific rarity
+     * @return True if a gem was successfully transferred, false otherwise
+     */
+    function transferGemByRarity(GemPackRequestStatus storage request, uint8 rarity, uint256 randomNumber) private returns (bool) {
+        if(probabilities[rarity] > 0) {
+            (uint256 gemCount, uint256[] memory tokenIds) = IGemFactory(gemFactory).getGemListAvailableByRarity(rarity);
+            if (gemCount > 0) {
+                uint256 modNbGemsAvailable = randomNumber % gemCount;
+                request.chosenTokenId = tokenIds[modNbGemsAvailable];
+                ITreasury(treasury).transferTreasuryGEMto(request.requester, request.chosenTokenId);
+                emit RandomGemTransferred(request.chosenTokenId, request.requester);
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * @notice Sums the probabilities up to a given index.
+     * @param end The index up to which to sum the probabilities.
+     * @return The sum of probabilities up to the given index.
+     */
+    function sumProbabilities(uint256 end) private view returns (uint256) {
+        uint8 sum = 0;
+        for (uint8 i = 0; i <= end-1; i++) {
+            sum += probabilities[i];
+        }
+        return sum;
+    }
+
+
 
 
     //---------------------------------------------------------------------------------------
@@ -255,4 +375,5 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
     function getRequestCount() external view returns(uint256) {return requestCount;}
     function getRandomPackFees() external view returns(uint256) {return randomPackFees;}
     function getPerfectCommonGemURI() external view returns(string memory) {return perfectCommonGemURI;}
+    function getPaused() external view returns(bool) {return paused;}
 }

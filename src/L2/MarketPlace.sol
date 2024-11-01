@@ -65,7 +65,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      * @notice Unpauses the contract, allowing actions to be performed.
      * @dev Can only be called by the owner when the contract is paused.
      */
-    function unpause() public onlyOwner whenNotPaused {
+    function unpause() public onlyOwner whenPaused {
         paused = false;
     }
 
@@ -122,6 +122,15 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         emit SetStakingIndex(_stakingIndex);
     }
 
+    /**
+     * @notice updates the gemfactory proxy address
+     * @param _gemFactory New gemFactory proxy address
+     */
+    function setGemFactory(address _gemFactory) external onlyOwner {
+        gemFactory = _gemFactory;
+        emit GemFactoryAddressUpdated(_gemFactory);
+    }
+
 
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------
@@ -142,7 +151,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      * @notice Lists a GEM for sale on the marketplace.
      * @param _tokenId The ID of the token to be listed for sale.
      * @param _price The price at which the GEM is listed.
-     * @dev The GEM must be approved for transfer by the marketplace contract before it can be listed.
+     * @dev The GEM must be approved for transfer for the marketplace contract before it can be listed.
      */
     function putGemForSale(uint256 _tokenId, uint256 _price) external whenNotPaused {
         // Ensure the GEM is approved for transfer
@@ -159,12 +168,13 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      */
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external whenNotPaused {
         uint256 tokenIdsLength = tokenIds.length;
+        uint256 pricesLength = prices.length;
         // Ensure there are tokens to list
         if(tokenIdsLength == 0) {
             revert NoTokens();
         }
         // Ensure the lengths of token IDs and prices match
-        if(tokenIdsLength != prices.length) {
+        if(tokenIdsLength != pricesLength) {
             revert WrongLength();
         }
 
@@ -256,16 +266,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         }
         
         uint256 price = gemsForSale[_tokenId].price;
-        // Ensure the price is valid
-        if(price == 0) {
-            revert WrongPrice();
-        }
-
         address seller = gemsForSale[_tokenId].seller;
-        // Ensure the seller address is valid
-        if(seller == address(0)) {
-            revert WrongSeller();
-        }
 
         // Ensure the buyer is not the seller
         if(msg.sender == seller && msg.sender == _payer) {
@@ -302,15 +303,6 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
     }
 
     /**
-     * @dev Converts a value from WAD (18 decimals) to RAY (27 decimals).
-     * @param v The value to convert.
-     * @return The converted value in RAY.
-     */
-    function _toRAY(uint256 v) internal pure returns (uint256) {
-        return v * 10 ** 9;
-    }
-
-    /**
      * @dev Converts a value from RAY (27 decimals) to WAD (18 decimals).
      * @param v The value to convert.
      * @return The converted value in WAD.
@@ -331,4 +323,5 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
     function getWstonAddress() external view returns(address) { return wston;}
     function getPauseStatus() external view returns(bool) { return paused;}
     function getGemForSale(uint256 _tokenId) external view returns(Sale memory) { return gemsForSale[_tokenId];}
+    function getPaused() external view returns(bool) { return paused;}
 }

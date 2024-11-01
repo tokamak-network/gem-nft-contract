@@ -17,6 +17,7 @@ library MiningLibrary {
         GemFactoryStorage.Gem[] storage Gems,
         mapping(address => mapping(uint256 => bool)) storage userMiningToken,
         mapping(address => mapping(uint256 => uint256)) storage userMiningStartTime,
+        mapping(GemFactoryStorage.Rarity => uint256) storage numberMiningGemsByRarity,
         address owner,
         uint256 tokenId
     ) internal {
@@ -24,6 +25,7 @@ library MiningLibrary {
         userMiningStartTime[owner][tokenId] = block.timestamp;
         Gems[tokenId].isLocked = true;
         Gems[tokenId].miningTry--;
+        numberMiningGemsByRarity[Gems[tokenId].rarity]++;
     }
 
     /**
@@ -38,11 +40,13 @@ library MiningLibrary {
         GemFactoryStorage.Gem[] storage Gems,
         mapping(address => mapping(uint256 => bool)) storage userMiningToken,
         mapping(address => mapping(uint256 => uint256)) storage userMiningStartTime,
+        mapping(GemFactoryStorage.Rarity => uint256) storage numberMiningGemsByRarity,
         address owner,
         uint256 tokenId
     ) internal {
         delete userMiningToken[owner][tokenId];
         delete userMiningStartTime[owner][tokenId];
         Gems[tokenId].isLocked = false;
+        numberMiningGemsByRarity[Gems[tokenId].rarity]--;
     }
 }
