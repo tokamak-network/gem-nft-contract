@@ -896,6 +896,14 @@ function tokenURI(uint256 tokenId) public view override returns (string memory) 
         }
     }
 
+    /**
+     * @notice Retrives the number of users that have started mining a gem and this for a specific rarity
+     */
+    function getNumberActiveMinersByRarity(Rarity rarity) external view returns(uint256) {
+        return numberMiningGemsByRarity[rarity];
+    }
+
+
     //---------------------------------------------------------------------------------------
     //-------------------------------STORAGE GETTERS-----------------------------------------
     //---------------------------------------------------------------------------------------
