@@ -6,7 +6,7 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IGemFactory } from "../interfaces/IGemFactory.sol";
 import { GemFactoryStorage } from "./GemFactoryStorage.sol";  
-import { AuthControl } from "../common/AuthControl.sol";
+import {AuthControl} from "../common/AuthControl.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { RandomPackStorage } from "./RandomPackStorage.sol";
 import "../proxy/ProxyStorage.sol";
@@ -34,7 +34,7 @@ interface ITreasury {
  * It allows users to request random GEMs by paying a fee and handles the minting and transfer of GEMs.
  * The contract includes mechanisms for pausing operations and managing fees.
  */
-contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase, RandomPackStorage {
+contract RandomPackThanos is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthControl, DRBConsumerBase, RandomPackStorage {
     using SafeERC20 for IERC20;
 
     /**
@@ -69,6 +69,17 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         paused = false;
     }
 
+    /**
+     * @notice we implement the receive function in order to receive TON (as a native token) 
+     */
+    receive() external payable {
+        // we send the funds to the treasury
+        (bool s,) = treasury.call{value: msg.value}("");
+        if(!s) {
+            revert FailedToSendFeesToTreasury();
+        }
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------------INITIALIZE FUNCTIONS-----------------------------------
     //---------------------------------------------------------------------------------------
@@ -76,14 +87,12 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
     /**
      * @notice Initializes the RandomPack contract with the given parameters.
      * @param _coordinator Address of the  DRBCoordinator contract.
-     * @param _ton Address of the TON token.
      * @param _gemFactory Address of the gem factory contract.
      * @param _treasury Address of the treasury contract.
      * @param _randomPackFees Fees for requesting a random pack.
      */
     function initialize(
         address _coordinator,  
-        address _ton, 
         address _gemFactory, 
         address _treasury, 
         uint256 _randomPackFees
@@ -95,7 +104,6 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         __DRBConsumerBase_init(_coordinator);
         gemFactory = _gemFactory;
         treasury = _treasury;
-        ton = _ton;
         randomPackFees = _randomPackFees;
         callbackGasLimit = 2100000;
         perfectCommonGemURI = "";
@@ -223,8 +231,10 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             revert InvalidAddress();
         }
         //users pays upfront fees
-        //user must approve the contract for the fees amount before calling the function
-        IERC20(ton).safeTransferFrom(msg.sender, treasury, randomPackFees);
+        (bool s,) = address(this).call{value: randomPackFees}("");
+        if(!s) {
+            revert FailedToPayFees();
+        }
         
         // Request randomness from the consumer with default parameters
         (uint256 directFundingCost, uint256 requestId) = requestRandomness(0,0,callbackGasLimit);        
@@ -237,9 +247,9 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
             requestCount++;
         }
 
-        if(msg.value > directFundingCost) { // if there is ETH to refund
+        if(msg.value > directFundingCost + randomPackFees) { // if there is ETH to refund
             // Refund excess ETH to the user if they overpaid
-            uint256 ethToRefund = msg.value - directFundingCost;
+            uint256 ethToRefund = msg.value - directFundingCost - randomPackFees;
             (bool success, ) = msg.sender.call{value: ethToRefund}("");
             if(!success) {
                 revert FailedToSendEthBack();
@@ -370,7 +380,6 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
 
     function getTreasuryAddress() external view returns(address) {return treasury;}
     function getGemFactoryAddress() external view returns(address) {return gemFactory;}
-    function getTonAddress() external view returns(address) {return ton;}
     function getCallbackGasLimit() external view returns(uint32) {return callbackGasLimit;}
     function getRequestCount() external view returns(uint256) {return requestCount;}
     function getRandomPackFees() external view returns(uint256) {return randomPackFees;}

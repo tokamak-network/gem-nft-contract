@@ -9,7 +9,7 @@ import "../proxy/ProxyStorage.sol";
 import { WstonSwapPoolStorage } from "./WstonSwapPoolStorage.sol";
 
 interface ITreasury {
-    function tonApproveWstonSwapPool(uint256 _amount) external returns(bool);
+    function transferTON(address _to, uint256 _amount) external returns(bool);
 }
 
 /**
@@ -20,7 +20,7 @@ interface ITreasury {
  * The contract includes mechanisms for pausing operations and ensuring secure token transfers.
  * @dev The contract uses OpenZeppelin's ReentrancyGuard for security and AuthControl for access management.
  */
-contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapPoolStorage {
+contract WstonSwapPoolThanos is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapPoolStorage {
 
     /**
      * @notice Modifier to ensure the contract is not paused.
@@ -60,21 +60,18 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
 
     /**
      * @notice Initializes the WstonSwapPool contract with the given parameters.
-     * @param _ton The address of the TON token contract.
      * @param _wston The address of the WSTON token contract.
      * @param _initialStakingIndex The initial staking index value.
      * @param _treasury The address of the treasury contract.
      * @dev Can only be called once. Grants the caller the default admin role.
      */
     function initialize(
-        address _ton, 
         address _wston,
         uint256 _initialStakingIndex, 
         address _treasury
     ) external {
         require(!initialized, "already initialized");   
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        ton = _ton;
         wston = _wston;
         treasury = _treasury;
         stakingIndex = _initialStakingIndex;
@@ -106,20 +103,17 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         // calculate the ton Amount based on the staking index
         uint256 tonAmount = ((wstonAmount * stakingIndex) / DECIMALS) / (10**9);
 
-        // make the treasury approve the swapper to spend TON
-        if(!ITreasury(treasury).tonApproveWstonSwapPool(tonAmount)) {
-            revert FailedToApproveTon(tonAmount);
-        }
-
         // Checks if treasury holds enough TON
-        if(IERC20(ton).balanceOf(treasury) < tonAmount) {
+        if(treasury.balance < tonAmount) {
             revert ContractTonBalanceOrAllowanceTooLow();
         }
 
         // transfers WSTON from the caller to the treasury
         _safeTransferFrom(IERC20(wston), msg.sender, treasury, wstonAmount);
         // Transfers TON from the treasury to the user
-        _safeTransferFrom(IERC20(ton), treasury, msg.sender, tonAmount);
+        if(!ITreasury(treasury).transferTON(msg.sender, tonAmount)) {
+            revert FailedToTransferTON();
+        }
 
         emit SwappedWstonForTon(msg.sender, tonAmount, wstonAmount);
     }
@@ -155,5 +149,4 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
     function getPaused() external view returns(bool) {return paused;}
     function getTreasuryAddress() external view returns(address) { return treasury;}
     function getWstonAddress() external view returns(address) { return wston;}
-    function getTonAddress() external view returns(address) { return ton;}
 }

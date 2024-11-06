@@ -1,4 +1,4 @@
-# GEM NFTs
+# GemSTON
 
 <div align="center">
 <img src="images/gem.png" alt="Mythic gem" width="250" />

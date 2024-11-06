@@ -33,7 +33,7 @@ contract RandomPackTest is L2BaseTest {
         assert(RandomPack(randomPackProxyAddress).getTreasuryAddress() == treasuryProxyAddress);
         assert(RandomPack(randomPackProxyAddress).getGemFactoryAddress() == gemfactoryProxyAddress);
         assert(RandomPack(randomPackProxyAddress).getTonAddress() == ton);
-        assert(RandomPack(randomPackProxyAddress).getCallbackGasLimit() == 600000);
+        assert(RandomPack(randomPackProxyAddress).getCallbackGasLimit() == 2100000);
         assert(RandomPack(randomPackProxyAddress).getRequestCount() == 0);
         assert(RandomPack(randomPackProxyAddress).getRandomPackFees() == randomPackFees);
         assert(keccak256(abi.encodePacked(RandomPack(randomPackProxyAddress).getPerfectCommonGemURI())) == keccak256(abi.encodePacked("")));

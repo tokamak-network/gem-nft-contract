@@ -33,7 +33,7 @@ interface IWstonSwapPool {
  * @dev The contract integrates with external interfaces for GEM creation, marketplace operations, and token swaps.
  * It includes security features such as pausing operations and role-based access control.
  */
-contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl, TreasuryStorage {
+contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl, TreasuryStorage {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {
@@ -93,15 +93,13 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     /**
      * @notice Initializes the Treasury contract with the given parameters.
      * @param _wston Address of the WSTON token.
-     * @param _ton Address of the TON token.
      * @param _gemFactory Address of the gem factory contract.
      */
-    function initialize(address _wston, address _ton, address _gemFactory) external {
+    function initialize(address _wston, address _gemFactory) external {
         require(!initialized, "already initialized");   
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         gemFactory = _gemFactory;
         wston = _wston;
-        ton = _ton;
         initialized = true;
     }
 
@@ -148,15 +146,6 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     function setWstonSwapPool(address _wstonSwapPool) external onlyOwnerOrAdmin {
         _checkNonAddress(_wstonSwapPool);
         wstonSwapPool = _wstonSwapPool;
-    }
-
-    /**
-     * @notice Approves the WSTON swap pool to spend TON tokens.
-     */
-    function tonApproveWstonSwapPool(uint256 _amount) external onlyWstonSwapPoolOrOwner returns(bool) {
-        _checkNonAddress(ton);
-        IERC20(ton).approve(wstonSwapPool, _amount);
-        return true;
     }
 
     /**
@@ -209,7 +198,7 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
      * @dev only the owner or the admins are authorized to call the function
      * @return bool Returns true if the transfer is successful.
      */
-    function transferTON(address _to, uint256 _amount) external onlyOwnerOrAdmin returns(bool) {
+    function transferTON(address _to, uint256 _amount) external onlyWstonSwapPoolOrOwner returns(bool) {
         // check _to diffrent from address(0)
         _checkNonAddress(_to);
 
@@ -220,7 +209,10 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         }
 
         // transfer to the recipient
-        IERC20(ton).safeTransfer(_to, _amount);
+        (bool success,) = _to.call{value: _amount}("");
+        if(!success) {
+            revert FailedToSendTON();
+        }
         return true;
     }
 
@@ -375,7 +367,7 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
 
     // Function to check the balance of TON token within the contract
     function getTONBalance() public view returns (uint256) {
-        return IERC20(ton).balanceOf(address(this));
+        return address(this).balance;
     }
 
     // Function to check the balance of WSTON token within the contract
@@ -387,7 +379,6 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     function getMarketPlaceAddress() external view returns(address) {return _marketplace;}
     function getRandomPackAddress() external view returns(address) {return randomPack;}
     function getAirdropAddress() external view returns(address) {return airdrop;}
-    function getTonAddress() external view returns(address) {return ton;}
     function getWstonAddress() external view returns(address) {return wston;}
     function getSwapPoolAddress() external view returns(address) {return wstonSwapPool;}
 

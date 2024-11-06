@@ -51,6 +51,8 @@ contract RandomPackStorage {
     error RandomPackFeesEqualToZero();
     error RequestNotMade();
     error FailedToSendEthBack();
+    error FailedToPayFees();
+    error FailedToSendFeesToTreasury();
     error invalidProbabilities();
     error AlreadyInitialized();
     

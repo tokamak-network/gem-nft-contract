@@ -52,4 +52,7 @@ contract MarketPlaceStorage {
     error GemNotApproved();
     error PurchaseFailed();
     error ListingGemFailed();
+    error WrongMsgValue();
+    error FailedToPay();
+    error FailedToSendFeesToTreasury();
 }

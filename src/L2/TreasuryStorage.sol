@@ -19,4 +19,5 @@ contract TreasuryStorage {
     error UnsuffiscientWstonBalance();
     error UnsuffiscientTonBalance();
     error NotEnoughWstonAvailableInTreasury();
+    error FailedToSendTON();
 }
