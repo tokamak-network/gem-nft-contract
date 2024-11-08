@@ -259,7 +259,7 @@ contract RandomPackThanos is ProxyStorage, ReentrancyGuard, IERC721Receiver, Aut
         }
 
         // Emit an event for the random GEM request
-        emit RandomGemRequested(msg.sender);
+        emit RandomGemRequested(msg.sender, requestId);
         return requestId;
     }
 

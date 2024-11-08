@@ -86,6 +86,11 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
         paused = false;
     }
 
+    /**
+     * @notice we implement the receive function in order to receive TON (as a native token) 
+     */
+    receive() external payable {}
+
     //---------------------------------------------------------------------------------------
     //--------------------------------INITIALIZE FUNCTIONS-----------------------------------
     //---------------------------------------------------------------------------------------
