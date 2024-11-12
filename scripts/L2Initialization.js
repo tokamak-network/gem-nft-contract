@@ -27,7 +27,6 @@ async function main() {
   const Treasury = await ethers.getContractAt("Treasury", treasuryAddress);
   const RandomPack = await ethers.getContractAt("RandomPack", randomPackAddress)
 
-
   // ---------------------------- GEMFACTORY INITIALIZATION ---------------------------------
   // Attach the GemFactory interface to the GemFactoryProxy address
   const gemFactoryProxyAsGemFactory = GemFactory.attach(gemFactoryProxyAddress);
@@ -85,12 +84,13 @@ async function main() {
     process.env.TON_ADDRESS, // l2ton
     gemFactoryAddress,
     treasuryAddress,
-    BigInt(15), // ton fee prices = 10
+    BigInt(15000000000000000000), 
   );
   await tx4.wait();
   console.log("RandomPack initialized");
 
   // -------------------------------- STORAGE SETTER ----------------------------------
+
 
   await gemFactoryProxyAsGemFactory.setGemsValue(
     BigInt(10) ** BigInt(27) * BigInt(10), // commonGemsValue
@@ -164,12 +164,15 @@ async function main() {
   await gemFactoryProxyAsGemFactory.addColor("Amethyst/Amber",6,1);
   await gemFactoryProxyAsGemFactory.addColor("Garnet",7,7);
 
-  
-  await RandomPack.setGemFactory(gemFactoryAddress);
+  await RandomPack.setGemFactory(gemFactoryProxyAddress);
   console.log("gemFactory set in RandomPack")
   
   await RandomPack.setTreasury(treasuryAddress);
   console.log("Treasury set in RandomPack")
+
+  await RandomPack.setProbabilities(50,30,20,0,0,0);
+  console.log("probabilities set in random pack")
+
 }
 
 main()

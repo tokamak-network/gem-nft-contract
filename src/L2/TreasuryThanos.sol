@@ -8,6 +8,7 @@ import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import { AuthControl } from "../common/AuthControl.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { TreasuryStorage } from "./TreasuryStorage.sol"; 
+import { MarketPlaceStorage } from "./MarketPlaceStorage.sol"; 
 import "../proxy/ProxyStorage.sol";
 
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -16,8 +17,17 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 interface IMarketPlace {
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external;
     function putGemForSale(uint256 _tokenId, uint256 _price) external;
-    function buyGem(uint256 _tokenId, bool _paymentMethod) external;
+    function buyGem(uint256 _tokenId, bool _paymentMethod) external payable;
     function removeGemForSale(uint256 _tokenId) external;
+    function getGemForSale(uint256 _tokenId) external view returns (Sale memory);
+    function getStakingIndex() external view returns(uint256);
+    function getTonFeesRate() external view returns(uint256);
+
+    struct Sale {
+        address seller;
+        uint256 price;
+        bool isActive;
+    }
 }
 
 interface IWstonSwapPool {
@@ -338,7 +348,18 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
      * @param _paymentMethod Payment method to use for the purchase.
      */
     function buyGem(uint256 _tokenId, bool _paymentMethod) external onlyOwnerOrAdmin {
-        IMarketPlace(_marketplace).buyGem(_tokenId, _paymentMethod);
+        uint256 totalprice = 0;
+        if(!_paymentMethod) {
+            IMarketPlace.Sale memory sale = IMarketPlace(_marketplace).getGemForSale(_tokenId);
+            uint256 stakingIndex = IMarketPlace(_marketplace).getStakingIndex();
+            uint256 wstonPrice = (sale.price * stakingIndex) / DECIMALS;
+            uint256 tonFeesRate = IMarketPlace(_marketplace).getTonFeesRate();
+            totalprice = _toWAD(wstonPrice + ((wstonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
+            if(address(this).balance < totalprice) {
+                revert NotEnoughTonAvailableInTreasury();
+            }
+        }
+        IMarketPlace(_marketplace).buyGem{value: totalprice}(_tokenId, _paymentMethod);
     }
 
     /**
@@ -364,6 +385,15 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
      */
     function _checkNonAddress(address account) internal pure {
         if(account == address(0))   revert InvalidAddress();
+    }
+
+    /**
+     * @dev Converts a value from RAY (27 decimals) to WAD (18 decimals).
+     * @param v The value to convert.
+     * @return The converted value in WAD.
+     */
+    function _toWAD(uint256 v) internal pure returns (uint256) {
+        return v / 10 ** 9;
     }
 
     //---------------------------------------------------------------------------------------

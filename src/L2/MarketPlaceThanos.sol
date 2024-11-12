@@ -74,8 +74,8 @@ contract MarketPlaceThanos is ProxyStorage, MarketPlaceStorage, ReentrancyGuard,
      */
     receive() external payable {
         // we send the funds to the treasury
-        (bool s,) = treasury.call{value: msg.value}("");
-        if(!s) {
+        (bool success,) = treasury.call{value: msg.value}("");
+        if(!success) {
             revert FailedToSendFeesToTreasury();
         }
     }
@@ -293,10 +293,6 @@ contract MarketPlaceThanos is ProxyStorage, MarketPlaceStorage, ReentrancyGuard,
             // Transfer TON from payer to treasury
             if(msg.value != totalprice) {
                 revert WrongMsgValue();
-            }
-            (bool success,) = treasury.call{value: totalprice}("");
-            if(!success) {
-                revert FailedToPay();
             }
             if (seller != treasury) {
                 // Approve and transfer WSTON from treasury to seller

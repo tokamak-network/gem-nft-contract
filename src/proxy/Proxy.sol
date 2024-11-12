@@ -101,7 +101,7 @@ contract Proxy is
 
     /// @dev receive ether
     receive() external payable {
-        revert("cannot receive Ether");
+
     }
 
     /// @dev fallback function , execute on undefined function call
