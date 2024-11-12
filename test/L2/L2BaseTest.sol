@@ -70,7 +70,7 @@ contract L2BaseTest is Test {
     address gemfactoryProxyAddress;
     Treasury treasury;
     TreasuryProxy treasuryProxy;
-    address treasuryProxyAddress;
+    address payable treasuryProxyAddress;
     MarketPlace marketplace;
     MarketPlaceProxy marketplaceProxy;
     address marketplaceProxyAddress;
@@ -80,7 +80,7 @@ contract L2BaseTest is Test {
     address airdropProxyAddress;
     RandomPack randomPack;
     RandomPackProxy randomPackProxy;
-    address randomPackProxyAddress;
+    address payable randomPackProxyAddress;
     
     address wston;
     address ton;
@@ -128,8 +128,9 @@ contract L2BaseTest is Test {
         vm.stopPrank();
 
         vm.startPrank(owner);
-        // give ETH to User1 to cover gasFees associated with using VRF functions
-        vm.deal(user1, 100 ether);
+        // give ETH to User1 and User2 to cover gasFees associated with using VRF functions as well as interacting with thanos
+        vm.deal(user1, 1000000 ether);
+        vm.deal(user2, 1000000 ether);
 
         // deploy DRBCoordinatorMock
         drbCoordinatorMock = new DRBCoordinatorMock(
@@ -193,7 +194,7 @@ contract L2BaseTest is Test {
         treasury = new Treasury();
         treasuryProxy = new TreasuryProxy();
         treasuryProxy.upgradeTo(address(treasury));
-        treasuryProxyAddress = address(treasuryProxy);
+        treasuryProxyAddress = payable(address(treasuryProxy));
         Treasury(treasuryProxyAddress).initialize(
             wston,
             ton,
@@ -278,7 +279,7 @@ contract L2BaseTest is Test {
         randomPack = new RandomPack();
         randomPackProxy = new RandomPackProxy();
         randomPackProxy.upgradeTo(address(randomPack));
-        randomPackProxyAddress = address(randomPackProxy);
+        randomPackProxyAddress = payable(address(randomPackProxy));
         RandomPack(randomPackProxyAddress).initialize(
             address(drbCoordinatorMock),
             ton,

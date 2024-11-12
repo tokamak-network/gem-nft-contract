@@ -24,7 +24,7 @@ interface ITreasury {
 }
 
 /**
- * @title MarketPlace
+ * @title MarketPlace to be deployed on Thanos network only as it considers TON as a native token
  * @author TOKAMAK OPAL TEAM
  * @dev The MarketPlace contract facilitates the buying and selling of GEM tokens within the ecosystem.
  * It provides a platform for users to list their GEMs for sale, purchase GEMs using different payment methods,
@@ -34,7 +34,7 @@ interface ITreasury {
  * - WSTON: Users can also pay with WSTON tokens, which are transferred directly to the seller.
  * @dev this contract is meant to be deployed on Titan only (does not consider TON as a native token)
  **/
-contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthControl {
+contract MarketPlaceThanos is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthControl {
     using SafeERC20 for IERC20;
 
     /**
@@ -69,6 +69,17 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         paused = false;
     }
 
+    /**
+     * @notice we implement the receive function in order to receive TON (as a native token) 
+     */
+    receive() external payable {
+        // we send the funds to the treasury
+        (bool success,) = treasury.call{value: msg.value}("");
+        if(!success) {
+            revert FailedToSendFeesToTreasury();
+        }
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------INITIALIZATION FUNCTIONS-------------------------------------
     //---------------------------------------------------------------------------------------
@@ -79,14 +90,12 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      * @param _gemfactory Address of the gem factory contract.
      * @param _tonFeesRate Fee rate for TON transactions.
      * @param _wston Address of the WSTON token.
-     * @param _ton Address of the TON token.
      */
     function initialize(
         address _treasury, 
         address _gemfactory,
         uint256 _tonFeesRate,
-        address _wston,
-        address _ton
+        address _wston
     ) external {
         if (initialized) revert AlreadyInitialized();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -94,7 +103,6 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         gemFactory = _gemfactory;
         treasury = _treasury;
         wston = _wston;
-        ton = _ton;
         initialized = true;
     }
 
@@ -142,7 +150,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
      * @param _paymentMethod The payment method used. If true, the user purchases using L2 WSTON; if false, using TON.
      * @dev This function handles the purchase process, including payment and transfer of ownership.
      */
-    function buyGem(uint256 _tokenId, bool _paymentMethod) external whenNotPaused {
+    function buyGem(uint256 _tokenId, bool _paymentMethod) external payable whenNotPaused {
         // Attempt to buy the GEM, revert if unsuccessful
         if (!_buyGem(_tokenId, msg.sender, _paymentMethod)) revert PurchaseFailed();
     }
@@ -283,7 +291,9 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
             // Add the ton fees 
             uint256 totalprice = _toWAD(wstonPrice + ((wstonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
             // Transfer TON from payer to treasury
-            IERC20(ton).transferFrom(_payer, treasury, totalprice); // 18 decimals
+            if(msg.value != totalprice) {
+                revert WrongMsgValue();
+            }
             if (seller != treasury) {
                 // Approve and transfer WSTON from treasury to seller
                 ITreasury(treasury).approveWstonForMarketplace(price);
@@ -319,7 +329,6 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
     function getTonFeesRate() external view returns(uint256) { return tonFeesRate;}
     function getGemFactoryAddress() external view returns(address) { return gemFactory;}
     function getTreasuryAddress() external view returns(address) { return treasury;}
-    function getTonAddress() external view returns(address) { return ton;}
     function getWstonAddress() external view returns(address) { return wston;}
     function getPauseStatus() external view returns(bool) { return paused;}
     function getGemForSale(uint256 _tokenId) external view returns(Sale memory) { return gemsForSale[_tokenId];}

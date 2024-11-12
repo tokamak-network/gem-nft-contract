@@ -8,6 +8,7 @@ import { GemFactoryStorage } from "./GemFactoryStorage.sol";
 import { AuthControl } from "../common/AuthControl.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { TreasuryStorage } from "./TreasuryStorage.sol"; 
+import { MarketPlaceStorage } from "./MarketPlaceStorage.sol"; 
 import "../proxy/ProxyStorage.sol";
 
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -16,8 +17,17 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 interface IMarketPlace {
     function putGemListForSale(uint256[] memory tokenIds, uint256[] memory prices) external;
     function putGemForSale(uint256 _tokenId, uint256 _price) external;
-    function buyGem(uint256 _tokenId, bool _paymentMethod) external;
+    function buyGem(uint256 _tokenId, bool _paymentMethod) external payable;
     function removeGemForSale(uint256 _tokenId) external;
+    function getGemForSale(uint256 _tokenId) external view returns (Sale memory);
+    function getStakingIndex() external view returns(uint256);
+    function getTonFeesRate() external view returns(uint256);
+
+    struct Sale {
+        address seller;
+        uint256 price;
+        bool isActive;
+    }
 }
 
 interface IWstonSwapPool {
@@ -33,7 +43,7 @@ interface IWstonSwapPool {
  * @dev The contract integrates with external interfaces for GEM creation, marketplace operations, and token swaps.
  * It includes security features such as pausing operations and role-based access control.
  */
-contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl, TreasuryStorage {
+contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl, TreasuryStorage {
     using SafeERC20 for IERC20;
 
     modifier whenNotPaused() {
@@ -86,6 +96,11 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         paused = false;
     }
 
+    /**
+     * @notice we implement the receive function in order to receive TON (as a native token) 
+     */
+    receive() external payable {}
+
     //---------------------------------------------------------------------------------------
     //--------------------------------INITIALIZE FUNCTIONS-----------------------------------
     //---------------------------------------------------------------------------------------
@@ -93,15 +108,13 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     /**
      * @notice Initializes the Treasury contract with the given parameters.
      * @param _wston Address of the WSTON token.
-     * @param _ton Address of the TON token.
      * @param _gemFactory Address of the gem factory contract.
      */
-    function initialize(address _wston, address _ton, address _gemFactory) external {
+    function initialize(address _wston, address _gemFactory) external {
         require(!initialized, "already initialized");   
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         gemFactory = _gemFactory;
         wston = _wston;
-        ton = _ton;
         initialized = true;
     }
 
@@ -148,15 +161,6 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     function setWstonSwapPool(address _wstonSwapPool) external onlyOwnerOrAdmin {
         _checkNonAddress(_wstonSwapPool);
         wstonSwapPool = _wstonSwapPool;
-    }
-
-    /**
-     * @notice Approves the WSTON swap pool to spend TON tokens.
-     */
-    function tonApproveWstonSwapPool(uint256 _amount) external onlyWstonSwapPoolOrOwner returns(bool) {
-        _checkNonAddress(ton);
-        IERC20(ton).approve(wstonSwapPool, _amount);
-        return true;
     }
 
     /**
@@ -209,7 +213,7 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
      * @dev only the owner or the admins are authorized to call the function
      * @return bool Returns true if the transfer is successful.
      */
-    function transferTON(address _to, uint256 _amount) external onlyOwnerOrAdmin returns(bool) {
+    function transferTON(address _to, uint256 _amount) external onlyWstonSwapPoolOrOwner returns(bool) {
         // check _to diffrent from address(0)
         _checkNonAddress(_to);
 
@@ -220,7 +224,10 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         }
 
         // transfer to the recipient
-        IERC20(ton).safeTransfer(_to, _amount);
+        (bool success,) = _to.call{value: _amount}("");
+        if(!success) {
+            revert FailedToSendTON();
+        }
         return true;
     }
 
@@ -341,7 +348,18 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
      * @param _paymentMethod Payment method to use for the purchase.
      */
     function buyGem(uint256 _tokenId, bool _paymentMethod) external onlyOwnerOrAdmin {
-        IMarketPlace(_marketplace).buyGem(_tokenId, _paymentMethod);
+        uint256 totalprice = 0;
+        if(!_paymentMethod) {
+            IMarketPlace.Sale memory sale = IMarketPlace(_marketplace).getGemForSale(_tokenId);
+            uint256 stakingIndex = IMarketPlace(_marketplace).getStakingIndex();
+            uint256 wstonPrice = (sale.price * stakingIndex) / DECIMALS;
+            uint256 tonFeesRate = IMarketPlace(_marketplace).getTonFeesRate();
+            totalprice = _toWAD(wstonPrice + ((wstonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
+            if(address(this).balance < totalprice) {
+                revert NotEnoughTonAvailableInTreasury();
+            }
+        }
+        IMarketPlace(_marketplace).buyGem{value: totalprice}(_tokenId, _paymentMethod);
     }
 
     /**
@@ -369,13 +387,22 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
         if(account == address(0))   revert InvalidAddress();
     }
 
+    /**
+     * @dev Converts a value from RAY (27 decimals) to WAD (18 decimals).
+     * @param v The value to convert.
+     * @return The converted value in WAD.
+     */
+    function _toWAD(uint256 v) internal pure returns (uint256) {
+        return v / 10 ** 9;
+    }
+
     //---------------------------------------------------------------------------------------
     //------------------------STORAGE GETTER / VIEW FUNCTIONS--------------------------------
     //---------------------------------------------------------------------------------------
 
     // Function to check the balance of TON token within the contract
     function getTONBalance() public view returns (uint256) {
-        return IERC20(ton).balanceOf(address(this));
+        return address(this).balance;
     }
 
     // Function to check the balance of WSTON token within the contract
@@ -387,7 +414,6 @@ contract Treasury is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthControl
     function getMarketPlaceAddress() external view returns(address) {return _marketplace;}
     function getRandomPackAddress() external view returns(address) {return randomPack;}
     function getAirdropAddress() external view returns(address) {return airdrop;}
-    function getTonAddress() external view returns(address) {return ton;}
     function getWstonAddress() external view returns(address) {return wston;}
     function getSwapPoolAddress() external view returns(address) {return wstonSwapPool;}
 

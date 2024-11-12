@@ -10,6 +10,9 @@ contract TreasuryStorage {
     address internal ton;
     address internal wstonSwapPool;
 
+    uint256 constant public DECIMALS = 10**27;
+    uint256 constant public TON_FEES_RATE_DIVIDER = 10000;
+
     bool paused = false;
     bool internal initialized;
 
@@ -19,4 +22,6 @@ contract TreasuryStorage {
     error UnsuffiscientWstonBalance();
     error UnsuffiscientTonBalance();
     error NotEnoughWstonAvailableInTreasury();
+    error FailedToSendTON();
+    error NotEnoughTonAvailableInTreasury();
 }

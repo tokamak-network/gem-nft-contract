@@ -34,7 +34,7 @@ contract RandomPackStorage {
     mapping(uint8 => uint8) internal probabilities; // stores the probability based on the rarity => in percent
 
     //events
-    event RandomGemRequested(address requestor);
+    event RandomGemRequested(address requestor, uint256 requestId);
     event RandomGemToBeTransferred(uint256 tokenId, address newOwner);
     event RandomGemTransferred(uint256 tokenId, address newOwner);
     event CommonGemToBeMinted();
@@ -51,6 +51,8 @@ contract RandomPackStorage {
     error RandomPackFeesEqualToZero();
     error RequestNotMade();
     error FailedToSendEthBack();
+    error FailedToPayFees();
+    error FailedToSendFeesToTreasury();
     error invalidProbabilities();
     error AlreadyInitialized();
     
