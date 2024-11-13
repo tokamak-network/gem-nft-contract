@@ -122,44 +122,6 @@ forge compile
 forge test
 ```
 
-## Code Review instruction
-
-Below is the list of contracts to be reviewed
-
-|         Smart Contract Name           |      nSLOC      |
-|---------------------------------------|-----------------|
-| common/AuthControl.sol                | 61              |
-| common/AuthRole.sol                   | 5               |
-| L1/L1WrappedStakedTON.sol             | 169             |
-| L1/L1WrappedStakedTONFactory.sol.sol  | 25              |
-| L1/L1WrappedStakedTONProxy.sol        | 5               |
-| L1/L1WrappedStakedTONStorage.sol      | 28              |
-| L2/GemFactory.sol                     | 604             |
-| L2/GemFactoryProxy.sol                | 5               |
-| L2/Airdrop.sol                        | 83              |
-| L2/AirdropStorage.sol                 | 15              |
-| L2/AirdropProxy.sol                   | 5               |
-| L2/GemFactoryStorage.sol              | 113             |
-| L2/L2StandardERC20.sol                | 38              |
-| L2/MarketPlace.sol                    | 116             |
-| L2/MarketPlaceStorage.sol             | 24              |
-| L2/MarketPlaceProxy.sol               | 5               |
-| L2/RandomPack.sol                     | 83              |
-| L2/RandomPackStorage.sol              | 24              |
-| L2/RandomPackProxy.sol                | 5               |
-| L2/Treasury.sol                       | 170             |
-| L2/WstonSwapPool.sol                  | 116             |
-| L2/WstonSwapPoolStorage.sol           | 20              |
-| L2/WstonSwapPoolProxy.sol             | 5               |
-| L2/Randomness/DRBConsumerBase.sol     | 30              |
-| library/ForgeLibrary.sol              | 193             |
-| library/GemLibrary.sol                | 35              |
-| library/MiningLibrary.sol             | 15              |
-| library/TransferLibrary.sol           | 19              |
-| proxy/ProxyStorage.sol                | 7               |
-| proxy/Proxy.sol                       | 97              |
-| **Total**                             | **2379**        |
-
 ## Contract addresses
 
 Titan Sepolia
