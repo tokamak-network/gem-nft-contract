@@ -51,7 +51,7 @@ contract L1WrappedStakedTONFactory is ProxyStorage, AuthControl, L1WrappedStaked
     nonZeroAddress(_layer2Address) 
     nonZeroAddress(_depositManager) 
     nonZeroAddress(_seigManager) 
-    returns(L1WrappedStakedTONProxy)  {
+    returns(address)  {
 
         // instanciate the proxy with owner = msg.sender
         L1WrappedStakedTONProxy proxy = new L1WrappedStakedTONProxy();
@@ -74,7 +74,7 @@ contract L1WrappedStakedTONFactory is ProxyStorage, AuthControl, L1WrappedStaked
 
         emit WSTONTokenCreated(proxyAddress, _layer2Address);
 
-        return proxy;
+        return proxyAddress;
     }
 
     /**

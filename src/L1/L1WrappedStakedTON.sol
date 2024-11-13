@@ -572,7 +572,7 @@ contract L1WrappedStakedTON is
      * @dev we iterrate over the number of pending requests and check if it is withdrawable 
      * @return count the total number of withdrawable requests
      */
-    function numWithdrawableRequests() internal returns (uint256) {
+    function numWithdrawableRequests() internal view returns (uint256) {
         uint256 numRequests = IDepositManager(depositManager).numRequests(layer2Address, address(this));
         uint256 index = IDepositManager(depositManager).withdrawalRequestIndex(layer2Address, address(this));
         uint256 count;

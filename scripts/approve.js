@@ -13,22 +13,8 @@ async function main() {
   // Get contract instances
   const Treasury = await ethers.getContractAt("Treasury", treasuryAddress);
 
-  // Prepare arrays for token IDs and prices
-  const tokenIds = [];
-  const prices = [];
-  const fixedPrice = ethers.BigNumber.from("11000000000000000000000000000"); // Price in Wei
+  await Treasury.transferWSTON("0x15759359e60a3b9e59eA7A96D10Fa48829f83bEb",BigInt(2500000000000000000000000000000));
 
-  for (let gemId = 30; gemId <= 50; gemId++) {
-    tokenIds.push(gemId);
-    prices.push(fixedPrice);
-  }
-
-  try {
-    await Treasury.putGemListForSale(tokenIds, prices);
-    console.log("putGemListForSale is successful for Gem IDs 30 to 50");
-  } catch (error) {
-    console.error("Error putting Gem list for sale:", error);
-  }
 }
 
 main()
