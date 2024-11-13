@@ -1,6 +1,8 @@
 const { ethers, run } = require("hardhat");
 require('dotenv').config();
 
+// command to run: "npx hardhat run scripts/3.step/1.gemfactoryDeployment.js --network titan"
+
 async function main() {
     const [deployer] = await ethers.getSigners();
 
@@ -35,6 +37,8 @@ async function main() {
     await gemFactory.waitForDeployment();
     console.log("GemFactory deployed to:", gemFactory.target);
 
+    await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
+
     await run("verify:verify", {
         address: gemFactory.target,
         constructorArguments: [],
@@ -46,6 +50,8 @@ async function main() {
     await gemFactoryForging.waitForDeployment();
     console.log("GemFactoryForging deployed to:", gemFactoryForging.target);
 
+    await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
+
     await run("verify:verify", {
         address: gemFactoryForging.target,
         constructorArguments: [],
@@ -56,6 +62,8 @@ async function main() {
     const gemFactoryMining = await GemFactoryMining.deploy();
     await gemFactoryMining.waitForDeployment();
     console.log("GemFactoryMining deployed to:", gemFactoryMining.target);
+
+    await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
 
     await run("verify:verify", {
         address: gemFactoryMining.target,
@@ -69,10 +77,13 @@ async function main() {
     await gemFactoryProxy.waitForDeployment();
     console.log("GemFactoryProxy deployed to:", gemFactoryProxy.target);
 
+    await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
+
     // verifying the contract
     await run("verify:verify", {
         address: gemFactoryProxy.target,
         constructorArguments: [],
+        contract:"src/L2/GemFactoryProxy.sol:GemFactoryProxy"
       });
 
     // Set the first index to the GemFactory contract

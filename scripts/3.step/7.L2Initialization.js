@@ -1,5 +1,7 @@
 const { ethers } = require("hardhat");
 require('dotenv').config();
+// command to run: "source .env"
+// command to run: "npx hardhat run scripts/3.step/7.L2Initialization.js --network titan"
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -10,11 +12,15 @@ async function main() {
   const gemFactoryMiningAddress = process.env.GEM_FACTORY_MINING;
   const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
   const marketPlaceAddress = process.env.MARKETPLACE;
+  const marketPlaceProxyAddress = process.env.MARKETPLACE_PROXY;
   const treasuryAddress = process.env.TREASURY;
-  const swapPool = process.env.WSTON_SWAP_POOL;
+  const treasuryProxyAddress = process.env.TREASURY_PROXY;
+  const swapPoolAddress = process.env.WSTON_SWAP_POOL;
+  const swapPoolProxyAddress = process.env.WSTON_SWAP_POOL_PROXY;
   const randomPackAddress = process.env.RANDOM_PACK;
+  const randomPackProxyAddress = process.env.RANDOM_PACK_PROXY;
   const drbCoordinatorAddress = process.env.DRB_COORDINATOR_MOCK;
-  const owner = "0x15759359e60a3b9e59eA7A96D10Fa48829f83bEb"
+  const owner = "0x5c5c36Bb1e3B266637F6830FCAe2Ee2715339Eb1"
   
   if (!gemFactoryAddress || !gemFactoryProxyAddress|| !marketPlaceAddress || !treasuryAddress || !randomPackAddress || !drbCoordinatorAddress) {
     throw new Error("Environment variables GEM_FACTORY, MARKETPLACE, TREASURY, RANDOM_PACK and DRB_COORDINATOR_MOCK must be set");
@@ -25,21 +31,23 @@ async function main() {
   const GemFactoryMining = await ethers.getContractAt("GemFactoryMining", gemFactoryMiningAddress);
   const MarketPlace = await ethers.getContractAt("MarketPlace", marketPlaceAddress);
   const Treasury = await ethers.getContractAt("Treasury", treasuryAddress);
-  const RandomPack = await ethers.getContractAt("RandomPack", randomPackAddress)
+  const RandomPack = await ethers.getContractAt("RandomPack", randomPackAddress);
+  const WstonSwapPool = await ethers.getContractAt("WstonSwapPool", swapPoolAddress);
 
-  // ---------------------------- GEMFACTORY INITIALIZATION ---------------------------------
+  // ---------------------------- GEMFACTORYPROXY INITIALIZATION ---------------------------------
   // Attach the GemFactory interface to the GemFactoryProxy address
   const gemFactoryProxyAsGemFactory = GemFactory.attach(gemFactoryProxyAddress);
-    // Initialize GemFactory with newly created contract addresses
-    const initializeTx = await gemFactoryProxyAsGemFactory.initialize(
-      owner,
-      process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
-      process.env.TON_ADDRESS, // l2ton
-      treasuryAddress, // treasury
-      { gasLimit: 10000000 }
+
+  // Initialize GemFactory with newly created contract addresses
+  const initializeTx = await gemFactoryProxyAsGemFactory.initialize(
+    owner,
+    process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
+    process.env.TON_ADDRESS, // l2ton
+    treasuryAddress, // treasury
+    { gasLimit: 10000000 }
   );
   await initializeTx.wait();
-  console.log("GemFactory initialized");
+  console.log("GemFactoryProxy initialized");
 
 
   // Attach the GemFactoryMining interface to the GemFactoryProxy address
@@ -52,42 +60,64 @@ async function main() {
   await drbInitializeTx.wait();
   console.log("GemFactoryMining DRB initialized");
 
-  // ---------------------------- TREASURY INITIALIZATION ---------------------------------
-
+  // ---------------------------- TREASURYPROXY INITIALIZATION ---------------------------------
+  // Attach the Treasury interface to the TreasuryProxy contract address
+  const treasuryProxyAsTreasury = Treasury.attach(treasuryProxyAddress);
   // Call the Treasury initialize function
-  const tx2 = await Treasury.initialize(
+  const tx2 = await treasuryProxyAsTreasury.initialize(
     process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
     gemFactoryProxyAddress
   );
   await tx2.wait();
-  console.log("Treasury initialized");
+  console.log("TreasuryProxy initialized");
 
-  // -------------------------- MARKETPLACE INITIALIZATION -------------------------------
+  // -------------------------- MARKETPLACEPROXY INITIALIZATION -------------------------------
+
+  // Attach the MarketPlace interface to the MarketPlaceProxy contract address
+  const marketPlaceProxyAsMarketPlace = MarketPlace.attach(marketPlaceProxyAddress);
 
   // Call the MarketPlace initialize function
-  const tx3 = await MarketPlace.initialize(
-    treasuryAddress,
+  const tx3 = await marketPlaceProxyAsMarketPlace.initialize(
+    treasuryProxyAddress,
     gemFactoryProxyAddress,
     BigInt(10), // ton fee rate = 10
     process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
   );
   await tx3.wait();
-  console.log("MarketPlace initialized");
+  console.log("MarketPlaceProxy initialized");
 
-  // -------------------------- RANDOMPACK INITIALIZATION -------------------------------
+  // -------------------------- RANDOMPACKPROXY INITIALIZATION -------------------------------
+
+  // Attach the RandomPack interface to the RandomPackProxy contract address
+  const randomPackProxyAsRandomPack = RandomPack.attach(randomPackProxyAddress);
 
   //initializing the randomPack contract
-  const tx4 = await RandomPack.initialize(
+  const tx4 = await randomPackProxyAsRandomPack.initialize(
     drbCoordinatorAddress,
     process.env.TON_ADDRESS, // l2ton
-    gemFactoryAddress,
-    treasuryAddress,
+    gemFactoryProxyAddress,
+    treasuryProxyAddress,
     BigInt(15000000000000000000), 
   );
   await tx4.wait();
-  console.log("RandomPack initialized");
+  console.log("RandomPackProxy initialized");
+
+  // -------------------------- WSTONSWAPPOOLPROXY INITIALIZATION -------------------------------
+
+  // Attach the RandomPack interface to the RandomPackProxy contract address
+  const wstonSwapPoolProxyAsWstonSwapPool = WstonSwapPool.attach(swapPoolProxyAddress);
+
+  //initializing the randomPack contract
+  const tx5 = await wstonSwapPoolProxyAsWstonSwapPool.initialize(
+    process.env.TON_ADDRESS, // l2ton
+    process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
+    BigInt(1) ** BigInt(27), // staking index = 1e27
+    treasuryProxyAddress
+  );
+  await tx5.wait();
+  console.log("WstonSwapPoolProxy initialized");
 
   // -------------------------------- STORAGE SETTER ----------------------------------
 
@@ -134,20 +164,21 @@ async function main() {
     {gasLimit: 1000000}
   );
   console.log("Mining Trys set");
-
+  
   // Set MarketPlace Address in GemFactory
-  await gemFactoryProxyAsGemFactory.setMarketPlaceAddress(marketPlaceAddress);
-  console.log("MarketPlace address set in GemFactory");
+  const setMarketPlaceAddressinGemFactory = await gemFactoryProxyAsGemFactory.setMarketPlaceAddress(marketPlaceProxyAddress);
+  setMarketPlaceAddressinGemFactory.wait();
+  console.log("MarketPlaceProxy address set in GemFactoryProxy");
 
-  await Treasury.setMarketPlace(marketPlaceAddress);
-  console.log("MarketPlace address set in Treasury");
+  await treasuryProxyAsTreasury.setMarketPlace(marketPlaceProxyAddress);
+  console.log("MarketPlaceProxy address set in Treasury");
 
 
-  await Treasury.setWstonSwapPool(swapPool);
-  console.log("Swap pool address set in Treasury");
+  await treasuryProxyAsTreasury.setWstonSwapPool(swapPoolProxyAddress);
+  console.log("WstonSwapPoolProxy address set in TreasuryProxy");
 
-  await Treasury.setRandomPack(randomPackAddress);
-  console.log("Random pack address set in Treasury");
+  await treasuryProxyAsTreasury.setRandomPack(randomPackProxyAddress);
+  console.log("RandomPackProxy address set in TreasuryProxy");
 
   // we set up the list of colors available for the GEM
   await gemFactoryProxyAsGemFactory.addColor("Ruby",0,0);
@@ -164,14 +195,14 @@ async function main() {
   await gemFactoryProxyAsGemFactory.addColor("Amethyst/Amber",6,1);
   await gemFactoryProxyAsGemFactory.addColor("Garnet",7,7);
 
-  await RandomPack.setGemFactory(gemFactoryProxyAddress);
-  console.log("gemFactory set in RandomPack")
+  await randomPackProxyAsRandomPack.setGemFactory(gemFactoryProxyAddress);
+  console.log("GemFactoryProxy set in RandomPackProxy")
   
-  await RandomPack.setTreasury(treasuryAddress);
-  console.log("Treasury set in RandomPack")
+  await randomPackProxyAsRandomPack.setTreasury(treasuryAddress);
+  console.log("TreasuryProxy set in RandomPackProxy")
 
-  await RandomPack.setProbabilities(50,30,20,0,0,0);
-  console.log("probabilities set in random pack")
+  await randomPackProxyAsRandomPack.setProbabilities(50,30,20,0,0,0);
+  console.log("probabilities set in RandomPackProxy")
 
 }
 
