@@ -122,44 +122,6 @@ forge compile
 forge test
 ```
 
-## Code Review instruction
-
-Below is the list of contracts to be reviewed
-
-|         Smart Contract Name           |      nSLOC      |
-|---------------------------------------|-----------------|
-| common/AuthControl.sol                | 61              |
-| common/AuthRole.sol                   | 5               |
-| L1/L1WrappedStakedTON.sol             | 169             |
-| L1/L1WrappedStakedTONFactory.sol.sol  | 25              |
-| L1/L1WrappedStakedTONProxy.sol        | 5               |
-| L1/L1WrappedStakedTONStorage.sol      | 28              |
-| L2/GemFactory.sol                     | 604             |
-| L2/GemFactoryProxy.sol                | 5               |
-| L2/Airdrop.sol                        | 83              |
-| L2/AirdropStorage.sol                 | 15              |
-| L2/AirdropProxy.sol                   | 5               |
-| L2/GemFactoryStorage.sol              | 113             |
-| L2/L2StandardERC20.sol                | 38              |
-| L2/MarketPlace.sol                    | 116             |
-| L2/MarketPlaceStorage.sol             | 24              |
-| L2/MarketPlaceProxy.sol               | 5               |
-| L2/RandomPack.sol                     | 83              |
-| L2/RandomPackStorage.sol              | 24              |
-| L2/RandomPackProxy.sol                | 5               |
-| L2/Treasury.sol                       | 170             |
-| L2/WstonSwapPool.sol                  | 116             |
-| L2/WstonSwapPoolStorage.sol           | 20              |
-| L2/WstonSwapPoolProxy.sol             | 5               |
-| L2/Randomness/DRBConsumerBase.sol     | 30              |
-| library/ForgeLibrary.sol              | 193             |
-| library/GemLibrary.sol                | 35              |
-| library/MiningLibrary.sol             | 15              |
-| library/TransferLibrary.sol           | 19              |
-| proxy/ProxyStorage.sol                | 7               |
-| proxy/Proxy.sol                       | 97              |
-| **Total**                             | **2379**        |
-
 ## Contract addresses
 
 Titan Sepolia
@@ -173,8 +135,8 @@ GEM_FACTORY_FORGING=0x21cF9693ca31E89ECF0A1fA9790ed35bac2CEa47
 GEM_FACTORY_MINING=0xF910a4546D054deF63f4529b4b71A2877553Ce74
 TREASURY=0x65f65bFAaAeC2d31DD24420205Ec7E4D34C6f2Aa
 TREASURY_PROXY=0xC127c8db7FBCa0b3E1AbA9E12b9978ddba8B4f7e
-MARKETPLACE=0x3B34D02EF3eC25139f097e1D37F6b3d3F555E0c8
-MARKETPLACE_PROXY=0x0686e1e390246D2Dd257bA02a47E5ce7e2C159e4
+MARKETPLACE=0x8494A994fDd630f55b7CF0B232B6E98Ac23f4221
+MARKETPLACE_PROXY=0x8AE9f1e123f58E2B2ef66464eb0750C1B279505F
 WSTON_SWAP_POOL=0xbE21e502d5d536F40C3AB06E0FE9830fe1E86c2D
 WSTON_SWAP_POOL_PROXY=0xAF6b64801E977B93D9f1F12B267dBeb94eD2cae2
 RANDOM_PACK=0xaa185F301f398bf15096968bF0CE15AbBA265911

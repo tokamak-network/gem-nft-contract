@@ -205,7 +205,7 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         // Unlock the GEM and remove it from the sale list
         GemFactory(gemFactory).setIsLocked(_tokenId, false);
         delete gemsForSale[_tokenId];
-        emit GemRemovedFromSale(_tokenId);
+        emit GemRemovedFromSale(msg.sender, _tokenId);
 
     }
 

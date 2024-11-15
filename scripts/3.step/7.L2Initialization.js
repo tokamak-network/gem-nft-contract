@@ -125,10 +125,10 @@ async function main() {
   await gemFactoryProxyAsGemFactory.setGemsValue(
     BigInt(10) ** BigInt(27) * BigInt(10), // commonGemsValue
     BigInt(10) ** BigInt(27) * BigInt(19), // rareGemsValue
-    BigInt(10) ** BigInt(27) * BigInt(54), // uniqueGemsValue
-    BigInt(10) ** BigInt(27) * BigInt(205), // epicGemsValue
-    BigInt(10) ** BigInt(27) * BigInt(974), // legendaryGemsValue
-    BigInt(10) ** BigInt(27) * BigInt(5552), // mythicGemsValue
+    BigInt(10) ** BigInt(27) * BigInt(55), // uniqueGemsValue
+    BigInt(10) ** BigInt(27) * BigInt(214), // epicGemsValue
+    BigInt(10) ** BigInt(27) * BigInt(1040), // legendaryGemsValue
+    BigInt(10) ** BigInt(27) * BigInt(6060), // mythicGemsValue
     {gasLimit: 1000000}
   );
   console.log("gem values set");
