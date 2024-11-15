@@ -29,7 +29,7 @@ contract MarketPlaceStorage {
 
     event GemBought(uint256 tokenId, address payer, address seller, uint256 amount);
     event GemForSale(uint256 tokenId, address seller, uint256 price);
-    event GemRemovedFromSale(uint256 tokenId);
+    event GemRemovedFromSale(address seller, uint256 tokenId);
     event WSTONClaimed(uint256 tokenId, address claimer);
     event SetDiscountRate(uint256 discountRate);
     event SetStakingIndex(uint256 stakingIndex);
