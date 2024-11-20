@@ -5,7 +5,7 @@ async function main() {
   const [deployer] = await ethers.getSigners();
 
   console.log("Minting GEMs with the account:", deployer.address);
-  const treasuryAddress = process.env.TREASURY;
+  const treasuryAddress = process.env.TREASURY_PROXY;
 
   // Get contract instance
   const Treasury = await ethers.getContractAt("Treasury", treasuryAddress);
@@ -14,10 +14,10 @@ async function main() {
   const rarities = [1, 1, 1, 1, 1]; // Adjust this to match the enum type in Solidity
   const colors = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]];
   const quadrants = [
-    [3, 3, 3, 2], 
+    [3, 2, 3, 2], 
     [2, 2, 3, 3], 
     [3, 3, 2, 3], 
-    [3, 3, 3, 3], 
+    [3, 3, 2, 3], 
     [3, 2, 2, 2]
   ];
   const tokenURIs = ["", "", "", "", ""];
