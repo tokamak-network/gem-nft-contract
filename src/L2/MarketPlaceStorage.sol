@@ -27,7 +27,7 @@ contract MarketPlaceStorage {
     bool internal paused = false;
     bool internal initialized = false;
 
-    event GemBought(uint256 tokenId, address payer, address seller, uint256 amount);
+    event GemBought(uint256 tokenId, address payer, address seller, uint256 amount, uint256 gemCoolDownDueDate);
     event GemForSale(uint256 tokenId, address seller, uint256 price);
     event GemRemovedFromSale(address seller, uint256 tokenId);
     event WSTONClaimed(uint256 tokenId, address claimer);

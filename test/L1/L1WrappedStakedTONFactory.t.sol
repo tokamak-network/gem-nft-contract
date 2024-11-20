@@ -77,10 +77,10 @@ contract L1WrappedStakedTONFactoryTest is L1BaseTest {
         vm.startPrank(owner);
         mockL1WrappedStakedTONUpgraded = new MockL1WrappedStakedTONUpgraded();
         // the contract is upgradeable from the L1WrappedStakedTONFactory contract only
-        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).upgradeWstonTo(address(l1wrappedstakedtonProxy), address(mockL1WrappedStakedTONUpgraded));
+        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).upgradeWstonTo(l1wrappedstakedtonProxyAddress, address(mockL1WrappedStakedTONUpgraded));
         
         // check that the new counter storage and incrementCounter functions are deployed
-        address l1wrappedstakedtonProxyAddress = address(l1wrappedstakedtonProxy);
+        address l1wrappedstakedtonProxyAddress = l1wrappedstakedtonProxyAddress;
         MockL1WrappedStakedTONUpgraded(l1wrappedstakedtonProxyAddress).incrementCounter();
         uint256 counter = MockL1WrappedStakedTONUpgraded(l1wrappedstakedtonProxyAddress).getCounter();
         assert(counter == 1);
@@ -89,7 +89,7 @@ contract L1WrappedStakedTONFactoryTest is L1BaseTest {
         // Test upgrade with incorrect owner
         vm.startPrank(user1);
         vm.expectRevert(L1WrappedStakedTONFactoryStorage.NotContractOwner.selector);
-        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).upgradeWstonTo(address(l1wrappedstakedtonProxy), address(0x9));
+        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).upgradeWstonTo(l1wrappedstakedtonProxyAddress, address(0x9));
         vm.stopPrank();
     }
 

@@ -707,20 +707,19 @@ contract GemFactory is
         return ownershipTokenCount[_owner];
     }
 
-/**
- * @notice Retrieves the URI associated with a specific GEM token.
- * @param tokenId The ID of the GEM token to query.
- * @return The URI string associated with the specified token ID.
- */
-function tokenURI(uint256 tokenId) public view override returns (string memory) {
-    // Ensure the token exists before querying its URI
-    if (!_exists(tokenId)) {
-        revert URIQueryForNonexistentToken(tokenId);
+    /**
+    * @notice Retrieves the URI associated with a specific GEM token.
+    * @param tokenId The ID of the GEM token to query.
+    * @return The URI string associated with the specified token ID.
+    */
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        // Ensure the token exists before querying its URI
+        if (!_exists(tokenId)) {
+            revert URIQueryForNonexistentToken(tokenId);
+        }
+        // Return the token URI from the parent contract
+        return super.tokenURI(tokenId);
     }
-    // Return the token URI from the parent contract
-    return super.tokenURI(tokenId);
-}
-
 
     /**
      * @notice Checks if a GEM token exists.

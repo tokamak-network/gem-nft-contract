@@ -31,6 +31,7 @@ contract L1BaseTest is Test {
 
     address l1WrappedStakedTon;
     L1WrappedStakedTONProxy l1wrappedstakedtonProxy;
+    address l1wrappedstakedtonProxyAddress;
     L1WrappedStakedTONFactory l1WrappedStakedtonFactory;
     L1WrappedStakedTONFactoryProxy l1WrappedStakedtonFactoryProxy;
     address l1WrappedStakedtonFactoryProxyAddress;
@@ -134,7 +135,7 @@ contract L1BaseTest is Test {
         DepositManager(depositManager).setSeigManager(seigManager);
 
         // deploy and initialize Wrapped Staked TON
-        l1wrappedstakedtonProxy = L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(
+        l1wrappedstakedtonProxyAddress = L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).createWSTONToken(
             candidate,
             depositManager,
             seigManager,
@@ -148,7 +149,7 @@ contract L1BaseTest is Test {
 
 
         // ton approve to bypass the ERC20OnApprove misconfiguration due to solc version update
-        vm.startPrank(address(l1wrappedstakedtonProxy));
+        vm.startPrank(l1wrappedstakedtonProxyAddress);
         IERC20(ton).approve(wton, type(uint256).max);
         vm.stopPrank();
         //end of setup
@@ -156,10 +157,10 @@ contract L1BaseTest is Test {
 
 
     function testSetup() public view {
-        address l1wtonCheck = L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getDepositManager();
+        address l1wtonCheck = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getDepositManager();
         assert(l1wtonCheck == depositManager);
 
-        address seigManagerCheck =  L1WrappedStakedTON(address(l1wrappedstakedtonProxy)).getSeigManager();
+        address seigManagerCheck =  L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getSeigManager();
         assert(seigManagerCheck == seigManager);
 
     }

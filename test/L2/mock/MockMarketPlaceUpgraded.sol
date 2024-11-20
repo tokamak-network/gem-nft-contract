@@ -124,7 +124,7 @@ contract MockMarketPlaceUpgraded is ProxyStorage, MarketPlaceStorage, Reentrancy
         GemFactory(gemFactory).setIsLocked(_tokenId, false);
 
         delete gemsForSale[_tokenId];
-        emit GemRemovedFromSale(_tokenId);
+        emit GemRemovedFromSale(msg.sender, _tokenId);
 
     }
 
@@ -208,9 +208,10 @@ contract MockMarketPlaceUpgraded is ProxyStorage, MarketPlaceStorage, Reentrancy
         IGemFactory(gemFactory).setIsLocked(_tokenId, false);
         // transfer NFT ownership
         IGemFactory(gemFactory).transferFrom(seller, _payer, _tokenId);
-        
+        IGemFactory.Gem memory gem = IGemFactory(gemFactory).getGem(_tokenId);
+        uint256 gemCoolDownDueDate = gem.gemCooldownDueDate;
 
-        emit GemBought(_tokenId, _payer, seller, price);
+        emit GemBought(_tokenId, _payer, seller, price, gemCoolDownDueDate);
         return true;
     }
 
