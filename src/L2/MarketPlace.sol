@@ -296,9 +296,10 @@ contract MarketPlace is ProxyStorage, MarketPlaceStorage, ReentrancyGuard, AuthC
         IGemFactory(gemFactory).setIsLocked(_tokenId, false);
         // Transfer GEM ownership from seller to payer
         IGemFactory(gemFactory).transferFrom(seller, _payer, _tokenId);
-        
+        IGemFactory.Gem memory gem = IGemFactory(gemFactory).getGem(_tokenId);
+        uint256 gemCoolDownDueDate = gem.gemCooldownDueDate;
         // Emit an event for the GEM purchase
-        emit GemBought(_tokenId, _payer, seller, price);
+        emit GemBought(_tokenId, _payer, seller, price, gemCoolDownDueDate);
         return true;
     }
 

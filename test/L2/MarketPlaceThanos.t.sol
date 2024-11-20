@@ -514,7 +514,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         testPutGemForSale();
         vm.startPrank(user1);
         vm.expectEmit(true,true,true,true);
-        emit MarketPlaceStorage.GemRemovedFromSale(0);
+        emit MarketPlaceStorage.GemRemovedFromSale(user1, 0);
         marketplacethanos.removeGemForSale(0);
         vm.stopPrank();
     }

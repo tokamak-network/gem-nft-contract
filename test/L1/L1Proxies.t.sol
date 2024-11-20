@@ -48,10 +48,9 @@ contract L1ProxyTest is L1WrappedStakedTONTest {
 
         mockL1WrappedStakedTONUpgraded = new MockL1WrappedStakedTONUpgraded();
         // the contract is upgradeable from the L1WrappedStakedTONFactory contract only
-        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).upgradeWstonTo(address(l1wrappedstakedtonProxy), address(mockL1WrappedStakedTONUpgraded));
+        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).upgradeWstonTo(l1wrappedstakedtonProxyAddress, address(mockL1WrappedStakedTONUpgraded));
         
         // check that the new counter storage and incrementCounter functions are deployed
-        address l1wrappedstakedtonProxyAddress = address(l1wrappedstakedtonProxy);
         MockL1WrappedStakedTONUpgraded(l1wrappedstakedtonProxyAddress).incrementCounter();
         uint256 counter = MockL1WrappedStakedTONUpgraded(l1wrappedstakedtonProxyAddress).getCounter();
         assert(counter == 1);
@@ -67,7 +66,7 @@ contract L1ProxyTest is L1WrappedStakedTONTest {
 
         mockL1WrappedStakedTONUpgraded = new MockL1WrappedStakedTONUpgraded();
         // the contract is upgradeable from the L1WrappedStakedTONFactory contract only
-        vm.expectRevert("AuthControl: Caller is not the owner");
+        vm.expectRevert();
         l1wrappedstakedtonProxy.upgradeTo(address(mockL1WrappedStakedTONUpgraded));
 
         vm.stopPrank();

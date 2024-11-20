@@ -4,6 +4,19 @@ pragma solidity 0.8.25;
 import { GemFactoryStorage } from "../L2/GemFactoryStorage.sol";
 
 interface IGemFactory {
+    struct Gem {
+        uint256 tokenId;  
+        uint256 value; // 27 decimals
+        uint256 gemCooldownDueDate; // gem cooldown before user can start mining
+        uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
+        uint8 rarity; 
+        uint32 miningPeriod; // Mining delay before claiming
+        uint8 miningTry; 
+        bool isLocked; // Locked if gem is listed on the marketplace
+        uint8[4] quadrants; // 4 quadrants
+        uint8[2] color; // id of the color
+        string tokenURI; // IPFS address of the metadata file 
+    }
 
     function startMiningGEM(uint256 _tokenId) external returns(bool);
     function cancelMining(uint256 _tokenId) external returns(bool);
@@ -55,5 +68,7 @@ interface IGemFactory {
     function setApprovalForAll(address operator, bool approved) external;
 
     function isApprovedForAll(address owner, address operator) external view returns (bool);
+
+    function getGem(uint256 tokenId) external view returns (Gem memory);
 
 }
