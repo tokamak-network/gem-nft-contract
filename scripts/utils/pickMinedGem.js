@@ -13,8 +13,8 @@ async function main() {
   
   try {
     // Convert 0.005 ETH to wei
-    const ethValue = ethers.parseUnits('0.005', 'ether');
-    const tx = await GemFactoryMining.pickMinedGEM(7, {
+    const ethValue = ethers.parseUnits('0.003', 'ether');
+    const tx = await GemFactoryMining.pickMinedGEM(36, {
         gasLimit: 15000000,
         value: ethValue
     });

@@ -98,7 +98,7 @@ contract GemFactoryStorage {
     address internal airdrop;
 
     // constants
-    uint32 public constant CALLBACK_GAS_LIMIT = 210000;
+    uint32 public constant CALLBACK_GAS_LIMIT = 2100000;
 
     //---------------------------------------------------------------------------------------
     //-------------------------------------EVENTS--------------------------------------------

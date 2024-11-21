@@ -13,7 +13,7 @@ async function main() {
   
   try {
    
-    const tx = await GemFactoryMining.startMiningGEM(7, {
+    const tx = await GemFactoryMining.startMiningGEM(36, {
         gasLimit: 15000000 
       });
     await tx.wait();

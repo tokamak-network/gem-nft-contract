@@ -169,6 +169,9 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
             // Increment the request count
             requestCount++;
         }
+        // Delete/update user mining data
+        delete userMiningToken[ownerOf(_tokenId)][_tokenId];
+        delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
 
         // Refund excess ETH to the user if they overpaid
         if (msg.value > directFundingCost) {
@@ -245,9 +248,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         Gems[_tokenId].randomRequestId = 0;
         Gems[_tokenId].gemCooldownDueDate = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
 
-        // Delete/update user mining data
-        delete userMiningToken[ownerOf(_tokenId)][_tokenId];
-        delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
+        // update mining tries
         numberMiningGemsByRarity[Gems[_tokenId].rarity]--;
     }
 
