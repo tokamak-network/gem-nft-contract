@@ -11,14 +11,14 @@ async function main() {
   const Treasury = await ethers.getContractAt("Treasury", treasuryAddress);
 
   // Prepare input parameters for the createPreminedGEMPool function
-  const rarities = [2, 2, 2, 2, 2]; // Adjust this to match the enum type in Solidity
+  const rarities = [0, 0, 0, 0, 0]; // Adjust this to match the enum type in Solidity
   const colors = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]];
   const quadrants = [
-    [4, 3, 3, 3], 
-    [4, 4, 3, 3], 
-    [3, 3, 4, 3], 
-    [3, 3, 4, 3], 
-    [3, 4, 4, 4]
+    [1, 2, 2, 1], 
+    [1, 2, 2, 1], 
+    [1, 2, 2, 1], 
+    [1, 2, 2, 1], 
+    [1, 2, 2, 1]
   ];
   const tokenURIs = ["", "", "", "", ""];
 

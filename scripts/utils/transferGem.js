@@ -14,7 +14,7 @@ async function main() {
     console.log("Transfering treasury Gem to...");
 
     // Call createPreminedGEMPool
-    const tx = await Treasury.transferTreasuryGEMto("0xC78F3BC6a1f43E6Dd892631A632ca650f7393b71", 37);
+    const tx = await Treasury.transferTreasuryGEMto("0xC78F3BC6a1f43E6Dd892631A632ca650f7393b71", 43);
     await tx.wait();
     console.log("Token sent");
   } catch (error) {
