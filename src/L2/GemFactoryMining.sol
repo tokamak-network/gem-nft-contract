@@ -169,6 +169,9 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
             // Increment the request count
             requestCount++;
         }
+        // Delete/update user mining data
+        delete userMiningToken[ownerOf(_tokenId)][_tokenId];
+        delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
 
         // Refund excess ETH to the user if they overpaid
         if (msg.value > directFundingCost) {
@@ -231,9 +234,10 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
             
             // fetching the mined gem's cooldown period
             uint256 minedGemCooldownDueDate = Gems[s_requests[requestId].chosenTokenId].gemCooldownDueDate;
+            uint256 chosenTokenId = s_requests[requestId].chosenTokenId;
 
             // Emit an event for the GEM mining claim
-            emit GemMiningClaimed(_tokenId, minedGemCooldownDueDate, msg.sender);
+            emit GemMiningClaimed(_tokenId, chosenTokenId, minedGemCooldownDueDate, msg.sender);
         } else {
             // No GEM available, set chosenTokenId to 0 and emit an event
             s_requests[requestId].chosenTokenId = 0;
@@ -245,9 +249,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         Gems[_tokenId].randomRequestId = 0;
         Gems[_tokenId].gemCooldownDueDate = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
 
-        // Delete/update user mining data
-        delete userMiningToken[ownerOf(_tokenId)][_tokenId];
-        delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
+        // update mining tries
         numberMiningGemsByRarity[Gems[_tokenId].rarity]--;
     }
 

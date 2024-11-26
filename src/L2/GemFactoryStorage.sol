@@ -98,7 +98,7 @@ contract GemFactoryStorage {
     address internal airdrop;
 
     // constants
-    uint32 public constant CALLBACK_GAS_LIMIT = 210000;
+    uint32 public constant CALLBACK_GAS_LIMIT = 2100000;
 
     //---------------------------------------------------------------------------------------
     //-------------------------------------EVENTS--------------------------------------------
@@ -121,7 +121,7 @@ contract GemFactoryStorage {
 
     // Mining Events
     event GemMiningStarted(uint256 tokenId, address miner, uint256 startMiningTime, uint256 newminingTry);
-    event GemMiningClaimed(uint256 tokenId, uint256 minedGemCooldownDueDate, address miner);
+    event GemMiningClaimed(uint256 tokenId, uint256 chosenTokenId, uint256 minedGemCooldownDueDate, address miner);
     event GemMelted(uint256 _tokenId, address _from);
     event RandomGemRequested(uint256 tokenId, uint256 requestNumber);
     event NoGemAvailable(uint256 tokenId);

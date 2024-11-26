@@ -43,7 +43,7 @@ async function main() {
     owner,
     process.env.TITAN_WRAPPED_STAKED_TON, // l2wston
     process.env.TON_ADDRESS, // l2ton
-    treasuryAddress, // treasury
+    treasuryProxyAddress, // treasury
     { gasLimit: 10000000 }
   );
   await initializeTx.wait();
