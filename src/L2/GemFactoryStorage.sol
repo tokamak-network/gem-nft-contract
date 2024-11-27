@@ -124,7 +124,7 @@ contract GemFactoryStorage {
     event GemMiningClaimed(uint256 tokenId, uint256 chosenTokenId, uint256 minedGemCooldownDueDate, uint256 initialGemCooldownDueDate, address miner);
     event GemMelted(uint256 _tokenId, address _from);
     event RandomGemRequested(uint256 tokenId, uint256 requestNumber);
-    event NoGemAvailable(uint256 tokenId);
+    event NoGemAvailable(uint256 tokenId, uint256 initialGemCooldownDueDate, address miner);
     event CountGemsByQuadrant(uint256 gemCount, uint256[] tokenIds);
     event MiningCancelled(uint256 _tokenId, address owner, uint256 timestamp);
     event EthSentBack(uint256 amount);

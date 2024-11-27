@@ -27,7 +27,7 @@ async function main() {
     const miningLibrary = await MiningLibrary.deploy();
     await miningLibrary.waitForDeployment();
     console.log("MiningLibrary deployed to:", miningLibrary.target);
-
+/*
     // Deploy GemLibrary
     const GemLibrary = await ethers.getContractFactory("GemLibrary");
     const gemLibrary = await GemLibrary.deploy();
@@ -46,7 +46,7 @@ async function main() {
         address: gemFactory.target,
         constructorArguments: [],
       });
-/*
+
     // Instantiate the GemFactoryForging
     const GemFactoryForging = await ethers.getContractFactory("GemFactoryForging");
     const gemFactoryForging = await GemFactoryForging.deploy();
@@ -88,12 +88,12 @@ async function main() {
         constructorArguments: [],
         contract:"src/L2/GemFactoryProxy.sol:GemFactoryProxy"
       });
-*/
+
     // Set the first index to the GemFactory contract
     const upgradeTo = await GemFactoryProxy.upgradeTo(gemFactory.target);
     await upgradeTo.wait();
     console.log("GemFactoryProxy upgraded to GemFactory");
-/*
+
     // Set the second index to the GemFactoryForging contract
     const setImplementation = await gemFactoryProxy.setImplementation2(gemFactoryForging.target, 1, true);
     await setImplementation.wait();
