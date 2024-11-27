@@ -238,11 +238,12 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
             uint256 initialGemCooldownDueDate = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
 
             // Emit an event for the GEM mining claim
-            emit GemMiningClaimed(_tokenId, chosenTokenId, minedGemCooldownDueDate, initialGemCooldownDueDate, msg.sender);
+            emit GemMiningClaimed(_tokenId, chosenTokenId, minedGemCooldownDueDate, initialGemCooldownDueDate, s_requests[requestId].requester);
         } else {
             // No GEM available, set chosenTokenId to 0 and emit an event
             s_requests[requestId].chosenTokenId = 0;
-            emit NoGemAvailable(_tokenId);
+            uint256 initialGemCooldownDueDate = block.timestamp + _getCooldownPeriod(Gems[s_requests[requestId].tokenId].rarity);
+            emit NoGemAvailable(_tokenId, initialGemCooldownDueDate, s_requests[requestId].requester);
         }
         
         // reset storage variable of the initial GEM
