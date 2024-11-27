@@ -515,7 +515,7 @@ contract GemFactory is
         super.transferFrom(from, to, tokenId);
 
         // Emit an event to log the transfer of the GEM
-        emit TransferGEM(from, to, tokenId);
+        emit TransferGEM(from, to, tokenId, Gems[tokenId].gemCooldownDueDate);
     }
 
     /**
@@ -552,7 +552,7 @@ contract GemFactory is
         _checkOnERC721(from, to, tokenId, data);
 
         // Emit an event to log the transfer of the GEM
-        emit TransferGEM(from, to, tokenId);
+        emit TransferGEM(from, to, tokenId, Gems[tokenId].gemCooldownDueDate);
     }
 
     /**
