@@ -198,7 +198,7 @@ async function main() {
   await randomPackProxyAsRandomPack.setGemFactory(gemFactoryProxyAddress);
   console.log("GemFactoryProxy set in RandomPackProxy")
   
-  await randomPackProxyAsRandomPack.setTreasury(treasuryAddress);
+  await randomPackProxyAsRandomPack.setTreasury(treasuryProxyAddress);
   console.log("TreasuryProxy set in RandomPackProxy")
 
   await randomPackProxyAsRandomPack.setProbabilities(50,30,20,0,0,0);
