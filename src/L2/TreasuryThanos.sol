@@ -164,6 +164,14 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
     }
 
     /**
+     * @notice updates the wston token address
+     * @param _wston New wston token address
+     */
+    function setWston(address _wston) external onlyOwner {
+        wston = _wston;
+    }
+
+    /**
      * @notice Approves a specific operator to manage a GEM token.
      * @param operator Address of the operator.
      * @param _tokenId ID of the token to approve.

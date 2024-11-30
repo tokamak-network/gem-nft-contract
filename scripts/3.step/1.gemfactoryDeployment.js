@@ -11,23 +11,19 @@ async function main() {
     const balance = await ethers.provider.getBalance(await deployer.getAddress());
     console.log("Account balance:", ethers.formatEther(balance));
 
-    const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
-    const GemFactoryProxy = await ethers.getContractAt("GemFactoryProxy", gemFactoryProxyAddress);
-
     // ------------------------ GEMFACTORY INSTANCES ---------------------------------
-/*
     // Deploy ForgeLibrary
     const ForgeLibrary = await ethers.getContractFactory("ForgeLibrary");
     const forgeLibrary = await ForgeLibrary.deploy();
     await forgeLibrary.waitForDeployment();
     console.log("ForgeLibrary deployed to:", forgeLibrary.target);
-*/
+
     // Deploy MiningLibrary
     const MiningLibrary = await ethers.getContractFactory("MiningLibrary");
     const miningLibrary = await MiningLibrary.deploy();
     await miningLibrary.waitForDeployment();
     console.log("MiningLibrary deployed to:", miningLibrary.target);
-/*
+
     // Deploy GemLibrary
     const GemLibrary = await ethers.getContractFactory("GemLibrary");
     const gemLibrary = await GemLibrary.deploy();
@@ -54,12 +50,12 @@ async function main() {
     console.log("GemFactoryForging deployed to:", gemFactoryForging.target);
 
     await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
-
+      
     await run("verify:verify", {
         address: gemFactoryForging.target,
         constructorArguments: [],
       });
-*/
+
     // Instantiate the GemFactoryMining
     const GemFactoryMining = await ethers.getContractFactory("GemFactoryMining");
     const gemFactoryMining = await GemFactoryMining.deploy();
@@ -74,7 +70,7 @@ async function main() {
       });
 
     // ------------------------ GEMFACTORY PROXY ---------------------------------
-/*
+
     const GemFactoryProxy = await ethers.getContractFactory("GemFactoryProxy");
     const gemFactoryProxy = await GemFactoryProxy.deploy();
     await gemFactoryProxy.waitForDeployment();
@@ -90,7 +86,7 @@ async function main() {
       });
 
     // Set the first index to the GemFactory contract
-    const upgradeTo = await GemFactoryProxy.upgradeTo(gemFactory.target);
+    const upgradeTo = await gemFactoryProxy.upgradeTo(gemFactory.target);
     await upgradeTo.wait();
     console.log("GemFactoryProxy upgraded to GemFactory");
 
@@ -98,14 +94,14 @@ async function main() {
     const setImplementation = await gemFactoryProxy.setImplementation2(gemFactoryForging.target, 1, true);
     await setImplementation.wait();
     console.log("GemFactoryProxy implementation set to GemFactoryForging");
-*/
+
     // Set the third index to the GemFactoryMining contract
-    const setImplementation2 = await GemFactoryProxy.setImplementation2(gemFactoryMining.target, 2, true);
+    const setImplementation2 = await gemFactoryProxy.setImplementation2(gemFactoryMining.target, 2, true);
     await setImplementation2.wait();
     console.log("GemFactoryProxy implementation set to GemFactoryMining");
 
     // ------------------------ FUNCTION SELECTORS ---------------------------------
-/*
+
     // Compute the function selector for GemFactoryForging
     const forgeTokensSelector = ethers.keccak256(ethers.toUtf8Bytes("forgeTokens(uint256[],uint8,uint8[2])")).substring(0, 10);
     const forgingSelectors = [forgeTokensSelector];
@@ -114,7 +110,7 @@ async function main() {
     const setForgingSelectors = await gemFactoryProxy.setSelectorImplementations2(forgingSelectors, gemFactoryForging.target);
     await setForgingSelectors.wait();
     console.log("Mapped forgeTokens function to GemFactoryForging");
-*/
+
     // Compute the function selectors for GemFactoryMining
     const startMiningSelector = ethers.keccak256(ethers.toUtf8Bytes("startMiningGEM(uint256)")).substring(0, 10);
     const cancelMiningSelector = ethers.keccak256(ethers.toUtf8Bytes("cancelMining(uint256)")).substring(0, 10);
@@ -131,17 +127,17 @@ async function main() {
     ];
 
     // Map the mining functions to the GemFactoryMining implementation
-    const setMiningSelectors = await GemFactoryProxy.setSelectorImplementations2(miningSelectors, gemFactoryMining.target);
+    const setMiningSelectors = await gemFactoryProxy.setSelectorImplementations2(miningSelectors, gemFactoryMining.target);
     await setMiningSelectors.wait();
     console.log("Mapped mining functions to GemFactoryMining");
-/*
+
     // Debugging: Verify the mapping
     const forgeTokensImplementation = await gemFactoryProxy.getSelectorImplementation2(forgeTokensSelector);
     if (forgeTokensImplementation !== gemFactoryForging.target) {
         throw new Error("Selector not mapped to GemFactoryForging");
     }
-*/
-    const startMiningImpl = await GemFactoryProxy.getSelectorImplementation2(startMiningSelector);
+
+    const startMiningImpl = await gemFactoryProxy.getSelectorImplementation2(startMiningSelector);
     if (startMiningImpl !== gemFactoryMining.target) {
         throw new Error("Selector not mapped to GemFactoryMining");
     }

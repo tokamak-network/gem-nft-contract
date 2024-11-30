@@ -12,10 +12,10 @@ async function main() {
     console.log("Account balance:", ethers.formatEther(balance));
 
     // Deploy RandomPack
-    const RandomPack = await ethers.getContractFactory("RandomPack");
+    const RandomPack = await ethers.getContractFactory("RandomPackThanos");
     const randomPack = await RandomPack.deploy();
     await randomPack.waitForDeployment(); // Ensure deployment is complete
-    console.log("RandomPack deployed to:", randomPack.target);
+    console.log("RandomPackThanos deployed to:", randomPack.target);
 
     // Verify RandomPack
     await run("verify:verify", {
@@ -31,7 +31,7 @@ async function main() {
 
     await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
 
-    // Verify Treasury
+    // Verify randompack proxy
     await run("verify:verify", {
       address: randomPackProxy.target,
       constructorArguments: [],

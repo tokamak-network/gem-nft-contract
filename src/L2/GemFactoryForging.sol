@@ -18,7 +18,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageUpgradeable {
 
     /**
-     * @notice Modifier to ensure the contract is not paused.
+     * @notice Modifier to ensure the contract is not paused
      */
     modifier whenNotPaused() {
       require(!paused, "Pausable: paused");

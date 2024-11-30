@@ -132,13 +132,20 @@ contract MarketPlaceThanos is ProxyStorage, MarketPlaceStorage, ReentrancyGuard,
 
     /**
      * @notice updates the gemfactory proxy address
-     * @param _gemFactory New gemFactory proxy address
+     * @param _gemFactory New gemFactory proxy address.
      */
     function setGemFactory(address _gemFactory) external onlyOwner {
         gemFactory = _gemFactory;
         emit GemFactoryAddressUpdated(_gemFactory);
     }
 
+    /**
+     * @notice updates the wston token address
+     * @param _wston New wston token address
+     */
+    function setWston(address _wston) external onlyOwner {
+        wston = _wston;
+    }
 
     //---------------------------------------------------------------------------------------
     //--------------------------EXTERNAL FUNCTIONS-------------------------------------------

@@ -12,10 +12,10 @@ async function main() {
     console.log("Account balance:", ethers.formatEther(balance));
 
     // Deploy WstonSwapPool
-    const WstonSwapPool = await ethers.getContractFactory("WstonSwapPool");
+    const WstonSwapPool = await ethers.getContractFactory("WstonSwapPoolThanos");
     const wstonSwapPool = await WstonSwapPool.deploy();
     await wstonSwapPool.waitForDeployment(); // Ensure deployment is complete
-    console.log("WstonSwapPool deployed to:", wstonSwapPool.target);
+    console.log("WstonSwapPoolThanos deployed to:", wstonSwapPool.target);
 
     // Verify WstonSwapPool
     await run("verify:verify", {
@@ -37,7 +37,7 @@ async function main() {
       constructorArguments: [],
       contract:"src/L2/WstonSwapPoolProxy.sol:WstonSwapPoolProxy"
     });
-    console.log("TreasuryProxy verified");
+    console.log("WstonSwapPoolProxy verified");
 
     // Set the first index to the GemFactory contract
     const upgradeTo = await wstonSwapPoolProxy.upgradeTo(wstonSwapPool.target);

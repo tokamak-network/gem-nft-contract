@@ -11,18 +11,18 @@ async function main() {
     const balance = await ethers.provider.getBalance(deployer.address);
     console.log("Account balance:", ethers.formatEther(balance));
 
-    const MarketPlace = await ethers.getContractFactory("MarketPlace");
+    const MarketPlace = await ethers.getContractFactory("MarketPlaceThanos");
     
     // Deploy MarketPlace
     const marketPlace = await MarketPlace.deploy();
     await marketPlace.waitForDeployment(); // Ensure deployment is complete
-    console.log("MarketPlace deployed to:", marketPlace.target);
+    console.log("MarketPlaceThanos deployed to:", marketPlace.target);
 
     // Verify MarketPlace
     await run("verify:verify", {
       address: marketPlace.target,
       constructorArguments: [],
-      contract:"src/L2/MarketPlace.sol:MarketPlace"
+      contract:"src/L2/MarketPlaceThanos.sol:MarketPlaceThanos"
     });
 
     // Deploy MarketPlace Proxy
@@ -39,7 +39,7 @@ async function main() {
       constructorArguments: [],
       contract:"src/L2/MarketPlaceProxy.sol:MarketPlaceProxy"
     });
-    console.log("TreasuryProxy verified");
+    console.log("marketplaceProxy verified");
 
     // Set the first index to the GemFactory contract
     const upgradeTo = await marketPlaceProxy.upgradeTo(marketPlace.target);

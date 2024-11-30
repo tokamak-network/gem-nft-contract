@@ -81,6 +81,30 @@ contract WstonSwapPool is ProxyStorage, AuthControl, ReentrancyGuard, WstonSwapP
         initialized = true;
     }
 
+    /**
+     * @notice updates the wston token address
+     * @param _wston New wston token address
+     */
+    function setWston(address _wston) external onlyOwner {
+        wston = _wston;
+    }
+
+    /**
+     * @notice updates the ton token address
+     * @param _ton New ton token address
+     */
+    function setTon(address _ton) external onlyOwner {
+        ton = _ton;
+    }
+
+    /**
+     * @notice updates the treasury address
+     * @param _treasury New treasury address
+     */
+    function setTreasury(address _treasury) external onlyOwner {
+        treasury = _treasury;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
     //---------------------------------------------------------------------------------------

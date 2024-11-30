@@ -12,17 +12,17 @@ async function main() {
     console.log("Account balance:", ethers.formatEther(balance));
 
     // Instantiate the Treasury
-    const Treasury = await ethers.getContractFactory("Treasury");
+    const Treasury = await ethers.getContractFactory("TreasuryThanos");
     const treasury = await Treasury.deploy();
     await treasury.waitForDeployment();
-    console.log("treasury deployed to:", treasury.target);
+    console.log("TreasuryThanos deployed to:", treasury.target);
 
     await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
 
     await run("verify:verify", {
       address: treasury.target,
       constructorArguments: [],
-      contract:"src/L2/Treasury.sol:Treasury"
+      contract:"src/L2/TreasuryThanos.sol:TreasuryThanos"
     });
 
 
