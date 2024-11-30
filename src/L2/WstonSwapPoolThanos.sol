@@ -78,6 +78,22 @@ contract WstonSwapPoolThanos is ProxyStorage, AuthControl, ReentrancyGuard, Wsto
         initialized = true;
     }
 
+    /**
+     * @notice updates the wston token address
+     * @param _wston New wston token address
+     */
+    function setWston(address _wston) external onlyOwner {
+        wston = _wston;
+    }
+
+    /**
+     * @notice updates the treasury address
+     * @param _treasury New treasury address
+     */
+    function setTreasury(address _treasury) external onlyOwner {
+        treasury = _treasury;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
     //---------------------------------------------------------------------------------------

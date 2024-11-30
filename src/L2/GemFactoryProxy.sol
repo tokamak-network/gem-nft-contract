@@ -5,7 +5,7 @@ import "../proxy/Proxy.sol";
 
 /**
  * @title
- * @dev
+ * @dev proxy contract
  */
 contract GemFactoryProxy is Proxy {
 

@@ -63,7 +63,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
      * @dev the Gem must be Rare or above
      * @dev the cooldown period must have elapsed
      * @dev the Gem must not be locked. Therefore, it must not be listed on the marketplace 
-     * @dev There must be more than 1 mining try left
+     * @dev There must be more than 1 mining try left.
      */
     function startMiningGEM(uint256 _tokenId) external whenNotPaused returns (bool) {
         // Ensure the caller's address is not zero

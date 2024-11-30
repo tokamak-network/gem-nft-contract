@@ -1,7 +1,7 @@
 const { ethers, run } = require("hardhat");
 require('dotenv').config();
 
-// command to run: "npx hardhat run scripts/2.step/1.L2TitanWrappedStakedTon.js --network titan"
+// command to run: "npx hardhat run scripts/2.step/1.L2TitanWrappedStakedTon.js --network thanos"
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -21,11 +21,11 @@ async function main() {
     const titanWston = await TitanWston.deploy(
         l2Bridge,
         l1Token,
-        "Titan Wston",
-        "WSTON"
+        "Thanos Wston",
+        "TWSTON"
     );
     await titanWston.waitForDeployment();
-    console.log("L2 Titan Wston deployed to:", titanWston.target);
+    console.log("L2 Thanos Wston deployed to:", titanWston.target);
 
     await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
 
@@ -34,8 +34,8 @@ async function main() {
         constructorArguments: [
             l2Bridge,
             l1Token,
-            "Titan Wston",
-            "WSTON"
+            "Thanos Wston",
+            "TWSTON"
         ],
         contract: "src/L2/L2StandardERC20.sol:L2StandardERC20"
     });

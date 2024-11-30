@@ -16,8 +16,8 @@ module.exports = {
   },
   networks: {
     hardhat: {},
-    titan: {
-      url: process.env.TITAN_SEPOLIA_RPC_URL,
+    thanos: {
+      url: process.env.THANOS_SEPOLIA_RPC_URL,
       accounts: [process.env.PRIVATE_KEY]
     },
     sepolia: {
@@ -29,16 +29,16 @@ module.exports = {
   etherscan: {
     apiKey: {
       sepolia: process.env.ETHERSCAN_API_KEY,
-      titan_sepolia: "abcd",
+      thanos_sepolia: "abcd",
       bscTestnet: "abcd",
     },
     customChains: [
       {
-        network: "titan_sepolia",
-        chainId: 55007,
+        network: "thanos_sepolia",
+        chainId: 111551119090,
         urls: {
-            apiURL: "https://explorer.titan-sepolia.tokamak.network/api",
-            browserURL: "https://explorer.titan-sepolia.tokamak.network/",
+            apiURL: "https://explorer.thanos-sepolia.tokamak.network/api",
+            browserURL: "https://explorer.thanos-sepolia.tokamak.network/",
         },
     }
     ]

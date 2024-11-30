@@ -89,7 +89,7 @@ contract RandomPackThanos is ProxyStorage, ReentrancyGuard, IERC721Receiver, Aut
      * @param _coordinator Address of the  DRBCoordinator contract.
      * @param _gemFactory Address of the gem factory contract.
      * @param _treasury Address of the treasury contract.
-     * @param _randomPackFees Fees for requesting a random pack.
+     * @param _randomPackFees Fees for requesting a random pack
      */
     function initialize(
         address _coordinator,  

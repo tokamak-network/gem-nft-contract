@@ -203,6 +203,14 @@ contract RandomPack is ProxyStorage, ReentrancyGuard, IERC721Receiver, AuthContr
         probInitialized = true;
     }
 
+    /**
+     * @notice updates the ton token address
+     * @param _ton New ton token address
+     */
+    function setTon(address _ton) external onlyOwner {
+        ton = _ton;
+    }
+
     //---------------------------------------------------------------------------------------
     //--------------------------------EXTERNAL FUNCTIONS-------------------------------------
     //---------------------------------------------------------------------------------------
