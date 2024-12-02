@@ -1,7 +1,7 @@
 const { ethers, run } = require("hardhat");
 require('dotenv').config();
 
-// command to run: "npx hardhat run scripts/3.step/1.gemfactoryDeployment.js --network titan"
+// command to run: "npx hardhat run scripts/3.step/1.gemfactoryDeployment.js --network thanos"
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -10,6 +10,9 @@ async function main() {
 
     const balance = await ethers.provider.getBalance(await deployer.getAddress());
     console.log("Account balance:", ethers.formatEther(balance));
+
+    const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
+    const gemFactoryProxy = await ethers.getContractAt("GemFactoryProxy", gemFactoryProxyAddress);
 
     // ------------------------ GEMFACTORY INSTANCES ---------------------------------
     // Deploy ForgeLibrary
@@ -70,7 +73,7 @@ async function main() {
       });
 
     // ------------------------ GEMFACTORY PROXY ---------------------------------
-
+/*
     const GemFactoryProxy = await ethers.getContractFactory("GemFactoryProxy");
     const gemFactoryProxy = await GemFactoryProxy.deploy();
     await gemFactoryProxy.waitForDeployment();
@@ -84,7 +87,7 @@ async function main() {
         constructorArguments: [],
         contract:"src/L2/GemFactoryProxy.sol:GemFactoryProxy"
       });
-
+*/
     // Set the first index to the GemFactory contract
     const upgradeTo = await gemFactoryProxy.upgradeTo(gemFactory.target);
     await upgradeTo.wait();
@@ -131,18 +134,6 @@ async function main() {
     await setMiningSelectors.wait();
     console.log("Mapped mining functions to GemFactoryMining");
 
-    // Debugging: Verify the mapping
-    const forgeTokensImplementation = await gemFactoryProxy.getSelectorImplementation2(forgeTokensSelector);
-    if (forgeTokensImplementation !== gemFactoryForging.target) {
-        throw new Error("Selector not mapped to GemFactoryForging");
-    }
-
-    const startMiningImpl = await gemFactoryProxy.getSelectorImplementation2(startMiningSelector);
-    if (startMiningImpl !== gemFactoryMining.target) {
-        throw new Error("Selector not mapped to GemFactoryMining");
-    }
-
-    console.log("Function selectors verified successfully");
 }
 
 main()

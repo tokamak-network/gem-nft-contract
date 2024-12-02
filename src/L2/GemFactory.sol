@@ -342,7 +342,6 @@ contract GemFactory is
 
         // Declare variables for GEM attributes
         uint32 _gemCooldownPeriod;
-        uint32 _miningPeriod;
         uint256 _value;
         uint8 _miningTry;
 
@@ -360,7 +359,6 @@ contract GemFactory is
 
             // Set attributes for COMMON rarity
             _gemCooldownPeriod = 0;
-            _miningPeriod = 0;
             _value = CommonGemsValue;
             _miningTry = 0;
         } else if (_rarity == Rarity.RARE) {
@@ -373,7 +371,6 @@ contract GemFactory is
 
             // Set attributes for RARE rarity
             _gemCooldownPeriod = RareGemsCooldownPeriod;
-            _miningPeriod = RareGemsMiningPeriod;
             _value = RareGemsValue;
             _miningTry = RareminingTry;
         } else if (_rarity == Rarity.UNIQUE) {
@@ -386,7 +383,6 @@ contract GemFactory is
 
             // Set attributes for UNIQUE rarity
             _gemCooldownPeriod = UniqueGemsCooldownPeriod;
-            _miningPeriod = UniqueGemsMiningPeriod;
             _value = UniqueGemsValue;
             _miningTry = UniqueminingTry;
         } else if (_rarity == Rarity.EPIC) {
@@ -399,7 +395,6 @@ contract GemFactory is
 
             // Set attributes for EPIC rarity
             _gemCooldownPeriod = EpicGemsCooldownPeriod;
-            _miningPeriod = EpicGemsMiningPeriod;
             _value = EpicGemsValue;
             _miningTry = EpicminingTry;
         } else if (_rarity == Rarity.LEGENDARY) {
@@ -412,7 +407,6 @@ contract GemFactory is
 
             // Set attributes for LEGENDARY rarity
             _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
-            _miningPeriod = LegendaryGemsMiningPeriod;
             _value = LegendaryGemsValue;
             _miningTry = LegendaryminingTry;
         } else if (_rarity == Rarity.MYTHIC) {
@@ -422,7 +416,6 @@ contract GemFactory is
             }
             // Set attributes for MYTHIC rarity
             _gemCooldownPeriod = MythicGemsCooldownPeriod;
-            _miningPeriod = MythicGemsMiningPeriod;
             _value = MythicGemsValue;
             _miningTry = MythicminingTry;
         } else {
@@ -442,7 +435,6 @@ contract GemFactory is
             _color,
             _quadrants,
             _value,
-            _miningPeriod,
             _cooldownDueDate,
             _miningTry,
             _tokenURI
@@ -454,7 +446,7 @@ contract GemFactory is
 
         // Emit an event for the creation of the new GEM
         emit Created(
-            newGemId, _rarity, _color, _miningTry, _value, _quadrants, _miningPeriod, _cooldownDueDate, _tokenURI, msg.sender
+            newGemId, _rarity, _color, _miningTry, _value, _quadrants, _cooldownDueDate, _tokenURI, msg.sender
         );
         return newGemId;
     }

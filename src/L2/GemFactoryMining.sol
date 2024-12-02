@@ -25,9 +25,9 @@ interface ITreasury {
  */
 contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUpgradeable, ReentrancyGuard, DRBConsumerBase {
     using MiningLibrary for GemFactoryStorage.Gem[];
+    bool GFMiningInitialized = false;
 
     event DRBCoordiantorInitialized(address coordinator);
-
     error DRBAlreadyInitialized();
 
     /**
@@ -43,8 +43,12 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
     //---------------------------------------------------------------------------------------
 
     function DRBInitialize(address _coordinator) external {
+        if(GFMiningInitialized) {
+            revert DRBAlreadyInitialized();
+        }
         __DRBConsumerBase_init(_coordinator);
         emit DRBCoordiantorInitialized(_coordinator);
+        GFMiningInitialized = true;
     }
 
     //---------------------------------------------------------------------------------------

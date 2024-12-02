@@ -455,7 +455,6 @@ contract GemFactoryTest is L2BaseTest {
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
         assert(newGem.rarity == GemFactoryStorage.Rarity.RARE);
         assert(newGem.color[0] == color[0] && newGem.color[1] == color[1]);
-        assert(newGem.miningPeriod == RareGemsMiningPeriod);
         assert(newGem.gemCooldownDueDate == block.timestamp + RareGemsCooldownPeriod);
 
         // Verify the new gem quadrants
@@ -543,7 +542,6 @@ contract GemFactoryTest is L2BaseTest {
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
         assert(newGem.rarity == GemFactoryStorage.Rarity.EPIC);
         assert(newGem.color[0] == color[0] && newGem.color[1] == color[1]);
-        assert(newGem.miningPeriod == EpicGemsMiningPeriod);
         assert(newGem.gemCooldownDueDate == block.timestamp + EpicGemsCooldownPeriod);
 
         // Verify the new gem quadrants
