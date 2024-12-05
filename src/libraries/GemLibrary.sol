@@ -15,7 +15,6 @@ library GemLibrary {
      * @param color The color attributes of the gem.
      * @param quadrants The quadrant attributes of the gem.
      * @param value The value of the gem.
-     * @param miningPeriod The mining period for the gem.
      * @param gemCooldownPeriod The cooldown period for the gem.
      * @param miningTry The number of mining attempts for the gem.
      * @param tokenURI The URI for the gem's metadata.
@@ -30,7 +29,6 @@ library GemLibrary {
         uint8[2] memory color,
         uint8[4] memory quadrants,
         uint256 value,
-        uint32 miningPeriod,
         uint256 gemCooldownPeriod,
         uint8 miningTry,
         string memory tokenURI
@@ -41,7 +39,6 @@ library GemLibrary {
             quadrants: quadrants,
             color: color,
             value: value,
-            miningPeriod: miningPeriod,
             gemCooldownDueDate: gemCooldownPeriod,
             miningTry: miningTry,
             isLocked: false,

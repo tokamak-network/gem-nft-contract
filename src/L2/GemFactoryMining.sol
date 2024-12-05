@@ -8,6 +8,7 @@ import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import { IGemFactory } from "../interfaces/IGemFactory.sol"; 
 
 interface ITreasury {
     function transferWSTON(address _to, uint256 _amount) external returns(bool);
@@ -24,11 +25,9 @@ interface ITreasury {
  */
 contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUpgradeable, ReentrancyGuard, DRBConsumerBase {
     using MiningLibrary for GemFactoryStorage.Gem[];
-
     bool GFMiningInitialized = false;
 
     event DRBCoordiantorInitialized(address coordinator);
-
     error DRBAlreadyInitialized();
 
     /**
@@ -144,7 +143,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
             revert NotGemOwner();
         }
         // Ensure the mining period has elapsed
-        if (block.timestamp < userMiningStartTime[msg.sender][_tokenId] + Gems[_tokenId].miningPeriod) {
+        if (block.timestamp < userMiningStartTime[msg.sender][_tokenId] + getMiningPeriodBasedOnRarity(Gems[_tokenId].rarity)) {
             revert MiningPeriodNotElapsed();
         }
         // Ensure the GEM is currently locked
@@ -308,6 +307,29 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         if (rarity == Rarity.MYTHIC) return MythicGemsCooldownPeriod;
         // Revert if the rarity is invalid
         revert("Invalid rarity");
+    }
+
+    /**
+     * @notice Retrieves the mining period of a GEM based on its rarity.
+     * @param _rarity The rarity of the GEM.
+     * @return value The mining period associated with the specified rarity.
+     */
+    function getMiningPeriodBasedOnRarity(Rarity _rarity) internal view returns (uint256 value) {
+        // Determine the value based on the rarity of the GEM
+        if (_rarity == Rarity.RARE) {
+            value = RareGemsMiningPeriod;
+        } else if (_rarity == Rarity.UNIQUE) {
+            value = UniqueGemsMiningPeriod;
+        } else if (_rarity == Rarity.EPIC) {
+            value = EpicGemsMiningPeriod;
+        } else if (_rarity == Rarity.LEGENDARY) {
+            value = LegendaryGemsMiningPeriod;
+        } else if (_rarity == Rarity.MYTHIC) {
+            value = MythicGemsMiningPeriod;
+        } else {
+            // Revert if the rarity is not recognized
+            revert("wrong rarity");
+        }
     }
 
 

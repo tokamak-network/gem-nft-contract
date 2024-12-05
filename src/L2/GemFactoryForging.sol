@@ -48,11 +48,6 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
             EpicGemsValue: EpicGemsValue,
             LegendaryGemsValue: LegendaryGemsValue,
             MythicGemsValue: MythicGemsValue,
-            RareGemsMiningPeriod: RareGemsMiningPeriod,
-            UniqueGemsMiningPeriod: UniqueGemsMiningPeriod,
-            EpicGemsMiningPeriod: EpicGemsMiningPeriod,
-            LegendaryGemsMiningPeriod: LegendaryGemsMiningPeriod,
-            MythicGemsMiningPeriod: MythicGemsMiningPeriod,
             RareminingTry: RareminingTry,
             UniqueminingTry: UniqueminingTry,
             EpicminingTry: EpicminingTry,
@@ -68,13 +63,12 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
         // Initialize variables for forged GEM properties
         uint8[4] memory forgedQuadrants;
         Rarity newRarity;
-        uint32 forgedGemsMiningPeriod;
         uint256 forgedGemsCooldownDueDate;
         uint8 forgedGemsminingTry;
         uint256 forgedGemsValue;
 
         // Call the forgeTokens function from Gems contract
-        (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownDueDate, forgedGemsminingTry) = Gems.forgeTokens(
+        (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsCooldownDueDate, forgedGemsminingTry) = Gems.forgeTokens(
             GEMIndexToOwner,
             ownershipTokenCount,
             msg.sender,
@@ -95,7 +89,7 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
         _setTokenURI(newGemId, ""); // Set empty URI for the new token
 
         // Emit another event for the created GEM
-        emit Created(newGemId, newRarity, _color, forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsMiningPeriod, forgedGemsCooldownDueDate, "", msg.sender);
+        emit Created(newGemId, newRarity, _color, forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsCooldownDueDate, "", msg.sender);
 
         return newGemId;
     }

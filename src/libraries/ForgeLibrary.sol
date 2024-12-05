@@ -10,11 +10,6 @@ library ForgeLibrary {
         uint256 EpicGemsValue;
         uint256 LegendaryGemsValue;
         uint256 MythicGemsValue;
-        uint32 RareGemsMiningPeriod;
-        uint32 UniqueGemsMiningPeriod;
-        uint32 EpicGemsMiningPeriod;
-        uint32 LegendaryGemsMiningPeriod;
-        uint32 MythicGemsMiningPeriod;
         uint8 RareminingTry;
         uint8 UniqueminingTry;
         uint8 EpicminingTry;
@@ -53,7 +48,6 @@ library ForgeLibrary {
      * @return forgedQuadrants The quadrant attributes of the forged gem.
      * @return newRarity The new rarity of the forged gem.
      * @return forgedGemsValue The value of the forged gem.
-     * @return forgedGemsMiningPeriod The mining period of the forged gem.
      * @return forgedGemsCooldownDueDate The cooldown period of the forged gem.
      * @return forgedGemsminingTry The number of mining attempts for the forged gem.
      */
@@ -66,7 +60,7 @@ library ForgeLibrary {
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color,
         ForgeParams memory params
-    ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint32 forgedGemsMiningPeriod, uint256 forgedGemsCooldownDueDate, uint8 forgedGemsminingTry) {
+    ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint256 forgedGemsCooldownDueDate, uint8 forgedGemsminingTry) {
          // Ensure the sender's address is not zero
         if(msgSender == address(0)) {
             revert AddressZero();
@@ -79,7 +73,6 @@ library ForgeLibrary {
                 revert WrongNumberOfGemToBeForged();
             }
             forgedGemsValue = params.RareGemsValue;
-            forgedGemsMiningPeriod = params.RareGemsMiningPeriod;
             forgedGemsminingTry = params.RareminingTry;
             forgedGemsCooldownPeriod = params.RareGemsCooldownPeriod;
         } else if (_rarity == GemFactoryStorage.Rarity.RARE) {
@@ -87,7 +80,6 @@ library ForgeLibrary {
                 revert WrongNumberOfGemToBeForged();
             }
             forgedGemsValue = params.UniqueGemsValue;
-            forgedGemsMiningPeriod = params.UniqueGemsMiningPeriod;
             forgedGemsminingTry = params.UniqueminingTry;
             forgedGemsCooldownPeriod = params.UniqueGemsCooldownPeriod;
         } else if (_rarity == GemFactoryStorage.Rarity.UNIQUE) {
@@ -95,7 +87,6 @@ library ForgeLibrary {
                 revert WrongNumberOfGemToBeForged();
             }
             forgedGemsValue = params.EpicGemsValue;
-            forgedGemsMiningPeriod = params.EpicGemsMiningPeriod;
             forgedGemsminingTry = params.EpicminingTry;
             forgedGemsCooldownPeriod = params.EpicGemsCooldownPeriod;
         } else if (_rarity == GemFactoryStorage.Rarity.EPIC) {
@@ -103,7 +94,6 @@ library ForgeLibrary {
                 revert WrongNumberOfGemToBeForged();
             }
             forgedGemsValue = params.LegendaryGemsValue;
-            forgedGemsMiningPeriod = params.LegendaryGemsMiningPeriod;
             forgedGemsminingTry = params.LegendaryminingTry;
             forgedGemsCooldownPeriod = params.LegendaryGemsCooldownPeriod;
         } else if (_rarity == GemFactoryStorage.Rarity.LEGENDARY) {
@@ -111,7 +101,6 @@ library ForgeLibrary {
                 revert WrongNumberOfGemToBeForged();
             }
             forgedGemsValue = params.MythicGemsValue;
-            forgedGemsMiningPeriod = params.MythicGemsMiningPeriod;
             forgedGemsminingTry = params.MythicminingTry;
             forgedGemsCooldownPeriod = params.MythicGemsCooldownPeriod;
         } else {
@@ -197,7 +186,6 @@ library ForgeLibrary {
             quadrants: forgedQuadrants,
             color: _color,
             value: forgedGemsValue,
-            miningPeriod: forgedGemsMiningPeriod,
             gemCooldownDueDate: forgedGemsCooldownDueDate,
             miningTry: forgedGemsminingTry,
             isLocked: false,
@@ -214,7 +202,7 @@ library ForgeLibrary {
         ownershipTokenCount[msgSender]++;
 
         // Return the properties of the newly forged GEM
-        return (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsMiningPeriod, forgedGemsCooldownDueDate, forgedGemsminingTry);
+        return (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsCooldownDueDate, forgedGemsminingTry);
     }
 
     /**

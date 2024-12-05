@@ -18,7 +18,6 @@ contract GemFactoryStorage {
         uint256 gemCooldownDueDate; // gem cooldown before user can start mining
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
         Rarity rarity; 
-        uint32 miningPeriod; // Mining delay before claiming
         uint8 miningTry; 
         bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
@@ -112,7 +111,6 @@ contract GemFactoryStorage {
         uint8 miningTry,
         uint256 value,
         uint8[4] quadrants, 
-        uint32 miningPeriod,
         uint256 cooldownDueDate,
         string tokenURI, 
         address owner
