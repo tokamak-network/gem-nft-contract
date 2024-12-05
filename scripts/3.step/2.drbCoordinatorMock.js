@@ -1,7 +1,7 @@
 const { ethers, run } = require("hardhat");
 require('dotenv').config();
 
-// command to run: "npx hardhat run scripts/3.step/2.drbCoordinatorMock.js --network titan"
+// command to run: "npx hardhat run scripts/3.step/2.drbCoordinatorMock.js --network thanos"
 
 async function main() {
     const [deployer] = await ethers.getSigners();
