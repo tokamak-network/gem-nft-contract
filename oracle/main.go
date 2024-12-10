@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/big"
 	"os"
@@ -23,6 +22,7 @@ import (
 
 type DepositedEvent struct {
 	To                 common.Address
+	Token              bool
 	Amount             *big.Int
 	WstonAmount        *big.Int
 	DepositTime        *big.Int
@@ -34,41 +34,35 @@ type WithdrawalRequestedEvent struct {
 	Amount *big.Int
 }
 
-func main() {
+var contractABI abi.ABI
 
-	// Load the .env file
+func main() {
+	// Load environment variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
+
 	// Fetch environment variables
 	sepoliaRPCURL := os.Getenv("SEPOLIA_RPC_URL")
-	titanSepoliaRPCURL := os.Getenv("TITAN_SEPOLIA_RPC_URL")
+	thanosSepoliaRPCURL := os.Getenv("THANOS_SEPOLIA_RPC_URL")
 	l1WrappedStakedTonAddress := os.Getenv("L1_WRAPPED_STAKED_TON")
 	wstonSwapPoolAddress := os.Getenv("WSTON_SWAP_POOL")
 	marketplaceAddress := os.Getenv("MARKETPLACE")
+	privateKeyHex := os.Getenv("PRIVATE_KEY")
 
-	// Read the private key from the Docker secret file
-	privateKeyPath := "/run/secrets/private_key"
-	privateKeyBytes, err := ioutil.ReadFile(privateKeyPath)
-	if err != nil {
-		log.Fatalf("Failed to read private key from Docker secret: %v", err)
-	}
-	privateKeyHex := strings.TrimSpace(string(privateKeyBytes))
-
-	// Connect to Sepolia (L1)
+	// Connect to Ethereum networks
 	clientL1, err := ethclient.Dial(sepoliaRPCURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to Sepolia: %v", err)
 	}
 
-	// Connect to Titan Sepolia (L2)
-	clientL2, err := ethclient.Dial(titanSepoliaRPCURL)
+	clientL2, err := ethclient.Dial(thanosSepoliaRPCURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to Titan Sepolia: %v", err)
+		log.Fatalf("Failed to connect to Thanos Sepolia: %v", err)
 	}
 
-	// Set up the event listener
+	// Set up event listener
 	contractAddress := common.HexToAddress(l1WrappedStakedTonAddress)
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{contractAddress},
@@ -79,17 +73,17 @@ func main() {
 	if err != nil {
 		log.Printf("Failed to subscribe to logs: %v", err)
 		log.Println("Falling back to polling for events...")
-
-		// Fallback to polling
+		pollForEvents(clientL1, contractAddress, privateKeyHex, clientL2, wstonSwapPoolAddress, marketplaceAddress)
 		return
 	}
 
-	// Define the ABI of the contract
+	// Define contract ABI
 	contractABI, err := abi.JSON(strings.NewReader(`
 		[{
 			"anonymous": false,
 			"inputs": [
 				{"indexed": false, "internalType": "address", "name": "to", "type": "address"},
+				{"indexed": false, "internalType": "bool", "name": "token", "type": "bool"},
 				{"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
 				{"indexed": false, "internalType": "uint256", "name": "wstonAmount", "type": "uint256"},
 				{"indexed": false, "internalType": "uint256", "name": "depositTime", "type": "uint256"},
@@ -112,21 +106,19 @@ func main() {
 	}
 
 	// Precompute event signatures
-	depositedEventSig := crypto.Keccak256Hash([]byte("Deposited(address,uint256,uint256,uint256,uint256)")).Hex()
+	depositedEventSig := crypto.Keccak256Hash([]byte("Deposited(address,bool,uint256,uint256,uint256,uint256)")).Hex()
 	withdrawalRequestedEventSig := crypto.Keccak256Hash([]byte("WithdrawalRequested(address,uint256)")).Hex()
 
-	// Listen for the events
+	// Listen for events
 	for {
 		select {
 		case err := <-sub.Err():
 			log.Printf("Error in subscription: %v", err)
 			log.Println("Falling back to polling for events...")
-			pollForEvents(clientL1, contractAddress, contractABI, privateKeyHex, clientL2, wstonSwapPoolAddress, marketplaceAddress)
+			pollForEvents(clientL1, contractAddress, privateKeyHex, clientL2, wstonSwapPoolAddress, marketplaceAddress)
 			return
 		case vLog := <-logs:
-			// Check if the log matches the Deposited event
 			if vLog.Topics[0].Hex() == depositedEventSig {
-				// Parse the Deposited event
 				event := new(DepositedEvent)
 				err := contractABI.UnpackIntoInterface(event, "Deposited", vLog.Data)
 				if err != nil {
@@ -134,21 +126,18 @@ func main() {
 					continue
 				}
 
-				fmt.Printf("Deposited event detected: To=%s, Amount=%s, WstonAmount=%s, DepositTime=%s, DepositBlockNumber=%s\n",
-					event.To.Hex(), event.Amount.String(), event.WstonAmount.String(), event.DepositTime.String(), event.DepositBlockNumber.String())
+				fmt.Printf("Deposited event detected: To=%s, Token=%t, Amount=%s, WstonAmount=%s, DepositTime=%s, DepositBlockNumber=%s\n",
+					event.To.Hex(), event.Token, event.Amount.String(), event.WstonAmount.String(), event.DepositTime.String(), event.DepositBlockNumber.String())
 
-				// Fetch the stakingIndex from L1
 				stakingIndex, err := fetchStakingIndex(clientL1, l1WrappedStakedTonAddress)
 				if err != nil {
 					log.Printf("Failed to fetch staking index: %v", err)
 					continue
 				}
 
-				// Trigger the oracle job for Deposited event
 				runOracleJob(clientL1, clientL2, privateKeyHex, l1WrappedStakedTonAddress, wstonSwapPoolAddress, marketplaceAddress, stakingIndex)
 
 			} else if vLog.Topics[0].Hex() == withdrawalRequestedEventSig {
-				// Parse the WithdrawalRequested event
 				event := new(WithdrawalRequestedEvent)
 				err := contractABI.UnpackIntoInterface(event, "WithdrawalRequested", vLog.Data)
 				if err != nil {
@@ -159,21 +148,19 @@ func main() {
 				fmt.Printf("WithdrawalRequested event detected: To=%s, Amount=%s\n",
 					event.To.Hex(), event.Amount.String())
 
-				// Fetch the stakingIndex from L1
 				stakingIndex, err := fetchStakingIndex(clientL1, l1WrappedStakedTonAddress)
 				if err != nil {
 					log.Printf("Failed to fetch staking index: %v", err)
 					continue
 				}
 
-				// Trigger the oracle job for WithdrawalRequested event
 				runOracleJob(clientL1, clientL2, privateKeyHex, l1WrappedStakedTonAddress, wstonSwapPoolAddress, marketplaceAddress, stakingIndex)
 			}
 		}
 	}
 }
 
-func pollForEvents(clientL1 *ethclient.Client, contractAddress common.Address, contractABI abi.ABI, privateKeyHex string, clientL2 *ethclient.Client, wstonSwapPoolAddress, marketplaceAddress string) {
+func pollForEvents(clientL1 *ethclient.Client, contractAddress common.Address, privateKeyHex string, clientL2 *ethclient.Client, wstonSwapPoolAddress, marketplaceAddress string) {
 	// Define the block range for polling
 	startBlock := uint64(0) // You may want to start from a specific block
 	endBlock := uint64(0)   // Set to 0 to always fetch the latest block
@@ -266,14 +253,14 @@ func pollForEvents(clientL1 *ethclient.Client, contractAddress common.Address, c
 
 func fetchStakingIndex(client *ethclient.Client, contractAddress string) (*big.Int, error) {
 	contractAddr := common.HexToAddress(contractAddress)
-	contractABI := `[{"constant":true,"inputs":[],"name":"stakingIndex","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
+	contractABI := `[{"constant":true,"inputs":[],"name":"getStakingIndex","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
 
 	parsedABI, err := abi.JSON(strings.NewReader(contractABI))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse contract ABI: %v", err)
 	}
 
-	callData, err := parsedABI.Pack("stakingIndex")
+	callData, err := parsedABI.Pack("getStakingIndex")
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack call data: %v", err)
 	}
@@ -289,13 +276,14 @@ func fetchStakingIndex(client *ethclient.Client, contractAddress string) (*big.I
 	}
 
 	var stakingIndex *big.Int
-	err = parsedABI.UnpackIntoInterface(&stakingIndex, "stakingIndex", result)
+	err = parsedABI.UnpackIntoInterface(&stakingIndex, "getStakingIndex", result)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unpack result: %v", err)
 	}
 
 	return stakingIndex, nil
 }
+
 
 func runOracleJob(clientL1, clientL2 *ethclient.Client, privateKeyHex, l1WrappedStakedTonAddress, wstonSwapPoolAddress, marketplaceAddress string, stakingIndex *big.Int) {
 	// Use the stakingIndex directly from the event

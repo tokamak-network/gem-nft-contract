@@ -1,6 +1,8 @@
 const { ethers } = require("hardhat");
 require('dotenv').config();
 
+// npx hardhat run scripts/utils/setCooldownPeriod.js --network thanos
+
 async function main() {
   const [deployer] = await ethers.getSigners();
 
@@ -14,32 +16,32 @@ async function main() {
   try {
     // Set Gems Cooldown Periods
     await GemFactory.setGemsCooldownPeriods(
-        BigInt(1), 
-        BigInt(1), 
-        BigInt(1), 
-        BigInt(1), 
-        BigInt(1),  
+        BigInt(24 * 60 * 60), 
+        BigInt(12 * 60 * 60), 
+        BigInt(6 * 60 * 60), 
+        BigInt(3 * 60 * 60), 
+        BigInt(1 * 60 * 60),  
         {gasLimit: 1000000}
     );
     console.log("Gems Cooldown Periods set");
 
     await GemFactory.setGemsMiningPeriods(
-        BigInt(1), 
-        BigInt(1),
-        BigInt(1),
-        BigInt(1),
-        BigInt(1),
+        BigInt(10 * 60), 
+        BigInt(10 * 60),
+        BigInt(10 * 60),
+        BigInt(10 * 60),
+        BigInt(10 * 60),
         {gasLimit: 1000000}
       );
       console.log("Gems Mining Periods set");
 
     // Set Mining Trys
     await GemFactory.setMiningTries(
-      BigInt(100),  // rareminingTry
-      BigInt(100),  // uniqueminingTry
-      BigInt(100), // epicminingTry
-      BigInt(100), // legendaryminingTry
-      BigInt(100),  // mythicminingTry
+      BigInt(1),  // rareminingTry
+      BigInt(2),  // uniqueminingTry
+      BigInt(4), // epicminingTry
+      BigInt(8), // legendaryminingTry
+      BigInt(16),  // mythicminingTry
       {gasLimit: 1000000}
     );
     console.log("Mining Trys set");

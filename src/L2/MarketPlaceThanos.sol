@@ -294,11 +294,11 @@ contract MarketPlaceThanos is ProxyStorage, MarketPlaceStorage, ReentrancyGuard,
             IERC20(wston).transferFrom(_payer, seller, price);
         } else {
             // Calculate the total price in TON (we multiply the WSTON price by the staking index)
-            uint256 wstonPrice = (price * stakingIndex) / DECIMALS;
+            uint256 tonPrice = (price * stakingIndex) / DECIMALS;
             // Add the ton fees 
-            uint256 totalprice = _toWAD(wstonPrice + ((wstonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
+            uint256 totalprice = _toWAD(tonPrice + ((tonPrice * tonFeesRate) / TON_FEES_RATE_DIVIDER));
             // Transfer TON from payer to treasury
-            if(msg.value != totalprice) {
+            if(msg.value < totalprice) {
                 revert WrongMsgValue();
             }
             if (seller != treasury) {

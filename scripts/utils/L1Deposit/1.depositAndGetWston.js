@@ -23,7 +23,7 @@ async function main() {
     const tonTokenContract = new ethers.Contract(tonTokenAddress, tonTokenABI, deployer);
 
     // Define the amount to deposit (in TON)
-    const tonAmount = ethers.parseUnits('10000', 'ether'); 
+    const tonAmount = ethers.parseUnits('100', 'ether'); 
 
 
     try {
