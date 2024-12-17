@@ -6,20 +6,19 @@ async function main() {
 
   console.log("collect Gem with the account:", deployer.address);
   const gemFactoryProxy = process.env.GEM_FACTORY_PROXY;
+  const drbCoordinatorAddress = process.env.DRB_COORDINATOR_MOCK;
 
   // Get contract instance
   const GemFactoryMining = await ethers.getContractAt("GemFactoryMining", gemFactoryProxy);
 
   
   try {
-    // Convert 0.005 ETH to wei
-    const ethValue = ethers.parseUnits('0.3', 'ether');
-    const tx = await GemFactoryMining.pickMinedGEM(100, {
-        gasLimit: 15000000,
-        value: ethValue
-    });
-    await tx.wait();
-    console.log("PickMinedGem called");
+
+    const drbInitializeTx = await GemFactoryMining.DRBInitialize(
+        drbCoordinatorAddress
+      );
+      await drbInitializeTx.wait();
+      console.log("GemFactoryMining DRB initialized");
 
 
   } catch (error) {

@@ -78,6 +78,8 @@ contract GemFactoryStorage {
     uint32 internal LegendaryGemsCooldownPeriod;
     uint32 internal MythicGemsCooldownPeriod;
 
+    uint32 public callbackGasLimit;
+
     uint256 internal CommonGemsValue;
     uint256 internal RareGemsValue;
     uint256 internal UniqueGemsValue;
@@ -95,9 +97,6 @@ contract GemFactoryStorage {
     address internal treasury;
     address internal marketplace;
     address internal airdrop;
-
-    // constants
-    uint32 public constant CALLBACK_GAS_LIMIT = 2100000;
 
     //---------------------------------------------------------------------------------------
     //-------------------------------------EVENTS--------------------------------------------
@@ -177,6 +176,8 @@ contract GemFactoryStorage {
         uint256 LegendaryValue,
         uint256 MythicValue
     );
+
+    event CallBackGasLimitUpdated(uint32 newCallbackGasLimit);
 
     //---------------------------------------------------------------------------------------
     //-------------------------------------ERRORS--------------------------------------------

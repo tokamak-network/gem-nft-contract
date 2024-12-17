@@ -137,6 +137,7 @@ contract GemFactory is
         wston = _wston;
         ton = _ton;
         treasury = _treasury;
+        callbackGasLimit = 4000000;
     }
 
     /**
@@ -284,6 +285,15 @@ contract GemFactory is
      */
     function setWston(address _wston) external onlyOwner {
         wston = _wston;
+    }
+
+    /**
+     * @notice Sets the gas limit for the callback function.
+     * @param _callbackGasLimit New gas limit for the callback function.
+     */
+    function setCallbackGasLimit(uint32 _callbackGasLimit) external onlyOwner {
+        callbackGasLimit = _callbackGasLimit;
+        emit CallBackGasLimitUpdated(_callbackGasLimit);
     }
 
 
