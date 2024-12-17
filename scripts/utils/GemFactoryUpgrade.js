@@ -27,18 +27,35 @@ async function main() {
     console.log("GemFactoryMining deployed to:", gemFactoryMining.target);
 
     await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
-
+/*
     await run("verify:verify", {
         address: gemFactoryMining.target,
         constructorArguments: [],
-      });
+      });*/
+    
+    // Instantiate the GemFactory
+    const GemFactory = await ethers.getContractFactory("GemFactory");
+    const gemFactory = await GemFactory.deploy();
+    await gemFactory.waitForDeployment();
+    console.log("GemFactory deployed to:", gemFactory.target);
 
+    await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
+/*
+    await run("verify:verify", {
+        address: gemFactory.target,
+        constructorArguments: [],
+      });
+      */
     // ------------------------ GEMFACTORY PROXY ---------------------------------
 
     const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
 
     // Get contract instance
     const GemFactoryProxy = await ethers.getContractAt("GemFactoryProxy", gemFactoryProxyAddress);
+    const upgradeTo = await GemFactoryProxy.upgradeTo(gemFactory.target);
+    await upgradeTo.wait();
+    console.log("GemFactory upgraded to implementation: ", gemFactory.target);
+
     // Set the third index to the GemFactoryMining contract
     const setImplementation2 = await GemFactoryProxy.setImplementation2(gemFactoryMining.target, 2, true);
     await setImplementation2.wait();

@@ -10,7 +10,7 @@ interface IGemFactory {
         uint256 gemCooldownDueDate; // gem cooldown before user can start mining
         uint256 randomRequestId; // store the random request (if any). it is initially set up to 0
         uint8 rarity; 
-        uint8 miningTry; 
+        uint8 miningTry;
         bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color

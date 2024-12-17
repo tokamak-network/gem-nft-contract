@@ -1,11 +1,6 @@
-version: '3.7'
-
+version: '3.8'
 services:
-  fetchstakingindextitan:
-    image: fetchstakingindextitan
-    secrets:
-      - private_key
-
-secrets:
-  private_key:
-    external: true
+  app:
+    image: fetchstakingindexthanos
+    env_file:
+      - .env

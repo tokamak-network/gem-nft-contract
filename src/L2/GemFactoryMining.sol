@@ -156,7 +156,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         }
 
         // Request randomness from the consumer with default parameters
-        (uint256 directFundingCost, uint256 requestId) = requestRandomness(0, 0, CALLBACK_GAS_LIMIT);
+        (uint256 directFundingCost, uint256 requestId) = requestRandomness(0, 0, callbackGasLimit);
         // Store the request ID in the GEM's data
         Gems[_tokenId].randomRequestId = requestId;
 
