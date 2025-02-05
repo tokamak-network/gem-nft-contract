@@ -157,7 +157,7 @@ contract MockTreasuryUpgraded is ProxyStorage, IERC721Receiver, ReentrancyGuard,
     function createPreminedGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
-        uint8 _backgroundColor,
+        bytes1[2] memory _backgroundColor,
         uint8[4] memory _quadrants,  
         string memory _tokenURI
     ) external onlyOwnerOrRandomPackOrMarketplace returns (uint256) {
@@ -178,7 +178,7 @@ contract MockTreasuryUpgraded is ProxyStorage, IERC721Receiver, ReentrancyGuard,
     function createPreminedGEMPool(
         GemFactoryStorage.Rarity[] memory _rarities,
         uint8[2][] memory _colors,
-        uint8[] memory _backgroundColors,
+        bytes1[2][] memory _backgroundColors,
         uint8[4][] memory _quadrants, 
         string[] memory _tokenURIs
     ) public onlyOwnerOrRandomPackOrMarketplace returns (uint256[] memory) {

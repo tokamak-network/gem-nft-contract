@@ -126,7 +126,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 background = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -177,7 +177,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 background = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -210,7 +210,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 background = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -262,7 +262,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 background = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
         // Call createGEM function from the Treasury contract
@@ -299,9 +299,9 @@ contract MarketPlaceThanosTest is L2BaseTest {
         colors[0] = [0,0];
         colors[1] = [1,1];
 
-        uint8[] memory backgroundColors = new uint8[](2);
-        backgroundColors[0] = 1;
-        backgroundColors[1] = 2;
+        bytes1[2][] memory backgroundColors = new bytes1[2][](2);
+        backgroundColors[0] = [bytes1(0x00), bytes1(0x00)];
+        backgroundColors[1] = [bytes1(0x00), bytes1(0x00)];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
@@ -368,9 +368,9 @@ contract MarketPlaceThanosTest is L2BaseTest {
         colors[0] = [0,0];
         colors[1] = [1,1];
 
-        uint8[] memory backgroundColors = new uint8[](2);
-        backgroundColors[0] = 1;
-        backgroundColors[1] = 2;
+        bytes1[2][] memory backgroundColors = new bytes1[2][](2);
+        backgroundColors[0] = [bytes1(0x00), bytes1(0x00)];
+        backgroundColors[1] = [bytes1(0x00), bytes1(0x00)];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
@@ -437,9 +437,9 @@ contract MarketPlaceThanosTest is L2BaseTest {
         colors[0] = [0,0];
         colors[1] = [1,1];
 
-        uint8[] memory backgroundColors = new uint8[](2);
-        backgroundColors[0] = 1;
-        backgroundColors[1] = 2;
+        bytes1[2][] memory backgroundColors = new bytes1[2][](2);
+        backgroundColors[0] = [bytes1(0x00), bytes1(0x00)];
+        backgroundColors[1] = [bytes1(0x00), bytes1(0x00)];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
@@ -492,9 +492,9 @@ contract MarketPlaceThanosTest is L2BaseTest {
         colors[0] = [0,0];
         colors[1] = [1,1];
 
-        uint8[] memory backgroundColors = new uint8[](2);
-        backgroundColors[0] = 1;
-        backgroundColors[1] = 2;
+        bytes1[2][] memory backgroundColors = new bytes1[2][](2);
+        backgroundColors[0] = [bytes1(0x00), bytes1(0x00)];
+        backgroundColors[1] = [bytes1(0x00), bytes1(0x00)];
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
@@ -590,7 +590,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 backgroundColor = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
 
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
@@ -598,7 +598,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
             color,
-            backgroundColor,
+            background,
             quadrants,
             tokenURI
         );
@@ -638,14 +638,14 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 backgroundColor = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
             color,
-            backgroundColor,
+            background,
             quadrants,
             tokenURI
         );
@@ -688,14 +688,14 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 backgroundColor = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
             color,
-            backgroundColor,
+            background,
             quadrants,
             tokenURI
         );
@@ -733,14 +733,14 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 backgroundColor = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
         // Call createGEM function from the Treasury contract
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
             color,
-            backgroundColor,
+            background,
             quadrants,
             tokenURI
         );
@@ -774,7 +774,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
-        uint8 backgroundColor = 0;
+        bytes1[2] memory background = [bytes1(0x00), bytes1(0x00)];
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
 
@@ -782,7 +782,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(
             rarity,
             color,
-            backgroundColor,
+            background,
             quadrants,
             tokenURI
         );

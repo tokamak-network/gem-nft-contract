@@ -22,7 +22,7 @@ contract GemFactoryStorage {
         bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
-        uint8 backgroundColor;
+        bytes1[2] backgroundColor; // background color (2 HEX values). If solid => second bytes1 is equal to 0
         string tokenURI; // IPFS address of the metadata file 
     }
 
@@ -44,9 +44,9 @@ contract GemFactoryStorage {
     uint8 public colorsCount;
     uint8[2][] public colors;
 
-    mapping(uint8 => string) public backgroundColorName;
+    mapping(bytes1 => mapping(bytes1 => string)) public backgroundColorName;
     uint8 public backgroundColorsCount;
-    uint8[] public backgroundColors;
+    bytes1[2][] public backgroundColors;
 
     mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) public ownershipTokenCount;
@@ -112,7 +112,7 @@ contract GemFactoryStorage {
         uint256 indexed tokenId, 
         Rarity rarity, 
         uint8[2] color, 
-        uint8 backgroundColor,
+        bytes1[2] backgroundColor,
         uint8 miningTry,
         uint256 value,
         uint8[4] quadrants, 
@@ -140,7 +140,7 @@ contract GemFactoryStorage {
         Rarity newRarity, 
         uint8[4] forgedQuadrants, 
         uint8[2] color, 
-        uint8 backgroundColor,
+        bytes1[2] backgroundColor,
         uint256 newValue
     );
     event Test();

@@ -14,7 +14,7 @@ interface IGemFactory {
         bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
-        uint8 backgroundColor;
+        bytes1[2] backgroundColor;
         string tokenURI; // IPFS address of the metadata file 
     }
 
@@ -26,7 +26,7 @@ interface IGemFactory {
     function createGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
-        uint8 _backgroundColor, 
+        bytes1[2] memory _backgroundColor, 
         uint8[4] memory _quadrants,
         string memory _tokenURI
     ) external  returns (uint256);
@@ -34,7 +34,7 @@ interface IGemFactory {
     function createGEMPool(
         GemFactoryStorage.Rarity[] memory _rarities,
         uint8[2][] memory _colors,
-        uint8[] memory _bckgroundColors,
+        bytes1[2][] memory _bckgroundColors,
         uint8[4][] memory _quadrants,
         string[] memory _tokenURIs
     ) external returns (uint256[] memory);

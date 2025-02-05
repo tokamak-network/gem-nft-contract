@@ -335,12 +335,12 @@ contract GemFactory is
      * @notice Creates a premined pool of GEM based on their attributes passed in the parameters and assigns their ownership to the contract.
      * @param _rarity The rarity of the GEM to be created.
      * @param _color The colors of the GEM to be created.
-     * @param _backgroundColor The background color of the GEM to be created
+     * @param _backgroundColor The background colors of the GEM to be created
      * @param _quadrants Quadrants of the GEM to be created.
      * @param _tokenURI TokenURIs of each GEM.
      * @return The IDs of the newly created GEM.
      */
-    function createGEM(Rarity _rarity, uint8[2] memory _color, uint8 _backgroundColor, uint8[4] memory _quadrants, string memory _tokenURI)
+    function createGEM(Rarity _rarity, uint8[2] memory _color, bytes1[2] memory _backgroundColor, uint8[4] memory _quadrants, string memory _tokenURI)
         public
         onlyTreasury
         whenNotPaused
@@ -352,7 +352,7 @@ contract GemFactory is
         }
 
         // Check if the specified color combination exists
-        if (!backgroundColorExists(_backgroundColor)) {
+        if (!backgroundColorExists(_backgroundColor[0], _backgroundColor[1])) {
             revert BackgroundColorNotExist();
         }
 
@@ -372,8 +372,6 @@ contract GemFactory is
             if (_quadrants[2] != 1 && _quadrants[2] != 2) revert NewGemInvalidQuadrant(2, 1, 2);
             if (_quadrants[3] != 1 && _quadrants[3] != 2) revert NewGemInvalidQuadrant(3, 1, 2);
             if (sumOfQuadrants >= 8) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "COMMON");
-            // only 1 background color for common gems
-            if (_backgroundColor != 0) revert WrongBackGroundColor();
 
             // Set attributes for COMMON rarity
             _gemCooldownPeriod = 0;
@@ -386,8 +384,6 @@ contract GemFactory is
             if (_quadrants[2] != 2 && _quadrants[2] != 3) revert NewGemInvalidQuadrant(2, 2, 3);
             if (_quadrants[3] != 2 && _quadrants[3] != 3) revert NewGemInvalidQuadrant(3, 2, 3);
             if (sumOfQuadrants >= 12) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "RARE");
-            // only 8 different backgrounds (from 0 to 7) 
-            if (_backgroundColor > 7) revert WrongBackGroundColor();
 
             // Set attributes for RARE rarity
             _gemCooldownPeriod = RareGemsCooldownPeriod;
@@ -400,8 +396,6 @@ contract GemFactory is
             if (_quadrants[2] != 3 && _quadrants[2] != 4) revert NewGemInvalidQuadrant(2, 3, 4);
             if (_quadrants[3] != 3 && _quadrants[3] != 4) revert NewGemInvalidQuadrant(3, 3, 4);
             if (sumOfQuadrants >= 16) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "UNIQUE");
-            // only 8 different backgrounds (from 0 to 7) 
-            if (_backgroundColor > 7) revert WrongBackGroundColor();
             
             // Set attributes for UNIQUE rarity
             _gemCooldownPeriod = UniqueGemsCooldownPeriod;
@@ -414,8 +408,6 @@ contract GemFactory is
             if (_quadrants[2] != 4 && _quadrants[2] != 5) revert NewGemInvalidQuadrant(2, 4, 5);
             if (_quadrants[3] != 4 && _quadrants[3] != 5) revert NewGemInvalidQuadrant(3, 4, 5);
             if (sumOfQuadrants >= 20) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "EPIC");
-            // only 8 different backgrounds (from 0 to 7) 
-            if (_backgroundColor > 7) revert WrongBackGroundColor();
 
             // Set attributes for EPIC rarity
             _gemCooldownPeriod = EpicGemsCooldownPeriod;
@@ -428,8 +420,6 @@ contract GemFactory is
             if (_quadrants[2] != 5 && _quadrants[2] != 6) revert NewGemInvalidQuadrant(2, 5, 6);
             if (_quadrants[3] != 5 && _quadrants[3] != 6) revert NewGemInvalidQuadrant(3, 5, 6);
             if (sumOfQuadrants >= 24) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "LEGENDARY");
-            // only 6 different backgrounds (from 0 to 5) 
-            if (_backgroundColor > 5) revert WrongBackGroundColor();
 
             // Set attributes for LEGENDARY rarity
             _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
@@ -440,8 +430,6 @@ contract GemFactory is
             if (_quadrants[0] != 6 || _quadrants[1] != 6 || _quadrants[2] != 6 || _quadrants[3] != 6) {
                 revert NewGemInvalidQuadrant(0, 6, 6);
             }
-            // only 6 different backgrounds (from 0 to 5) 
-            if (_backgroundColor > 5) revert WrongBackGroundColor();
             // Set attributes for MYTHIC rarity
             _gemCooldownPeriod = MythicGemsCooldownPeriod;
             _value = MythicGemsValue;
@@ -492,7 +480,7 @@ contract GemFactory is
     function createGEMPool(
         Rarity[] memory _rarities,
         uint8[2][] memory _colors,
-        uint8[] memory _backgroundColors,
+        bytes1[2][] memory _backgroundColors,
         uint8[4][] memory _quadrants,
         string[] memory _tokenURIs
     ) public onlyTreasury whenNotPaused returns (uint256[] memory) {
@@ -616,11 +604,12 @@ contract GemFactory is
      * @notice Adds a new background color to the list of available background colors.
      * @dev Only callable by the owner of the contract.
      * @param _backgroundColorName The name of the background color to add.
-     * @param _index The index of the background color.
+     * @param _index1 The first index of the background color.
+     * @param _index2 The second index of the background color.
      */
-    function addBackgroundColor(string memory _backgroundColorName, uint8 _index) external onlyOwner {
-        backgroundColorName[_index] = _backgroundColorName;
-        backgroundColors.push(_index);
+    function addBackgroundColor(string memory _backgroundColorName, bytes1 _index1, bytes1 _index2) external onlyOwner {
+        backgroundColorName[_index1][_index2] = _backgroundColorName;
+        backgroundColors.push([_index1, _index2]);
         backgroundColorsCount++;
 
         emit BackgroundColorAdded(backgroundColorsCount, _backgroundColorName);
@@ -652,12 +641,13 @@ contract GemFactory is
 
     /**
      * @notice Checks if a background color exists based on the given indices.
-     * @param _index The first index of the color.
+     * @param _index1 The first index of the color.
+     * @param _index2 The second index of the color.
      * @return True if the color exists, false otherwise.
      */
-    function backgroundColorExists(uint8 _index) internal view returns (bool) {
+    function backgroundColorExists(bytes1 _index1, bytes1 _index2) internal view returns (bool) {
         // Check if the background color name is not an empty string
-        return bytes(backgroundColorName[_index]).length > 0;
+        return bytes(backgroundColorName[_index1][_index2]).length > 0;
     }
 
     /**
@@ -861,12 +851,13 @@ contract GemFactory is
 
     /**
      * @notice Retrieves the name of a background color based on its indices.
-     * @param _index The index of the background color.
+     * @param _index1 The first index of the background color.
+     * @param _index2 The second index of the background color.
      * @return The name of the background color as a string.
      */
-    function getBackgroundColorName(uint8 _index) external view returns (string memory) {
+    function getBackgroundColorName(bytes1 _index1, bytes1 _index2) external view returns (string memory) {
         // Return the color name associated with the specified indices
-        return backgroundColorName[_index];
+        return backgroundColorName[_index1][_index2];
     }
 
     function availableGemsRandomPack() external view returns(bool) {

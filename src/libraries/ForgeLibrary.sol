@@ -190,7 +190,7 @@ library ForgeLibrary {
             isLocked: false,
             quadrants: forgedQuadrants,
             color: _color,
-            backgroundColor: 0,
+            backgroundColor: [bytes1(0x00), bytes1(0x00)],
             tokenURI: ""
         });
         Gems.push(_Gem);

@@ -79,7 +79,7 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
         );
 
         // Emit an event for the forged GEM
-        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, 0, forgedGemsValue);
+        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, [bytes1(0x00), bytes1(0x00)], forgedGemsValue);
 
         // Burn the old tokens
         burnTokens(msg.sender, _tokenIds);
@@ -89,7 +89,7 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
         _setTokenURI(newGemId, ""); // Set empty URI for the new token
 
         // Emit another event for the created GEM
-        emit Created(newGemId, newRarity, _color, 0, forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsCooldownDueDate, "", msg.sender);
+        emit Created(newGemId, newRarity, _color, [bytes1(0x00), bytes1(0x00)], forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsCooldownDueDate, "", msg.sender);
 
         return newGemId;
     }
