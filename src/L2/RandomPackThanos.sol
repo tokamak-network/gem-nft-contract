@@ -21,6 +21,7 @@ interface ITreasury {
     function createPreminedGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
+        uint8 _backgroundColor,
         uint8[4] memory _quadrants,  
         string memory _tokenURI
     ) external returns (uint256);
@@ -332,7 +333,7 @@ contract RandomPackThanos is ProxyStorage, ReentrancyGuard, IERC721Receiver, Aut
      * @dev this function reverts if there is no WSTON availbe as a collateral for a new Common Gem
      */
     function mintCommonGem(GemPackRequestStatus storage request) private {
-        request.chosenTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0, 0], [1, 1, 1, 1], "");
+        request.chosenTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0, 0], 0, [1, 1, 1, 1], "");
         ITreasury(treasury).transferTreasuryGEMto(request.requester, request.chosenTokenId);
         emit CommonGemMinted();
     }

@@ -22,6 +22,7 @@ contract GemFactoryTest is L2BaseTest {
         returns (
             GemFactoryStorage.Rarity rarity,
             uint8[2] memory color,
+            uint8 backgroundColor,
             uint8[4] memory quadrants,
             string memory tokenURI
         )
@@ -29,6 +30,7 @@ contract GemFactoryTest is L2BaseTest {
         // Define GEM properties
         rarity = GemFactoryStorage.Rarity.COMMON;
         color = [0, 0];
+        backgroundColor = 0;
         quadrants = [1, 2, 1, 1];
         tokenURI = "https://example.com/token/1";
     }
@@ -39,11 +41,11 @@ contract GemFactoryTest is L2BaseTest {
     function testCreateGEM() public {
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         // Verify GEM creation
         assert(newGemId == 0);
@@ -64,11 +66,11 @@ contract GemFactoryTest is L2BaseTest {
         // creating a single GEM
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         //transferring the GEM from the treasury to user1
         vm.startPrank(treasuryProxyAddress);
@@ -91,11 +93,11 @@ contract GemFactoryTest is L2BaseTest {
         // creating a single GEM
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         // listing the gem into the marketplace
         uint256 gemPrice = 1500 * 10 ** 27;
@@ -117,11 +119,11 @@ contract GemFactoryTest is L2BaseTest {
         // creating a single GEM
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         vm.startPrank(treasuryProxyAddress);
         GemFactory(gemfactoryProxyAddress).safeTransferFrom(treasuryProxyAddress, user1, newGemId);
@@ -145,11 +147,11 @@ contract GemFactoryTest is L2BaseTest {
         // creating a single GEM
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         vm.startPrank(treasuryProxyAddress);
         // ensure the transfer fails due to the fact airdrop contract does not implement onERC721Receive function
@@ -166,11 +168,11 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
 
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         vm.expectRevert(abi.encodeWithSelector(UnauthorizedCaller.selector, owner));
-        GemFactory(gemfactoryProxyAddress).createGEM(rarity, color, quadrants, tokenURI);
+        GemFactory(gemfactoryProxyAddress).createGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         vm.stopPrank();
     }
@@ -183,11 +185,11 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(user1);
 
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         vm.expectRevert("caller is neither owner nor randomPack contract");
-        Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         vm.stopPrank();
     }
@@ -203,6 +205,10 @@ contract GemFactoryTest is L2BaseTest {
         colors[0] = [0, 0];
         colors[1] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 1;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
@@ -217,7 +223,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM creation
         assert(newGemIds.length == 2);
@@ -247,6 +253,10 @@ contract GemFactoryTest is L2BaseTest {
         colors[0] = [0, 0];
         colors[1] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 1;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
@@ -261,7 +271,7 @@ contract GemFactoryTest is L2BaseTest {
 
         vm.expectRevert("caller is neither owner nor randomPack contract");
         // Call createPreminedGEMPool function from the Treasury contract
-        Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+        Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
         vm.stopPrank();
     }
 
@@ -276,6 +286,10 @@ contract GemFactoryTest is L2BaseTest {
         colors[0] = [0, 0];
         colors[1] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 1;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
@@ -289,7 +303,7 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[1] = "https://example.com/token/2";
 
         vm.expectRevert(abi.encodeWithSelector(UnauthorizedCaller.selector, owner));
-        GemFactory(gemfactoryProxyAddress).createGEMPool(rarities, colors, quadrants, tokenURIs);
+        GemFactory(gemfactoryProxyAddress).createGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         vm.stopPrank();
     }
@@ -301,11 +315,11 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
 
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
@@ -338,11 +352,11 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
 
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
@@ -369,11 +383,11 @@ contract GemFactoryTest is L2BaseTest {
     function testMeltGEMShouldRevertIfContractPaused() public {
         vm.startPrank(owner);
         // defining a default GEM
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Call createGEM function from the Treasury contract
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
@@ -407,6 +421,10 @@ contract GemFactoryTest is L2BaseTest {
         colors[0] = [0, 0];
         colors[1] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
@@ -421,7 +439,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -479,6 +497,12 @@ contract GemFactoryTest is L2BaseTest {
         colors[2] = [3, 1];
         colors[3] = [2, 2];
 
+        uint8[] memory backgroundColors = new uint8[](4);
+        backgroundColors[0] = 1;
+        backgroundColors[1] = 2;
+        backgroundColors[2] = 1;
+        backgroundColors[3] = 4;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](4);
         rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
@@ -499,7 +523,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -535,8 +559,7 @@ contract GemFactoryTest is L2BaseTest {
 
         uint8[2] memory color = [1, 3];
 
-        uint256 newGemId =
-            GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
+        uint256 newGemId = GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.UNIQUE, color);
 
         // Verify the new gem properties
         GemFactoryStorage.Gem memory newGem = GemFactory(gemfactoryProxyAddress).getGem(newGemId);
@@ -564,6 +587,10 @@ contract GemFactoryTest is L2BaseTest {
         colors[0] = [0, 0];
         colors[1] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
@@ -578,7 +605,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -622,6 +649,10 @@ contract GemFactoryTest is L2BaseTest {
         colors[0] = [0, 0];
         colors[1] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
@@ -636,7 +667,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -675,6 +706,10 @@ contract GemFactoryTest is L2BaseTest {
         colors[0] = [0, 0];
         colors[1] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.RARE;
@@ -689,7 +724,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -735,6 +770,10 @@ contract GemFactoryTest is L2BaseTest {
         colors[0] = [0, 0];
         colors[1] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
@@ -749,7 +788,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -797,6 +836,12 @@ contract GemFactoryTest is L2BaseTest {
         colors[2] = [2, 2]; // solid Topaz
         colors[3] = [6, 1]; // gradient Amethyst/Amber
 
+        uint8[] memory backgroundColors = new uint8[](4);
+        backgroundColors[0] = 1;
+        backgroundColors[1] = 2;
+        backgroundColors[2] = 1;
+        backgroundColors[3] = 4;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](4);
         rarities[0] = GemFactoryStorage.Rarity.EPIC;
         rarities[1] = GemFactoryStorage.Rarity.EPIC;
@@ -816,7 +861,7 @@ contract GemFactoryTest is L2BaseTest {
         tokenURIs[3] = "https://example.com/token/4";
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
         // Verify GEM creation
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[1]) == treasuryProxyAddress);
@@ -856,12 +901,13 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
         // Define GEM properties
         uint8[2] memory color = [0, 0];
+        uint8 backgroundColor = 0;
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
         uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
@@ -889,12 +935,13 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
         // Define GEM properties
         uint8[2] memory color = [0, 0];
+        uint8 backgroundColor = 0;
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
         uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
@@ -931,12 +978,13 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
         // Define GEM properties
         uint8[2] memory color = [0, 0];
+        uint8 backgroundColor = 0;
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
         uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
@@ -964,11 +1012,12 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
         // Define GEM properties
         uint8[2] memory color = [0, 0];
+        uint8 backgroundColor = 0;
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
         uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
         vm.stopPrank();
@@ -1005,12 +1054,13 @@ contract GemFactoryTest is L2BaseTest {
 
         // Define GEM properties
         uint8[2] memory color = [0, 0];
+        uint8 backgroundColor = 0;
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.RARE;
         uint8[4] memory quadrants = [3, 2, 3, 3];
         string memory tokenURI = "https://example.com/token/1";
 
         // Create a GEM and transfer it to user1
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemId) == treasuryProxyAddress);
@@ -1111,6 +1161,13 @@ contract GemFactoryTest is L2BaseTest {
         colors[3] = [1, 1];
         colors[4] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](5);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+        backgroundColors[2] = 0;
+        backgroundColors[3] = 0;
+        backgroundColors[4] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
         rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
@@ -1134,7 +1191,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1190,6 +1247,13 @@ contract GemFactoryTest is L2BaseTest {
         colors[3] = [1, 1];
         colors[4] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](5);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+        backgroundColors[2] = 0;
+        backgroundColors[3] = 0;
+        backgroundColors[4] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
         rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
@@ -1213,7 +1277,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1320,6 +1384,13 @@ contract GemFactoryTest is L2BaseTest {
         colors[3] = [1, 1];
         colors[4] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](5);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+        backgroundColors[2] = 0;
+        backgroundColors[3] = 0;
+        backgroundColors[4] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
         rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
@@ -1343,7 +1414,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1399,6 +1470,13 @@ contract GemFactoryTest is L2BaseTest {
         colors[3] = [1, 1];
         colors[4] = [1, 1];
 
+        uint8[] memory backgroundColors = new uint8[](5);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+        backgroundColors[2] = 0;
+        backgroundColors[3] = 0;
+        backgroundColors[4] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
         rarities[0] = GemFactoryStorage.Rarity.UNIQUE;
         rarities[1] = GemFactoryStorage.Rarity.COMMON;
@@ -1422,7 +1500,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);
@@ -1469,11 +1547,11 @@ contract GemFactoryTest is L2BaseTest {
         vm.startPrank(owner);
 
         // Define GEM properties
-        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8[4] memory quadrants, string memory tokenURI) =
+        (GemFactoryStorage.Rarity rarity, uint8[2] memory color, uint8 backgroundColor, uint8[4] memory quadrants, string memory tokenURI) =
             defineDefaultGem();
 
         // Create a GEM
-        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, quadrants, tokenURI);
+        uint256 newGemId = Treasury(treasuryProxyAddress).createPreminedGEM(rarity, color, backgroundColor, quadrants, tokenURI);
         vm.stopPrank();
 
         vm.startPrank(treasuryProxyAddress);
@@ -1618,6 +1696,13 @@ contract GemFactoryTest is L2BaseTest {
         colors[2] = [1, 1];
         colors[3] = [1, 1];
         colors[4] = [1, 1];
+        
+        uint8[] memory backgroundColors = new uint8[](5);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+        backgroundColors[2] = 0;
+        backgroundColors[3] = 0;
+        backgroundColors[4] = 0;
 
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](5);
         rarities[0] = GemFactoryStorage.Rarity.EPIC;
@@ -1642,7 +1727,7 @@ contract GemFactoryTest is L2BaseTest {
 
         // Call createPreminedGEMPool function from the Treasury contract
         uint256[] memory newGemIds =
-            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, quadrants, tokenURIs);
+            Treasury(treasuryProxyAddress).createPreminedGEMPool(rarities, colors, backgroundColors, quadrants, tokenURIs);
 
         // Verify GEM minting
         assert(GemFactory(gemfactoryProxyAddress).ownerOf(newGemIds[0]) == treasuryProxyAddress);

@@ -23,7 +23,7 @@ async function main() {
     const l1BridgeContract = new ethers.Contract(l1bridge, l1BridgeABI, deployer);
 
     // Define the amount to deposit (in WSTON with 27 decimals)
-    const wstonAmount = ethers.parseUnits('10000', 27); 
+    const wstonAmount = ethers.parseUnits('40628', 27); 
 
     try {
         // Call the approve function

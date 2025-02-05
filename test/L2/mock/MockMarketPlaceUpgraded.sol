@@ -17,6 +17,7 @@ interface ITreasury {
     function createPreminedGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
+        uint8 _backgroundColor,
         uint8[4] memory _quadrants,  
         string memory _tokenURI
     ) external returns (uint256);
@@ -221,7 +222,7 @@ contract MockMarketPlaceUpgraded is ProxyStorage, MarketPlaceStorage, Reentrancy
         // the function caller pays a WSTON amount equal to the value of the GEM.
         IERC20(wston).safeTransferFrom(msg.sender, treasury, commonGemValue);
         // we mint from scratch a perfect common GEM 
-        uint256 newTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], [1,1,1,1], commonGemTokenUri);
+        uint256 newTokenId = ITreasury(treasury).createPreminedGEM(GemFactoryStorage.Rarity.COMMON, [0,0], 0, [1,1,1,1], commonGemTokenUri);
         // the new gem is transferred to the user
         ITreasury(treasury).transferTreasuryGEMto(msg.sender, newTokenId);
         return true;

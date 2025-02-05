@@ -12,7 +12,7 @@ async function main() {
 
   
   try {
-    const tx = await DrbCoordinator.fulfillRandomness(21, {
+    const tx = await DrbCoordinator.fulfillRandomness(295, {
         gasLimit: 300000,
     });
     await tx.wait();

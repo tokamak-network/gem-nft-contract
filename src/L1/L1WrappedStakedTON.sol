@@ -642,6 +642,14 @@ contract L1WrappedStakedTON is
         return stakingIndex;
     }
 
+    function getWtonAmount(uint256 _wstonAmount) external view returns(uint256) {
+        return ((_wstonAmount * stakingIndex) / DECIMALS);
+    }
+
+    function getTonAmount(uint256 _wstonAmount) external view returns(uint256) {
+        return (((_wstonAmount * stakingIndex) / DECIMALS) / 1e9);
+    }
+
     function getTonAddress() external view returns (address) {
         return ton;
     }

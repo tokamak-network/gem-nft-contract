@@ -13,6 +13,7 @@ library GemLibrary {
      * @param owner The address of the gem owner.
      * @param rarity The rarity of the gem.
      * @param color The color attributes of the gem.
+     * @param backgroundColor The background color of the gem.
      * @param quadrants The quadrant attributes of the gem.
      * @param value The value of the gem.
      * @param gemCooldownPeriod The cooldown period for the gem.
@@ -27,6 +28,7 @@ library GemLibrary {
         address owner,
         GemFactoryStorage.Rarity rarity,
         uint8[2] memory color,
+        uint8 backgroundColor,
         uint8[4] memory quadrants,
         uint256 value,
         uint256 gemCooldownPeriod,
@@ -38,6 +40,7 @@ library GemLibrary {
             rarity: rarity,
             quadrants: quadrants,
             color: color,
+            backgroundColor: backgroundColor,
             value: value,
             gemCooldownDueDate: gemCooldownPeriod,
             miningTry: miningTry,

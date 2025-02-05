@@ -16,7 +16,7 @@ async function main() {
   try {
     // Set Gems Cooldown Periods
     await GemFactory.setCallbackGasLimit(
-        4000000n,
+        10000000n,
         {gasLimit: 1000000}
     );
     console.log("callback gas limit set");

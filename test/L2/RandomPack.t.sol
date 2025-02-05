@@ -222,6 +222,11 @@ contract RandomPackTest is L2BaseTest {
         colors[1] = [1,1];
         colors[2] = [1,1];
 
+        uint8[] memory backgroundColors = new uint8[](3);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+        backgroundColors[2] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](3);
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.RARE;
@@ -241,6 +246,7 @@ contract RandomPackTest is L2BaseTest {
         uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
             rarities,
             colors,
+            backgroundColors,
             quadrants,
             tokenURIs
         );
@@ -301,6 +307,11 @@ contract RandomPackTest is L2BaseTest {
         uint8[2][] memory colors = new uint8[2][](2);
         colors[0] = [0,0];
         colors[1] = [1,1];
+
+        uint8[] memory backgroundColors = new uint8[](2);
+        backgroundColors[0] = 0;
+        backgroundColors[1] = 0;
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
@@ -314,6 +325,7 @@ contract RandomPackTest is L2BaseTest {
         Treasury(treasuryProxyAddress).createPreminedGEMPool(
             rarities,
             colors,
+            backgroundColors,
             quadrants,
             tokenURIs
         );

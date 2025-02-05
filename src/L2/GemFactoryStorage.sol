@@ -22,6 +22,7 @@ contract GemFactoryStorage {
         bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
+        uint8 backgroundColor;
         string tokenURI; // IPFS address of the metadata file 
     }
 
@@ -42,6 +43,10 @@ contract GemFactoryStorage {
     mapping(uint8 => mapping(uint8 => string)) public colorName;
     uint8 public colorsCount;
     uint8[2][] public colors;
+
+    mapping(uint8 => string) public backgroundColorName;
+    uint8 public backgroundColorsCount;
+    uint8[] public backgroundColors;
 
     mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) public ownershipTokenCount;
@@ -107,6 +112,7 @@ contract GemFactoryStorage {
         uint256 indexed tokenId, 
         Rarity rarity, 
         uint8[2] color, 
+        uint8 backgroundColor,
         uint8 miningTry,
         uint256 value,
         uint8[4] quadrants, 
@@ -134,8 +140,10 @@ contract GemFactoryStorage {
         Rarity newRarity, 
         uint8[4] forgedQuadrants, 
         uint8[2] color, 
+        uint8 backgroundColor,
         uint256 newValue
     );
+    event Test();
     event ColorValidated(uint8 color_0, uint8 color_1);
 
     // Pause Events
@@ -186,11 +194,13 @@ contract GemFactoryStorage {
     // gem creation errors
     error NewGemInvalidQuadrant(uint8 quadrantIndex, uint8 expectedValue1, uint8 expectedValue2);
     error SumOfQuadrantsTooHigh(uint8 sum, string rarity);
+    error WrongBackGroundColor();
     
     // Forging errors
     error InvalidQuadrant(uint8 quadrant, uint8 value);
     error InvalidSumOfQuadrants();
     error ColorNotExist();
+    error BackgroundColorNotExist();
 
     // Mining errors
     error MismatchedArrayLengths();

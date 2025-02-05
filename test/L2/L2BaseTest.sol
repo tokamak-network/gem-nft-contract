@@ -306,6 +306,16 @@ contract L2BaseTest is Test {
         GemFactory(gemfactoryProxyAddress).addColor("Amethyst/Amber",6,1);
         GemFactory(gemfactoryProxyAddress).addColor("Garnet",7,7);
 
+        GemFactory(gemfactoryProxyAddress).addBackgroundColor("Muted", 0);
+        GemFactory(gemfactoryProxyAddress).addBackgroundColor("grad1", 1);
+        GemFactory(gemfactoryProxyAddress).addBackgroundColor("grad2", 2);
+        GemFactory(gemfactoryProxyAddress).addBackgroundColor("grad3", 3);
+        GemFactory(gemfactoryProxyAddress).addBackgroundColor("grad4", 4);
+        GemFactory(gemfactoryProxyAddress).addBackgroundColor("grad5", 5);
+        GemFactory(gemfactoryProxyAddress).addBackgroundColor("grad6", 6);
+        GemFactory(gemfactoryProxyAddress).addBackgroundColor("grad7", 7);
+
+
         //deploying and initializing the airdrop contract
         airdrop = new Airdrop();
         airdropProxy = new AirdropProxy();

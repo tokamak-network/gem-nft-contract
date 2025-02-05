@@ -7,7 +7,7 @@ require('dotenv').config();
 async function main() {
     const [deployer] = await ethers.getSigners();
 
-    console.log("Minting GEMs with the account:", deployer.address);
+    console.log("Transferring WSTON with the account:", deployer.address);
     const treasuryProxyAddress = process.env.TREASURY_PROXY;
     const l2wstonAddress = process.env.THANOS_WRAPPED_STAKED_TON;
 
@@ -23,7 +23,7 @@ async function main() {
     const L2Wston = new ethers.Contract(l2wstonAddress, wstonABI, deployer);
 
     // Define the amount to deposit (in TON)
-    const wstonAmount = ethers.parseUnits('10000', 27); 
+    const wstonAmount = ethers.parseUnits('40628', 27); 
 
 
     try {

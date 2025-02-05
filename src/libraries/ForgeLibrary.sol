@@ -182,15 +182,16 @@ library ForgeLibrary {
         // Create the new GEM and add it to the storage
         GemFactoryStorage.Gem memory _Gem = GemFactoryStorage.Gem({
             tokenId: 0,
-            rarity: newRarity,
-            quadrants: forgedQuadrants,
-            color: _color,
             value: forgedGemsValue,
             gemCooldownDueDate: forgedGemsCooldownDueDate,
+            randomRequestId: 0,
+            rarity: newRarity,
             miningTry: forgedGemsminingTry,
             isLocked: false,
-            tokenURI: "",
-            randomRequestId: 0
+            quadrants: forgedQuadrants,
+            color: _color,
+            backgroundColor: 0,
+            tokenURI: ""
         });
         Gems.push(_Gem);
         newGemId = Gems.length - 1;
