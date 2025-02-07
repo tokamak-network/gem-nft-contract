@@ -225,11 +225,6 @@ contract RandomPackThanosTest is L2BaseTest {
         colors[1] = [1,1];
         colors[2] = [1,1];
 
-        bytes1[2][] memory backgroundColors = new bytes1[2][](3);
-        backgroundColors[0] = [bytes1(0x00), bytes1(0x00)];
-        backgroundColors[1] = [bytes1(0x00), bytes1(0x00)];
-        backgroundColors[2] = [bytes1(0x00), bytes1(0x00)];
-
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](3);
         rarities[0] = GemFactoryStorage.Rarity.COMMON;
         rarities[1] = GemFactoryStorage.Rarity.RARE;
@@ -249,7 +244,6 @@ contract RandomPackThanosTest is L2BaseTest {
         uint256[] memory newGemIds = Treasury(treasuryProxyAddress).createPreminedGEMPool(
             rarities,
             colors,
-            backgroundColors,
             quadrants,
             tokenURIs
         );
@@ -309,10 +303,6 @@ contract RandomPackThanosTest is L2BaseTest {
         colors[0] = [0,0];
         colors[1] = [1,1];
 
-        bytes1[2][] memory backgroundColors = new bytes1[2][](2);
-        backgroundColors[0] = [bytes1(0x00), bytes1(0x00)];
-        backgroundColors[1] = [bytes1(0x00), bytes1(0x00)];
-
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;
@@ -326,7 +316,6 @@ contract RandomPackThanosTest is L2BaseTest {
         Treasury(treasuryProxyAddress).createPreminedGEMPool(
             rarities,
             colors,
-            backgroundColors,
             quadrants,
             tokenURIs
         );

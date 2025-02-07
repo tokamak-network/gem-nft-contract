@@ -60,12 +60,16 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
             MythicGemsCooldownPeriod: MythicGemsCooldownPeriod
         });
 
+        // check if the color wished exists
+        require(bytes(colorName[_color[0]][_color[1]]).length > 0, "this color does not exist");
+
         // Initialize variables for forged GEM properties
         uint8[4] memory forgedQuadrants;
         Rarity newRarity;
         uint256 forgedGemsCooldownDueDate;
         uint8 forgedGemsminingTry;
         uint256 forgedGemsValue;
+        BackgroundColor memory _backgroundColor = getBackgroundColor(_color[0], _color[1], Rarity(uint8(_rarity) + 1));
 
         // Call the forgeTokens function from Gems contract
         (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsCooldownDueDate, forgedGemsminingTry) = Gems.forgeTokens(
@@ -75,11 +79,12 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
             _tokenIds,
             _rarity,
             _color,
+            _backgroundColor,
             params
         );
 
         // Emit an event for the forged GEM
-        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, [bytes1(0x00), bytes1(0x00)], forgedGemsValue);
+        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, _backgroundColor, forgedGemsValue);
 
         // Burn the old tokens
         burnTokens(msg.sender, _tokenIds);
@@ -89,7 +94,7 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
         _setTokenURI(newGemId, ""); // Set empty URI for the new token
 
         // Emit another event for the created GEM
-        emit Created(newGemId, newRarity, _color, [bytes1(0x00), bytes1(0x00)], forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsCooldownDueDate, "", msg.sender);
+        emit Created(newGemId, newRarity, _color, _backgroundColor, forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsCooldownDueDate, "", msg.sender);
 
         return newGemId;
     }
@@ -108,5 +113,370 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
             // ERC721 burn function
             _burn(_tokenIds[i]);
         }
+    }
+
+    /**
+     * @notice computes the background color based on the color and rarity of the GEM
+     * @param _index1 The first index of the color.
+     * @param _index2 The second index of the color.
+     * @param _rarity the rarity of the Gem for which we want to determine the background color
+     * @return the background color associated
+     */
+    function getBackgroundColor(uint8 _index1, uint8 _index2, Rarity _rarity) internal view returns(BackgroundColor memory) {
+        // memory storage initialization
+        uint8[2] memory r_background;
+        uint8[2] memory g_background;
+        uint8[2] memory b_background;
+        uint8 blur_background;
+        bool dropShadow;
+        uint256 colorIndex = colorIndexInTheColorArray[_index1][_index2];
+        uint8[2] memory r_color = colors[colorIndex].r; 
+        uint8[2] memory g_color = colors[colorIndex].g; 
+        uint8[2] memory b_color = colors[colorIndex].b; 
+        uint16 sumOfcolor_r = uint16(r_color[0]) + uint16(r_color[1]);
+        uint16 sumOfcolor_g = uint16(g_color[0]) + uint16(g_color[1]);
+        uint16 sumOfcolor_b = uint16(b_color[0]) + uint16(b_color[1]);
+        if(_rarity == Rarity.COMMON) {
+            // the background for COMMON gems is predefined
+            r_background = [25, 25];
+            g_background = [26, 26];
+            b_background = [34, 34];
+            blur_background = 0;
+        }
+        else if(_rarity == Rarity.RARE) {
+            dropShadow = false;
+            blur_background = 0;
+            if(sumOfcolor_r > sumOfcolor_g)  {
+                if(sumOfcolor_r > sumOfcolor_b) {
+                    r_background = [127, 127];
+                    if(sumOfcolor_g > sumOfcolor_b) {
+                        // case r > g > b
+                        b_background = [90, 90];
+                        // g is a random value between 110 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
+                        g_background = [110 + middleValue, 110 + middleValue];
+                    }
+                    else {
+                        // case r > b >= g
+                        g_background = [90, 90];
+                        // b is a random value between 110 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
+                        b_background = [110 + middleValue, 110 + middleValue];
+                    }
+                }
+                else if(sumOfcolor_r == sumOfcolor_b) {
+                    r_background = [127, 127];
+                    g_background = [90, 90];
+                    b_background = [127, 127];
+                }
+                else {
+                    b_background = [127, 127];
+                    if(sumOfcolor_r > sumOfcolor_g) {
+                        // case  b > r > g
+                        g_background = [90, 90];
+                        // r is a random value between 110 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
+                        r_background = [110 + middleValue, 110 + middleValue];
+                    }
+                    else {
+                        // case b > g >= r
+                        r_background = [90, 90];
+                        // g is a random value between 110 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
+                        g_background = [110 + middleValue, 110 + middleValue];
+                    }
+                }
+            }
+            else if(sumOfcolor_r == sumOfcolor_g) {
+                if(sumOfcolor_r > sumOfcolor_b) {
+                    r_background = [127, 127];
+                    g_background = [127, 127];
+                    b_background = [90, 90];
+                }
+                else {
+                    r_background = [90, 90];
+                    g_background = [90, 90];
+                    b_background = [127, 127];
+                }
+            }
+            else {
+                // case g > r
+                if(sumOfcolor_g > sumOfcolor_b) {
+                    g_background = [127, 127];
+                    if(sumOfcolor_r > sumOfcolor_b) {
+                        // case g > r > b
+                        b_background = [90, 90];
+                        // r is a random value between 110 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
+                        r_background = [110 + middleValue, 110 + middleValue];
+                    }
+                    else {
+                        // case g > b >= r
+                        r_background = [90, 90];
+                        // b is a random value between 110 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
+                        b_background = [110 + middleValue, 110 + middleValue];
+                    }
+                }
+                else if(sumOfcolor_g == sumOfcolor_b) {
+                    r_background = [90, 90];
+                    g_background = [127, 127];
+                    b_background = [127, 127];
+                }
+                else {
+                    b_background = [127, 127];
+                    if(sumOfcolor_g > sumOfcolor_r) {
+                        // case b > g > r
+                        r_background = [90, 90];
+                        // g is a random value between 110 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
+                        g_background = [110 + middleValue, 110 + middleValue];
+                    }
+                    else {
+                        // case b > r >= g
+                        g_background = [90, 90];
+                        // r is a random value between 110 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
+                        r_background = [110 + middleValue, 110 + middleValue];
+                    }
+                }
+            }
+
+        }
+        else if(_rarity == Rarity.UNIQUE) {
+            dropShadow = false;
+            blur_background = 0;
+            if(sumOfcolor_r > sumOfcolor_g)  {
+                if(sumOfcolor_r > sumOfcolor_b) {
+                    r_background = [150, 150];
+                    if(sumOfcolor_g > sumOfcolor_b) {
+                        // case r > g > b
+                        b_background = [50, 50];
+                        // g is a random value between 80 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        g_background = [80 + middleValue, 80 + middleValue];
+                    }
+                    else {
+                        // case r > b >= g
+                        g_background = [50, 50];
+                        // b is a random value between 80 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        b_background = [80 + middleValue, 80 + middleValue];
+                    }
+                }
+                else if(sumOfcolor_r == sumOfcolor_b) {
+                    r_background = [150, 150];
+                    g_background = [50, 50];
+                    b_background = [150, 150];
+                }
+                else {
+                    b_background = [150, 150];
+                    if(sumOfcolor_r > sumOfcolor_g) {
+                        // case  b > r > g
+                        g_background = [50, 50];
+                        // r is a random value between 80 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        r_background = [80 + middleValue, 80 + middleValue];
+                    }
+                    else {
+                        // case b > g >= r
+                        r_background = [50, 50];
+                        // g is a random value between 80 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        g_background = [80 + middleValue, 80 + middleValue];
+                    }
+                }
+            }
+            else if(sumOfcolor_r == sumOfcolor_g) {
+                if(sumOfcolor_r > sumOfcolor_b) {
+                    r_background = [150, 150];
+                    g_background = [150, 150];
+                    b_background = [50, 50];
+                }
+                else {
+                    r_background = [50, 50];
+                    g_background = [50, 50];
+                    b_background = [150, 150];
+                }
+            }
+            else {
+                // case g > r
+                if(sumOfcolor_g > sumOfcolor_b) {
+                    g_background = [150, 150];
+                    if(sumOfcolor_r > sumOfcolor_b) {
+                        // case g > r > b
+                        b_background = [50, 50];
+                        // r is a random value between 80 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        r_background = [80 + middleValue, 80 + middleValue];
+                    }
+                    else {
+                        // case g > b >= r
+                        r_background = [50, 50];
+                        // b is a random value between 80 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        b_background = [80 + middleValue, 80 + middleValue];
+                    }
+                }
+                else if(sumOfcolor_g == sumOfcolor_b) {
+                    r_background = [50, 50];
+                    g_background = [150, 150];
+                    b_background = [150, 150];
+                }
+                else {
+                    b_background = [150, 150];
+                    if(sumOfcolor_g > sumOfcolor_r) {
+                        // case b > g > r
+                        r_background = [50, 50];
+                        // g is a random value between 80 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        g_background = [80 + middleValue, 80 + middleValue];
+                    }
+                    else {
+                        // case b > r >= g
+                        g_background = [50, 50];
+                        // r is a random value between 80 and 120
+                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        r_background = [80 + middleValue, 80 + middleValue];
+                    }
+                }
+            }
+        }
+        else if(_rarity == Rarity.EPIC) {
+            dropShadow = false;
+            blur_background = 0;
+
+            if(sumOfcolor_r > sumOfcolor_g)  {
+                if(sumOfcolor_r > sumOfcolor_b) {
+                    r_background = [150, 100];
+                    if(sumOfcolor_g > sumOfcolor_b) {
+                        // case r > g > b
+                        b_background = [50, 0];
+                        // g1 is a random value between 80 and 120 g2 is a random value between 40 and 60
+                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
+                        g_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
+                    }
+                    else {
+                        // case r > b >= g
+                        g_background = [50, 0];
+                        // b is a random value between 80 and 120
+                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
+                        b_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
+                    }
+                }
+                else if(sumOfcolor_r == sumOfcolor_b) {
+                    r_background = [150, 100];
+                    g_background = [50, 0];
+                    b_background = [150, 100];
+                }
+                else {
+                    b_background = [150, 100];
+                    if(sumOfcolor_r > sumOfcolor_g) {
+                        // case  b > r > g
+                        g_background = [50, 0];
+                        // r is a random value between 80 and 120
+                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
+                        r_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
+                    }
+                    else {
+                        // case b > g >= r
+                        r_background = [50, 0];
+                        // g is a random value between 80 and 120
+                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
+                        g_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
+                    }
+                }
+            }
+            else if(sumOfcolor_r == sumOfcolor_g) {
+                if(sumOfcolor_r > sumOfcolor_b) {
+                    r_background = [150, 100];
+                    g_background = [150, 100];
+                    b_background = [50, 0];
+                }
+                else {
+                    r_background = [50, 0];
+                    g_background = [50, 0];
+                    b_background = [150, 100];
+                }
+            }
+            else {
+                // case g > r
+                if(sumOfcolor_g > sumOfcolor_b) {
+                    g_background = [150, 100];
+                    if(sumOfcolor_r > sumOfcolor_b) {
+                        // case g > r > b
+                        b_background = [50, 0];
+                        // r is a random value between 80 and 120
+                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
+                        r_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
+                    }
+                    else {
+                        // case g > b >= r
+                        r_background = [50, 0];
+                        // b is a random value between 80 and 120
+                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
+                        b_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
+                    }
+                }
+                else if(sumOfcolor_g == sumOfcolor_b) {
+                    r_background = [50, 0];
+                    g_background = [150, 100];
+                    b_background = [150, 100];
+                }
+                else {
+                    b_background = [150, 100];
+                    if(sumOfcolor_g > sumOfcolor_r) {
+                        // case b > g > r
+                        r_background = [50, 0];
+                        // g is a random value between 80 and 120
+                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
+                        g_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
+                    }
+                    else {
+                        // case b > r >= g
+                        g_background = [50, 0];
+                        // r is a random value between 80 and 120
+                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
+                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
+                        r_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
+                    }
+                }
+            }
+        }
+        else if(_rarity == Rarity.LEGENDARY) {
+            dropShadow = true;
+            blur_background = 25;
+            r_background = r_color;
+            g_background = g_color;
+            b_background = b_color;
+
+        }
+        else if(_rarity == Rarity.MYTHIC) {
+            dropShadow = true;
+            blur_background = 40;
+            uint8 firstOrSecondColor = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 2);
+            uint8 secondColor_r = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 255);
+            uint8 secondColor_g = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp, secondColor_r))) % 255);
+            uint8 secondColor_b = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp, secondColor_g))) % 255);
+            r_background = [r_color[firstOrSecondColor], secondColor_r];
+            g_background = [g_color[firstOrSecondColor], secondColor_g];
+            b_background = [b_color[firstOrSecondColor], secondColor_b];
+
+        }
+        BackgroundColor memory backgroundColor = BackgroundColor({
+            r: r_background,
+            g: g_background,
+            b: b_background,
+            blur: blur_background,
+            dropShadow: dropShadow
+        });
+        return backgroundColor;
     }
 }

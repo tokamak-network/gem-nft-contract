@@ -22,8 +22,24 @@ contract GemFactoryStorage {
         bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
-        bytes1[2] backgroundColor; // background color (2 HEX values). If solid => second bytes1 is equal to 0
-        string tokenURI; // IPFS address of the metadata file 
+        BackgroundColor backgroundColor; // background color (RGB + Blur)
+        string tokenURI; // URI of the token
+    }
+
+    struct Color {
+        string colorName;
+        uint8[2] colorIds; // ids of the colors associated with a Gem
+        uint8[2] r; // r values associated with the RGB color
+        uint8[2] g; // g values associated with the RGB color
+        uint8[2] b; // b values associated with the RGB color
+    }
+
+    struct BackgroundColor {
+        uint8[2] r; // r values associated with the RGB color
+        uint8[2] g; // g values associated with the RGB color
+        uint8[2] b; // b values associated with the RGB color
+        uint8 blur; // blur percentage
+        bool dropShadow;
     }
 
     struct RequestStatus {
@@ -39,13 +55,17 @@ contract GemFactoryStorage {
     //-------------------------------------STORAGE-------------------------------------------
     //---------------------------------------------------------------------------------------
 
+    // list of Gems
     Gem[] public Gems;
+
     mapping(uint8 => mapping(uint8 => string)) public colorName;
-    uint8 public colorsCount;
-    uint8[2][] public colors;
+    mapping(uint8 => mapping(uint8 => uint256)) public colorIndexInTheColorArray;
+    mapping(string => bool) public isColorNameUsed;
+    Color[] public colors;
+    uint256 constant NO_COLOR = type(uint256).max;
 
     mapping(bytes1 => mapping(bytes1 => string)) public backgroundColorName;
-    uint8 public backgroundColorsCount;
+    uint256 public backgroundColorsCount;
     bytes1[2][] public backgroundColors;
 
     mapping(uint256 => address) public GEMIndexToOwner;
@@ -112,7 +132,7 @@ contract GemFactoryStorage {
         uint256 indexed tokenId, 
         Rarity rarity, 
         uint8[2] color, 
-        bytes1[2] backgroundColor,
+        BackgroundColor backgroundColor,
         uint8 miningTry,
         uint256 value,
         uint8[4] quadrants, 
@@ -140,7 +160,7 @@ contract GemFactoryStorage {
         Rarity newRarity, 
         uint8[4] forgedQuadrants, 
         uint8[2] color, 
-        bytes1[2] backgroundColor,
+        BackgroundColor backgroundColor,
         uint256 newValue
     );
     event Test();
@@ -151,8 +171,7 @@ contract GemFactoryStorage {
     event Unpaused(address account);
 
     //storage setter events
-    event ColorAdded(uint8 indexed id, string color);
-    event BackgroundColorAdded(uint8 indexed id, string backgroundColor);
+    event ColorAdded(uint256 indexed id, string color);
 
     //storage modification events
     event GemsCoolDownPeriodModified(
@@ -186,6 +205,7 @@ contract GemFactoryStorage {
     );
 
     event CallBackGasLimitUpdated(uint32 newCallbackGasLimit);
+
 
     //---------------------------------------------------------------------------------------
     //-------------------------------------ERRORS--------------------------------------------
@@ -228,4 +248,7 @@ contract GemFactoryStorage {
     error ContractPaused();
     error ContractNotPaused();
     error URIQueryForNonexistentToken(uint256 tokenId);
+
+    // color add error
+    error WrongColorIndexes();
 }

@@ -14,8 +14,16 @@ interface IGemFactory {
         bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
-        bytes1[2] backgroundColor;
+        BackgroundColor backgroundColor;
         string tokenURI; // IPFS address of the metadata file 
+    }
+
+    struct BackgroundColor {
+        uint8[2] r; // r values associated with the RGB color
+        uint8[2] g; // g values associated with the RGB color
+        uint8[2] b; // b values associated with the RGB color
+        uint8 blur; // blur percentage
+        bool dropShadow;
     }
 
     function startMiningGEM(uint256 _tokenId) external returns(bool);
@@ -26,7 +34,6 @@ interface IGemFactory {
     function createGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
-        bytes1[2] memory _backgroundColor, 
         uint8[4] memory _quadrants,
         string memory _tokenURI
     ) external  returns (uint256);
@@ -34,7 +41,6 @@ interface IGemFactory {
     function createGEMPool(
         GemFactoryStorage.Rarity[] memory _rarities,
         uint8[2][] memory _colors,
-        bytes1[2][] memory _bckgroundColors,
         uint8[4][] memory _quadrants,
         string[] memory _tokenURIs
     ) external returns (uint256[] memory);

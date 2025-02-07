@@ -243,7 +243,6 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
      * @notice Creates a premined GEM with specified attributes.
      * @param _rarity Rarity of the GEM.
      * @param _color Color attributes of the GEM.
-     * @param _backgroundColor Background color attributes of the GEM
      * @param _quadrants Quadrant attributes of the GEM.
      * @param _tokenURI URI of the GEM token.
      * @dev the contract must hold enough WSTON to cover the entire supply of GEMs across all owners
@@ -252,7 +251,6 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
     function createPreminedGEM( 
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color, 
-        bytes1[2] memory _backgroundColor,
         uint8[4] memory _quadrants,  
         string memory _tokenURI
     ) external onlyOwnerOrRandomPackOrMarketplace returns (uint256) {
@@ -265,7 +263,6 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
         return IGemFactory(gemFactory).createGEM(
             _rarity,
             _color,
-            _backgroundColor,
             _quadrants,
             _tokenURI
         );
@@ -275,7 +272,6 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
      * @notice Creates a pool of premined GEMs with specified attributes.
      * @param _rarities Array of rarities for each GEM.
      * @param _colors Array of color attributes for each GEM.
-     * @param _backgroundColors Array of background colors for each gem
      * @param _quadrants Array of quadrant attributes for each GEM.
      * @param _tokenURIs Array of URIs for each GEM token.
      * @dev the contract must hold enough WSTON to cover the entire supply of GEMs across all owners
@@ -284,7 +280,6 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
     function createPreminedGEMPool(
         GemFactoryStorage.Rarity[] memory _rarities,
         uint8[2][] memory _colors,
-        bytes1[2][] memory _backgroundColors,
         uint8[4][] memory _quadrants, 
         string[] memory _tokenURIs
     ) public onlyOwnerOrRandomPackOrMarketplace returns (uint256[] memory) {
@@ -304,7 +299,6 @@ contract TreasuryThanos is ProxyStorage, IERC721Receiver, ReentrancyGuard, AuthC
         return IGemFactory(gemFactory).createGEMPool(
             _rarities,
             _colors,
-            _backgroundColors,
             _quadrants,
             _tokenURIs
         );

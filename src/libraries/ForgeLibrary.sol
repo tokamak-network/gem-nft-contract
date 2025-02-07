@@ -59,6 +59,7 @@ library ForgeLibrary {
         uint256[] memory _tokenIds,
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color,
+        GemFactoryStorage.BackgroundColor memory _backgroundColor,
         ForgeParams memory params
     ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint256 forgedGemsCooldownDueDate, uint8 forgedGemsminingTry) {
          // Ensure the sender's address is not zero
@@ -190,7 +191,7 @@ library ForgeLibrary {
             isLocked: false,
             quadrants: forgedQuadrants,
             color: _color,
-            backgroundColor: [bytes1(0x00), bytes1(0x00)],
+            backgroundColor: _backgroundColor,
             tokenURI: ""
         });
         Gems.push(_Gem);

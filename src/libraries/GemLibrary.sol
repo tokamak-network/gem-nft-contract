@@ -28,7 +28,7 @@ library GemLibrary {
         address owner,
         GemFactoryStorage.Rarity rarity,
         uint8[2] memory color,
-        bytes1[2] memory backgroundColor,
+        GemFactoryStorage.BackgroundColor memory backgroundColor,
         uint8[4] memory quadrants,
         uint256 value,
         uint256 gemCooldownPeriod,
