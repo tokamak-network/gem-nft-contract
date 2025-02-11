@@ -81,7 +81,7 @@ contract GemFactoryStorage {
     // Random requests mapping
     mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */
 
-    bool public paused;
+    bool internal paused;
 
     // Mining storage
     // mining try is uint8 (will be always less than type(uint8).max = 255)
@@ -249,6 +249,4 @@ contract GemFactoryStorage {
     error ContractNotPaused();
     error URIQueryForNonexistentToken(uint256 tokenId);
 
-    // color add error
-    error WrongColorIndexes();
 }

@@ -293,7 +293,7 @@ contract L2BaseTest is Test {
 
         // we set up the list of colors available for the GEM
         GemFactory(gemfactoryProxyAddress).addColor("Ruby",0,0,255,255,255,255,0,0);
-        GemFactory(gemfactoryProxyAddress).addColor("Amber/Topaz",1,2,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Amber/Topaz",1,2,0,148,255,0,148,255);
         GemFactory(gemfactoryProxyAddress).addColor("Ruby/Amber",0,1,255,255,255,255,0,0);
         GemFactory(gemfactoryProxyAddress).addColor("Amber",1,1,255,255,255,255,0,0);
         GemFactory(gemfactoryProxyAddress).addColor("Topaz",2,2,255,255,255,255,0,0);

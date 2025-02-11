@@ -1,7 +1,7 @@
 const { ethers, run } = require("hardhat");
 require('dotenv').config();
 
-// command to run: "npx hardhat run scripts/3.step/1.gemfactoryDeployment.js --network titan"
+// command to run: "npx hardhat run scripts/3.step/1.gemfactoryDeployment.js --network thanos"
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -12,7 +12,7 @@ async function main() {
     console.log("Account balance:", ethers.formatEther(balance));
 
     // ------------------------ GEMFACTORY INSTANCES ---------------------------------
-
+/*
     // Deploy MiningLibrary
     const MiningLibrary = await ethers.getContractFactory("MiningLibrary");
     const miningLibrary = await MiningLibrary.deploy();
@@ -27,9 +27,29 @@ async function main() {
     console.log("GemFactoryMining deployed to:", gemFactoryMining.target);
 
     await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
-/*
+
     await run("verify:verify", {
         address: gemFactoryMining.target,
+        constructorArguments: [],
+      });
+*/
+    // Deploy ForgeLibrary
+    const ForgingLibrary = await ethers.getContractFactory("ForgingLibrary");
+    const forgingLibrary = await ForgingLibrary.deploy();
+    await forgingLibrary.waitForDeployment();
+    console.log("forgingLibrary deployed to:", forgingLibrary.target);
+
+
+    // Instantiate the GemFactoryForging
+    const GemFactoryForging = await ethers.getContractFactory("GemFactoryForging");
+    const gemFactoryForging = await GemFactoryForging.deploy();
+    await gemFactoryForging.waitForDeployment();
+    console.log("GemFactoryForging deployed to:", gemFactoryForging.target);
+
+    await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
+
+    await run("verify:verify", {
+        address: gemFactoryForging.target,
         constructorArguments: [],
       });
     
@@ -45,25 +65,35 @@ async function main() {
         address: gemFactory.target,
         constructorArguments: [],
       });
-      */
+    
     // ------------------------ GEMFACTORY PROXY ---------------------------------
 
     const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
     
     // Get contract instance
     const GemFactoryProxy = await ethers.getContractAt("GemFactoryProxy", gemFactoryProxyAddress);
-/*
+
     const upgradeTo = await GemFactoryProxy.upgradeTo(gemFactory.target);
     await upgradeTo.wait();
     console.log("GemFactory upgraded to implementation: ", gemFactory.target);
-*/
+
     // Set the third index to the GemFactoryMining contract
-    const setImplementation2 = await GemFactoryProxy.setImplementation2(gemFactoryMining.target, 2, true);
+    const setImplementation2 = await GemFactoryProxy.setImplementation2(gemFactoryForging.target, 1, true);
     await setImplementation2.wait();
-    console.log("GemFactoryProxy implementation set to GemFactoryMining");
+    console.log("GemFactoryProxy implementation set to GemFactoryForging");
 
     // ------------------------ FUNCTION SELECTORS ---------------------------------
 
+    // Compute the function selector for GemFactoryForging
+    const forgeTokensSelector = ethers.keccak256(ethers.toUtf8Bytes("forgeTokens(uint256[],uint8,uint8[2])")).substring(0, 10);
+    const forgingSelectors = [forgeTokensSelector];
+
+    // Map the forgeTokens function to the GemFactoryForging implementation
+    const setForgingSelectors = await GemFactoryProxy.setSelectorImplementations2(forgingSelectors, gemFactoryForging.target);
+    await setForgingSelectors.wait();
+    console.log("Mapped forgeTokens function to GemFactoryForging");
+
+    /*
 
     // Compute the function selectors for GemFactoryMining
     const startMiningSelector = ethers.keccak256(ethers.toUtf8Bytes("startMiningGEM(uint256)")).substring(0, 10);
@@ -85,13 +115,7 @@ async function main() {
     await setMiningSelectors.wait();
     console.log("Mapped mining functions to GemFactoryMining");
 
-
-    const startMiningImpl = await GemFactoryProxy.getSelectorImplementation2(startMiningSelector);
-    if (startMiningImpl !== gemFactoryMining.target) {
-        throw new Error("Selector not mapped to GemFactoryMining");
-    }
-
-    console.log("Function selectors verified successfully");
+    */
 }
 
 main()

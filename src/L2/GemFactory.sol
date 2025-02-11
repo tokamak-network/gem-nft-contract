@@ -5,6 +5,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {GemFactoryStorage} from "./GemFactoryStorage.sol";
+import "./GemFactoryForging.sol";
 import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
 import {GemLibrary} from "../libraries/GemLibrary.sol";
 import {MiningLibrary} from "../libraries/MiningLibrary.sol";
@@ -350,80 +351,40 @@ contract GemFactory is
             revert ColorNotExist();
         }
 
+        require(GemLibrary.checkQuadrants(_quadrants, _rarity), "Wrong quadrants");
+
         // Declare variables for GEM attributes
         uint32 _gemCooldownPeriod;
         uint256 _value;
-        uint8 _miningTry;
-
-        // Calculate the sum of the quadrant values
-        uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
+        uint8 _miningTry;        
 
         // Determine GEM attributes based on its rarity
         if (_rarity == Rarity.COMMON) {
-            // Validate quadrant values for COMMON rarity
-            if (_quadrants[0] != 1 && _quadrants[0] != 2) revert NewGemInvalidQuadrant(0, 1, 2);
-            if (_quadrants[1] != 1 && _quadrants[1] != 2) revert NewGemInvalidQuadrant(1, 1, 2);
-            if (_quadrants[2] != 1 && _quadrants[2] != 2) revert NewGemInvalidQuadrant(2, 1, 2);
-            if (_quadrants[3] != 1 && _quadrants[3] != 2) revert NewGemInvalidQuadrant(3, 1, 2);
-            if (sumOfQuadrants >= 8) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "COMMON");
-
             // Set attributes for COMMON rarity
             _gemCooldownPeriod = 0;
             _value = CommonGemsValue;
             _miningTry = 0;
         } else if (_rarity == Rarity.RARE) {
-            // Validate quadrant values for RARE rarity
-            if (_quadrants[0] != 2 && _quadrants[0] != 3) revert NewGemInvalidQuadrant(0, 2, 3);
-            if (_quadrants[1] != 2 && _quadrants[1] != 3) revert NewGemInvalidQuadrant(1, 2, 3);
-            if (_quadrants[2] != 2 && _quadrants[2] != 3) revert NewGemInvalidQuadrant(2, 2, 3);
-            if (_quadrants[3] != 2 && _quadrants[3] != 3) revert NewGemInvalidQuadrant(3, 2, 3);
-            if (sumOfQuadrants >= 12) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "RARE");
-
             // Set attributes for RARE rarity
             _gemCooldownPeriod = RareGemsCooldownPeriod;
             _value = RareGemsValue;
             _miningTry = RareminingTry;
         } else if (_rarity == Rarity.UNIQUE) {
-            // Validate quadrant values for UNIQUE rarity
-            if (_quadrants[0] != 3 && _quadrants[0] != 4) revert NewGemInvalidQuadrant(0, 3, 4);
-            if (_quadrants[1] != 3 && _quadrants[1] != 4) revert NewGemInvalidQuadrant(1, 3, 4);
-            if (_quadrants[2] != 3 && _quadrants[2] != 4) revert NewGemInvalidQuadrant(2, 3, 4);
-            if (_quadrants[3] != 3 && _quadrants[3] != 4) revert NewGemInvalidQuadrant(3, 3, 4);
-            if (sumOfQuadrants >= 16) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "UNIQUE");
-            
             // Set attributes for UNIQUE rarity
             _gemCooldownPeriod = UniqueGemsCooldownPeriod;
             _value = UniqueGemsValue;
             _miningTry = UniqueminingTry;
         } else if (_rarity == Rarity.EPIC) {
-            // Validate quadrant values for EPIC rarity
-            if (_quadrants[0] != 4 && _quadrants[0] != 5) revert NewGemInvalidQuadrant(0, 4, 5);
-            if (_quadrants[1] != 4 && _quadrants[1] != 5) revert NewGemInvalidQuadrant(1, 4, 5);
-            if (_quadrants[2] != 4 && _quadrants[2] != 5) revert NewGemInvalidQuadrant(2, 4, 5);
-            if (_quadrants[3] != 4 && _quadrants[3] != 5) revert NewGemInvalidQuadrant(3, 4, 5);
-            if (sumOfQuadrants >= 20) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "EPIC");
-
             // Set attributes for EPIC rarity
             _gemCooldownPeriod = EpicGemsCooldownPeriod;
             _value = EpicGemsValue;
             _miningTry = EpicminingTry;
         } else if (_rarity == Rarity.LEGENDARY) {
-            // Validate quadrant values for LEGENDARY rarity
-            if (_quadrants[0] != 5 && _quadrants[0] != 6) revert NewGemInvalidQuadrant(0, 5, 6);
-            if (_quadrants[1] != 5 && _quadrants[1] != 6) revert NewGemInvalidQuadrant(1, 5, 6);
-            if (_quadrants[2] != 5 && _quadrants[2] != 6) revert NewGemInvalidQuadrant(2, 5, 6);
-            if (_quadrants[3] != 5 && _quadrants[3] != 6) revert NewGemInvalidQuadrant(3, 5, 6);
-            if (sumOfQuadrants >= 24) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "LEGENDARY");
-
             // Set attributes for LEGENDARY rarity
             _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
             _value = LegendaryGemsValue;
             _miningTry = LegendaryminingTry;
         } else if (_rarity == Rarity.MYTHIC) {
-            // Validate quadrant values for MYTHIC rarity
-            if (_quadrants[0] != 6 || _quadrants[1] != 6 || _quadrants[2] != 6 || _quadrants[3] != 6) {
-                revert NewGemInvalidQuadrant(0, 6, 6);
-            }
             // Set attributes for MYTHIC rarity
             _gemCooldownPeriod = MythicGemsCooldownPeriod;
             _value = MythicGemsValue;
@@ -436,7 +397,7 @@ contract GemFactory is
         // Calculate the cooldown due date for the GEM
         uint256 _cooldownDueDate = block.timestamp + _gemCooldownPeriod;
 
-        BackgroundColor memory backgroundColor = getBackgroundColor(_color[0], _color[1], _rarity);
+        BackgroundColor memory backgroundColor = GemLibrary.getBackgroundColor(_color[0], _color[1], _rarity, colors, colorIndexInTheColorArray);
 
         // Create the new GEM and get its ID
         uint256 newGemId = Gems.createGem(
@@ -646,372 +607,6 @@ contract GemFactory is
     }
 
     /**
-     * @notice computes the background color based on the color and rarity of the GEM
-     * @param _index1 The first index of the color.
-     * @param _index2 The second index of the color.
-     * @param _rarity the rarity of the Gem for which we want to determine the background color
-     * @return the background color associated
-     */
-    function getBackgroundColor(uint8 _index1, uint8 _index2, Rarity _rarity) internal returns(BackgroundColor memory) {
-        // memory storage initialization
-        uint8[2] memory r_background;
-        uint8[2] memory g_background;
-        uint8[2] memory b_background;
-        uint8 blur_background;
-        bool dropShadow;
-        uint256 colorIndex = colorIndexInTheColorArray[_index1][_index2];
-        uint8[2] memory r_color = colors[colorIndex].r; 
-        uint8[2] memory g_color = colors[colorIndex].g; 
-        uint8[2] memory b_color = colors[colorIndex].b; 
-        uint16 sumOfcolor_r = uint16(r_color[0]) + uint16(r_color[1]);
-        uint16 sumOfcolor_g = uint16(g_color[0]) + uint16(g_color[1]);
-        uint16 sumOfcolor_b = uint16(b_color[0]) + uint16(b_color[1]);
-        emit Test();
-        if(_rarity == Rarity.COMMON) {
-            // the background for COMMON gems is predefined
-            r_background = [25, 25];
-            g_background = [26, 26];
-            b_background = [34, 34];
-            blur_background = 0;
-        }
-        else if(_rarity == Rarity.RARE) {
-            dropShadow = false;
-            blur_background = 0;
-            if(sumOfcolor_r > sumOfcolor_g)  {
-                if(sumOfcolor_r > sumOfcolor_b) {
-                    r_background = [127, 127];
-                    if(sumOfcolor_g > sumOfcolor_b) {
-                        // case r > g > b
-                        b_background = [90, 90];
-                        // g is a random value between 110 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
-                        g_background = [110 + middleValue, 110 + middleValue];
-                    }
-                    else {
-                        // case r > b >= g
-                        g_background = [90, 90];
-                        // b is a random value between 110 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
-                        b_background = [110 + middleValue, 110 + middleValue];
-                    }
-                }
-                else if(sumOfcolor_r == sumOfcolor_b) {
-                    r_background = [127, 127];
-                    g_background = [90, 90];
-                    b_background = [127, 127];
-                }
-                else {
-                    b_background = [127, 127];
-                    if(sumOfcolor_r > sumOfcolor_g) {
-                        // case  b > r > g
-                        g_background = [90, 90];
-                        // r is a random value between 110 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
-                        r_background = [110 + middleValue, 110 + middleValue];
-                    }
-                    else {
-                        // case b > g >= r
-                        r_background = [90, 90];
-                        // g is a random value between 110 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
-                        g_background = [110 + middleValue, 110 + middleValue];
-                    }
-                }
-            }
-            else if(sumOfcolor_r == sumOfcolor_g) {
-                if(sumOfcolor_r > sumOfcolor_b) {
-                    r_background = [127, 127];
-                    g_background = [127, 127];
-                    b_background = [90, 90];
-                }
-                else {
-                    r_background = [90, 90];
-                    g_background = [90, 90];
-                    b_background = [127, 127];
-                }
-            }
-            else {
-                // case g > r
-                if(sumOfcolor_g > sumOfcolor_b) {
-                    g_background = [127, 127];
-                    if(sumOfcolor_r > sumOfcolor_b) {
-                        // case g > r > b
-                        b_background = [90, 90];
-                        // r is a random value between 110 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
-                        r_background = [110 + middleValue, 110 + middleValue];
-                    }
-                    else {
-                        // case g > b >= r
-                        r_background = [90, 90];
-                        // b is a random value between 110 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
-                        b_background = [110 + middleValue, 110 + middleValue];
-                    }
-                }
-                else if(sumOfcolor_g == sumOfcolor_b) {
-                    r_background = [90, 90];
-                    g_background = [127, 127];
-                    b_background = [127, 127];
-                }
-                else {
-                    b_background = [127, 127];
-                    if(sumOfcolor_g > sumOfcolor_r) {
-                        // case b > g > r
-                        r_background = [90, 90];
-                        // g is a random value between 110 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
-                        g_background = [110 + middleValue, 110 + middleValue];
-                    }
-                    else {
-                        // case b > r >= g
-                        g_background = [90, 90];
-                        // r is a random value between 110 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 10);
-                        r_background = [110 + middleValue, 110 + middleValue];
-                    }
-                }
-            }
-
-        }
-        else if(_rarity == Rarity.UNIQUE) {
-            dropShadow = false;
-            blur_background = 0;
-            if(sumOfcolor_r > sumOfcolor_g)  {
-                if(sumOfcolor_r > sumOfcolor_b) {
-                    r_background = [150, 150];
-                    if(sumOfcolor_g > sumOfcolor_b) {
-                        // case r > g > b
-                        b_background = [50, 50];
-                        // g is a random value between 80 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        g_background = [80 + middleValue, 80 + middleValue];
-                    }
-                    else {
-                        // case r > b >= g
-                        g_background = [50, 50];
-                        // b is a random value between 80 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        b_background = [80 + middleValue, 80 + middleValue];
-                    }
-                }
-                else if(sumOfcolor_r == sumOfcolor_b) {
-                    r_background = [150, 150];
-                    g_background = [50, 50];
-                    b_background = [150, 150];
-                }
-                else {
-                    b_background = [150, 150];
-                    if(sumOfcolor_r > sumOfcolor_g) {
-                        // case  b > r > g
-                        g_background = [50, 50];
-                        // r is a random value between 80 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        r_background = [80 + middleValue, 80 + middleValue];
-                    }
-                    else {
-                        // case b > g >= r
-                        r_background = [50, 50];
-                        // g is a random value between 80 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        g_background = [80 + middleValue, 80 + middleValue];
-                    }
-                }
-            }
-            else if(sumOfcolor_r == sumOfcolor_g) {
-                if(sumOfcolor_r > sumOfcolor_b) {
-                    r_background = [150, 150];
-                    g_background = [150, 150];
-                    b_background = [50, 50];
-                }
-                else {
-                    r_background = [50, 50];
-                    g_background = [50, 50];
-                    b_background = [150, 150];
-                }
-            }
-            else {
-                // case g > r
-                if(sumOfcolor_g > sumOfcolor_b) {
-                    g_background = [150, 150];
-                    if(sumOfcolor_r > sumOfcolor_b) {
-                        // case g > r > b
-                        b_background = [50, 50];
-                        // r is a random value between 80 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        r_background = [80 + middleValue, 80 + middleValue];
-                    }
-                    else {
-                        // case g > b >= r
-                        r_background = [50, 50];
-                        // b is a random value between 80 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        b_background = [80 + middleValue, 80 + middleValue];
-                    }
-                }
-                else if(sumOfcolor_g == sumOfcolor_b) {
-                    r_background = [50, 50];
-                    g_background = [150, 150];
-                    b_background = [150, 150];
-                }
-                else {
-                    b_background = [150, 150];
-                    if(sumOfcolor_g > sumOfcolor_r) {
-                        // case b > g > r
-                        r_background = [50, 50];
-                        // g is a random value between 80 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        g_background = [80 + middleValue, 80 + middleValue];
-                    }
-                    else {
-                        // case b > r >= g
-                        g_background = [50, 50];
-                        // r is a random value between 80 and 120
-                        uint8 middleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        r_background = [80 + middleValue, 80 + middleValue];
-                    }
-                }
-            }
-        }
-        else if(_rarity == Rarity.EPIC) {
-            dropShadow = false;
-            blur_background = 0;
-
-            if(sumOfcolor_r > sumOfcolor_g)  {
-                if(sumOfcolor_r > sumOfcolor_b) {
-                    r_background = [150, 100];
-                    if(sumOfcolor_g > sumOfcolor_b) {
-                        // case r > g > b
-                        b_background = [50, 0];
-                        // g1 is a random value between 80 and 120 g2 is a random value between 40 and 60
-                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
-                        g_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
-                    }
-                    else {
-                        // case r > b >= g
-                        g_background = [50, 0];
-                        // b is a random value between 80 and 120
-                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
-                        b_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
-                    }
-                }
-                else if(sumOfcolor_r == sumOfcolor_b) {
-                    r_background = [150, 100];
-                    g_background = [50, 0];
-                    b_background = [150, 100];
-                }
-                else {
-                    b_background = [150, 100];
-                    if(sumOfcolor_r > sumOfcolor_g) {
-                        // case  b > r > g
-                        g_background = [50, 0];
-                        // r is a random value between 80 and 120
-                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
-                        r_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
-                    }
-                    else {
-                        // case b > g >= r
-                        r_background = [50, 0];
-                        // g is a random value between 80 and 120
-                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
-                        g_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
-                    }
-                }
-            }
-            else if(sumOfcolor_r == sumOfcolor_g) {
-                if(sumOfcolor_r > sumOfcolor_b) {
-                    r_background = [150, 100];
-                    g_background = [150, 100];
-                    b_background = [50, 0];
-                }
-                else {
-                    r_background = [50, 0];
-                    g_background = [50, 0];
-                    b_background = [150, 100];
-                }
-            }
-            else {
-                // case g > r
-                if(sumOfcolor_g > sumOfcolor_b) {
-                    g_background = [150, 100];
-                    if(sumOfcolor_r > sumOfcolor_b) {
-                        // case g > r > b
-                        b_background = [50, 0];
-                        // r is a random value between 80 and 120
-                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
-                        r_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
-                    }
-                    else {
-                        // case g > b >= r
-                        r_background = [50, 0];
-                        // b is a random value between 80 and 120
-                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
-                        b_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
-                    }
-                }
-                else if(sumOfcolor_g == sumOfcolor_b) {
-                    r_background = [50, 0];
-                    g_background = [150, 100];
-                    b_background = [150, 100];
-                }
-                else {
-                    b_background = [150, 100];
-                    if(sumOfcolor_g > sumOfcolor_r) {
-                        // case b > g > r
-                        r_background = [50, 0];
-                        // g is a random value between 80 and 120
-                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
-                        g_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
-                    }
-                    else {
-                        // case b > r >= g
-                        g_background = [50, 0];
-                        // r is a random value between 80 and 120
-                        uint8 firstmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 40);
-                        uint8 secondmiddleValue = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 20);
-                        r_background = [80 + firstmiddleValue, 40 + secondmiddleValue];
-                    }
-                }
-            }
-        }
-        else if(_rarity == Rarity.LEGENDARY) {
-            dropShadow = true;
-            blur_background = 25;
-            r_background = r_color;
-            g_background = g_color;
-            b_background = b_color;
-
-        }
-        else if(_rarity == Rarity.MYTHIC) {
-            dropShadow = true;
-            blur_background = 40;
-            uint8 firstOrSecondColor = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 2);
-            uint8 secondColor_r = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp))) % 255);
-            uint8 secondColor_g = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp, secondColor_r))) % 255);
-            uint8 secondColor_b = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp, secondColor_g))) % 255);
-            r_background = [r_color[firstOrSecondColor], secondColor_r];
-            g_background = [g_color[firstOrSecondColor], secondColor_g];
-            b_background = [b_color[firstOrSecondColor], secondColor_b];
-
-        }
-        BackgroundColor memory backgroundColor = BackgroundColor({
-            r: r_background,
-            g: g_background,
-            b: b_background,
-            blur: blur_background,
-            dropShadow: dropShadow
-        });
-        return backgroundColor;
-    }
-
-    /**
      * @notice Transfers a GEM from one address to another.
      * @dev Updates the GEM's cooldown period and adjusts ownership counts.
      * @param _from The address to transfer the GEM from.
@@ -1105,30 +700,6 @@ contract GemFactory is
     }
 
     /**
-     * @notice Gets the number of GEM tokens owned by a specific address.
-     * @param _owner The address to query the balance for.
-     * @return count The number of GEM tokens owned by the specified address.
-     */
-    function balanceOf(address _owner) public view override(ERC721Upgradeable, IERC721) returns (uint256 count) {
-        // Return the count of tokens owned by the address
-        return ownershipTokenCount[_owner];
-    }
-
-    /**
-    * @notice Retrieves the URI associated with a specific GEM token.
-    * @param tokenId The ID of the GEM token to query.
-    * @return The URI string associated with the specified token ID.
-    */
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        // Ensure the token exists before querying its URI
-        if (!_exists(tokenId)) {
-            revert URIQueryForNonexistentToken(tokenId);
-        }
-        // Return the token URI from the parent contract
-        return super.tokenURI(tokenId);
-    }
-
-    /**
      * @notice Checks if a GEM token exists.
      * @param tokenId The ID of the GEM token to check.
      * @return True if the token exists, false otherwise.
@@ -1143,7 +714,7 @@ contract GemFactory is
      * @param tokenId The ID of the GEM to retrieve.
      * @return The Gem struct containing details of the specified GEM.
      */
-    function getGem(uint256 tokenId) public view returns (Gem memory) {
+    function getGem(uint256 tokenId) external view returns (Gem memory) {
         // Iterate through the list of Gems to find the one with the specified token ID
         for (uint256 i = 0; i < Gems.length; ++i) {
             if (Gems[i].tokenId == tokenId) {
@@ -1155,28 +726,34 @@ contract GemFactory is
     }
 
     /**
-     * @notice Retrieves the value of a GEM based on its rarity.
-     * @param _rarity The rarity of the GEM.
-     * @return value The value associated with the specified rarity.
-     */
-    function getValueBasedOnRarity(Rarity _rarity) public view returns (uint256 value) {
-        // Determine the value based on the rarity of the GEM
-        if (_rarity == Rarity.COMMON) {
-            value = CommonGemsValue;
-        } else if (_rarity == Rarity.RARE) {
-            value = RareGemsValue;
-        } else if (_rarity == Rarity.UNIQUE) {
-            value = UniqueGemsValue;
-        } else if (_rarity == Rarity.EPIC) {
-            value = EpicGemsValue;
-        } else if (_rarity == Rarity.LEGENDARY) {
-            value = LegendaryGemsValue;
-        } else if (_rarity == Rarity.MYTHIC) {
-            value = MythicGemsValue;
-        } else {
-            // Revert if the rarity is not recognized
-            revert("wrong rarity");
+    * @notice Retrieves the details of a specific GEM's background color by its token ID.
+    * @param _tokenId The ID of the GEM's background to retrieve.
+    * @return r The red values of the background color.
+    * @return g The green values of the background color.
+    * @return b The blue values of the background color.
+    * @return blur The blur percentage of the background color.
+    * @return dropShadow Whether the background color has a drop shadow.
+    */
+    function getGemBackgroundColor(uint256 _tokenId) external view returns(uint8[2] memory r, uint8[2] memory g, uint8[2] memory b, uint8 blur, bool dropShadow) {
+        // Ensure the Gem exists
+        bool gemFound = false;
+        Gem memory gem;
+
+        // Loop through the Gems array to find the Gem with the matching tokenId
+        for (uint256 i = 0; i < Gems.length; ++i) {
+            if (Gems[i].tokenId == _tokenId) {
+                gem = Gems[i];
+                gemFound = true;
+                break; // Exit the loop once the Gem is found
+            }
         }
+
+        // Revert if the Gem is not found
+        require(gemFound, "Gem with the specified tokenId does not exist");
+
+        // Extract the background color details
+        BackgroundColor memory bgColor = gem.backgroundColor;
+        return (bgColor.r, bgColor.g, bgColor.b, bgColor.blur, bgColor.dropShadow);
     }
 
     /**
@@ -1309,6 +886,31 @@ contract GemFactory is
         return numberMiningGemsByRarity[rarity];
     }
 
+    /**
+     * @notice Retrieves the value of a GEM based on its rarity.
+     * @param _rarity The rarity of the GEM.
+     * @return value The value associated with the specified rarity.
+     */
+    function getValueBasedOnRarity(Rarity _rarity) public view returns (uint256 value) {
+        // Determine the value based on the rarity of the GEM
+        if (_rarity == Rarity.COMMON) {
+            value = CommonGemsValue;
+        } else if (_rarity == Rarity.RARE) {
+            value = RareGemsValue;
+        } else if (_rarity == Rarity.UNIQUE) {
+            value = UniqueGemsValue;
+        } else if (_rarity == Rarity.EPIC) {
+            value = EpicGemsValue;
+        } else if (_rarity == Rarity.LEGENDARY) {
+            value = LegendaryGemsValue;
+        } else if (_rarity == Rarity.MYTHIC) {
+            value = MythicGemsValue;
+        } else {
+            // Revert if the rarity is not recognized
+            revert("wrong rarity");
+        }
+    }
+
 
     //---------------------------------------------------------------------------------------
     //-------------------------------STORAGE GETTERS-----------------------------------------
@@ -1418,17 +1020,15 @@ contract GemFactory is
         return MythicGemsCooldownPeriod;
     }
 
-    function getRequestIds() external view returns (uint256[] memory) {
-        return requestIds;
-    }
-    function getPaused() external view returns(bool) {return paused;}
-
-
     function getRequestCount() external view returns (uint256) {
         return requestCount;
     }
 
     function getOwnershipTokenCount(address _user) external view returns (uint256) {
         return ownershipTokenCount[_user];
+    }
+
+    function getPaused() external view returns(bool) {
+        return paused;
     }
 }
