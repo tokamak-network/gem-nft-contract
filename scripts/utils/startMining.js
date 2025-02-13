@@ -8,16 +8,16 @@ async function main() {
   const gemFactoryProxy = process.env.GEM_FACTORY_PROXY;
 
   // Get contract instance
-  const GemFactoryMining = await ethers.getContractAt("GemFactoryMining", gemFactoryProxy);
+  const GemFactoryForging = await ethers.getContractAt("GemFactoryForging", gemFactoryProxy);
 
   
   try {
    
-    const tx = await GemFactoryMining.startMiningGEM(36, {
+    const tx = await GemFactoryForging.forgeTokens([1,2],1,[1,2], {
         gasLimit: 15000000 
       });
     await tx.wait();
-    console.log("Token started Mining");
+    console.log("Token forged");
 
 
   } catch (error) {

@@ -1,7 +1,7 @@
 const { ethers, run } = require("hardhat");
 require('dotenv').config();
 
-// command to run: "npx hardhat run scripts/3.step/1.gemfactoryDeployment.js --network thanos"
+// command to run: "npx hardhat run scripts/utils/GemFactoryUpgrade.js --network thanos"
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -34,14 +34,24 @@ async function main() {
       });
 */
     // Deploy ForgeLibrary
-    const ForgingLibrary = await ethers.getContractFactory("ForgingLibrary");
-    const forgingLibrary = await ForgingLibrary.deploy();
-    await forgingLibrary.waitForDeployment();
-    console.log("forgingLibrary deployed to:", forgingLibrary.target);
+    const ForgeLibrary = await ethers.getContractFactory("ForgeLibrary");
+    const forgeLibrary = await ForgeLibrary.deploy();
+    await forgeLibrary.waitForDeployment();
+    console.log("ForgeLibrary deployed to:", forgeLibrary.target);
+
+    // Deploy GemLibrary
+    const GemLibrary = await ethers.getContractFactory("GemLibrary");
+    const gemLibrary = await GemLibrary.deploy();
+    await gemLibrary.waitForDeployment();
+    console.log("GemLibrary deployed to:", gemLibrary.target);
 
 
     // Instantiate the GemFactoryForging
-    const GemFactoryForging = await ethers.getContractFactory("GemFactoryForging");
+    const GemFactoryForging = await ethers.getContractFactory("GemFactoryForging", {
+        libraries: {
+            GemLibrary: gemLibrary.target
+        }
+    });
     const gemFactoryForging = await GemFactoryForging.deploy();
     await gemFactoryForging.waitForDeployment();
     console.log("GemFactoryForging deployed to:", gemFactoryForging.target);
@@ -54,7 +64,11 @@ async function main() {
       });
     
     // Instantiate the GemFactory
-    const GemFactory = await ethers.getContractFactory("GemFactory");
+    const GemFactory = await ethers.getContractFactory("GemFactory", {
+      libraries: {
+        GemLibrary: gemLibrary.target
+      }
+    });
     const gemFactory = await GemFactory.deploy();
     await gemFactory.waitForDeployment();
     console.log("GemFactory deployed to:", gemFactory.target);

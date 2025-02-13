@@ -28,10 +28,6 @@ library ForgeLibrary {
     // ERRORS
     error NotValidColor();
     error WrongNumberOfGemToBeForged();
-    error AddressZero();
-    error NotGemOwner();
-    error GemIsLocked();
-    error WrongRarity();
 
     /**
      * @notice Forges new tokens from existing gems.
@@ -64,7 +60,7 @@ library ForgeLibrary {
     ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint256 forgedGemsCooldownDueDate, uint8 forgedGemsminingTry) {
          // Ensure the sender's address is not zero
         if(msgSender == address(0)) {
-            revert AddressZero();
+            revert GemFactoryStorage.AddressZero();
         }
         uint32 forgedGemsCooldownPeriod;
 
@@ -115,13 +111,13 @@ library ForgeLibrary {
         // Iterate over each token to validate ownership, lock status, and rarity
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if(GEMIndexToOwner[_tokenIds[i]] != msgSender) {
-                revert NotGemOwner();
+                revert GemFactoryStorage.NotGemOwner();
             }
             if(isTokenLocked(Gems, _tokenIds[i])) {
-                revert GemIsLocked();
+                revert GemFactoryStorage.GemIsLocked();
             }
             if(Gems[_tokenIds[i]].rarity != _rarity) {
-                revert WrongRarity();
+                revert GemFactoryStorage.WrongRarity();
             }
 
             // Sum the quadrants of the tokens

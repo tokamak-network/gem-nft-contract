@@ -661,7 +661,7 @@ contract GemFactoryTest is L2BaseTest {
         tokenIds[1] = newGemIds[1];
         uint8[2] memory color = [0, 1];
 
-        vm.expectRevert(ForgeLibrary.NotGemOwner.selector);
+        vm.expectRevert(GemFactoryStorage.NotGemOwner.selector);
         GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();
@@ -721,7 +721,7 @@ contract GemFactoryTest is L2BaseTest {
         uint8[2] memory color = [0, 1];
 
         // Expect the transaction to revert with the error message "wrong rarity Gems"
-        vm.expectRevert(ForgeLibrary.WrongRarity.selector);
+        vm.expectRevert(GemFactoryStorage.WrongRarity.selector);
         GemFactoryForging(gemfactoryProxyAddress).forgeTokens(tokenIds, GemFactoryStorage.Rarity.COMMON, color);
 
         vm.stopPrank();

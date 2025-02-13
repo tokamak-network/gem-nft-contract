@@ -18,9 +18,9 @@ async function main() {
   // Prepare arrays for token IDs and prices
   const tokenIds = [];
   const prices = [];
-  const fixedPrice = ethers.parseUnits("22", 27); // 22 * 10^27
+  const fixedPrice = ethers.parseUnits("150", 27); // 22 * 10^27
 
-  for (let gemId = 550; gemId <= 550; gemId++) {
+  for (let gemId = 80; gemId <= 100; gemId++) {
     tokenIds.push(gemId);
     prices.push(fixedPrice);
 
@@ -39,7 +39,7 @@ async function main() {
     const tx = await Treasury.putGemListForSale(tokenIds, prices, {
       gasLimit: 15000000 
     });
-    console.log("putGemListForSale is successful for Gem IDs 409 to 423");
+    console.log("putGemListForSale is successful");
   } catch (error) {
     console.error("Error putting Gem list for sale:", error);
   }

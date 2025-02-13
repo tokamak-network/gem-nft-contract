@@ -11,8 +11,8 @@ async function main() {
     const balance = await ethers.provider.getBalance(await deployer.getAddress());
     console.log("Account balance:", ethers.formatEther(balance));
 
-    const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
-    const gemFactoryProxy = await ethers.getContractAt("GemFactoryProxy", gemFactoryProxyAddress);
+    //const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
+    //const gemFactoryProxy = await ethers.getContractAt("GemFactoryProxy", gemFactoryProxyAddress);
 
     // ------------------------ GEMFACTORY INSTANCES ---------------------------------
     // Deploy ForgeLibrary
@@ -34,7 +34,11 @@ async function main() {
     console.log("GemLibrary deployed to:", gemLibrary.target);
 
     // Instantiate the GemFactory
-    const GemFactory = await ethers.getContractFactory("GemFactory");
+    const GemFactory = await ethers.getContractFactory("GemFactory", {
+      libraries: {
+        GemLibrary: gemLibrary.target
+      }
+    });
     const gemFactory = await GemFactory.deploy();
     await gemFactory.waitForDeployment();
     console.log("GemFactory deployed to:", gemFactory.target);
@@ -47,7 +51,11 @@ async function main() {
       });
 
     // Instantiate the GemFactoryForging
-    const GemFactoryForging = await ethers.getContractFactory("GemFactoryForging");
+    const GemFactoryForging = await ethers.getContractFactory("GemFactoryForging", {
+      libraries: {
+        GemLibrary: gemLibrary.target
+      }
+    });
     const gemFactoryForging = await GemFactoryForging.deploy();
     await gemFactoryForging.waitForDeployment();
     console.log("GemFactoryForging deployed to:", gemFactoryForging.target);
@@ -73,7 +81,7 @@ async function main() {
       });
 
     // ------------------------ GEMFACTORY PROXY ---------------------------------
-/*
+
     const GemFactoryProxy = await ethers.getContractFactory("GemFactoryProxy");
     const gemFactoryProxy = await GemFactoryProxy.deploy();
     await gemFactoryProxy.waitForDeployment();
@@ -87,7 +95,7 @@ async function main() {
         constructorArguments: [],
         contract:"src/L2/GemFactoryProxy.sol:GemFactoryProxy"
       });
-*/
+
     // Set the first index to the GemFactory contract
     const upgradeTo = await gemFactoryProxy.upgradeTo(gemFactory.target);
     await upgradeTo.wait();

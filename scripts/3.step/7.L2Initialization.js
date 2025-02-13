@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 require('dotenv').config();
 // command to run: "source .env"
-// command to run: "npx hardhat run scripts/3.step/7.L2Initialization.js --network titan"
+// command to run: "npx hardhat run scripts/3.step/7.L2Initialization.js --network thanos"
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -54,6 +54,7 @@ async function main() {
   await drbInitializeTx.wait();
   console.log("GemFactoryMining DRB initialized");
 
+  /*
   // ---------------------------- TREASURYPROXY INITIALIZATION ---------------------------------
   // Attach the Treasury interface to the TreasuryProxy contract address
   console.log("treasury initialization...");
@@ -102,7 +103,7 @@ async function main() {
   console.log("WstonSwapPoolProxy initialized");
 
   // -------------------------------- STORAGE SETTER ----------------------------------
-
+*/
 
   await GemFactory.setGemsValue(
     BigInt(10) ** BigInt(27) * BigInt(10), // commonGemsValue
@@ -163,81 +164,88 @@ async function main() {
   console.log("RandomPackProxy address set in TreasuryProxy");
 
   // we set up the list of colors available for the GEM
-  await GemFactory.addColor("Ruby",0,0);
-  await GemFactory.addColor("Ruby/Amber",0,1);
-  await GemFactory.addColor("Ruby/Topaz",0,2);
-  await GemFactory.addColor("Ruby/Emerald",0,3);
-  await GemFactory.addColor("Ruby/Turquoise",0,4);
-  await GemFactory.addColor("Ruby/Sapphire",0,5);
-  await GemFactory.addColor("Ruby/Amethyst",0,6);
-  await GemFactory.addColor("Ruby/Garnet",0,7);
+  await GemFactory.addColor("Ruby",0,0,224,224,17,17,95,95);
+  await GemFactory.addColor("Ruby/Amber",0,1,224,100,17,74,95,0);
+  await GemFactory.addColor("Ruby/Topaz",0,2,224,255,17,200,95,54);
+  await GemFactory.addColor("Ruby/Emerald",0,3,224,80,17,200,95,120);
+  await GemFactory.addColor("Ruby/Turquoise",0,4,224,64,17,224,95,208);
+  await GemFactory.addColor("Ruby/Sapphire",0,5,224,15,17,82,95,186);
+  await GemFactory.addColor("Ruby/Amethyst",0,6,224,153,17,102,95,204);
+  await GemFactory.addColor("Ruby/Garnet",0,7,224,154,17,42,95,42);
 
-  await GemFactory.addColor("Amber/Ruby",1,0);
-  await GemFactory.addColor("Amber",1,1);
-  await GemFactory.addColor("Amber/Topaz",1,2);
-  await GemFactory.addColor("Amber/Emerald",1,3);
-  await GemFactory.addColor("Amber/Turquoise",1,4);
-  await GemFactory.addColor("Amber/Sapphire",1,5);
-  await GemFactory.addColor("Amber/Amethyst",1,6);
-  await GemFactory.addColor("Amber/Garnet",1,7);
+  await GemFactory.addColor("Amber/Ruby",1,0,100,224,74,17,0,95);
+  await GemFactory.addColor("Amber",1,1,100,100,74,74,0,0);
+  await GemFactory.addColor("Amber/Topaz",1,2,100,255,74,200,0,54);
+  await GemFactory.addColor("Amber/Emerald",1,3,100,80,74,200,0,120);
+  await GemFactory.addColor("Amber/Turquoise",1,4,100,64,74,224,0,208);
+  await GemFactory.addColor("Amber/Sapphire",1,5,100,15,74,82,0,186);
+  await GemFactory.addColor("Amber/Amethyst",1,6,100,153,74,102,0,204);
+  await GemFactory.addColor("Amber/Garnet",1,7,100,154,74,42,0,42);
 
-  await GemFactory.addColor("Topaz/Ruby",2,0);
-  await GemFactory.addColor("Topaz/Amber",2,1);
-  await GemFactory.addColor("Topaz",2,2);
-  await GemFactory.addColor("Topaz/Emerald",2,3);
-  await GemFactory.addColor("Topaz/Turquoise",2,4);
-  await GemFactory.addColor("Topaz/Sapphire",2,5);
-  await GemFactory.addColor("Topaz/Amethyst",2,6);
-  await GemFactory.addColor("Topaz/Garnet",2,7);
+  await GemFactory.addColor("Topaz/Ruby",2,0,255,224,200,17,54,95);
+  await GemFactory.addColor("Topaz/Amber",2,1,255,100,200,74,54,0);
+  await GemFactory.addColor("Topaz",2,2,255,255,200,200,54,54);
+  await GemFactory.addColor("Topaz/Emerald",2,3,255,80,200,200,54,120);
+  await GemFactory.addColor("Topaz/Turquoise",2,4,255,64,200,224,54,208);
+  await GemFactory.addColor("Topaz/Sapphire",2,5,255,15,200,82,54,186);
+  await GemFactory.addColor("Topaz/Amethyst",2,6,255,153,200,102,54,204);
+  await GemFactory.addColor("Topaz/Garnet",2,7,255,154,200,42,54,42);
 
-  await GemFactory.addColor("Emerald/Ruby",3,0);
-  await GemFactory.addColor("Emerald/Amber",3,1);
-  await GemFactory.addColor("Emerald/Topaz",3,2);
-  await GemFactory.addColor("Emerald",3,3);
-  await GemFactory.addColor("Emerald/Turquoise",3,4);
-  await GemFactory.addColor("Emerald/Sapphire",3,5);
-  await GemFactory.addColor("Emerald/Amethyst",3,6);
-  await GemFactory.addColor("Emerald/Garnet",3,7);
+  await GemFactory.addColor("Emerald/Ruby",3,0,80,224,200,17,120,95);
+  await GemFactory.addColor("Emerald/Amber",3,1,80,100,200,74,120,0);
+  await GemFactory.addColor("Emerald/Topaz",3,2,80,255,200,200,120,54);
+  await GemFactory.addColor("Emerald",3,3,80,80,200,200,120,120);
+  await GemFactory.addColor("Emerald/Turquoise",3,4,80,64,200,224,120,208);
+  await GemFactory.addColor("Emerald/Sapphire",3,5,80,15,200,82,120,186);
+  await GemFactory.addColor("Emerald/Amethyst",3,6,80,153,200,102,120,204);
+  await GemFactory.addColor("Emerald/Garnet",3,7,80,154,200,42,120,42);
 
-  await GemFactory.addColor("Turquoise/Ruby",4,0);
-  await GemFactory.addColor("Turquoise/Amber",4,1);
-  await GemFactory.addColor("Turquoise/Topaz",4,2);
-  await GemFactory.addColor("Turquoise/Emerald",4,3);
-  await GemFactory.addColor("Turquoise",4,4);
-  await GemFactory.addColor("Turquoise/Sapphire",4,5);
-  await GemFactory.addColor("Turquoise/Amethyst",4,6);
-  await GemFactory.addColor("Turquoise/Garnet",4,7);
+  await GemFactory.addColor("Turquoise/Ruby",4,0,64,224,224,17,208,95);
+  await GemFactory.addColor("Turquoise/Amber",4,1,64,100,224,74,208,0);
+  await GemFactory.addColor("Turquoise/Topaz",4,2,64,255,224,200,208,54);
+  await GemFactory.addColor("Turquoise/Emerald",4,3,64,80,224,200,208,120);
+  await GemFactory.addColor("Turquoise",4,4,64,64,224,224,208,208);
+  await GemFactory.addColor("Turquoise/Sapphire",4,5,64,15,224,82,208,186);
+  await GemFactory.addColor("Turquoise/Amethyst",4,6,64,153,224,102,208,204);
+  await GemFactory.addColor("Turquoise/Garnet",4,7,64,154,224,42,208,42);
 
-  await GemFactory.addColor("Sapphire/Ruby",5,0);
-  await GemFactory.addColor("Sapphire/Amber",5,1);
-  await GemFactory.addColor("Sapphire/Topaz",5,2);
-  await GemFactory.addColor("Sapphire/Emerald",5,3);
-  await GemFactory.addColor("Sapphire/Turquoise",5,4);
-  await GemFactory.addColor("Sapphire",5,5);
-  await GemFactory.addColor("Sapphire/Amethyst",5,6);
-  await GemFactory.addColor("Sapphire/Garnet",5,7);
+  await GemFactory.addColor("Sapphire/Ruby",5,0,15,224,82,17,186,95);
+  await GemFactory.addColor("Sapphire/Amber",5,1,15,100,82,74,186,0);
+  await GemFactory.addColor("Sapphire/Topaz",5,2,15,255,82,200,186,54);
+  await GemFactory.addColor("Sapphire/Emerald",5,3,15,80,82,200,186,120);
+  await GemFactory.addColor("Sapphire/Turquoise",5,4,15,64,82,224,186,208);
+  await GemFactory.addColor("Sapphire",5,5,15,15,82,82,186,186);
+  await GemFactory.addColor("Sapphire/Amethyst",5,6,15,153,82,102,186,204);
+  await GemFactory.addColor("Sapphire/Garnet",5,7,15,154,82,42,186,42);
 
-  await GemFactory.addColor("Amethyst/Ruby",6,0);
-  await GemFactory.addColor("Amethyst/Amber",6,1);
-  await GemFactory.addColor("Amethyst/Topaz",6,2);
-  await GemFactory.addColor("Amethyst/Emerald",6,3);
-  await GemFactory.addColor("Amethyst/Turquoise",6,4);
-  await GemFactory.addColor("Amethyst/Sapphire",6,5);
-  await GemFactory.addColor("Amethyst",6,6);
-  await GemFactory.addColor("Amethyst/Garnet",6,7);
+  await GemFactory.addColor("Amethyst/Ruby",6,0,153,224,102,17,204,95);
+  await GemFactory.addColor("Amethyst/Amber",6,1,153,100,102,74,204,0);
+  await GemFactory.addColor("Amethyst/Topaz",6,2,153,255,102,200,204,54);
+  await GemFactory.addColor("Amethyst/Emerald",6,3,153,80,102,200,204,120);
+  await GemFactory.addColor("Amethyst/Turquoise",6,4,153,64,102,224,204,208);
+  await GemFactory.addColor("Amethyst/Sapphire",6,5,153,15,102,82,204,186);
+  await GemFactory.addColor("Amethyst",6,6,153,153,102,102,204,204);
+  await GemFactory.addColor("Amethyst/Garnet",6,7,153,154,102,42,204,42);
 
-  await GemFactory.addColor("Garnet/Ruby",7,0);
-  await GemFactory.addColor("Garnet/Amber",7,1);
-  await GemFactory.addColor("Garnet/Topaz",7,2);
-  await GemFactory.addColor("Garnet/Emerald",7,3);
-  await GemFactory.addColor("Garnet/Turquoise",7,4);
-  await GemFactory.addColor("Garnet/Sapphire",7,5);
-  await GemFactory.addColor("Garnet/Amethyst",7,6);
-  await GemFactory.addColor("Garnet",7,7);
+  await GemFactory.addColor("Garnet/Ruby",7,0,154,224,42,17,42,95);
+  await GemFactory.addColor("Garnet/Amber",7,1,154,100,42,74,42,0);
+  await GemFactory.addColor("Garnet/Topaz",7,2,154,255,42,200,42,54);
+  await GemFactory.addColor("Garnet/Emerald",7,3,154,80,42,200,42,120);
+  await GemFactory.addColor("Garnet/Turquoise",7,4,154,64,42,224,42,208);
+  await GemFactory.addColor("Garnet/Sapphire",7,5,154,15,42,82,42,186);
+  await GemFactory.addColor("Garnet/Amethyst",7,6,154,153,42,102,42,204);
+  await GemFactory.addColor("Garnet",7,7,154,154,42,42,42,42);
   console.log("colors initialized in GemFactoryProxy")
 
   await RandomPack.setGemFactory(gemFactoryProxyAddress);
   console.log("GemFactoryProxy set in RandomPackProxy")
+
+  await Treasury.setGemFactory(gemFactoryProxyAddress);
+  console.log("GemFactory set in Treasury");
+
+  await MarketPlace.setGemFactory(gemFactoryProxyAddress);
+  console.log("GemFactory set in MarketPLace");
+
   
   await RandomPack.setTreasury(treasuryProxyAddress);
   console.log("TreasuryProxy set in RandomPackProxy")

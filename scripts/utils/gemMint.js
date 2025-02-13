@@ -1,6 +1,8 @@
 const { ethers } = require("hardhat");
 require('dotenv').config();
 
+// command to run: "npx hardhat run scripts/utils/gemMint.js --network thanos"
+
 async function main() {
   const [deployer] = await ethers.getSigners();
 

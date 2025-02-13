@@ -27,7 +27,6 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
     }
 
     using ForgeLibrary for GemFactoryStorage.Gem[];
-    using GemLibrary for GemFactoryStorage.Gem[];
 
      /**
      * @notice function that allow users to forge their gems. Gems must have the same rarity. 
