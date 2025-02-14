@@ -32,7 +32,7 @@ async function main() {
         address: gemFactoryMining.target,
         constructorArguments: [],
       });
-*/
+
     // Deploy ForgeLibrary
     const ForgeLibrary = await ethers.getContractFactory("ForgeLibrary");
     const forgeLibrary = await ForgeLibrary.deploy();
@@ -80,16 +80,34 @@ async function main() {
         constructorArguments: [],
       });
     
+    */
+
+          // Instantiate the GemFactory
+    const MarketPlaceThanos = await ethers.getContractFactory("MarketPlaceThanos");
+    const marketplaceThanos = await MarketPlaceThanos.deploy();
+    await marketplaceThanos.waitForDeployment();
+    console.log("MarketPlaceThanos deployed to:", marketplaceThanos.target);
+
+    await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
+
+    await run("verify:verify", {
+        address: marketplaceThanos.target,
+        constructorArguments: [],
+      });
+
+
     // ------------------------ GEMFACTORY PROXY ---------------------------------
 
-    const gemFactoryProxyAddress = process.env.GEM_FACTORY_PROXY;
+    const marketplaceProxyAddress = process.env.MARKETPLACE_PROXY;
     
     // Get contract instance
-    const GemFactoryProxy = await ethers.getContractAt("GemFactoryProxy", gemFactoryProxyAddress);
+    const MarketPlaceProxy = await ethers.getContractAt("MarketPlaceProxy", marketplaceProxyAddress);
 
-    const upgradeTo = await GemFactoryProxy.upgradeTo(gemFactory.target);
+    const upgradeTo = await MarketPlaceProxy.upgradeTo(marketplaceThanos.target);
     await upgradeTo.wait();
-    console.log("GemFactory upgraded to implementation: ", gemFactory.target);
+    console.log("MarketPLaceProxy upgraded to implementation: ", marketplaceThanos.target);
+
+    /*
 
     // Set the third index to the GemFactoryMining contract
     const setImplementation2 = await GemFactoryProxy.setImplementation2(gemFactoryForging.target, 1, true);
