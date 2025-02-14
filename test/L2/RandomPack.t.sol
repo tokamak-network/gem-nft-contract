@@ -301,6 +301,7 @@ contract RandomPackTest is L2BaseTest {
         uint8[2][] memory colors = new uint8[2][](2);
         colors[0] = [0,0];
         colors[1] = [1,1];
+
         GemFactoryStorage.Rarity[] memory rarities = new GemFactoryStorage.Rarity[](2);
         rarities[0] = GemFactoryStorage.Rarity.RARE;
         rarities[1] = GemFactoryStorage.Rarity.UNIQUE;

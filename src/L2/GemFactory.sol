@@ -5,6 +5,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {DRBConsumerBase} from "./Randomness/DRBConsumerBase.sol";
 import {GemFactoryStorage} from "./GemFactoryStorage.sol";
+import "./GemFactoryForging.sol";
 import {IDRBCoordinator} from "../interfaces/IDRBCoordinator.sol";
 import {GemLibrary} from "../libraries/GemLibrary.sol";
 import {MiningLibrary} from "../libraries/MiningLibrary.sol";
@@ -350,80 +351,40 @@ contract GemFactory is
             revert ColorNotExist();
         }
 
+        require(GemLibrary.checkQuadrants(_quadrants, _rarity), "Wrong quadrants");
+
         // Declare variables for GEM attributes
         uint32 _gemCooldownPeriod;
         uint256 _value;
-        uint8 _miningTry;
-
-        // Calculate the sum of the quadrant values
-        uint8 sumOfQuadrants = _quadrants[0] + _quadrants[1] + _quadrants[2] + _quadrants[3];
+        uint8 _miningTry;        
 
         // Determine GEM attributes based on its rarity
         if (_rarity == Rarity.COMMON) {
-            // Validate quadrant values for COMMON rarity
-            if (_quadrants[0] != 1 && _quadrants[0] != 2) revert NewGemInvalidQuadrant(0, 1, 2);
-            if (_quadrants[1] != 1 && _quadrants[1] != 2) revert NewGemInvalidQuadrant(1, 1, 2);
-            if (_quadrants[2] != 1 && _quadrants[2] != 2) revert NewGemInvalidQuadrant(2, 1, 2);
-            if (_quadrants[3] != 1 && _quadrants[3] != 2) revert NewGemInvalidQuadrant(3, 1, 2);
-            if (sumOfQuadrants >= 8) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "COMMON");
-
             // Set attributes for COMMON rarity
             _gemCooldownPeriod = 0;
             _value = CommonGemsValue;
             _miningTry = 0;
         } else if (_rarity == Rarity.RARE) {
-            // Validate quadrant values for RARE rarity
-            if (_quadrants[0] != 2 && _quadrants[0] != 3) revert NewGemInvalidQuadrant(0, 2, 3);
-            if (_quadrants[1] != 2 && _quadrants[1] != 3) revert NewGemInvalidQuadrant(1, 2, 3);
-            if (_quadrants[2] != 2 && _quadrants[2] != 3) revert NewGemInvalidQuadrant(2, 2, 3);
-            if (_quadrants[3] != 2 && _quadrants[3] != 3) revert NewGemInvalidQuadrant(3, 2, 3);
-            if (sumOfQuadrants >= 12) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "RARE");
-
             // Set attributes for RARE rarity
             _gemCooldownPeriod = RareGemsCooldownPeriod;
             _value = RareGemsValue;
             _miningTry = RareminingTry;
         } else if (_rarity == Rarity.UNIQUE) {
-            // Validate quadrant values for UNIQUE rarity
-            if (_quadrants[0] != 3 && _quadrants[0] != 4) revert NewGemInvalidQuadrant(0, 3, 4);
-            if (_quadrants[1] != 3 && _quadrants[1] != 4) revert NewGemInvalidQuadrant(1, 3, 4);
-            if (_quadrants[2] != 3 && _quadrants[2] != 4) revert NewGemInvalidQuadrant(2, 3, 4);
-            if (_quadrants[3] != 3 && _quadrants[3] != 4) revert NewGemInvalidQuadrant(3, 3, 4);
-            if (sumOfQuadrants >= 16) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "UNIQUE");
-
             // Set attributes for UNIQUE rarity
             _gemCooldownPeriod = UniqueGemsCooldownPeriod;
             _value = UniqueGemsValue;
             _miningTry = UniqueminingTry;
         } else if (_rarity == Rarity.EPIC) {
-            // Validate quadrant values for EPIC rarity
-            if (_quadrants[0] != 4 && _quadrants[0] != 5) revert NewGemInvalidQuadrant(0, 4, 5);
-            if (_quadrants[1] != 4 && _quadrants[1] != 5) revert NewGemInvalidQuadrant(1, 4, 5);
-            if (_quadrants[2] != 4 && _quadrants[2] != 5) revert NewGemInvalidQuadrant(2, 4, 5);
-            if (_quadrants[3] != 4 && _quadrants[3] != 5) revert NewGemInvalidQuadrant(3, 4, 5);
-            if (sumOfQuadrants >= 20) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "EPIC");
-
             // Set attributes for EPIC rarity
             _gemCooldownPeriod = EpicGemsCooldownPeriod;
             _value = EpicGemsValue;
             _miningTry = EpicminingTry;
         } else if (_rarity == Rarity.LEGENDARY) {
-            // Validate quadrant values for LEGENDARY rarity
-            if (_quadrants[0] != 5 && _quadrants[0] != 6) revert NewGemInvalidQuadrant(0, 5, 6);
-            if (_quadrants[1] != 5 && _quadrants[1] != 6) revert NewGemInvalidQuadrant(1, 5, 6);
-            if (_quadrants[2] != 5 && _quadrants[2] != 6) revert NewGemInvalidQuadrant(2, 5, 6);
-            if (_quadrants[3] != 5 && _quadrants[3] != 6) revert NewGemInvalidQuadrant(3, 5, 6);
-            if (sumOfQuadrants >= 24) revert SumOfQuadrantsTooHigh(sumOfQuadrants, "LEGENDARY");
-
             // Set attributes for LEGENDARY rarity
             _gemCooldownPeriod = LegendaryGemsCooldownPeriod;
             _value = LegendaryGemsValue;
             _miningTry = LegendaryminingTry;
         } else if (_rarity == Rarity.MYTHIC) {
-            // Validate quadrant values for MYTHIC rarity
-            if (_quadrants[0] != 6 || _quadrants[1] != 6 || _quadrants[2] != 6 || _quadrants[3] != 6) {
-                revert NewGemInvalidQuadrant(0, 6, 6);
-            }
             // Set attributes for MYTHIC rarity
             _gemCooldownPeriod = MythicGemsCooldownPeriod;
             _value = MythicGemsValue;
@@ -436,6 +397,8 @@ contract GemFactory is
         // Calculate the cooldown due date for the GEM
         uint256 _cooldownDueDate = block.timestamp + _gemCooldownPeriod;
 
+        BackgroundColor memory backgroundColor = GemLibrary.getBackgroundColor(_color[0], _color[1], _rarity, colors, colorIndexInTheColorArray);
+
         // Create the new GEM and get its ID
         uint256 newGemId = Gems.createGem(
             GEMIndexToOwner,
@@ -443,6 +406,7 @@ contract GemFactory is
             msg.sender,
             _rarity,
             _color,
+            backgroundColor,
             _quadrants,
             _value,
             _cooldownDueDate,
@@ -456,7 +420,7 @@ contract GemFactory is
 
         // Emit an event for the creation of the new GEM
         emit Created(
-            newGemId, _rarity, _color, _miningTry, _value, _quadrants, _cooldownDueDate, _tokenURI, msg.sender
+            newGemId, _rarity, _color, backgroundColor, _miningTry, _value, _quadrants, _cooldownDueDate, _tokenURI, msg.sender
         );
         return newGemId;
     }
@@ -466,7 +430,7 @@ contract GemFactory is
      * @param _rarities rarity of each Gem
      * @param _colors The colors of the GEMs to be created.
      * @param _quadrants quadrants of the GEMs to be created.
-     * @param _tokenURIs TokenURIs of each GEM
+     * @param _tokenURIs TokenURIs of each GEM.
      * @return The IDs of the newly created GEMs.
      */
     function createGEMPool(
@@ -580,15 +544,42 @@ contract GemFactory is
      * @notice Adds a new color to the list of available colors.
      * @dev Only callable by the owner of the contract.
      * @param _colorName The name of the color to add.
-     * @param _index1 The first index of the color.
-     * @param _index2 The second index of the color.
+     * @param _colorId1 The first index of the color.
+     * @param _colorId2 The second index of the color.
+     * @param _r1 The first r value.
+     * @param _r2 The second r value.
+     * @param _g1 The first g value.
+     * @param _g2 The second g value.
+     * @param _b1 The first b value.
+     * @param _b2 The second b value.
      */
-    function addColor(string memory _colorName, uint8 _index1, uint8 _index2) external onlyOwner {
-        colorName[_index1][_index2] = _colorName;
-        colors.push([_index1, _index2]);
-        colorsCount++;
+    function addColor(
+        string memory _colorName, 
+        uint8 _colorId1, 
+        uint8 _colorId2,
+        uint8 _r1,
+        uint8 _r2,
+        uint8 _g1,
+        uint8 _g2,
+        uint8 _b1,
+        uint8 _b2
+    ) external onlyOwner {
+        require(bytes(_colorName).length > 0, "You must pass a color name");
+        require(!isColorNameUsed[_colorName], "Name already exists");
 
-        emit ColorAdded(colorsCount, _colorName);
+        Color memory newColor = Color({
+            colorName: _colorName,
+            colorIds: [_colorId1, _colorId2],
+            r: [_r1, _r2],
+            g: [_g1, _g2],
+            b: [_b1, _b2]
+        });
+        colors.push(newColor);
+        colorName[_colorId1][_colorId2] = _colorName;
+        isColorNameUsed[_colorName] = true;
+        colorIndexInTheColorArray[_colorId1][_colorId2] = colors.length - 1;
+
+        emit ColorAdded(colors.length, _colorName);
     }
 
     /**
@@ -596,7 +587,7 @@ contract GemFactory is
      * @param tokenId The ID of the token to set the URI for.
      * @param _tokenURI The URI to set for the token.
      */
-    function setTokenURI(uint256 tokenId, string memory _tokenURI) external {
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) external onlyOwner {
         _setTokenURI(tokenId, _tokenURI);
     }
 
@@ -709,30 +700,6 @@ contract GemFactory is
     }
 
     /**
-     * @notice Gets the number of GEM tokens owned by a specific address.
-     * @param _owner The address to query the balance for.
-     * @return count The number of GEM tokens owned by the specified address.
-     */
-    function balanceOf(address _owner) public view override(ERC721Upgradeable, IERC721) returns (uint256 count) {
-        // Return the count of tokens owned by the address
-        return ownershipTokenCount[_owner];
-    }
-
-    /**
-    * @notice Retrieves the URI associated with a specific GEM token.
-    * @param tokenId The ID of the GEM token to query.
-    * @return The URI string associated with the specified token ID.
-    */
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        // Ensure the token exists before querying its URI
-        if (!_exists(tokenId)) {
-            revert URIQueryForNonexistentToken(tokenId);
-        }
-        // Return the token URI from the parent contract
-        return super.tokenURI(tokenId);
-    }
-
-    /**
      * @notice Checks if a GEM token exists.
      * @param tokenId The ID of the GEM token to check.
      * @return True if the token exists, false otherwise.
@@ -747,7 +714,7 @@ contract GemFactory is
      * @param tokenId The ID of the GEM to retrieve.
      * @return The Gem struct containing details of the specified GEM.
      */
-    function getGem(uint256 tokenId) public view returns (Gem memory) {
+    function getGem(uint256 tokenId) external view returns (Gem memory) {
         // Iterate through the list of Gems to find the one with the specified token ID
         for (uint256 i = 0; i < Gems.length; ++i) {
             if (Gems[i].tokenId == tokenId) {
@@ -759,28 +726,34 @@ contract GemFactory is
     }
 
     /**
-     * @notice Retrieves the value of a GEM based on its rarity.
-     * @param _rarity The rarity of the GEM.
-     * @return value The value associated with the specified rarity.
-     */
-    function getValueBasedOnRarity(Rarity _rarity) public view returns (uint256 value) {
-        // Determine the value based on the rarity of the GEM
-        if (_rarity == Rarity.COMMON) {
-            value = CommonGemsValue;
-        } else if (_rarity == Rarity.RARE) {
-            value = RareGemsValue;
-        } else if (_rarity == Rarity.UNIQUE) {
-            value = UniqueGemsValue;
-        } else if (_rarity == Rarity.EPIC) {
-            value = EpicGemsValue;
-        } else if (_rarity == Rarity.LEGENDARY) {
-            value = LegendaryGemsValue;
-        } else if (_rarity == Rarity.MYTHIC) {
-            value = MythicGemsValue;
-        } else {
-            // Revert if the rarity is not recognized
-            revert("wrong rarity");
+    * @notice Retrieves the details of a specific GEM's background color by its token ID.
+    * @param _tokenId The ID of the GEM's background to retrieve.
+    * @return r The red values of the background color.
+    * @return g The green values of the background color.
+    * @return b The blue values of the background color.
+    * @return blur The blur percentage of the background color.
+    * @return dropShadow Whether the background color has a drop shadow.
+    */
+    function getGemBackgroundColor(uint256 _tokenId) external view returns(uint8[2] memory r, uint8[2] memory g, uint8[2] memory b, uint8 blur, bool dropShadow) {
+        // Ensure the Gem exists
+        bool gemFound = false;
+        Gem memory gem;
+
+        // Loop through the Gems array to find the Gem with the matching tokenId
+        for (uint256 i = 0; i < Gems.length; ++i) {
+            if (Gems[i].tokenId == _tokenId) {
+                gem = Gems[i];
+                gemFound = true;
+                break; // Exit the loop once the Gem is found
+            }
         }
+
+        // Revert if the Gem is not found
+        require(gemFound, "Gem with the specified tokenId does not exist");
+
+        // Extract the background color details
+        BackgroundColor memory bgColor = gem.backgroundColor;
+        return (bgColor.r, bgColor.g, bgColor.b, bgColor.blur, bgColor.dropShadow);
     }
 
     /**
@@ -809,7 +782,7 @@ contract GemFactory is
      * @param _index2 The second index of the color.
      * @return The name of the color as a string.
      */
-    function getColorName(uint8 _index1, uint8 _index2) public view returns (string memory) {
+    function getColorName(uint8 _index1, uint8 _index2) external view returns (string memory) {
         // Return the color name associated with the specified indices
         return colorName[_index1][_index2];
     }
@@ -911,6 +884,31 @@ contract GemFactory is
      */
     function getNumberActiveMinersByRarity(Rarity rarity) external view returns(uint256) {
         return numberMiningGemsByRarity[rarity];
+    }
+
+    /**
+     * @notice Retrieves the value of a GEM based on its rarity.
+     * @param _rarity The rarity of the GEM.
+     * @return value The value associated with the specified rarity.
+     */
+    function getValueBasedOnRarity(Rarity _rarity) public view returns (uint256 value) {
+        // Determine the value based on the rarity of the GEM
+        if (_rarity == Rarity.COMMON) {
+            value = CommonGemsValue;
+        } else if (_rarity == Rarity.RARE) {
+            value = RareGemsValue;
+        } else if (_rarity == Rarity.UNIQUE) {
+            value = UniqueGemsValue;
+        } else if (_rarity == Rarity.EPIC) {
+            value = EpicGemsValue;
+        } else if (_rarity == Rarity.LEGENDARY) {
+            value = LegendaryGemsValue;
+        } else if (_rarity == Rarity.MYTHIC) {
+            value = MythicGemsValue;
+        } else {
+            // Revert if the rarity is not recognized
+            revert("wrong rarity");
+        }
     }
 
 
@@ -1022,17 +1020,15 @@ contract GemFactory is
         return MythicGemsCooldownPeriod;
     }
 
-    function getRequestIds() external view returns (uint256[] memory) {
-        return requestIds;
-    }
-    function getPaused() external view returns(bool) {return paused;}
-
-
     function getRequestCount() external view returns (uint256) {
         return requestCount;
     }
 
     function getOwnershipTokenCount(address _user) external view returns (uint256) {
         return ownershipTokenCount[_user];
+    }
+
+    function getPaused() external view returns(bool) {
+        return paused;
     }
 }

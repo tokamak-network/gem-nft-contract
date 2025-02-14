@@ -4,6 +4,7 @@ pragma solidity 0.8.25;
 import "../proxy/ProxyStorage.sol";
 import "./GemFactoryStorage.sol";
 import { ForgeLibrary } from "../libraries/ForgeLibrary.sol";
+import { GemLibrary } from "../libraries/GemLibrary.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
@@ -60,12 +61,16 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
             MythicGemsCooldownPeriod: MythicGemsCooldownPeriod
         });
 
+        // check if the color wished exists
+        require(bytes(colorName[_color[0]][_color[1]]).length > 0, "this color does not exist");
+
         // Initialize variables for forged GEM properties
         uint8[4] memory forgedQuadrants;
         Rarity newRarity;
         uint256 forgedGemsCooldownDueDate;
         uint8 forgedGemsminingTry;
         uint256 forgedGemsValue;
+        BackgroundColor memory _backgroundColor = GemLibrary.getBackgroundColor(_color[0], _color[1], Rarity(uint8(_rarity) + 1), colors, colorIndexInTheColorArray);
 
         // Call the forgeTokens function from Gems contract
         (newGemId, forgedQuadrants, newRarity, forgedGemsValue, forgedGemsCooldownDueDate, forgedGemsminingTry) = Gems.forgeTokens(
@@ -75,11 +80,12 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
             _tokenIds,
             _rarity,
             _color,
+            _backgroundColor,
             params
         );
 
         // Emit an event for the forged GEM
-        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, forgedGemsValue);
+        emit GemForged(msg.sender, _tokenIds, newGemId, newRarity, forgedQuadrants, _color, _backgroundColor, forgedGemsValue);
 
         // Burn the old tokens
         burnTokens(msg.sender, _tokenIds);
@@ -89,7 +95,7 @@ contract GemFactoryForging is ProxyStorage, GemFactoryStorage, ERC721URIStorageU
         _setTokenURI(newGemId, ""); // Set empty URI for the new token
 
         // Emit another event for the created GEM
-        emit Created(newGemId, newRarity, _color, forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsCooldownDueDate, "", msg.sender);
+        emit Created(newGemId, newRarity, _color, _backgroundColor, forgedGemsminingTry, forgedGemsValue, forgedQuadrants, forgedGemsCooldownDueDate, "", msg.sender);
 
         return newGemId;
     }

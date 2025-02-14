@@ -292,19 +292,21 @@ contract L2BaseTest is Test {
         Treasury(treasuryProxyAddress).setRandomPack(randomPackProxyAddress);
 
         // we set up the list of colors available for the GEM
-        GemFactory(gemfactoryProxyAddress).addColor("Ruby",0,0);
-        GemFactory(gemfactoryProxyAddress).addColor("Ruby/Amber",0,1);
-        GemFactory(gemfactoryProxyAddress).addColor("Amber",1,1);
-        GemFactory(gemfactoryProxyAddress).addColor("Topaz",2,2);
-        GemFactory(gemfactoryProxyAddress).addColor("Topaz/Emerald",2,3);
-        GemFactory(gemfactoryProxyAddress).addColor("Emerald/Topaz",3,2);
-        GemFactory(gemfactoryProxyAddress).addColor("Emerald",3,3);
-        GemFactory(gemfactoryProxyAddress).addColor("Emerald/Amber",3,1);
-        GemFactory(gemfactoryProxyAddress).addColor("Turquoise",4,4);
-        GemFactory(gemfactoryProxyAddress).addColor("Sapphire",5,5);
-        GemFactory(gemfactoryProxyAddress).addColor("Amethyst",6,6);
-        GemFactory(gemfactoryProxyAddress).addColor("Amethyst/Amber",6,1);
-        GemFactory(gemfactoryProxyAddress).addColor("Garnet",7,7);
+        GemFactory(gemfactoryProxyAddress).addColor("Ruby",0,0,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Amber/Topaz",1,2,0,148,255,0,148,255);
+        GemFactory(gemfactoryProxyAddress).addColor("Ruby/Amber",0,1,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Amber",1,1,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Topaz",2,2,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Topaz/Emerald",2,3,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Emerald/Topaz",3,2,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Emerald",3,3,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Emerald/Amber",3,1,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Turquoise",4,4,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Sapphire",5,5,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Amethyst",6,6,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Amethyst/Amber",6,1,255,255,255,255,0,0);
+        GemFactory(gemfactoryProxyAddress).addColor("Garnet",7,7,255,255,255,255,0,0);
+
 
         //deploying and initializing the airdrop contract
         airdrop = new Airdrop();

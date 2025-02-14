@@ -272,7 +272,7 @@ async function main() {
 
     // Call createPreminedGEMPool
     const tx = await Treasury.createPreminedGEMPool(rarities, colors, quadrants, tokenURIs, {
-      gasLimit: 15000000 
+      gasLimit: 20000000 
     });
     console.log("Transaction sent:", tx.hash);
 

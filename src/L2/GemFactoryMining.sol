@@ -168,9 +168,6 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
             // Increment the request count
             requestCount++;
         }
-        // Delete/update user mining data
-        delete userMiningToken[ownerOf(_tokenId)][_tokenId];
-        delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
 
         // Refund excess ETH to the user if they overpaid
         if (msg.value > directFundingCost) {
@@ -252,6 +249,10 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
 
         // update mining tries
         numberMiningGemsByRarity[Gems[_tokenId].rarity]--;
+
+        // update user mining storage
+        delete userMiningToken[ownerOf(_tokenId)][_tokenId];
+        delete userMiningStartTime[ownerOf(_tokenId)][_tokenId];
     }
 
     /**
@@ -267,7 +268,7 @@ contract GemFactoryMining is ProxyStorage, GemFactoryStorage, ERC721URIStorageUp
         uint256[] memory tokenIds = new uint256[](Gems.length);
         uint256 index = 0;
         uint8 sumOfQuadrants = quadrant1 + quadrant2 + quadrant3+ quadrant4;
-    uint256 gemsLength = Gems.length;
+        uint256 gemsLength = Gems.length;
         // Iterate through the Gems to count those with quadrants less than the specified sum
         for (uint256 i = 0; i < gemsLength; ++i) {
             uint8 GemSumOfQuadrants = Gems[i].quadrants[0] + Gems[i].quadrants[1] + Gems[i].quadrants[2] + Gems[i].quadrants[3];

@@ -28,10 +28,6 @@ library ForgeLibrary {
     // ERRORS
     error NotValidColor();
     error WrongNumberOfGemToBeForged();
-    error AddressZero();
-    error NotGemOwner();
-    error GemIsLocked();
-    error WrongRarity();
 
     /**
      * @notice Forges new tokens from existing gems.
@@ -59,11 +55,12 @@ library ForgeLibrary {
         uint256[] memory _tokenIds,
         GemFactoryStorage.Rarity _rarity,
         uint8[2] memory _color,
+        GemFactoryStorage.BackgroundColor memory _backgroundColor,
         ForgeParams memory params
     ) internal returns (uint256 newGemId, uint8[4] memory forgedQuadrants, GemFactoryStorage.Rarity newRarity, uint256 forgedGemsValue, uint256 forgedGemsCooldownDueDate, uint8 forgedGemsminingTry) {
          // Ensure the sender's address is not zero
         if(msgSender == address(0)) {
-            revert AddressZero();
+            revert GemFactoryStorage.AddressZero();
         }
         uint32 forgedGemsCooldownPeriod;
 
@@ -114,13 +111,13 @@ library ForgeLibrary {
         // Iterate over each token to validate ownership, lock status, and rarity
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if(GEMIndexToOwner[_tokenIds[i]] != msgSender) {
-                revert NotGemOwner();
+                revert GemFactoryStorage.NotGemOwner();
             }
             if(isTokenLocked(Gems, _tokenIds[i])) {
-                revert GemIsLocked();
+                revert GemFactoryStorage.GemIsLocked();
             }
             if(Gems[_tokenIds[i]].rarity != _rarity) {
-                revert WrongRarity();
+                revert GemFactoryStorage.WrongRarity();
             }
 
             // Sum the quadrants of the tokens
@@ -182,15 +179,16 @@ library ForgeLibrary {
         // Create the new GEM and add it to the storage
         GemFactoryStorage.Gem memory _Gem = GemFactoryStorage.Gem({
             tokenId: 0,
-            rarity: newRarity,
-            quadrants: forgedQuadrants,
-            color: _color,
             value: forgedGemsValue,
             gemCooldownDueDate: forgedGemsCooldownDueDate,
+            randomRequestId: 0,
+            rarity: newRarity,
             miningTry: forgedGemsminingTry,
             isLocked: false,
-            tokenURI: "",
-            randomRequestId: 0
+            quadrants: forgedQuadrants,
+            color: _color,
+            backgroundColor: _backgroundColor,
+            tokenURI: ""
         });
         Gems.push(_Gem);
         newGemId = Gems.length - 1;

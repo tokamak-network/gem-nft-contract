@@ -562,6 +562,7 @@ contract MarketPlaceThanosTest is L2BaseTest {
         // Define GEM properties
         GemFactoryStorage.Rarity rarity = GemFactoryStorage.Rarity.COMMON;
         uint8[2] memory color = [0,0];
+
         uint8[4] memory quadrants = [1, 1, 1, 2];
         string memory tokenURI = "https://example.com/token/1";
         // Call createGEM function from the Treasury contract

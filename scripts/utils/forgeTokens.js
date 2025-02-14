@@ -4,19 +4,20 @@ require('dotenv').config();
 async function main() {
   const [deployer] = await ethers.getSigners();
 
-  console.log("fullfilRandomness with the account:", deployer.address);
-  const drbCoordinatorAddress = process.env.DRB_COORDINATOR_MOCK;
+  console.log("start mining with the account:", deployer.address);
+  const gemFactoryProxy = process.env.GEM_FACTORY_PROXY;
 
   // Get contract instance
-  const DrbCoordinator = await ethers.getContractAt("DRBCoordinatorMock", drbCoordinatorAddress);
+  const GemFactoryForging = await ethers.getContractAt("GemFactoryForging", gemFactoryProxy);
 
   
   try {
-    const tx = await DrbCoordinator.fulfillRandomness(295, {
-        gasLimit: 300000,
-    });
+   
+    const tx = await GemFactoryForging.forgeTokens([180,168],0,[6,6], {
+        gasLimit: 15000000 
+      });
     await tx.wait();
-    console.log("fullFillRandomness called");
+    console.log("Token forged");
 
 
   } catch (error) {

@@ -22,7 +22,24 @@ contract GemFactoryStorage {
         bool isLocked; // Locked if gem is listed on the marketplace
         uint8[4] quadrants; // 4 quadrants
         uint8[2] color; // id of the color
-        string tokenURI; // IPFS address of the metadata file 
+        BackgroundColor backgroundColor; // background color (RGB + Blur)
+        string tokenURI; // URI of the token
+    }
+
+    struct Color {
+        string colorName;
+        uint8[2] colorIds; // ids of the colors associated with a Gem
+        uint8[2] r; // r values associated with the RGB color
+        uint8[2] g; // g values associated with the RGB color
+        uint8[2] b; // b values associated with the RGB color
+    }
+
+    struct BackgroundColor {
+        uint8[2] r; // r values associated with the RGB color
+        uint8[2] g; // g values associated with the RGB color
+        uint8[2] b; // b values associated with the RGB color
+        uint8 blur; // blur percentage
+        bool dropShadow;
     }
 
     struct RequestStatus {
@@ -38,10 +55,18 @@ contract GemFactoryStorage {
     //-------------------------------------STORAGE-------------------------------------------
     //---------------------------------------------------------------------------------------
 
+    // list of Gems
     Gem[] public Gems;
+
     mapping(uint8 => mapping(uint8 => string)) public colorName;
-    uint8 public colorsCount;
-    uint8[2][] public colors;
+    mapping(uint8 => mapping(uint8 => uint256)) public colorIndexInTheColorArray;
+    mapping(string => bool) public isColorNameUsed;
+    Color[] public colors;
+    uint256 constant NO_COLOR = type(uint256).max;
+
+    mapping(bytes1 => mapping(bytes1 => string)) public backgroundColorName;
+    uint256 public backgroundColorsCount;
+    bytes1[2][] public backgroundColors;
 
     mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) public ownershipTokenCount;
@@ -56,7 +81,7 @@ contract GemFactoryStorage {
     // Random requests mapping
     mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */
 
-    bool public paused;
+    bool internal paused;
 
     // Mining storage
     // mining try is uint8 (will be always less than type(uint8).max = 255)
@@ -107,6 +132,7 @@ contract GemFactoryStorage {
         uint256 indexed tokenId, 
         Rarity rarity, 
         uint8[2] color, 
+        BackgroundColor backgroundColor,
         uint8 miningTry,
         uint256 value,
         uint8[4] quadrants, 
@@ -134,8 +160,10 @@ contract GemFactoryStorage {
         Rarity newRarity, 
         uint8[4] forgedQuadrants, 
         uint8[2] color, 
+        BackgroundColor backgroundColor,
         uint256 newValue
     );
+    event Test();
     event ColorValidated(uint8 color_0, uint8 color_1);
 
     // Pause Events
@@ -143,8 +171,7 @@ contract GemFactoryStorage {
     event Unpaused(address account);
 
     //storage setter events
-    event ColorAdded(uint8 indexed id, string color);
-    event BackgroundColorAdded(uint8 indexed id, string backgroundColor);
+    event ColorAdded(uint256 indexed id, string color);
 
     //storage modification events
     event GemsCoolDownPeriodModified(
@@ -179,6 +206,7 @@ contract GemFactoryStorage {
 
     event CallBackGasLimitUpdated(uint32 newCallbackGasLimit);
 
+
     //---------------------------------------------------------------------------------------
     //-------------------------------------ERRORS--------------------------------------------
     //---------------------------------------------------------------------------------------
@@ -186,11 +214,13 @@ contract GemFactoryStorage {
     // gem creation errors
     error NewGemInvalidQuadrant(uint8 quadrantIndex, uint8 expectedValue1, uint8 expectedValue2);
     error SumOfQuadrantsTooHigh(uint8 sum, string rarity);
+    error WrongBackGroundColor();
     
     // Forging errors
     error InvalidQuadrant(uint8 quadrant, uint8 value);
     error InvalidSumOfQuadrants();
     error ColorNotExist();
+    error BackgroundColorNotExist();
 
     // Mining errors
     error MismatchedArrayLengths();
@@ -218,4 +248,5 @@ contract GemFactoryStorage {
     error ContractPaused();
     error ContractNotPaused();
     error URIQueryForNonexistentToken(uint256 tokenId);
+
 }

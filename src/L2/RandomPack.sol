@@ -20,7 +20,7 @@ interface ITreasury {
     function getWSTONBalance() external view returns (uint256);
     function createPreminedGEM( 
         GemFactoryStorage.Rarity _rarity,
-        uint8[2] memory _color, 
+        uint8[2] memory _color,
         uint8[4] memory _quadrants,  
         string memory _tokenURI
     ) external returns (uint256);
