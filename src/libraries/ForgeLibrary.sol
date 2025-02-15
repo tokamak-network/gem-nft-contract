@@ -226,79 +226,84 @@ library ForgeLibrary {
         uint8 _color_0,
         uint8 _color_1
     ) internal view returns (bool colorValidated) {
-        colorValidated = false;
-        // Ensure the tokens are different
-        if (tokenA != tokenB) {
-            // Retrieve colors of the two tokens
-            uint8[2] memory _color1 = Gems[tokenA].color;
-            uint8 _color1_0 = _color1[0];
-            uint8 _color1_1 = _color1[1];
-            uint8[2] memory _color2 = Gems[tokenB].color;
-            uint8 _color2_0 = _color2[0];
-            uint8 _color2_1 = _color2[1];
+        // Retrieve colors of the two tokens
+        uint8[2] memory _color1 = Gems[tokenA].color;
+        uint8[2] memory _color2 = Gems[tokenB].color;
 
-            // Check if both tokens have identical colors and match the desired color
-            if (_color1_0 == _color1_1 && _color2_0 == _color2_1 && _color1_0 == _color2_0) {
-                colorValidated = (_color_0 == _color1_0 && _color_1 == _color1_1);
-                return colorValidated;
+        // Extract individual color components
+        uint8 _color1_0 = _color1[0];
+        uint8 _color1_1 = _color1[1];
+        uint8 _color2_0 = _color2[0];
+        uint8 _color2_1 = _color2[1];
+
+        // Check if both tokens are solids
+        bool isSolid1 = (_color1_0 == _color1_1);
+        bool isSolid2 = (_color2_0 == _color2_1);
+
+        // Case 1: Both tokens are solids
+        if (isSolid1 && isSolid2) {
+            // Two same solids: new color must be the same solid
+            if (_color1_0 == _color2_0) {
+                return (_color_0 == _color1_0 && _color_1 == _color1_0);
             }
-            // Check if both tokens have identical colors but different from each other
-            if (_color1_0 == _color1_1 && _color2_0 == _color2_1) {
-                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_0));
-                return colorValidated;
+            // Two different solids: new color can be [solid1, solid2] or [solid2, solid1]
+            else {
+                return (
+                    (_color_0 == _color1_0 && _color_1 == _color2_0) ||
+                    (_color_0 == _color2_0 && _color_1 == _color1_0)
+                );
             }
-            // Check if one token has identical colors and the other has one matching color
-            if (((_color1_0 != _color1_1 && _color2_0 == _color2_1) && (_color1_0 == _color2_0 || _color1_1 == _color2_0)) || ((_color1_0 == _color1_1 && _color2_0 != _color2_1) && (_color2_0 == _color1_0 || _color2_1 == _color1_0))) {
-                if (_color1_0 != _color1_1) {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color1_1) || (_color_1 == _color1_0 && _color_0 == _color1_1));
-                    return colorValidated;
-                } else {
-                    colorValidated = ((_color_0 == _color2_0 && _color_1 == _color2_1) || (_color_1 == _color2_0 && _color_0 == _color2_1));
-                    return colorValidated;
-                }
+        }
+
+        // Case 2: One solid and one gradient
+        if (isSolid1 || isSolid2) {
+            // Ensure _color1 is the solid and _color2 is the gradient
+            if (isSolid2) {
+                (_color1, _color2) = (_color2, _color1);
+                (_color1_0, _color1_1, _color2_0, _color2_1) = (_color2_0, _color2_1, _color1_0, _color1_1);
             }
-            // Check if one token has identical colors and the other has no matching colors
-            if (((_color1_0 != _color1_1 && _color2_0 == _color2_1) && (_color1_0 != _color2_0 && _color1_1 != _color2_0)) || ((_color1_0 == _color1_1 && _color2_0 != _color2_1) && (_color1_0 != _color2_0 && _color1_0 != _color2_1))) {
-                if (_color1_0 != _color1_1) {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_1 == _color1_0 && _color_0 == _color2_0) || (_color_1 == _color1_1 && _color_0 == _color2_0));
-                    return colorValidated;
-                } else {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color1_0 && _color_1 == _color2_1) || (_color_1 == _color1_0 && _color_0 == _color2_0) || (_color_1 == _color1_0 && _color_0 == _color2_1));
-                    return colorValidated;
-                }
+
+            // One gradient color matches the solid color
+            if (_color2_0 == _color1_0 || _color2_1 == _color1_0) {
+                return (_color_0 == _color2_0 && _color_1 == _color2_1);
             }
-            // Check if both tokens have different colors but match each other
-            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && ((_color1_0 == _color2_0 && _color1_1 == _color2_1) || (_color1_0 == _color2_1 && _color1_1 == _color2_0))) {
-                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color1_1) || (_color_0 == _color1_1 && _color_1 == _color1_0));
-                return colorValidated;
+            // Solid color is different from both gradient colors
+            else {
+                return (
+                    (_color_0 == _color2_0 && _color_1 == _color1_0) ||
+                    (_color_0 == _color2_1 && _color_1 == _color1_0) ||
+                    (_color_0 == _color1_0 && _color_1 == _color2_0) ||
+                    (_color_0 == _color1_0 && _color_1 == _color2_1)
+                );
             }
-            // Check if both tokens have different colors with at least one matching color
-            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && (_color1_0 == _color2_0 || _color1_0 == _color2_1 || _color1_1 == _color2_0 || _color1_1 == _color2_1)) {
-                if (_color1_0 == _color2_0) {
-                    colorValidated = ((_color_0 == _color1_1 && _color_1 == _color2_1) || (_color_0 == _color2_1 && _color_1 == _color1_1));
-                    return colorValidated;
-                } else if (_color1_0 == _color2_1) {
-                    colorValidated = ((_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_1));
-                    return colorValidated;
-                } else if (_color1_1 == _color2_0) {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_1) || (_color_0 == _color2_1 && _color_1 == _color1_0));
-                    return colorValidated;
-                } else if (_color1_1 == _color2_1) {
-                    colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color2_0 && _color_1 == _color1_0));
-                    return colorValidated;
-                }
-            }
-            // Check if both tokens have completely different colors
-            if (_color1_0 != _color1_1 && _color2_0 != _color2_1 && _color1_0 != _color2_0 && _color1_1 != _color2_0 && _color1_0 != _color2_1 && _color1_1 != _color2_1) {
-                colorValidated = ((_color_0 == _color1_0 && _color_1 == _color2_0) || (_color_0 == _color1_0 && _color_1 == _color2_1) || (_color_0 == _color1_1 && _color_1 == _color2_0) || (_color_0 == _color1_1 && _color_1 == _color2_1) || (_color_0 == _color2_0 && _color_1 == _color1_0) || (_color_0 == _color2_0 && _color_1 == _color1_1) || (_color_0 == _color2_1 && _color_1 == _color1_0) || (_color_0 == _color2_1 && _color_1 == _color1_1));
-                return colorValidated;
-            }
-        } else {
-            // Return false if the tokens are the same
-            return colorValidated;
+        }
+
+        // Case 3: Both tokens are gradients
+        // Check if gradients are the same
+        if (
+            (_color1_0 == _color2_0 && _color1_1 == _color2_1) ||
+            (_color1_0 == _color2_1 && _color1_1 == _color2_0)
+        ) {
+            return (
+                (_color_0 == _color1_0 && _color_1 == _color1_1) ||
+                (_color_0 == _color1_1 && _color_1 == _color1_0)
+            );
+        }
+        // Gradients are different
+        else {
+            return (
+                (_color_0 == _color1_0 && _color_1 == _color2_0) ||
+                (_color_0 == _color1_0 && _color_1 == _color2_1) ||
+                (_color_0 == _color1_1 && _color_1 == _color2_0) ||
+                (_color_0 == _color1_1 && _color_1 == _color2_1) ||
+                (_color_0 == _color2_0 && _color_1 == _color1_0) ||
+                (_color_0 == _color2_0 && _color_1 == _color1_1) ||
+                (_color_0 == _color2_1 && _color_1 == _color1_0) ||
+                (_color_0 == _color2_1 && _color_1 == _color1_1)
+            );
         }
     }
-
+    
     /**
      * @notice Checks if a gem token is locked.
      * @dev This function checks the `isLocked` status of a gem.

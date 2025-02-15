@@ -13,7 +13,7 @@ async function main() {
   
   try {
    
-    const tx = await GemFactoryForging.forgeTokens([180,168],0,[6,6], {
+    const tx = await GemFactoryForging.forgeTokens([152,192],0,[6,6], {
         gasLimit: 15000000 
       });
     await tx.wait();
