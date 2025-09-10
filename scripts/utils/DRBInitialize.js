@@ -4,7 +4,7 @@ require('dotenv').config();
 async function main() {
   const [deployer] = await ethers.getSigners();
 
-  console.log("collect Gem with the account:", deployer.address);
+  console.log("initialize DRB with the account:", deployer.address);
   const gemFactoryProxy = process.env.GEM_FACTORY_PROXY;
   const drbCoordinatorAddress = process.env.DRB_COORDINATOR_MOCK;
 
