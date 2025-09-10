@@ -322,10 +322,15 @@ contract L1WrappedStakedTON is
         emit StakingIndexUpdated(stakingIndex);
 
         uint256 wstonAmount;
+        uint256 balanceBefore;
+        uint256 balanceAfter;
 
         if (!_token) {
             // user transfers wton to this contract
+            balanceBefore = IERC20(wton).balanceOf(address(this));
             IERC20(wton).safeTransferFrom(_to, address(this), _amount);
+            balanceAfter = IERC20(wton).balanceOf(address(this));
+            require(balanceAfter - balanceBefore == _amount, "Wrong amount received");
 
             // approve depositManager to spend on behalf of the WrappedStakedTON contract
             if (IERC20(wton).allowance(address(this), depositManager) < _amount) {
@@ -339,8 +344,11 @@ contract L1WrappedStakedTON is
 
             wstonAmount = getDepositWstonAmount(_amount);
         } else {
+            balanceBefore = IERC20(ton).balanceOf(address(this));
             // user transfers ton to this contract
             IERC20(ton).safeTransferFrom(_to, address(this), _amount);
+            balanceAfter = IERC20(ton).balanceOf(address(this));
+            require(balanceAfter - balanceBefore == _amount, "Wrong amount received");
 
             // Encode the layer2 address into bytes
             bytes memory data = abi.encode(depositManager, layer2Address);

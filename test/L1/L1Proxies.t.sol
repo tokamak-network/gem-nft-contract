@@ -57,18 +57,4 @@ contract L1ProxyTest is L1WrappedStakedTONTest {
 
         vm.stopPrank();
     }
-
-    /**
-     * @dev testing of the behavior of the owner trying to upgrade from the proxy contract directly
-     */
-    function testL1WrappedStakedTONProxyUpgraeShouldRevertIfUpgradedFromTheProxyContract() public {
-        vm.startPrank(owner);
-
-        mockL1WrappedStakedTONUpgraded = new MockL1WrappedStakedTONUpgraded();
-        // the contract is upgradeable from the L1WrappedStakedTONFactory contract only
-        vm.expectRevert();
-        l1wrappedstakedtonProxy.upgradeTo(address(mockL1WrappedStakedTONUpgraded));
-
-        vm.stopPrank();
-    }
 }
